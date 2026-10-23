@@ -19,4 +19,5 @@ jobs:
       - run: npx eslint src
       - run: npx prettier --check .
       - run: npm run knip
+      - run: npm run cycles
       - run: npx vite build

@@ -4,3 +4,4 @@ src/export/generated/
 package-lock.json
 *.md
 *.css
+.claude/

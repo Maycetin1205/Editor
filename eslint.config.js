@@ -25,7 +25,7 @@ const LOOSE_DESIGN_VALUES = [
 ]
 
 export default defineConfig([
-  globalIgnores(['dist', 'src/export/generated']),
+  globalIgnores(['dist', 'src/export/generated', '.claude']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -173,6 +173,59 @@ export default defineConfig([
           },
         ]),
       ],
+    },
+  },
+  // The export writes files from the model: no editor, no React.
+  {
+    files: ['src/export/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['react', 'react/*', 'react-dom', 'react-dom/*'],
+              message: 'src/export must stay free of React.',
+            },
+            {
+              regex: '^(?:(?:\\.\\./)+|@/)(?:editor|softengine)(?:/|$)',
+              message: 'src/export must not import the editor or SoftEngine.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  // The editor's state is the model under its React parts and imports none of
+  // them. Warnings until phase 4 of BAUPLAN.md has moved what still does.
+  {
+    files: ['src/editor/state/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'warn',
+        {
+          patterns: [
+            {
+              regex:
+                '^(?:(?:\\.\\./)+|@/editor/)(?:actions|bar|canvas|controls|data|icons|inspector|masks|origin|shell|sidebar|widgets)(?:/|$)',
+              message: 'editor/state must not import a React part of the editor.',
+            },
+            {
+              regex: '^(?:(?:\\.\\./)+|@/)export(?:/|$)',
+              message: 'editor/state must not import the export.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  // Size brake: a long file or function has usually gathered more than one
+  // task. Warnings until the clean-up is through, then errors.
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    rules: {
+      'max-lines': ['warn', { max: 300, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': ['warn', { max: 80, skipBlankLines: true, skipComments: true }],
     },
   },
   // The door itself reaches back into nothing that uses it.
