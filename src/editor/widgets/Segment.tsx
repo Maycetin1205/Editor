@@ -1,0 +1,59 @@
+import type { ReactNode } from 'react'
+import { cn } from '@/editor/widgets/cn'
+
+interface SegmentOption {
+  value: string
+
+  name: string
+  icon?: ReactNode
+}
+
+interface SegmentProps {
+  name: string
+  options: readonly SegmentOption[]
+  value: string
+  id?: string
+  onChoose: (value: string) => void
+}
+
+export function Segment({
+  name,
+  options,
+  value,
+  id,
+  onChoose,
+}: SegmentProps) {
+  return (
+    <div
+      id={id}
+      role="radiogroup"
+      aria-label={name}
+      className="flex h-control w-fit items-center gap-[2px] rounded border border-line bg-panel p-[2px]"
+    >
+      {options.map((o) => {
+        const chosen = o.value === value
+        return (
+          <button
+            key={o.value}
+            type="button"
+            role="radio"
+            aria-checked={chosen}
+            aria-label={o.name}
+            title={o.icon === undefined ? undefined : o.name}
+            onClick={() => onChoose(o.value)}
+            className={cn(
+              'flex h-full shrink-0 items-center justify-center whitespace-nowrap rounded-[var(--radius-small)] text-ui font-semibold transition-colors',
+              'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent',
+              o.icon === undefined ? 'px-[10px]' : 'px-[7px]',
+              chosen
+                ? 'bg-accent text-panel'
+                : 'text-muted hover:bg-hover hover:text-ink',
+            )}
+          >
+            {o.icon ?? o.name}
+          </button>
+        )
+      })}
+    </div>
+  )
+}

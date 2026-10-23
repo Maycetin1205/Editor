@@ -1,0 +1,95 @@
+import { html, type CSSResultGroup, type TemplateResult } from 'lit'
+import { state } from 'lit/decorators.js'
+import { BlockElement, defineBlock } from '../base/BlockElement'
+import { noticeSignTpl } from '../base/notice'
+import { reportsHeight } from '../base/heightReport'
+import { sectionsOf, chainsRead } from '../../core/data/steps/chains'
+import { stepAdapter } from '../../core/data/steps/steps'
+import { runEvent, searchCarrier } from '../../runtime/events'
+import { PENDING_EVENT, pendingRows } from '../../runtime/pendingState'
+import { maskState } from '../../runtime/maskState'
+import { lookClass, lookStyle } from '../look/look'
+import { buttonStyle } from './buttonStyle'
+import { buttonProperties, type ButtonValues } from './properties'
+
+const CLICK = 'onClick'
+const CHAINS_ATTR = 'data-ff-actions'
+
+function openRows(el: HTMLElement): number | undefined {
+  const steps = chainsRead(el.getAttribute(CHAINS_ATTR))[CLICK]
+  if (!steps || steps.length === 0) return undefined
+  const counted = new Set<string>()
+  let open = 0
+  for (const section of sectionsOf(steps)) {
+    if (section.kind === 'once' || section.blockId === '') continue
+
+    const key = section.kind + ' ' + section.blockId
+    if (counted.has(key)) continue
+    const carrier = searchCarrier(el.ownerDocument ?? document, section.blockId)
+    if (!carrier) continue
+    counted.add(key)
+    open += pendingRows(carrier, section.kind)
+  }
+  return counted.size === 0 ? undefined : open
+}
+
+export interface Button extends ButtonValues {}
+
+export class Button extends BlockElement {
+  static readonly type = 'button'
+  static readonly tag = 'ff-button'
+
+  static override styles: CSSResultGroup = [BlockElement.styles, lookStyle, buttonStyle]
+
+  @state() private open: number | undefined = undefined
+
+  private wired = false
+
+  private readonly count = (): void => { this.open = openRows(this) }
+
+  constructor() {
+    super()
+    reportsHeight(this, () => this.renderRoot.querySelector('button'))
+  }
+
+  override render(): TemplateResult {
+    const open = this.open
+    return html`<button
+      class=${lookClass(this)}
+      ?disabled=${this.notice === 'schreibt'}
+      data-ff-editable
+      @dblclick=${(e: MouseEvent) => this.inlineEdit(e, 'label')}
+    >${noticeSignTpl(this.notice)}<span class="text">${open ? `${this.label} (${open})` : this.label}</span></button>`
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback()
+    this.wireClick()
+    document.addEventListener(PENDING_EVENT, this.count)
+    this.count()
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback()
+    document.removeEventListener(PENDING_EVENT, this.count)
+  }
+
+  private wireClick(): void {
+    if (this.wired || !this.hasAttribute(CHAINS_ATTR)) return
+    this.wired = true
+    const chains = chainsRead(this.getAttribute(CHAINS_ATTR))
+
+    if (Object.values(chains).some((chain) => chain.some((s) => stepAdapter(s.kind).answers))) maskState.host.start()
+    this.addEventListener('click', () => {
+      void runEvent(this, CLICK, {})
+    })
+  }
+}
+
+defineBlock(Button, {
+  name: 'Knopf',
+  category: 'input',
+  properties: buttonProperties,
+  capabilities: [{ kind: 'events', list: [{ key: CLICK, name: 'Klick' }] }],
+  grid: { startWidth: 8, startHeight: 2, minWidth: 4, heightFromContent: true },
+})

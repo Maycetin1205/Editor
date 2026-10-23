@@ -1,0 +1,299 @@
+/* The tokens of the mask, after the target picture of the user (15.10.2026,
+   no longer in the repo): white cards with a hairline and round corners on
+   a light grey ground, the type of Windows, one blue accent, the value of a
+   field in a box, a label small and grey over it, no capitals. Light only. */
+
+/* No font of its own: Segoe UI Variable lies on Windows 11, Segoe UI on every
+   Windows before, so the mask still loads nothing. */
+
+:root {
+  color-scheme: light;
+
+  /* The ground of the sheet; a card, a box and a list lie on it white. */
+  --se-bg:        #F3F3F3;
+  --se-panel:     #FFFFFF;
+  --se-panel-2:   #FAFAFA;
+
+  /* Ink in three steps: a value and a title, a label and a column head,
+     what only shows the way (a symbol, a sign, an empty place). */
+  --se-ink:       #1B1B1B;
+  --se-ink-2:     #5C5C5C;
+  --se-faint:     #8A8A8A;
+
+  /* Lines, all 1 px: the edge of a card and between rows, the softer one
+     inside a list of the board; the edge of a box and its darker lower
+     edge, as a field of Windows has it. */
+  --se-line:        #E3E3E3;
+  --se-line-soft:   #EDEDED;
+  --se-line-strong: #C8C8C8;
+  --se-box-bottom:  #8A8A8A;
+  --se-box-line:    #8A8A8A;  /* the box of a checkbox */
+
+  /* The blue of Windows, the accent of the mask: the main button, the title
+     of an area, a bold text, the field being typed into, the chosen row and
+     the row being captured. Soft, the ground of a list head and of these
+     rows. */
+  --se-accent:       #0067C0;
+  --se-accent-dark:  #005A9E;
+  --se-accent-soft:  #EAF3FB;
+
+  /* The ground of a field under the pointer, and of a button on it; a row
+     under the pointer lifts a little. */
+  --se-hover:        #F2F2F2;
+  --se-hover-strong: #E6E6E6;
+  /* The ground of a box that only shows a value: a text with its label and
+     a bound field. */
+  --se-read-ground:  #F7F7F7;
+  --se-row-hover:    #F6F9FC;
+  /* The chosen row: the soft accent, the bar at its left edge. */
+  --se-selection:    var(--se-accent-soft);
+  --se-mark-bar: inset 3px 0 0 var(--se-accent);
+  /* Marked text. */
+  --se-selection-ground: #CCE4F7;
+
+  --se-scrim: rgba(0, 0, 0, .3);
+
+  --se-card-bg:    #FFFFFF;
+
+  /* Tones: strong for a dot or a full ground, ink for text on the tint, tint
+     for a head, shell for the ground of a column, line for its border, soft
+     behind a chip. Akzent (info) is the blue of the accent. */
+  --se-neutral:       #5C5C5C;
+  --se-neutral-ink:   #1B1B1B;
+  --se-neutral-tint:  #F3F3F3;
+  --se-neutral-shell: #FAFAFA;
+  --se-neutral-line:  #C8C8C8;
+  --se-neutral-soft:  #EBEBEB;
+
+  --se-info:          #0067C0;
+  --se-info-ink:      #005A9E;
+  --se-info-tint:     #EAF3FB;
+  --se-info-shell:    #F5F9FD;
+  --se-info-line:     #C9DDF0;
+  --se-info-soft:     #EAF3FB;
+
+  --se-success:       #0F7B0F;
+  --se-success-ink:   #0B5A0B;
+  --se-success-tint:  #DFF6DD;
+  --se-success-shell: #F3FBF2;
+  --se-success-line:  #ACD8A7;
+  --se-success-soft:  #DFF6DD;
+
+  --se-warning:       #9D5D00;
+  --se-warning-ink:   #7A4800;
+  --se-warning-tint:  #FFF4CE;
+  --se-warning-shell: #FFFBEB;
+  --se-warning-line:  #F0D58C;
+  --se-warning-soft:  #FFF4CE;
+
+  --se-danger:        #C42B1C;
+  --se-danger-ink:    #A4262C;
+  --se-danger-tint:   #FDE7E9;
+  --se-danger-shell:  #FFFFFF;
+  --se-danger-line:   #F1BBBC;
+  --se-danger-soft:   #FDE7E9;
+
+  /* Corners: 4 px at a box and a button, 8 px at a card and a window, 2 px at
+     the small window that asks at a row. */
+  --se-border: 1px;
+  --se-radius: 4px;
+  --se-radius-sm: 4px;
+  --se-radius-card: 8px;
+  --se-radius-xs: 2px;
+
+  /* The hairline that closes a part. */
+  --se-hair: var(--se-border) solid var(--se-line);
+
+  /* The sheet is the whole window: its room around the cards and its thin
+     scrollbar. */
+  --se-sheet-top: 20px;
+  --se-sheet-x: 24px;
+  --se-sheet-bottom: 20px;
+  --se-scrollbar: #C8C8C8;
+
+  /* A table and the capture: the head grey-blue on the soft accent over a
+     light blue line, the rows apart by the hairline, no lines between the
+     columns; the row being typed on the soft accent with the accent bar at
+     its left edge, its cells plain text, the one with the cursor on a lower
+     edge of 2 px in the accent, one that holds the row back on a red one,
+     its empty places in the faint ink. */
+  --se-head-ground: var(--se-accent-soft);
+  --se-head-ink: #2B4E6E;
+  --se-head-rule: var(--se-border) solid #C9DDF0;
+  --se-capture-ground: var(--se-accent-soft);
+  --se-capture-edge: inset 3px 0 0 var(--se-accent);
+  --se-cell-focus: inset 0 -2px 0 var(--se-accent);
+  --se-cell-held: inset 0 -2px 0 var(--se-danger);
+  --se-placeholder: var(--se-faint);
+  /* A row that asks whether it is to go: the red tint with the red bar at its
+     left edge; under it the small window with the strong line, the choice
+     the keys stand on ringed in the ink. */
+  --se-ask-bar: inset 3px 0 0 var(--se-danger);
+  --se-ask-edge: 0 0 0 var(--se-border) var(--se-line-strong);
+  --se-ask-ring: 0 0 0 1px var(--se-panel), 0 0 0 2px var(--se-ink);
+
+  /* Lines, not shadows: a window, a card and a column of the board wear the
+     hairline. */
+  --se-shadow-pop: 0 0 0 var(--se-border) var(--se-line);
+  /* A card of the board on its column, under the pointer, chosen; the column
+     itself has the hairline, the room of a place a white ground. */
+  --se-shadow-tile: 0 0 0 var(--se-border) var(--se-line);
+  --se-shadow-tile-hover: 0 0 0 var(--se-border) var(--se-line-strong);
+  --se-shadow-chosen: var(--se-mark-bar), 0 0 0 var(--se-border) var(--se-line);
+  --se-column-edge: inset 0 0 0 var(--se-border) var(--se-line);
+  /* The hairline drawn inside, so the element keeps its size: a card, a
+     list, a button of the board. */
+  --se-edge: inset 0 0 0 var(--se-border) var(--se-line);
+  /* The one shadow of the mask: a card of the board lifts while it is dragged. */
+  --se-shadow-lift: 0 8px 24px rgba(0, 0, 0, .14), 0 2px 6px rgba(0, 0, 0, .10);
+  /* The list that opens under a row to spread its amount: barely lifted,
+     with the hairline (user, 21.10.: "dezenter"). */
+  --se-shadow-drop: 0 4px 12px rgba(0, 0, 0, .07), 0 0 0 var(--se-border) var(--se-line);
+  --se-place-ground: rgba(255, 255, 255, .72);
+  /* The edge of a place being typed into: the accent around it, its lower
+     edge 2 px, drawn inside. */
+  --se-focus-ring: inset 0 0 0 var(--se-border) var(--se-accent), inset 0 -2px 0 var(--se-accent);
+  /* The same at a box with a line of its own: the line turns accent, the
+     lower edge takes a second pixel inside. */
+  --se-box-focus: inset 0 calc(-1 * var(--se-border)) 0 var(--se-accent);
+
+  --se-font: "Segoe UI Variable Text", "Segoe UI", Arial, sans-serif;
+
+  /* The sizes of the type. A text offers 12, 13, 14, 20 and 22, each carrying
+     its name: 12 is 12 px, the label and the head of a column; 13 the value,
+     14 the title of an area, 20 the title of the sheet, 22 an amount. The
+     least is only for a narrow head. */
+  --se-fs-xs:    11px;
+  --se-fs-sm:    12px;
+  --se-fs:       13px;
+  --se-fs-lg:    14px;
+  --se-fs-title: 20px;
+  --se-fs-xl:    22px;
+
+  --se-lh:       1.4;
+  --se-lh-tight: 1.25;
+
+  --se-gap-sm: 6px;
+  --se-gap:    8px;
+  --se-gap-lg: 12px;
+
+  /* Ground and edge change under the pointer in this time; a focus ring
+     stands at once. */
+  --se-move: 120ms;
+
+  /* Waiting and its end, as Windows shows them (src/blocks/base/notice.ts):
+     in a button or a field the ring of the ProgressRing while it writes, its
+     stroke and the time of one turn, and the tick in its place for 2 s after;
+     at the upper inner edge of a list the line of the indeterminate
+     ProgressBar while it loads or writes, its height, the part of the width
+     that runs and the time of one run. */
+  --se-notice-ring: 16px;
+  --se-notice-ring-line: 2px;
+  --se-notice-turn: 2s;
+  --se-notice-bar: 2px;
+  --se-notice-segment: 40%;
+  --se-notice-pace: 1.5s;
+
+  /* What went wrong, once for the whole mask: the InfoBar of Windows, its
+     height and its ground, the red mixed into white. */
+  --se-infobar-height: 40px;
+  --se-infobar-ground: color-mix(in srgb, var(--se-danger) 8%, var(--se-panel));
+}
+
+/* The InfoBar (src/runtime/infoBar.ts) lies over the blocks at the lower edge
+   of the sheet and moves nothing: the red bar at its left edge, the hairline
+   around it, the sign, the name of the block in semibold before the sentence,
+   the cross on the right. The sheet fills the window, so the window holds it. */
+.ff-infobar {
+  position: fixed;
+  left: var(--se-sheet-x);
+  right: var(--se-sheet-x);
+  bottom: var(--se-sheet-bottom);
+  z-index: 20;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--se-gap-lg);
+  height: var(--se-infobar-height);
+  padding: 0 var(--se-gap-sm) 0 calc(var(--se-gap-lg) + 3px);
+  border-radius: var(--se-radius);
+  background: var(--se-infobar-ground);
+  box-shadow: var(--se-ask-bar), var(--se-edge);
+  color: var(--se-ink);
+  font-family: var(--se-font);
+  font-size: var(--se-fs);
+  line-height: var(--se-lh);
+}
+.ff-infobar[hidden] { display: none; }
+.ff-infobar .ff-infobar-sign {
+  flex: none;
+  width: var(--se-notice-ring);
+  height: var(--se-notice-ring);
+  color: var(--se-danger);
+}
+.ff-infobar .ff-infobar-sign circle { fill: currentColor; }
+.ff-infobar .ff-infobar-sign path {
+  fill: none;
+  stroke: var(--se-panel);
+  stroke-width: 1.5px;
+  stroke-linecap: round;
+}
+.ff-infobar .ff-infobar-sign .ff-infobar-dot { fill: var(--se-panel); }
+.ff-infobar .ff-infobar-text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--se-fs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ff-infobar .ff-infobar-name { font-weight: 600; }
+.ff-infobar .ff-infobar-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--se-radius);
+  background: none;
+  color: var(--se-ink-2);
+  cursor: pointer;
+  transition: background-color var(--se-move);
+}
+.ff-infobar .ff-infobar-close:hover { background: var(--se-hover-strong); color: var(--se-ink); }
+.ff-infobar .ff-infobar-close:focus-visible { outline: 2px solid var(--se-ink); outline-offset: -2px; }
+.ff-infobar .ff-infobar-close svg {
+  width: var(--se-notice-ring);
+  height: var(--se-notice-ring);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1px;
+  stroke-linecap: round;
+}
+
+/* The outline of an animal in the color of its kind, on a circle of the same
+   color, soft (animalAvatarTpl() in src/blocks/parts/card.ts). Only the data
+   list and the board draw one, so the rule names their tags: the export takes
+   it only into a mask that carries one of them. */
+ff-datalist, ff-kanban {
+  --se-animal-dog:         #3B5BDB;
+  --se-animal-dog-soft:    #E9EDFB;
+  --se-animal-cat:         #B7791F;
+  --se-animal-cat-soft:    #FBF1DD;
+  --se-animal-rabbit:      #4F7C2C;
+  --se-animal-rabbit-soft: #ECF4E4;
+  --se-animal-bird:        #0E7C86;
+  --se-animal-bird-soft:   #E3F1F2;
+  --se-animal-rat:         #8E5A9B;
+  --se-animal-rat-soft:    #F4ECF6;
+  --se-animal-turtle:      #4B6068;
+  --se-animal-turtle-soft: #E8EDEF;
+  --se-animal-fish:        #2563EB;
+  --se-animal-fish-soft:   #E8F0FE;
+  --se-animal-horse:       #8B5E34;
+  --se-animal-horse-soft:  #F4ECE4;
+  --se-animal-paw:         #626974;
+  --se-animal-paw-soft:    #EEF1F4;
+}

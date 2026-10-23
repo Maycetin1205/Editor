@@ -1,0 +1,164 @@
+import {
+  rulerTicks,
+  WITHOUT_MEASUREMENT,
+  scrollSplit,
+  pagesSplit,
+  ROWS_HEIGHT,
+  type RowMetrics,
+} from './pageSize'
+import { sortIndices, totalText } from './sorting'
+import { columnsTemplate, type Column, type ColumnsGrid, type Figure } from '../parts/column'
+import { rowFits } from '../parts/cellSearch'
+
+interface ViewQuestion {
+  columns: readonly Column[]
+
+  figures: readonly (Figure | null)[]
+
+  rendered?: readonly Column[]
+  slots?: readonly number[]
+
+  widthOf?: (index: number) => number | undefined
+
+  showsRows: boolean
+
+  empty: boolean
+
+  dataRows: readonly string[][]
+  searchText: string
+
+  sortColumn: number
+  sortAscending: boolean
+
+  wantedPage: number
+
+  measured: RowMetrics | null
+
+  takenRows: number
+
+  valueAt: (rawIndex: number, column: number) => string
+
+  paging: boolean
+}
+
+interface TableRenderModel {
+  cols: ColumnsGrid
+
+  tick: number
+
+  showsRows: boolean
+  empty: boolean
+
+  total: number
+  pageCount: number
+  page: number
+
+  rows: readonly number[]
+
+  rulerTicks: number | null
+
+  totals: readonly { title: string; text: string }[]
+}
+
+function totalsOf(
+  question: ViewQuestion,
+  visible: readonly number[],
+): { title: string; text: string }[] {
+  const out: { title: string; text: string }[] = []
+  question.columns.forEach((column, i) => {
+    if (column.total !== true) return
+    const text = totalText(
+      visible.map((row) => question.valueAt(row, i)),
+      question.figures[i]?.decimals ?? null,
+    )
+    if (text !== '') out.push({ title: column.title, text })
+  })
+  return out
+}
+
+function viewRows(question: ViewQuestion): string[][] {
+  return question.dataRows.map((_, row) => question.columns.map((__, s) => question.valueAt(row, s)))
+}
+
+function visibleIndices(question: ViewQuestion): number[] {
+  const rows = viewRows(question)
+  const filtered = fittingIndices(rows, question.searchText)
+  if (question.sortColumn < 0) return filtered
+  const sortRows = filtered.map((i) => rows[i])
+  return sortIndices(sortRows, question.sortColumn, question.sortAscending).map((k) => filtered[k])
+}
+
+export function tableRenderModel(question: ViewQuestion): TableRenderModel {
+  const rendered = question.rendered ?? question.columns
+  const slots = question.slots ?? rendered.map((_, i) => i)
+  const cols: ColumnsGrid = {
+    gridTemplateColumns: columnsTemplate(rendered, (j) => question.widthOf?.(slots[j] ?? j)),
+  }
+
+  const tick = ROWS_HEIGHT
+
+  const showsRows = question.showsRows
+
+  const empty = question.takenRows > 0 ? false : question.empty
+
+  const allVisible = visibleIndices(question)
+
+  const taken = question.takenRows
+  const measuredFit = question.measured === null
+    ? null
+    : Math.max(1, question.measured.fit - taken)
+  const perPage = measuredFit ?? Math.max(1, WITHOUT_MEASUREMENT - taken)
+
+  const free = question.measured === null ? null : Math.max(0, question.measured.fit - taken)
+  const splitQuestion = {
+    visible: allVisible,
+    showsRows,
+    perPage,
+    wantedPage: question.wantedPage,
+  }
+  const { pages, page, rows } = question.paging
+    ? pagesSplit(splitQuestion)
+    : scrollSplit(splitQuestion)
+  return {
+    cols,
+    tick,
+    showsRows,
+    empty,
+    total: allVisible.length,
+    pageCount: pages,
+    page,
+    rows,
+
+    rulerTicks: rulerTicks(free, rows.length),
+
+    totals: totalsOf(question, allVisible),
+  }
+}
+
+function fittingIndices(
+  rows: readonly (readonly string[])[],
+  searchText: string,
+): number[] {
+  const out: number[] = []
+  rows.forEach((z, i) => {
+    if (rowFits(z, searchText)) out.push(i)
+  })
+  return out
+}
+
+export function recordText(args: {
+  showsRows: boolean
+  visible: number
+  total: number
+  searchesActive: boolean
+}): string {
+  if (!args.showsRows) return '— Datensätze'
+
+  const word = (n: number): string => (n === 1 ? 'Datensatz' : 'Datensätze')
+  const wordDative = (n: number): string => (n === 1 ? 'Datensatz' : 'Datensätzen')
+  if (!args.searchesActive) {
+    return args.total === 0 ? 'Keine Datensätze' : `${args.total} ${word(args.total)}`
+  }
+  if (args.visible === 0) return `Kein Treffer von ${args.total} ${wordDative(args.total)}`
+  return `${args.visible} von ${args.total} ${wordDative(args.total)}`
+}

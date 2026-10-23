@@ -1,0 +1,178 @@
+import { useCallback, useEffect, useState, type ReactNode, type RefObject } from 'react'
+import type { MouseEvent as ReactMouseEvent } from 'react'
+import type { BlockNode } from '../../core/block/tree'
+import { type ListBinding } from '../../core/block/blockType'
+import type { SpotClick } from '../../blocks/base/BlockElement'
+import type { BindableSpot, LookupWindow } from '../../core/block/capability'
+import type { SourceInReach } from '../../core/data/extraSources'
+import type { EditorStore } from '../state/EditorStore'
+import { sourcesCarrier } from '../../core/block/sourcesInReach'
+import { useDataSources } from '../state/useDataSources'
+import { librarySourcesChoice, pickerGroups } from './pickerGroups'
+import { ListEntryBar, type ListPick } from './ListEntryBar'
+import { SpotFieldPicker } from './SpotFieldPicker'
+import { useBindingPicker } from './useBindingPicker'
+
+interface FieldBindingArgs {
+  editor: EditorStore
+  blockRef: RefObject<BlockNode>
+  block: BlockNode
+  selected: boolean | undefined
+  bindableSpots: readonly BindableSpot[]
+  listBinding: ListBinding | undefined
+
+  searchWindow: LookupWindow | undefined
+
+  sources: readonly SourceInReach[]
+
+  containerRef: RefObject<HTMLDivElement | null>
+
+  element: HTMLElement | null
+
+  spotClickOf: (click: Event) => SpotClick | null
+
+  onSelect?: () => void
+}
+
+export function useFieldBinding({
+  editor,
+  blockRef,
+  block,
+  selected,
+  bindableSpots,
+  listBinding,
+  searchWindow,
+  sources,
+  containerRef,
+  element,
+  spotClickOf,
+  onSelect,
+}: FieldBindingArgs): {
+  onClick: (e: ReactMouseEvent<HTMLDivElement>) => void
+  onDoubleClick: (e: ReactMouseEvent<HTMLDivElement>) => void
+  pickers: ReactNode
+
+  openEntry: number | null
+
+  openSpot: ListPick | null
+} {
+  const library = useDataSources().list
+
+  const hasSource = sources.length > 0
+
+  const libraryOffer = !hasSource && sourcesCarrier(editor.tree, block.id) !== undefined
+  const hasOffer = hasSource || libraryOffer
+
+  const { picker, closePicker, onClick, onDoubleClick } = useBindingPicker({
+    editor,
+    blockRef,
+    selected,
+    bindableSpots,
+    hasOffer,
+    spotClickOf,
+    onSelect,
+  })
+
+  const [listPicker, setListPicker] = useState<ListPick | null>(null)
+  const closeListPicker = useCallback(() => setListPicker(null), [])
+  if (!selected && listPicker !== null) setListPicker(null)
+
+  const sourceFromProp = listBinding?.sourceProp === undefined
+    ? undefined
+    : library.find((s) => s.id === String(block.values[listBinding.sourceProp ?? ''] ?? ''))
+  const listPickerHasFields = listBinding?.sourceProp !== undefined
+    ? sourceFromProp !== undefined
+    : hasOffer
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el || !listBinding) return
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as {
+        prop?: string
+        key?: string
+        index?: number
+        inner?: number
+        below?: boolean
+        top?: number
+        left?: number
+      }
+
+      if (detail?.prop !== listBinding.prop || typeof detail.index !== 'number') return
+      const index = detail.index
+
+      const next: ListPick = {
+        index,
+        ...(typeof detail.inner === 'number' ? { inner: detail.inner } : {}),
+        ...(typeof detail.key === 'string' ? { key: detail.key } : {}),
+        below: detail.below === true,
+        top: Math.max(8, detail.top ?? 0),
+        left: Math.max(8, detail.left ?? 0),
+      }
+      setListPicker((before) => (before !== null && samePick(before, next) ? before : next))
+    }
+    el.addEventListener('ff-list-bind', handler)
+    return () => el.removeEventListener('ff-list-bind', handler)
+  }, [containerRef, listBinding])
+
+  const entriesNow = listBinding ? listBinding.entries(block.values[listBinding.prop]) : []
+  const pickAt = listPicker === null
+    ? -1
+    : listPicker.key === undefined
+      ? listPicker.index
+      : entriesNow.findIndex((e) => listBinding?.keyOf?.(e) === listPicker.key)
+  if (listPicker !== null && entriesNow[pickAt] === undefined) setListPicker(null)
+  const pick = listPicker === null || pickAt === -1 ? null : { ...listPicker, index: pickAt }
+
+  const ownWindow = searchWindow?.entriesProp !== undefined
+    && searchWindow.entriesProp === listBinding?.prop
+
+  const groups = pickerGroups(sources)
+
+  const sourcesChoice = librarySourcesChoice(editor, block.id, sources, library, () => {
+    closePicker()
+    closeListPicker()
+  })
+
+  const pickers = (
+    <>
+      {selected && picker && hasOffer && (
+        <SpotFieldPicker
+          editor={editor}
+          block={block}
+          spot={picker.spot}
+          sources={sources}
+          sourcesChoice={sourcesChoice}
+          top={picker.top}
+          left={picker.left}
+          onClose={closePicker}
+        />
+      )}
+      {selected && pick && listBinding && (
+        <ListEntryBar
+          editor={editor}
+          block={block}
+          listBinding={listBinding}
+          pick={pick}
+          sources={sources}
+          groups={groups}
+          sourceFromProp={sourceFromProp}
+          hasFields={listPickerHasFields}
+          sourcesChoice={sourcesChoice}
+          searchWindow={ownWindow ? searchWindow : undefined}
+          element={element}
+          onClose={closeListPicker}
+        />
+      )}
+    </>
+  )
+
+  const columnOpen = selected === true && pick !== null
+
+  const openEntry = columnOpen && pick.inner === undefined ? pick.index : null
+
+  return { onClick, onDoubleClick, pickers, openEntry, openSpot: columnOpen ? pick : null }
+}
+
+const samePick = (a: ListPick, b: ListPick): boolean => a.index === b.index && a.inner === b.inner
+  && a.key === b.key && a.below === b.below && a.top === b.top && a.left === b.left

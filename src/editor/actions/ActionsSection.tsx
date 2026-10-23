@@ -1,0 +1,159 @@
+import type { ReactNode } from 'react'
+import { ArrowUp, Plus, X } from '@/editor/icons/icon'
+import { Button } from '@/editor/widgets/Button'
+import { cn } from '@/editor/widgets/cn'
+import { LINE_CHOSEN, LINE_HOVER } from '@/editor/widgets/lineLook'
+import type { EventDef } from '../../core/block/capability'
+import type { BlockNode } from '../../core/block/tree'
+import type { Step } from '../../core/data/steps/steps'
+import { useEditor } from '../state/useEditor'
+import { useView } from '../state/useView'
+import { conditionWords } from './conditionWords'
+import { releaseEmptyEntryKeys } from './entryEvents'
+import type { EditorStore } from '../state/EditorStore'
+import { NEW_STEP_TAB, stepPiece, type StepContext } from './stepPiece'
+import { StepWindow } from './StepWindow'
+import { useStepContext } from './useStepContext'
+
+function chainOf(ed: EditorStore, blockId: string, key: string): Step[] {
+  return ed.tree[blockId]?.chains?.[key] ?? []
+}
+
+function setChain(ed: EditorStore, blockId: string, key: string, steps: Step[]): void {
+  const node = ed.tree[blockId]
+  if (!node) return
+  ed.updateBlockEvents(blockId, { ...(node.chains ?? {}), [key]: steps })
+}
+
+export function ActionsSection({ block, events }: { block: BlockNode; events: readonly EventDef[] }) {
+  const context = useStepContext()
+
+  return (
+    <div className="flex flex-col gap-[10px]">
+      {events.map((ev) => <EventChain key={ev.key} block={block} ev={ev} context={context} />)}
+    </div>
+  )
+}
+
+export function EventChain({ block, ev, context }: { block: BlockNode; ev: EventDef; context: StepContext }) {
+  const ed = useEditor()
+  const opened = useView().stepWindow
+  const chain = chainOf(ed, block.id, ev.key)
+  const set = (steps: Step[]) => ed.transaction(() => {
+    setChain(ed, block.id, ev.key, steps)
+    if (steps.length === 0) releaseEmptyEntryKeys(ed, block.id)
+  })
+  return (
+    <section className="flex flex-col gap-[4px]">
+      <span className="truncate text-dense font-semibold text-muted">{ev.name}</span>
+      <div className="overflow-hidden rounded border border-line">
+        {chain.map((step, i) => (
+          <StepLine
+            key={step.id}
+            nr={i + 1}
+            step={step}
+            context={context}
+            open={opened?.blockId === block.id && opened.stepId === step.id}
+            onOpen={() => ed.openStep({ blockId: block.id, eventKey: ev.key, stepId: step.id, tab: stepPiece(step.kind).tab(step, context) })}
+            onUp={i === 0 ? undefined : () => {
+              const next = [...chain]
+              next.splice(i - 1, 0, ...next.splice(i, 1))
+              set(next)
+            }}
+            onRemove={() => set(chain.filter((s) => s.id !== step.id))}
+          />
+        ))}
+        <button
+          type="button"
+          onClick={() => ed.openStep({ blockId: block.id, eventKey: ev.key, stepId: null, tab: NEW_STEP_TAB })}
+          className={cn('flex h-[30px] w-full items-center gap-[8px] px-[8px] text-left text-muted hover:text-ink', LINE_HOVER)}
+        >
+          <Plus size={13} className="text-accent" /> Schritt hinzufügen
+        </button>
+      </div>
+    </section>
+  )
+}
+
+export function OpenStepWindow() {
+  const ed = useEditor()
+  const opened = useView().stepWindow
+  const context = useStepContext()
+  if (opened === null || ed.tree[opened.blockId] === undefined) return null
+
+  const chain = chainOf(ed, opened.blockId, opened.eventKey)
+  return (
+    <StepWindow
+      key={`${opened.blockId}:${opened.eventKey}:${opened.stepId ?? 'new'}`}
+      nr={opened.stepId === null ? chain.length + 1 : chain.findIndex((s) => s.id === opened.stepId) + 1}
+      step={chain.find((s) => s.id === opened.stepId)}
+      tab={opened.tab}
+      chain={chain}
+      context={context}
+      onApply={(next) => {
+        setChain(ed, opened.blockId, opened.eventKey, chain.some((s) => s.id === next.id)
+          ? chain.map((s) => (s.id === next.id ? next : s))
+          : [...chain, next])
+        ed.openStep(null)
+      }}
+      onClose={() => {
+        ed.openStep(null)
+        releaseEmptyEntryKeys(ed, opened.blockId)
+      }}
+    />
+  )
+}
+
+const LINE = 'group flex h-[30px] items-center gap-[8px] border-b border-line-soft px-[8px]'
+
+function StepLine({ nr, step, context, open, onOpen, onUp, onRemove }: {
+  nr: number
+  step: Step
+  context: StepContext
+  open: boolean
+  onOpen: () => void
+  onUp?: () => void
+  onRemove: () => void
+}) {
+  const ends = (
+    <span className="ml-auto flex shrink-0 items-center opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+      {onUp && (
+        <Button onlyIcon aria-label="Schritt nach oben" title="Nach oben" onClick={(e) => { e.stopPropagation(); onUp() }}>
+          <ArrowUp size={12} />
+        </Button>
+      )}
+      <Button onlyIcon aria-label="Schritt entfernen" title="Entfernen" onClick={(e) => { e.stopPropagation(); onRemove() }}>
+        <X size={13} />
+      </Button>
+    </span>
+  )
+  const number = <span className="w-[16px] shrink-0 text-right font-mono text-dense opacity-70">{nr}</span>
+
+  const { words, short, known } = stepPiece(step.kind).words(step, context)
+  const condition = conditionWords(step.onlyIf, context.reach.sources ?? [])
+  return (
+    <Clickable open={open} onClick={onOpen}>
+      {number}
+      <span className={cn('min-w-0 truncate', !known && 'opacity-60')}>{condition === '' ? words : `${words}, ${condition}`}</span>
+      {short !== '' && (
+        <span className="shrink-0 border-l border-line pl-[8px] font-mono text-dense opacity-70">{short}</span>
+      )}
+      {ends}
+    </Clickable>
+  )
+}
+
+function Clickable({ open, onClick, children }: { open: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-expanded={open}
+      onClick={onClick}
+      onKeyDown={(e) => { if (e.key === 'Enter') onClick() }}
+      className={cn(LINE, 'cursor-pointer', open ? LINE_CHOSEN : LINE_HOVER)}
+    >
+      {children}
+    </div>
+  )
+}

@@ -1,0 +1,177 @@
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  type ReactNode,
+} from 'react'
+import { createPortal } from 'react-dom'
+import type { BlockNode } from '../../core/block/tree'
+import type { SourceInReach } from '../../core/data/extraSources'
+import { blockType } from '../../core/block/registry'
+import { capability } from '../../core/block/capability'
+import { gridMetricsOf } from '../../core/block/grid'
+import { bindableSpotsOf, carriesOwnSource } from '../../core/block/treeQuery'
+import { SELECTION_FOLLOW_PROP } from '../../core/data/selectionFollow'
+import { useEditorInstance } from '../state/EditorContext'
+import { useView } from '../state/useView'
+import { followableByClick, followByClick } from '../bar/followOffer'
+import { ownSourcesOf, sourcesCarrier } from '../../core/block/sourcesInReach'
+import { useDataSources } from '../state/useDataSources'
+import { ColumnControls } from './ColumnControls'
+import { useFieldBinding } from './useFieldBinding'
+import { openLookupInEditor } from './lookupWindowState'
+import { Grip } from './Grip'
+import { GRIPS, useBlockResize } from './useBlockResize'
+import { useLitElement } from './useLitElement'
+
+interface BlockHostProps {
+  block: BlockNode
+  selected?: boolean
+
+  onSelect?: () => void
+
+  grid?: boolean
+
+  children?: ReactNode
+}
+
+const NO_SOURCES: readonly SourceInReach[] = []
+
+export function BlockHost({ block, selected, onSelect, grid = false, children }: BlockHostProps) {
+  const editor = useEditorInstance()
+  const view = useView()
+  const follower = view.followPickFor
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  const def = blockType(block.type)
+  const isContainer = def?.takesChildren ?? false
+  const list = capability(def, 'list')?.binding
+  const searchWindow = capability(def, 'lookupWindow')?.window
+
+  const sourcesLibrary = useDataSources()
+
+  const bindableSpots = useMemo(() => bindableSpotsOf(block), [block])
+
+  const carrier = sourcesCarrier(editor.tree, block.id)
+  const needs = bindableSpots.length > 0 || carriesOwnSource(block)
+  const library = sourcesLibrary.list
+  const sources = useMemo(
+    () => (needs && carrier
+      ? ownSourcesOf(carrier, library)
+      : NO_SOURCES),
+    [needs, carrier, library],
+  )
+
+  const blockRef = useRef<BlockNode>(block)
+  useLayoutEffect(() => {
+    blockRef.current = block
+  })
+
+  const { containerRef, elementRef, element, spotClickOf } = useLitElement({
+    editor,
+    blockRef,
+    block,
+    selected,
+    bindableSpots,
+    sources,
+    grid,
+  })
+
+  const { onClick, onDoubleClick, pickers, openEntry, openSpot } = useFieldBinding({
+    editor,
+    blockRef,
+    block,
+    selected,
+    bindableSpots,
+    listBinding: list,
+    searchWindow,
+    sources,
+    containerRef,
+    element,
+    spotClickOf,
+    onSelect,
+  })
+
+  const { startGridResize, resetGridSize } = useBlockResize(editor, blockRef, rootRef)
+
+  const gridSpec = gridMetricsOf(def)
+
+  const gridDraggable = grid
+
+  const toFollow = follower !== null && followableByClick(block, follower)
+
+  return (
+    <div
+      ref={rootRef}
+      onClick={(e) => {
+        if (follower !== null) {
+          if (!toFollow) return
+          e.stopPropagation()
+          const node = editor.getNode(follower)
+          const next = node ? followByClick(node, block, library) : null
+          if (next) editor.updateProperty(follower, SELECTION_FOLLOW_PROP, next)
+          editor.pickFollowFor(null)
+          return
+        }
+        if (spotClickOf(e.nativeEvent)?.kind === 'lookupWindow' && searchWindow !== undefined
+          && elementRef.current && openLookupInEditor(editor, elementRef.current, block.id, searchWindow, 0)) {
+          e.stopPropagation()
+          onSelect?.()
+          return
+        }
+        onClick(e)
+      }}
+      onDoubleClick={onDoubleClick}
+      data-block-id={block.id}
+      className={view.outlines ? 'block-outline block-outline--all' : 'block-outline'}
+      style={{
+        display: 'block',
+        position: 'relative',
+
+        height: '100%',
+        cursor: selected ? 'default' : 'pointer',
+        outline: selected
+          ? '2px solid var(--wb-selection)'
+          : toFollow ? '2px dashed var(--wb-selection)' : undefined,
+        outlineOffset: 1,
+        borderRadius: 'var(--radius)',
+        userSelect: 'none',
+      }}
+    >
+      <div
+        ref={containerRef}
+        style={{
+          pointerEvents: 'auto',
+          height: '100%',
+        }}
+      >
+        {element && isContainer && children != null
+          ? createPortal(children, element)
+          : null}
+      </div>
+      {pickers}
+      {list?.entryHeads === true && (
+        <ColumnControls
+          block={block}
+          selected={selected === true}
+          open={openEntry}
+          openSpot={openSpot}
+          binding={list}
+          element={element}
+          host={rootRef}
+          container={containerRef}
+          onSelect={onSelect}
+        />
+      )}
+      {selected && gridDraggable && GRIPS
+        .filter((edge) => !(gridSpec.heightFixed || gridSpec.heightFromContent) || edge === 'e' || edge === 'w')
+        .map((edge) => (
+          <Grip
+            key={edge}
+            edge={edge}
+            onStart={(e) => startGridResize(e, edge)}
+            onReset={() => resetGridSize(edge)}
+          />
+        ))}
+    </div>
+  )
+}

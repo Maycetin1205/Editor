@@ -1,0 +1,91 @@
+import { asNumber, decimalsIn, shownNumber } from '../../core/data/number'
+import { isUnread } from '../../core/unread'
+import { readDate } from '../../runtime/chosenDay'
+import { makeOperatorState } from './operatorState'
+
+const EMPTY_LAST = 1
+
+function asDate(value: string): number | null {
+  return readDate(value)?.getTime() ?? null
+}
+
+type Kind = 'number' | 'date' | 'text'
+
+function detectKind(values: readonly string[]): Kind {
+  let filled = 0
+  let numbers = 0
+  let dates = 0
+  for (const w of values) {
+    if (w.trim() === '') continue
+    filled++
+    if (asNumber(w) !== null) numbers++
+    if (asDate(w) !== null) dates++
+  }
+  if (filled === 0) return 'text'
+  if (dates === filled) return 'date'
+  if (numbers === filled) return 'number'
+  return 'text'
+}
+
+const textCompare = new Intl.Collator('de', { numeric: true, sensitivity: 'base' })
+
+export function sortIndices(
+  rows: readonly (readonly string[])[],
+  column: number,
+  ascending: boolean,
+): number[] {
+  if (column < 0 || rows.length === 0) return rows.map((_, i) => i)
+
+  const cell = (i: number): string => rows[i][column] ?? ''
+  const kind = detectKind(rows.map((z) => z[column] ?? ''))
+  const direction = ascending ? 1 : -1
+
+  return rows
+    .map((_, i) => i)
+    .sort((a, b) => {
+      const textA = cell(a).trim()
+      const textB = cell(b).trim()
+
+      if (textA === '' && textB === '') return a - b
+      if (textA === '') return EMPTY_LAST
+      if (textB === '') return -EMPTY_LAST
+
+      const d =
+        kind === 'number' ? (asNumber(textA) ?? 0) - (asNumber(textB) ?? 0)
+        : kind === 'date' ? (asDate(textA) ?? 0) - (asDate(textB) ?? 0)
+        : textCompare.compare(textA, textB)
+
+      return d !== 0 ? d * direction : a - b
+    })
+}
+
+interface RememberedSorting {
+  key: string
+  ascending: boolean
+}
+
+function readSorting(raw: unknown): RememberedSorting | null {
+  if (!isUnread<RememberedSorting>(raw)) return null
+  const key = typeof raw.key === 'string' ? raw.key.trim() : ''
+  if (key === '') return null
+  return { key, ascending: raw.ascending !== false }
+}
+
+export const rememberedSorting = makeOperatorState('ff_sorting_', 'ff_sortierung_', readSorting)
+
+const TOTAL_DECIMALS_MAX = 3
+
+export function totalText(values: readonly string[], decimals: number | null): string {
+  let total = 0
+  let counted = 0
+  let brought = 0
+  for (const value of values) {
+    const number = asNumber(value)
+    if (number === null) continue
+    total += number
+    counted++
+    brought = Math.max(brought, decimalsIn(value))
+  }
+  if (counted === 0) return ''
+  return shownNumber(total, decimals ?? Math.min(brought, TOTAL_DECIMALS_MAX))
+}

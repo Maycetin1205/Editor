@@ -1,0 +1,109 @@
+import { contractOf } from '../../core/block/registry'
+import { inOpenPopup } from '../../core/data/steps/popupStep'
+import { maskState } from '../../runtime/maskState'
+import { relocateSelection, giverIdOf, traitOf, rowsToSelection } from '../../runtime/selection'
+import {
+  readDataPreamble,
+  makeDataLink,
+  identityOf,
+  recordOf,
+  rowKeys,
+  sourceIdOf,
+} from '../../runtime/source'
+import { rowValues, type Calculation } from '../../core/data/calculation'
+import { columnWithKey, type Column } from '../parts/column'
+
+export type RowsFrom = 'source' | 'handed'
+
+export interface HandedRow {
+  rawRow: unknown
+
+  cells: readonly string[]
+}
+
+export interface RowsElement extends HTMLElement {
+  rawRows: unknown[]
+  dataRows: string[][]
+
+  listColumns: () => readonly Column[]
+  listCalculations: () => readonly Calculation[]
+}
+
+function rowComputed(
+  columns: readonly Column[],
+  calculations: readonly Calculation[],
+  given: (slot: number) => string,
+): string[] {
+  const values = rowValues(calculations, (key) => columnWithKey(columns, key), given)
+  return columns.map((_, slot) => given(slot) || (values.get(slot) ?? ''))
+}
+
+export function rowsIndexOf(el: HTMLElement, rawRow: unknown): string {
+  const source = maskState.host.source(sourceIdOf(el))
+  return source ? recordOf(source, rawRow) : ''
+}
+
+export function rowsTraitOf(el: HTMLElement, rawRow: unknown): string {
+  if (rawRow == null) return ''
+  const identity = identityOf(maskState.host.source(sourceIdOf(el)), rawRow)
+  return identity === '' ? traitOf(rawRow) : JSON.stringify([sourceIdOf(el), identity])
+}
+
+export function rowsKeysOf(el: HTMLElement, rows: readonly unknown[]): string[] {
+  return rowKeys(maskState.host.source(sourceIdOf(el)), rows)
+}
+
+export function hasRecordNumber(el: HTMLElement): boolean {
+  const source = maskState.host.source(sourceIdOf(el))
+  return source !== undefined && source.recordField !== ''
+}
+
+function fillRows(el: RowsElement, delivery: boolean): void {
+  const preamble = readDataPreamble(el)
+
+  if (delivery && !inOpenPopup(el)) contractOf(el, 'holdsSent')?.writtenArrived()
+  if (!preamble) {
+    el.rawRows = []
+    el.dataRows = []
+    return
+  }
+  const columns = el.listColumns()
+  const calculations = el.listCalculations()
+
+  const rows = rowsToSelection(el, preamble.rows)
+
+  relocateSelection(giverIdOf(el), rows, (r) => r, (r) => rowsTraitOf(el, r))
+
+  const read = preamble.read
+
+  el.rawRows = rows
+  el.dataRows = rows.map((row) => rowComputed(
+    columns,
+    calculations,
+    (slot) => {
+      const field = columns[slot]?.field ?? ''
+      return field === '' ? '' : read(row, field)
+    },
+  ))
+}
+
+const link = makeDataLink<RowsElement>({ hydrate: fillRows })
+
+export const followSource = link.connect
+export const unfollowSource = link.disconnect
+
+interface HandedCells {
+  rawRows: unknown[]
+  dataRows: string[][]
+}
+
+export function cellsForHandedRows(
+  rows: readonly HandedRow[],
+  columns: readonly Column[],
+  calculations: readonly Calculation[],
+): HandedCells {
+  return {
+    rawRows: rows.map((z) => z.rawRow),
+    dataRows: rows.map((z) => rowComputed(columns, calculations, (slot) => z.cells[slot] ?? '')),
+  }
+}

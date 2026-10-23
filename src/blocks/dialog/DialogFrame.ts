@@ -1,0 +1,206 @@
+import { css, html, LitElement, type PropertyValues, type TemplateResult } from 'lit'
+import { property } from 'lit/decorators.js'
+import { maskState } from '../../runtime/maskState'
+import { icon } from '../parts/icons'
+import { CARD_HEAD_PX } from '../area/areaStyle'
+
+export const DIALOG_FRAME_TAG = 'ff-dialog'
+export const DIALOG_CLOSE_EVENT = 'ff-dialog-close'
+
+export const DIALOG_EDGE = 24
+
+export const WINDOW_WIDTH = 520
+export const WINDOW_HEIGHT = 380
+
+export const DIALOG_MIN_WIDTH = 240
+export const DIALOG_MIN_HEIGHT = 160
+
+function pixel(value: unknown, replacement: number): number {
+  const number = Number(value)
+  return Number.isFinite(number) && number > 0 ? number : replacement
+}
+
+function onEscape(event: KeyboardEvent): void {
+  if (event.key !== 'Escape') return
+  const topmost = maskState.catchingFrames.filter((f) => f.isConnected).pop()
+  if (!topmost) return
+  event.stopPropagation()
+  topmost.close()
+}
+
+function catchesEscape(frame: DialogFrame, catches: boolean): void {
+  const catchingFrames = maskState.catchingFrames
+  const slot = catchingFrames.indexOf(frame)
+  if (catches && slot < 0) {
+    catchingFrames.push(frame)
+    if (catchingFrames.length === 1) window.addEventListener('keydown', onEscape, true)
+  }
+  if (!catches && slot >= 0) {
+    catchingFrames.splice(slot, 1)
+    if (catchingFrames.length === 0) window.removeEventListener('keydown', onEscape, true)
+  }
+}
+
+export class DialogFrame extends LitElement {
+  static override styles = css`
+    :host {
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      display: block;
+      font-family: var(--se-font);
+      font-size: var(--se-fs);
+      line-height: var(--se-lh);
+      color: var(--se-ink);
+    }
+
+    :host([viewport]) {
+      position: fixed;
+      z-index: 2147483646;
+    }
+    .scrim,
+    .stage {
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+    }
+    .scrim { background: var(--se-scrim); }
+    .stage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .window {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      max-width: calc(100% - ${DIALOG_EDGE}px);
+      max-height: calc(100% - ${DIALOG_EDGE}px);
+      overflow: hidden;
+      background: var(--se-panel);
+      border-radius: var(--se-radius-card);
+      box-shadow: var(--se-shadow-pop);
+    }
+    /* The head of a card (areaStyle): the title as text, the cross on the
+       right. */
+    .head {
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: ${CARD_HEAD_PX}px;
+      box-sizing: border-box;
+      padding: 0 14px 0 22px;
+    }
+    .title {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      color: var(--se-ink);
+
+      font-size: var(--se-fs-lg);
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .close {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: none;
+      border-radius: var(--se-radius);
+      background: transparent;
+      color: var(--se-ink-2);
+      cursor: pointer;
+      transition: background-color var(--se-move), color var(--se-move);
+    }
+    .close:hover {
+      background: var(--se-panel-2);
+      color: var(--se-ink);
+    }
+    .close:focus-visible { outline: none; box-shadow: var(--se-focus-ring); }
+    .close .icon { width: 18px; height: 18px; }
+    .content {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+    }
+  `
+
+  @property() heading = 'Dialog'
+  @property({ type: Number }) width = WINDOW_WIDTH
+  @property({ type: Number }) height = WINDOW_HEIGHT
+  @property({ type: Boolean, reflect: true }) viewport = false
+  @property({ type: Boolean, attribute: 'escape-closes' }) escapeCloses = false
+
+  private escapeRegistered = false
+
+  private refreshEscape(): void {
+    const shouldRegister = this.isConnected && this.escapeCloses
+    if (shouldRegister === this.escapeRegistered) return
+    this.escapeRegistered = shouldRegister
+    catchesEscape(this, shouldRegister)
+  }
+
+  windowBox(): DOMRect | null {
+    return this.renderRoot.querySelector('.window')?.getBoundingClientRect() ?? null
+  }
+
+  close(): void {
+    this.dispatchEvent(new CustomEvent(DIALOG_CLOSE_EVENT, {
+      bubbles: true,
+      composed: true,
+    }))
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback()
+    this.refreshEscape()
+  }
+
+  protected override updated(changed: PropertyValues<this>): void {
+    if (changed.has('escapeCloses')) this.refreshEscape()
+  }
+
+  override disconnectedCallback(): void {
+    if (this.escapeRegistered) {
+      this.escapeRegistered = false
+      catchesEscape(this, false)
+    }
+    super.disconnectedCallback()
+  }
+
+  override render(): TemplateResult {
+    const width = pixel(this.width, WINDOW_WIDTH)
+    const height = pixel(this.height, WINDOW_HEIGHT)
+    return html`
+      <div class="scrim"></div>
+      <div class="stage">
+        <section
+          class="window"
+          role="dialog"
+          aria-labelledby="dialog-title"
+          style="width:${width}px;height:${height}px"
+        >
+          <header class="head">
+            <div class="title" id="dialog-title"><slot name="title">${this.heading}</slot></div>
+            <button
+              class="close"
+              type="button"
+              aria-label="Schließen"
+              title="Schließen"
+              @click=${this.close}
+            >${icon('close')}</button>
+          </header>
+          <div class="content"><slot></slot></div>
+        </section>
+      </div>
+    `
+  }
+}
+
+if (!customElements.get(DIALOG_FRAME_TAG)) {
+  customElements.define(DIALOG_FRAME_TAG, DialogFrame)
+}

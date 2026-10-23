@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* The editor has no colors of its own: each of its roles names a token of
+     mask.css, so editor and mask come from one source and the editor wears
+     the look of the mask it builds. Tailwind mixes them for its opacity
+     (tailwind.config.js). */
+  :root {
+    --wb-ground: var(--se-panel-2);       /* the frame: head and both columns */
+    --wb-panel: var(--se-panel);          /* a window, a small window, a button */
+    --wb-control: var(--se-panel-2);      /* the ground of a place to type, white in the focus */
+    --wb-line: var(--se-line);
+    --wb-line-soft: var(--se-line-soft);  /* the hairline between surfaces */
+    --wb-box-line: var(--se-box-line);    /* the edge of an empty checkbox */
+    --wb-hover: var(--se-hover);
+    --wb-ink: var(--se-ink);
+    --wb-ink-2: var(--se-ink-2);
+    --wb-muted: var(--se-ink-2);          /* one ink, as in the mask */
+
+    --wb-accent: var(--se-accent);
+    --wb-accent-soft: var(--se-accent-soft);
+    --wb-accent-ink: var(--se-accent-dark);
+    --wb-error: var(--se-danger);
+    --wb-error-soft: var(--se-danger-soft);
+    --wb-pending: var(--se-warning);
+    --wb-pending-soft: var(--se-warning-soft);
+
+    /* The chosen block on the canvas: the accent of the mask. */
+    --wb-selection: var(--se-accent);
+
+    /* The ground around the sheet is the ground of the sheet, as in the
+       mask; the sheet shows its extent by its hairline. */
+    --wb-canvas: var(--se-bg);
+
+    /* Pixels, not rem: the corner must not grow with the font size. */
+    --radius: 3px;                    /* a field, a button */
+    --radius-small: 3px;              /* a checkbox, a line of a list */
+    --radius-card: 6px;               /* a window */
+  }
+
+  * {
+    border-color: var(--wb-line);
+  }
+
+  /* A pixel value, not a percentage, which would hang on each browser's own
+     setting. Text and controls of the reception mask are 13px (.kinput, .vk). */
+  html {
+    font-size: 13px;
+    line-height: 1.45;                /* html, body */
+  }
+
+  body {
+    background-color: var(--wb-ground);
+    color: var(--wb-ink);
+  }
+}
+
+@layer components {
+  /* Under the pointer every block shows a quiet hairline of the accent, so
+     an empty one can be found by moving the mouse; only the innermost block,
+     not the area around it. While "Umrisse" is on, every block also wears a
+     faint dashed edge. The chosen block wears its own solid edge
+     (BlockHost.tsx); the mask has none of this. */
+  .block-outline--all {
+    outline: 1px dashed var(--wb-line);
+  }
+
+  .block-outline:hover:not(:has(.block-outline:hover)) {
+    outline: 1px solid var(--wb-selection);
+  }
+}

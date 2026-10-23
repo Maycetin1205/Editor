@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "aufbau-editor",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5300
+    },
+    {
+      "name": "aufbau-editor-pruefung",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "--port", "5301"],
+      "port": 5301
+    },
+    {
+      "name": "kanban-softengine-ansicht",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["-e", "const h=require('http'),f=require('fs'),p=require('path');const d='C:/Users/mu.aycetin/Desktop/Kleintierpraxis-Kanban-SoftEngine';h.createServer((q,r)=>{const n=decodeURIComponent(q.url.split('?')[0]);const x=p.join(d,n==='/'?'index.basis.source.html':n);if(!x.startsWith(p.normalize(d))||!f.existsSync(x)||f.statSync(x).isDirectory()){r.writeHead(404);r.end();return}r.writeHead(200,{'Content-Type':x.endsWith('.html')?'text/html; charset=utf-8':'application/octet-stream'});f.createReadStream(x).pipe(r)}).listen(5310)"],
+      "port": 5310
+    }
+  ]
+}

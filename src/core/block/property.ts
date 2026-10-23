@@ -1,0 +1,276 @@
+import type { Unread } from '../unread'
+
+type ReadResult<V> =
+  | { ok: true; value: V }
+  | { ok: false }
+
+type ControlKind =
+  | 'text'
+  | 'number'
+  | 'boolean'
+  | 'choice'
+  | 'ladder'
+  | 'segment'
+  | 'field'
+  | 'source'
+  | 'structured'
+
+export interface ChoiceOption {
+  value: string
+  name: string
+
+  color?: string
+
+  icon?: string
+}
+
+export interface Condition<K extends string = string> {
+  key: K
+  equals?: PropertyValue
+  notEquals?: PropertyValue
+  noneOf?: readonly PropertyValue[]
+
+  and?: Condition<K>
+
+  otherwise?: Condition<K>
+}
+
+export type PropertyValue = string | number | boolean | readonly object[]
+
+interface PropertyType<V> {
+  control: ControlKind
+  read(raw: unknown): ReadResult<V>
+  toAttribute(value: V): string
+  fromAttribute(raw: string | null, fallback: V): V
+  options?: readonly ChoiceOption[]
+}
+
+export type PropertyPlace = 'bar' | 'display' | 'font' | 'source' | 'lookup' | 'block' | 'none'
+
+interface Preset {
+  by: string
+  values?: Readonly<Record<string, string>>
+}
+
+export interface Property<V> {
+  type: PropertyType<V>
+  default: V
+
+  label: string
+
+  place: PropertyPlace
+
+  attribute: string
+
+  when?: Condition
+  unit?: string
+  min?: number
+  max?: number
+  maxLength?: number
+
+  needsSource?: boolean
+  onlyUnderSiblings?: boolean
+
+  sourceProp?: string
+
+  plainNameProp?: string
+
+  nameFromParentField?: string
+
+  preset?: Preset
+}
+
+export type PropertyMap = { readonly [name: string]: Property<PropertyValue> }
+
+export type ValuesOf<P> = { [K in keyof P]: P[K] extends Property<infer V> ? V : never }
+
+function testHolds(condition: Condition, values: Readonly<Record<string, PropertyValue>>): boolean {
+  const value = values[condition.key]
+  if (condition.noneOf) return !condition.noneOf.some((v) => Object.is(value, v))
+  if ('notEquals' in condition) return !Object.is(value, condition.notEquals)
+  return Object.is(value, condition.equals)
+}
+
+export function propertyVisible(
+  condition: Condition | undefined,
+  values: Readonly<Record<string, PropertyValue>>,
+): boolean {
+  if (!condition) return true
+  if (!testHolds(condition, values)) {
+    return condition.otherwise !== undefined && propertyVisible(condition.otherwise, values)
+  }
+  return propertyVisible(condition.and, values)
+}
+
+interface Init<V> {
+  default: V
+  label: string
+  place?: PropertyPlace
+  attribute?: string
+  when?: Condition
+  needsSource?: boolean
+  onlyUnderSiblings?: boolean
+  sourceProp?: string
+  plainNameProp?: string
+  nameFromParentField?: string
+  preset?: Preset
+}
+
+function make<V>(type: PropertyType<V>, init: Init<V>, extra: Partial<Property<V>> = {}): Property<V> {
+  return {
+    type,
+    default: init.default,
+    label: init.label,
+    place: init.place ?? 'bar',
+    attribute: init.attribute ?? '',
+    ...(init.when ? { when: init.when } : {}),
+    ...(init.needsSource !== undefined ? { needsSource: init.needsSource } : {}),
+    ...(init.onlyUnderSiblings !== undefined ? { onlyUnderSiblings: init.onlyUnderSiblings } : {}),
+    ...(init.sourceProp !== undefined ? { sourceProp: init.sourceProp } : {}),
+    ...(init.plainNameProp !== undefined ? { plainNameProp: init.plainNameProp } : {}),
+    ...(init.nameFromParentField !== undefined ? { nameFromParentField: init.nameFromParentField } : {}),
+    ...(init.preset !== undefined ? { preset: init.preset } : {}),
+    ...extra,
+  }
+}
+
+const textType = (control: ControlKind, options?: readonly ChoiceOption[]): PropertyType<string> => ({
+  control,
+  read: (raw) => (typeof raw === 'string'
+    ? { ok: true, value: raw }
+    : { ok: false }),
+  toAttribute: (value) => value,
+  fromAttribute: (raw, fallback) => (raw === null ? fallback : raw),
+  ...(options ? { options } : {}),
+})
+
+export function textProperty(init: Init<string> & { maxLength?: number }): Property<string> {
+  return make(textType('text'), init,
+    init.maxLength === undefined ? {} : { maxLength: init.maxLength })
+}
+
+export function choiceProperty(
+  options: readonly ChoiceOption[],
+  init: Init<string>,
+): Property<string> {
+  return make(textType('choice', options), init)
+}
+
+export function ladderProperty(
+  options: readonly ChoiceOption[],
+  init: Init<string> & { min: number; max: number },
+): Property<string> {
+  const whole = (raw: string): boolean => {
+    const n = Number(raw)
+    return String(n) === raw && Number.isInteger(n) && n >= init.min && n <= init.max
+  }
+  const type: PropertyType<string> = {
+    ...textType('ladder', options),
+    read: (raw) => (typeof raw === 'string' && whole(raw)
+      ? { ok: true, value: raw }
+      : { ok: false }),
+    fromAttribute: (raw, fallback) => (raw !== null && whole(raw) ? raw : fallback),
+  }
+  return make(type, init, { min: init.min, max: init.max })
+}
+
+export function segmentProperty(
+  options: readonly ChoiceOption[],
+  init: Init<string>,
+): Property<string> {
+  return make(textType('segment', options), init)
+}
+
+export function fieldProperty(init: Init<string>): Property<string> {
+  return make(textType('field'), init)
+}
+
+export function sourceProperty(init: Init<string>): Property<string> {
+  return make(textType('source'), init)
+}
+
+export function numberProperty(
+  init: Init<number> & { min?: number; max?: number; unit?: string },
+): Property<number> {
+  const type: PropertyType<number> = {
+    control: 'number',
+    read: (raw) => (typeof raw === 'number' && Number.isFinite(raw)
+      ? { ok: true, value: raw }
+      : { ok: false }),
+    toAttribute: (value) => String(value),
+    fromAttribute: (raw, fallback) => {
+      if (raw === null) return fallback
+      const parsed = Number(raw)
+      return Number.isFinite(parsed) ? parsed : fallback
+    },
+  }
+  return make(type, init, {
+    ...(init.min !== undefined ? { min: init.min } : {}),
+    ...(init.max !== undefined ? { max: init.max } : {}),
+    ...(init.unit !== undefined ? { unit: init.unit } : {}),
+  })
+}
+
+export function booleanProperty(init: Init<boolean>): Property<boolean> {
+  const type: PropertyType<boolean> = {
+    control: 'boolean',
+    read: (raw) => (typeof raw === 'boolean'
+      ? { ok: true, value: raw }
+      : { ok: false }),
+    toAttribute: (value) => (value ? 'true' : 'false'),
+    fromAttribute: (raw, fallback) => (raw === null ? fallback : raw === 'true'),
+  }
+  return make(type, init)
+}
+
+function structuredProperty<V>(
+  type: Omit<PropertyType<V>, 'control'>,
+  init: Init<V>,
+): Property<V> {
+  return make({ ...type, control: 'structured' }, init)
+}
+
+export function listProperty<V>(
+  readList: (raw: unknown) => V,
+  init: Init<V>,
+  forExport: (value: V) => unknown = (value) => value,
+): Property<V> {
+  const parsed = (raw: string): unknown => {
+    try { return JSON.parse(raw) } catch { return undefined }
+  }
+  return structuredProperty<V>({
+    read: (raw) => (raw === undefined || Array.isArray(raw)
+      ? { ok: true, value: readList(raw) }
+      : { ok: false }),
+    toAttribute: (value) => JSON.stringify(forExport(value)),
+    fromAttribute: (raw, fallback) => {
+      if (raw === null) return fallback
+      const value = parsed(raw)
+      return value === undefined ? fallback : readList(value)
+    },
+  }, init)
+}
+
+export function defaultsOf(properties: PropertyMap): Record<string, PropertyValue> {
+  const out: Record<string, PropertyValue> = {}
+  for (const [name, property] of Object.entries(properties)) {
+    out[name] = property.default
+  }
+  return out
+}
+
+export function readValues(
+  properties: PropertyMap,
+  raw: Unread<Record<string, PropertyValue>>,
+): Record<string, PropertyValue> {
+  const values: Record<string, PropertyValue> = {}
+  for (const [name, property] of Object.entries(properties)) {
+    if (!Object.prototype.hasOwnProperty.call(raw, name)) {
+      values[name] = property.default
+      continue
+    }
+    const result = property.type.read(raw[name])
+    values[name] = result.ok ? result.value : property.default
+  }
+  return values
+}

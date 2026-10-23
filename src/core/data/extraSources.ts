@@ -1,0 +1,93 @@
+import { listProperty, type Property } from '../block/property'
+import type { Unread } from '../unread'
+import type { DataSource } from './dataSources'
+
+export interface KeyPair {
+  fromField: string
+  toField: string
+
+  from?: 'document' | 'formField'
+  fromSourceId?: string
+  fromProp?: string
+
+  unequal?: true
+}
+
+export const MAX_KEY_PAIRS = 3
+
+export function completePairs(carrier: { pairs: readonly KeyPair[] }): KeyPair[] {
+  return carrier.pairs.filter((p) => p.fromField.trim() !== '' && p.toField.trim() !== '')
+}
+
+function keyPairFrom(raw: unknown): KeyPair | null {
+  if (!raw || typeof raw !== 'object') return null
+  const pair: Unread<KeyPair> = raw
+  if (typeof pair.fromField !== 'string' || typeof pair.toField !== 'string') return null
+  const text = (v: unknown): string => (typeof v === 'string' ? v : '')
+  const outside: Partial<KeyPair> = pair.from === 'document' && text(pair.fromSourceId) !== ''
+    ? { from: 'document', fromSourceId: text(pair.fromSourceId) }
+    : pair.from === 'formField'
+      ? { from: 'formField', ...(text(pair.fromProp) !== '' ? { fromProp: text(pair.fromProp) } : {}) }
+      : {}
+  return {
+    fromField: pair.fromField,
+    toField: pair.toField,
+    ...outside,
+    ...(pair.unequal === true ? { unequal: true } : {}),
+  }
+}
+
+export function keyPairsFrom(raw: unknown): KeyPair[] {
+  const pairs: KeyPair[] = []
+  for (const p of Array.isArray(raw) ? raw : []) {
+    const pair = keyPairFrom(p)
+    if (pair) pairs.push(pair)
+  }
+  return pairs.slice(0, MAX_KEY_PAIRS)
+}
+
+export interface ExtraSource {
+  sourceId: string
+
+  partnerId: string
+
+  pairs: KeyPair[]
+}
+
+export const EXTRA_SOURCES_PROP = 'extraSources'
+
+export const extraSourcesProperty: Property<ExtraSource[]> = listProperty<ExtraSource[]>(extraSourcesFrom, {
+  default: [],
+  label: 'Weitere Quellen',
+  place: 'none',
+  attribute: 'extrasources',
+})
+
+export function sourceUsable(q: ExtraSource): boolean {
+  return q.sourceId !== ''
+}
+
+function extraSourcesFrom(raw: unknown): ExtraSource[] {
+  if (!Array.isArray(raw)) return []
+  const acc: ExtraSource[] = []
+  for (const entry of raw) {
+    if (!entry || typeof entry !== 'object') continue
+    const e: Unread<ExtraSource> = entry
+    if (typeof e.sourceId !== 'string') continue
+    acc.push({
+      sourceId: e.sourceId,
+
+      partnerId: typeof e.partnerId === 'string' ? e.partnerId : '',
+      pairs: keyPairsFrom(e.pairs),
+    })
+  }
+  return acc
+}
+
+export interface SourceInReach {
+  source: DataSource
+
+  pairs?: KeyPair[]
+
+  partnerId?: string
+}

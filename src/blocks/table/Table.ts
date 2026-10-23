@@ -1,0 +1,71 @@
+import { type CSSResultGroup, type TemplateResult } from 'lit'
+import { property } from 'lit/decorators.js'
+import type { Calculation } from '../../core/data/calculation'
+import { BlockElement, defineBlock } from '../base/BlockElement'
+import {
+  LIST_GRID,
+  listCapabilities,
+  RecordList,
+  tableStyle,
+  type HandedRow,
+  type RowsFrom,
+} from '../list'
+import { COLUMNS_BINDING, type Column } from '../parts/column'
+import { tableProperties, type TableValues } from './properties'
+
+export interface Table extends TableValues {}
+
+export class Table extends BlockElement {
+  static readonly type = 'table'
+  static readonly tag = 'ff-table'
+
+  static override styles: CSSResultGroup = [BlockElement.styles, tableStyle]
+
+  static override busyLine = true
+
+  @property({ attribute: false }) dataRows: string[][] = []
+
+  @property({ attribute: false }) rawRows: unknown[] = []
+
+  private readonly _list = new RecordList(this)
+
+  listColumns(): readonly Column[] {
+    return this.columns
+  }
+
+  listCalculations(): readonly Calculation[] {
+    return []
+  }
+
+  get rowsFrom(): RowsFrom {
+    return this._list.rowsFrom
+  }
+
+  set rowsFrom(value: RowsFrom) {
+    this._list.rowsFrom = value
+  }
+
+  set handedRows(rows: readonly HandedRow[]) {
+    this._list.handedRows = rows
+  }
+
+  focusSearch(): boolean {
+    return this._list.focusSearch()
+  }
+
+  setSearchText(text: string): void {
+    this._list.setSearchText(text)
+  }
+
+  override render(): TemplateResult {
+    return this._list.render()
+  }
+}
+
+defineBlock(Table, {
+  name: 'Tabelle',
+  category: 'display',
+  properties: tableProperties,
+  capabilities: listCapabilities(COLUMNS_BINDING),
+  grid: LIST_GRID,
+})

@@ -1,0 +1,254 @@
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { cn } from '@/editor/widgets/cn'
+import { LEVEL_OVER_MASK_WINDOW } from '@/editor/widgets/Popover'
+import { Plus } from '@/editor/icons/icon'
+import { cssZoomOf } from '../../blocks/base/cssZoom'
+import type { HeadsPlaced } from '../../blocks/base/headsReport'
+import type { DialogFrame } from '../../blocks/dialog/DialogFrame'
+import type { Table } from '../../blocks/table/Table'
+import {
+  newColumn,
+  COLUMNS_MAX,
+  DEFAULT_TITLE,
+  type Column,
+} from '../../blocks/parts/column'
+import { fieldOf, sourcesKey } from '../../core/data/dataSources'
+import { useDataSources } from '../state/useDataSources'
+import { useEditor } from '../state/useEditor'
+import { useView } from '../state/useView'
+import type { OpenLookup } from '../state/EditorStore'
+import {
+  windowFrameInEditor,
+  windowStateOf,
+  type WindowState,
+} from './lookupWindowState'
+import { widthFromLength } from './fieldWidth'
+import { FieldPicker, type PickerGroup } from './FieldPicker'
+import { axesOf, dragSize } from './dragSize'
+import { Grip } from './Grip'
+import { GRIPS } from './useBlockResize'
+import { useHeadsPlaced } from './useHeadsPlaced'
+
+const HANDLE_EDGE = 6
+
+const PLUS_WIDTH = 26
+
+interface Head {
+  slot: number
+
+  left: number
+  top: number
+  width: number
+  height: number
+}
+
+function tableIn(frame: DialogFrame): Table | null {
+  return frame.querySelector<Table>('ff-table')
+}
+
+function headsOnScreen(table: Table | null, placed: HeadsPlaced): Head[] {
+  if (table === null) return []
+  const at = table.getBoundingClientRect()
+  const zoom = cssZoomOf(table)
+  return placed.heads.filter((head) => !head.below).map((head) => ({
+    slot: head.path.index,
+    left: at.left + head.left * zoom,
+    top: at.top + head.top * zoom,
+    width: head.width * zoom,
+    height: head.height * zoom,
+  }))
+}
+
+interface Metrics {
+  width: number
+  height: number
+}
+
+function carryTo(frame: DialogFrame, state: WindowState, before: Metrics | null): void {
+  const table = tableIn(frame)
+  if (table !== null) {
+    const columns = [...state.columns]
+    if (JSON.stringify(table.columns) !== JSON.stringify(columns)) table.columns = columns
+  }
+
+  if (before === null || before.width !== state.width) frame.width = state.width
+  if (before === null || before.height !== state.height) frame.height = state.height
+}
+
+export function LookupColumns() {
+  const open = useView().lookupWindow
+  if (open === null) return null
+
+  return <Heads key={`${open.blockId}:${open.slot}`} open={open} />
+}
+
+function Heads({ open }: { open: OpenLookup }) {
+  const ed = useEditor()
+  const library = useDataSources().list
+  const [chosen, setChosen] = useState<number | null>(null)
+  const layerRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const check = (): void => {
+      if (windowFrameInEditor() === null) ed.setLookupWindow(null)
+    }
+    const mo = new MutationObserver(check)
+    mo.observe(document.body, { childList: true })
+    check()
+    return () => mo.disconnect()
+  }, [ed, open])
+
+  const frame = windowFrameInEditor()
+  const table = frame === null ? null : tableIn(frame)
+  const heads = headsOnScreen(table, useHeadsPlaced(table))
+
+  const state = windowStateOf(ed, open.blockId, open.window, open.slot)
+
+  const backfilled = useRef<Metrics | null>(null)
+  useEffect(() => {
+    if (frame === null || state === null) return
+    carryTo(frame, state, backfilled.current)
+    backfilled.current = { width: state.width, height: state.height }
+  })
+
+  if (state === null) return null
+
+  const source = library.find((s) => s.id === state.sourceId)
+  const groups: PickerGroup[] = source === undefined ? [] : [{
+    sourceId: '',
+    name: source.name,
+    badge: sourcesKey(source),
+    fields: source.fields,
+  }]
+
+  const change = (slot: number, part: Partial<Column>): void => {
+    state.setColumns(state.columns.map((s, i) => (i === slot ? { ...s, ...part } : s)))
+  }
+
+  const append = (): void => {
+    const slot = state.columns.length
+    state.setColumns([...state.columns, newColumn(slot)])
+    setChosen(slot)
+  }
+
+  const headOfPickers = chosen === null
+    ? undefined
+    : heads.find((k) => k.slot === chosen)
+  const columnOfPickers = chosen === null ? undefined : state.columns[chosen]
+  const defaultTitle = DEFAULT_TITLE.replace('{n}', String((chosen ?? 0) + 1))
+
+  const plus = state.columns.length < COLUMNS_MAX && heads.length > 0
+    ? { right: Math.max(...heads.map((h) => h.left + h.width)), top: Math.min(...heads.map((h) => h.top)) }
+    : null
+  const rect = frame?.windowBox() ?? null
+  const box = rect === null ? null : { left: rect.left, top: rect.top, width: rect.width, height: rect.height }
+
+  return createPortal(
+    <>
+      <div
+        ref={layerRef}
+        data-ff-editor-helper
+        className="pointer-events-none fixed inset-0"
+        style={{ zIndex: LEVEL_OVER_MASK_WINDOW }}
+      >
+        {heads.map((head) => {
+          const left = head.left + HANDLE_EDGE
+          const right = head.left + head.width - HANDLE_EDGE
+          return (
+            <div
+              key={head.slot}
+              className={cn(
+                'pointer-events-auto absolute cursor-pointer',
+                'hover:bg-selection/[.08]',
+                chosen === head.slot && 'bg-selection/[.08]',
+              )}
+              style={{
+                left: left,
+                top: head.top,
+                width: Math.max(0, right - left),
+                height: head.height,
+              }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation()
+                setChosen((v) => (v === head.slot ? null : head.slot))
+              }}
+            />
+          )
+        })}
+
+        {box !== null && (
+          <div className="absolute" style={box}>
+            {GRIPS.map((edge) => (
+              <Grip
+                key={edge}
+                edge={edge}
+                onStart={(e) => dragSize(ed, e, edge, box, (axis, value) => state.setMetrics(axis, value))}
+                onReset={() => ed.transaction(() => {
+                  for (const axis of axesOf(edge)) state.setMetrics(axis, undefined)
+                })}
+              />
+            ))}
+          </div>
+        )}
+
+        {plus !== null && (
+          <button
+            type="button"
+            aria-label="Spalte anfügen"
+            title="Spalte anfügen"
+            className={cn(
+              'pointer-events-auto absolute grid cursor-pointer place-items-center rounded border border-line bg-panel',
+              'text-selection hover:bg-selection/[.08]',
+            )}
+            style={{
+              left: plus.right - PLUS_WIDTH,
+              top: plus.top - 29,
+              width: PLUS_WIDTH,
+              height: 24,
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation()
+              append()
+            }}
+          >
+            <Plus size={13} />
+          </button>
+        )}
+      </div>
+
+      {headOfPickers !== undefined && columnOfPickers !== undefined && chosen !== null && (
+        <FieldPicker
+          key={chosen}
+          level={LEVEL_OVER_MASK_WINDOW}
+          spotLabel={columnOfPickers.title === '' ? defaultTitle : columnOfPickers.title}
+          groups={groups}
+          current={columnOfPickers.field}
+          anchor={layerRef}
+          top={headOfPickers.top + headOfPickers.height + 4}
+          left={headOfPickers.left}
+
+          onPick={(value) => {
+            const field = fieldOf(source, value)
+            const plainName = field?.name ?? ''
+            const width = widthFromLength(field?.length)
+            change(chosen, {
+              field: value,
+              title: value === '' ? defaultTitle : (plainName !== '' ? plainName : value),
+              ...(width === undefined ? {} : { width }),
+            })
+          }}
+          removeLabel="Spalte entfernen"
+          onRemove={!state.provided && state.columns.length <= 1 ? undefined : () => {
+            state.setColumns(state.columns.filter((_, i) => i !== chosen))
+            setChosen(null)
+          }}
+          onClose={() => setChosen(null)}
+        />
+      )}
+    </>,
+    document.body,
+  )
+}

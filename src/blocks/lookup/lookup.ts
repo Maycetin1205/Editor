@@ -1,0 +1,299 @@
+import { html, render } from 'lit'
+import { BLOCK_ID_ATTR } from '../../core/data/actions'
+import type { ListBinding } from '../../core/block/listBinding'
+import { deliveryAdapter } from '../../core/data/deliveries/deliveries'
+import { blockType } from '../../core/block/registry'
+import { rowsToSelection } from '../../runtime/selection'
+import { maskState } from '../../runtime/maskState'
+import {
+  DIALOG_FRAME_TAG,
+  WINDOW_HEIGHT,
+  WINDOW_WIDTH,
+  type DialogFrame,
+} from '../dialog/DialogFrame'
+import { LOOKUP_KEY_PART } from '../list/operatorState'
+import {
+  coerceColumns,
+  COLUMN_ACCESS,
+  DEFAULT_TITLE,
+  FIELD_KEY_PREFIX,
+  type Column,
+} from '../parts/column'
+import {
+  ROW_ACTIVATED_EVENT,
+  type RowActivatedDetail,
+} from '../list/rowActivation'
+import type { HandedRow, RowsFrom } from '../list/sourceRows'
+
+const WINDOW_TABLE_TYPE = 'table'
+
+interface WindowTable extends HTMLElement {
+  preview: boolean
+  rowsFrom: RowsFrom
+  columns: Column[]
+  handedRows: readonly HandedRow[]
+  setSearchText: (text: string) => void
+  focusSearch: () => boolean
+  updateComplete: Promise<boolean>
+}
+
+function lookupKey(el: HTMLElement, spot = 'field'): string {
+  return `${el.getAttribute(BLOCK_ID_ATTR) ?? ''}${LOOKUP_KEY_PART}${spot}`
+}
+
+function lookupColumns(columns: readonly Column[]): Column[] {
+  return coerceColumns(columns.map((s) => ({ ...s, key: s.key || `${FIELD_KEY_PREFIX}${s.field}` })))
+}
+
+export function windowWidthFor(columns: number): number {
+  return Math.min(900, Math.max(WINDOW_WIDTH, 160 + 180 * columns))
+}
+
+function wholeNumber(v: unknown): number | undefined {
+  return typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : undefined
+}
+
+export function entryWindowSize(
+  entry: { windowWidth?: number; windowHeight?: number },
+  columns: number,
+): { width: number; height: number } {
+  return {
+    width: wholeNumber(entry.windowWidth) ?? windowWidthFor(columns),
+    height: wholeNumber(entry.windowHeight) ?? WINDOW_HEIGHT,
+  }
+}
+
+export const LOOKUP_COLUMNS_BINDING: ListBinding<Column, 'lookupColumns' | 'lookupSource'> = {
+  prop: 'lookupColumns',
+  defaultTitle: DEFAULT_TITLE,
+  sourceProp: 'lookupSource',
+  entries: coerceLookupColumns,
+  ...COLUMN_ACCESS,
+}
+
+export function coerceLookupColumns(v: unknown): Column[] {
+  if (typeof v === 'string') {
+    try {
+      v = JSON.parse(v)
+    } catch {
+      return []
+    }
+  }
+  return Array.isArray(v) && v.length > 0 ? coerceColumns(v) : []
+}
+
+export function windowColumnsOr(provided: unknown, automatic: () => Column[]): Column[] {
+  const own = coerceLookupColumns(provided)
+  return own.length > 0 ? own : automatic()
+}
+
+interface LookupArgs {
+  spot?: string
+  el: HTMLElement
+  sourceId: string
+  storageField: string
+  storageTitle: string
+
+  columns: readonly Column[]
+  title: string
+
+  width: number
+  height: number
+  onAdopt: (display: string, value: string, record: unknown) => void
+
+  entries?: readonly Entry[]
+
+  backFocus?: HTMLElement | (() => void) | null
+
+  searchText?: string
+
+  preview?: boolean
+}
+
+export interface Entry {
+  display: string
+  value: string
+
+  record: unknown
+}
+
+interface LookupSetting {
+  el: HTMLElement
+  sourceId: string
+  storageField: string
+
+  columns: readonly Column[]
+}
+
+function displayFieldOf(columns: readonly Column[], storageField: string): string {
+  const first = columns[0]
+  return first === undefined ? storageField : first.field
+}
+
+function onlyOneColumn(displayField: string, storageField: string): boolean {
+  const display = displayField.trim()
+  return display === '' || display === storageField.trim()
+}
+
+export function lookupEntries(
+  rows: readonly unknown[],
+  displayField: string,
+  storageField: string,
+): Entry[] {
+  const displayCode = displayField.trim()
+  const entries: Entry[] = []
+  const singleColumn = onlyOneColumn(displayField, storageField)
+  const seen = new Set<string>()
+  for (const row of rows) {
+    const value = maskState.host.readField(row, storageField).trim()
+    const display = displayCode === '' ? value : maskState.host.readField(row, displayCode).trim()
+    if (display === '' && value === '') continue
+    if (singleColumn) {
+      if (seen.has(value)) continue
+      seen.add(value)
+    }
+    entries.push({ display, value, record: row })
+  }
+  return entries
+}
+
+function windowEntries(
+  el: HTMLElement,
+  rows: unknown[],
+  displayField: string,
+  storageField: string,
+): Entry[] {
+  return lookupEntries(rowsToSelection(el, rows), displayField, storageField)
+}
+
+type EntriesResult =
+  | { ok: true; entries: Entry[] }
+  | { ok: false }
+
+export function sourcesRows(sourceId: string): unknown[] | null {
+  const source = maskState.host.source(sourceId)
+  if (!source) return null
+  return maskState.host.rows(source)
+}
+
+export function sourceCame(sourceId: string): boolean {
+  const source = maskState.host.source(sourceId)
+  if (!source) return true
+  if (deliveryAdapter(source.delivery.kind).fetchOn === 'never') return maskState.host.hasData()
+  return maskState.host.rows(source).length > 0
+}
+
+export function fetchEntries(e: LookupSetting): EntriesResult {
+  if (e.sourceId === '' || e.storageField === '') return { ok: false }
+  const rows = sourcesRows(e.sourceId)
+  if (rows === null) return { ok: false }
+  const displayField = displayFieldOf(coerceLookupColumns([...e.columns]), e.storageField)
+  return { ok: true, entries: windowEntries(e.el, rows, displayField, e.storageField) }
+}
+
+function magnifierOf(el: HTMLElement): HTMLElement | null {
+  return el.shadowRoot?.querySelector<HTMLElement>('.magnifier') ?? null
+}
+
+function close(withFocus = true): void {
+  const lookupWindow = maskState.lookupWindow
+  const target = withFocus ? lookupWindow.backFocus : null
+  lookupWindow.backFocus = null
+  lookupWindow.open?.remove()
+  lookupWindow.open = null
+  lookupWindow.openFor = null
+  if (typeof target === 'function') target()
+  else target?.focus()
+}
+
+export function closeLookupFor(el: HTMLElement): void {
+  if (maskState.lookupWindow.openFor === el) close(false)
+}
+
+type ColumnsSource = Pick<LookupArgs, 'storageField' | 'storageTitle'>
+
+export function automaticColumns(args: ColumnsSource): Column[] {
+  const title = args.storageTitle !== '' ? args.storageTitle : 'Wert'
+  return [{ key: `${FIELD_KEY_PREFIX}${args.storageField}`, title, field: args.storageField }]
+}
+
+function windowTable(tag: string, args: LookupArgs, entries: readonly Entry[]): WindowTable {
+  const own = coerceLookupColumns([...args.columns])
+  const columns = lookupColumns(windowColumnsOr(own, () => automaticColumns(args)))
+
+  const table = document.createElement(tag) as WindowTable
+  if (args.preview === true) table.preview = true
+  else table.setAttribute(BLOCK_ID_ATTR, lookupKey(args.el, args.spot))
+  table.setAttribute('fills', '')
+  table.setAttribute('search', 'true')
+  table.setAttribute('columnpicker', 'true')
+  table.rowsFrom = 'handed'
+  table.columns = columns
+
+  const singleColumn = onlyOneColumn(
+    displayFieldOf(own, args.storageField),
+    args.storageField,
+  )
+  table.handedRows = entries.map((e) => ({
+    rawRow: e.record,
+    cells: own.length > 0
+      ? own.map((s) => (s.field === '' ? '' : maskState.host.readField(e.record, s.field)))
+      : (singleColumn ? [e.value] : [e.display, e.value]),
+  }))
+  return table
+}
+
+export function openLookup(args: LookupArgs): void {
+  const tag = blockType(WINDOW_TABLE_TYPE)?.tag
+  if (tag === undefined) return
+
+  let entries = args.entries
+
+  if (entries === undefined) {
+    const result = fetchEntries(args)
+    if (!result.ok) return
+    entries = result.entries
+  }
+
+  const found = entries ?? []
+
+  close(false)
+
+  const table = windowTable(tag, args, found)
+  const holder = document.createElement('div')
+  holder.style.display = 'contents'
+  render(html`<ff-dialog
+    viewport
+    escape-closes
+    data-ff-lookup
+    .heading=${args.title !== '' ? args.title : 'Nachschlagen'}
+    .width=${args.width}
+    .height=${args.height}
+    @ff-dialog-close=${() => close()}
+    @click=${(e: Event) => e.stopPropagation()}
+  >${table}</ff-dialog>`, holder)
+
+  const dialog = holder.querySelector<DialogFrame>(DIALOG_FRAME_TAG)
+  table.addEventListener(ROW_ACTIVATED_EVENT, (event) => {
+    const detail = (event as CustomEvent<RowActivatedDetail>).detail
+    const entry = found.find((e) => e.record === detail.rawRow)
+    if (!entry) return
+    close()
+    args.onAdopt(entry.display, entry.value, entry.record)
+  })
+
+  const lookupWindow = maskState.lookupWindow
+  lookupWindow.backFocus = args.backFocus ?? magnifierOf(args.el)
+  document.body.appendChild(holder)
+  lookupWindow.open = holder
+  lookupWindow.openFor = args.el
+
+  const brought = args.searchText ?? ''
+  if (brought !== '') table.setSearchText(brought)
+
+  if (dialog) {
+    void Promise.all([dialog.updateComplete, table.updateComplete]).then(() => {
+      if (dialog.isConnected) table.focusSearch()
+    })
+  }
+}
