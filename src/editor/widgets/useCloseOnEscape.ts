@@ -2,12 +2,16 @@ import { useEffect, useRef } from 'react'
 
 const open: (() => void)[] = []
 
-window.addEventListener('keydown', (e) => {
-  const close = open.at(-1)
-  if (e.key !== 'Escape' || close === undefined) return
-  e.stopImmediatePropagation()
-  close()
-}, true)
+window.addEventListener(
+  'keydown',
+  (e) => {
+    const close = open.at(-1)
+    if (e.key !== 'Escape' || close === undefined) return
+    e.stopImmediatePropagation()
+    close()
+  },
+  true,
+)
 
 export function useCloseOnEscape(onClose: () => void): void {
   const latest = useRef(onClose)

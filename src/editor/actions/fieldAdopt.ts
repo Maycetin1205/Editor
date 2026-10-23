@@ -1,11 +1,6 @@
 import { relationParameterDefault, type Parameter } from '../../core/data/actions'
 import type { DataSource } from '../../core/data/dataSources'
-import {
-  fieldCodeSplit,
-  parameterRole,
-  relIdFromIdbId,
-  type RelationTemplate,
-} from '../../core/data/relations'
+import { fieldCodeSplit, parameterRole, relIdFromIdbId, type RelationTemplate } from '../../core/data/relations'
 
 interface AdoptField {
   sourceId: string
@@ -21,10 +16,12 @@ function fieldPosLen(source: DataSource, code: string): { pos: string; len: stri
 }
 
 export function adoptFields(sources: readonly DataSource[]): AdoptField[] {
-  return sources.flatMap((source) => source.fields.flatMap((field) => {
-    const pl = fieldPosLen(source, field.code)
-    return pl ? [{ sourceId: source.id, code: field.code, label: field.name, posLen: `${pl.pos}_${pl.len}` }] : []
-  }))
+  return sources.flatMap((source) =>
+    source.fields.flatMap((field) => {
+      const pl = fieldPosLen(source, field.code)
+      return pl ? [{ sourceId: source.id, code: field.code, label: field.name, posLen: `${pl.pos}_${pl.len}` }] : []
+    }),
+  )
 }
 
 export function fieldAdopt(
@@ -58,7 +55,11 @@ export function adoptedField(
   return adoptFields(sources).find((f) => {
     const split = fieldCodeSplit(f.posLen)
     const source = sources.find((s) => s.id === f.sourceId)
-    return split !== null && split.pos === fixed('pos') && split.len === fixed('len')
-      && (!hasTable || relIdFromIdbId(source?.tableId ?? '') === fixed('relid'))
+    return (
+      split !== null &&
+      split.pos === fixed('pos') &&
+      split.len === fixed('len') &&
+      (!hasTable || relIdFromIdbId(source?.tableId ?? '') === fixed('relid'))
+    )
   })
 }

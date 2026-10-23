@@ -22,7 +22,11 @@ const COLUMNS = [
 
 const at = (v: readonly string[], k: number): string => v[k] ?? ''
 
-function relationFrom(before: RelationTemplate | undefined, syntaxText: string, name: string): Omit<RelationTemplate, 'id'> | null {
+function relationFrom(
+  before: RelationTemplate | undefined,
+  syntaxText: string,
+  name: string,
+): Omit<RelationTemplate, 'id'> | null {
   const syntax = relationSyntaxRead(syntaxText)
   if (!syntax || name.trim() === '') return null
   const positions = before?.positions
@@ -48,7 +52,9 @@ export function RelationsTab() {
   const marked = hits.find((r) => r.id === markedId)
   const usage = marked
     ? [
-        ...Object.values(ed.tree).filter((n) => relationIdsOf(n).includes(marked.id)).map((n) => blockName(n, sources)),
+        ...Object.values(ed.tree)
+          .filter((n) => relationIdsOf(n).includes(marked.id))
+          .map((n) => blockName(n, sources)),
         ...sources
           .filter((s) => deliveryAdapter(s.delivery.kind).relationIds(s.delivery).includes(marked.id))
           .map((s) => `Quelle ${s.name}`),
@@ -118,7 +124,9 @@ export function RelationsTab() {
             </div>
             {usage.length > 0 && (
               <>
-                <div className="border-t border-line-soft"><Strip>Benutzt von</Strip></div>
+                <div className="border-t border-line-soft">
+                  <Strip>Benutzt von</Strip>
+                </div>
                 <div className="px-[12px] py-[8px] text-dense">{usage.join(', ')}</div>
               </>
             )}

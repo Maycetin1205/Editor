@@ -41,12 +41,7 @@ export function SwatchChoice({
         <ChevronDown size={13} aria-hidden className="text-muted" />
       </button>
       {open && (
-        <Popover
-          name={label}
-          anchor={button}
-          width={options.length * SWATCH_STEP + 18}
-          onClose={() => setOpen(false)}
-        >
+        <Popover name={label} anchor={button} width={options.length * SWATCH_STEP + 18} onClose={() => setOpen(false)}>
           <div className="flex flex-wrap gap-[6px] p-[4px]">
             {options.map((o) => (
               <ColorSwatch

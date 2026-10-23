@@ -44,11 +44,21 @@ export class MaskFolder extends Subject<MaskFolder> {
   private _failure: string | null = null
   private _version = 0
 
-  get version(): number { return this._version }
-  get state(): FolderState { return this._state }
-  get name(): string { return this.handle?.name ?? '' }
-  get entries(): readonly MaskEntry[] { return this._entries }
-  get failure(): string | null { return this._failure }
+  get version(): number {
+    return this._version
+  }
+  get state(): FolderState {
+    return this._state
+  }
+  get name(): string {
+    return this.handle?.name ?? ''
+  }
+  get entries(): readonly MaskEntry[] {
+    return this._entries
+  }
+  get failure(): string | null {
+    return this._failure
+  }
 
   private changed(): void {
     this._version++
@@ -59,7 +69,7 @@ export class MaskFolder extends Subject<MaskFolder> {
     const kept = await keptHandle<FileSystemDirectoryHandle>(KEPT_KEY)
     if (kept === null || this.handle !== null) return
     this.handle = kept
-    await this.opened(await accessOf(kept) === 'granted')
+    await this.opened((await accessOf(kept)) === 'granted')
   }
 
   private async opened(granted: boolean): Promise<void> {
@@ -72,7 +82,7 @@ export class MaskFolder extends Subject<MaskFolder> {
     const before = this.handle
     const picked = await pickFolder(KEPT_KEY, before ?? undefined)
     if (picked === null) return 'closed'
-    const same = before !== null && await before.isSameEntry(picked)
+    const same = before !== null && (await before.isSameEntry(picked))
     this.handle = picked
     await keepHandle(KEPT_KEY, picked)
     await this.opened(true)
@@ -88,7 +98,7 @@ export class MaskFolder extends Subject<MaskFolder> {
   async ready(): Promise<boolean> {
     if (this._state === 'open') return true
     if (this._state === 'ask') return this.grant()
-    return await this.pick() !== 'closed'
+    return (await this.pick()) !== 'closed'
   }
 
   async list(): Promise<void> {
@@ -141,8 +151,9 @@ export class MaskFolder extends Subject<MaskFolder> {
     const base = (path.endsWith(MASK_SUFFIX) ? path.slice(0, -MASK_SUFFIX.length) : path).split('/').join(' - ')
     const now = new Date()
     const two = (n: number): string => String(n).padStart(2, '0')
-    const stamp = `${now.getFullYear()}-${two(now.getMonth() + 1)}-${two(now.getDate())}`
-      + ` ${two(now.getHours())}-${two(now.getMinutes())}-${two(now.getSeconds())}`
+    const stamp =
+      `${now.getFullYear()}-${two(now.getMonth() + 1)}-${two(now.getDate())}` +
+      ` ${two(now.getHours())}-${two(now.getMinutes())}-${two(now.getSeconds())}`
     const fileName = await freeFileName(folder, fileNameFrom(`${base} ${stamp}`, MASK_NAME_DEFAULT), MASK_SUFFIX)
     await writeText(await folder.getFileHandle(fileName, { create: true }), text)
   }
@@ -186,7 +197,8 @@ async function entryOf(file: FileSystemFileHandle, at: readonly string[]): Promi
 
 function rootValues(text: string): Record<string, string> {
   try {
-    const values: unknown = (JSON.parse(text) as { tree?: Record<string, { values?: unknown }> }).tree?.[ROOT_ID]?.values
+    const values: unknown = (JSON.parse(text) as { tree?: Record<string, { values?: unknown }> }).tree?.[ROOT_ID]
+      ?.values
     if (!values || typeof values !== 'object') return {}
     return Object.fromEntries(Object.entries(values).filter((e): e is [string, string] => typeof e[1] === 'string'))
   } catch {

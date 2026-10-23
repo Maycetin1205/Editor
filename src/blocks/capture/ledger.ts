@@ -57,13 +57,8 @@ export class CaptureLedger {
 
   constructor(host: CaptureHost) {
     this.host = host
-    const context = (): CaptureContext => captureContext(
-      host.block,
-      host.columns(),
-      host.sourceId(),
-      host.calculations(),
-      host.split(),
-    )
+    const context = (): CaptureContext =>
+      captureContext(host.block, host.columns(), host.sourceId(), host.calculations(), host.split())
     this.outbound = new Outbound(host.report)
     const status = this.outbound.shows.bind(this.outbound)
     this.row = new CaptureRow({ ...host, context })
@@ -71,51 +66,93 @@ export class CaptureLedger {
     this.booked = new BookedRows({ ...host, firstCell: () => this.row.firstCell }, status)
   }
 
-  get typingColumn(): number { return this.row.typingColumn }
+  get typingColumn(): number {
+    return this.row.typingColumn
+  }
 
-  get mark(): number { return this.row.mark }
+  get mark(): number {
+    return this.row.mark
+  }
 
-  get suggestions(): readonly Entry[] { return this.row.suggestions }
+  get suggestions(): readonly Entry[] {
+    return this.row.suggestions
+  }
 
-  get firstCell(): number { return this.row.firstCell }
+  get firstCell(): number {
+    return this.row.firstCell
+  }
 
-  get openCell(): number { return this.row.openCell }
+  get openCell(): number {
+    return this.row.openCell
+  }
 
-  get touched(): boolean { return this.row.touched }
+  get touched(): boolean {
+    return this.row.touched
+  }
 
-  rowView(): { value: string; automatic: boolean; held: boolean }[] { return this.row.rowView() }
+  rowView(): { value: string; automatic: boolean; held: boolean }[] {
+    return this.row.rowView()
+  }
 
-  isHeld(index: number): boolean { return this.row.isHeld(index) }
+  isHeld(index: number): boolean {
+    return this.row.isHeld(index)
+  }
 
-  waitingSources(): Map<number, string> { return this.row.waitingSources() }
+  waitingSources(): Map<number, string> {
+    return this.row.waitingSources()
+  }
 
-  type(index: number, text: string): void { this.row.type(index, text) }
+  type(index: number, text: string): void {
+    this.row.type(index, text)
+  }
 
-  leave(index: number): void { this.row.leave(index) }
+  leave(index: number): void {
+    this.row.leave(index)
+  }
 
-  empty(index: number): void { this.row.empty(index) }
+  empty(index: number): void {
+    this.row.empty(index)
+  }
 
-  setMark(mark: number): void { this.row.setMark(mark) }
+  setMark(mark: number): void {
+    this.row.setMark(mark)
+  }
 
-  decideKey(index: number, key: string): KeyAction { return this.row.decideKey(index, key) }
+  decideKey(index: number, key: string): KeyAction {
+    return this.row.decideKey(index, key)
+  }
 
-  neighbour(from: number, direction: 1 | -1): number { return this.row.neighbour(from, direction) }
+  neighbour(from: number, direction: 1 | -1): number {
+    return this.row.neighbour(from, direction)
+  }
 
-  focusCell(index: number): void { this.host.focusCell(index) }
+  focusCell(index: number): void {
+    this.host.focusCell(index)
+  }
 
-  lookupAt(index: number): LookupSpot | null { return this.row.lookupAt(index) }
+  lookupAt(index: number): LookupSpot | null {
+    return this.row.lookupAt(index)
+  }
 
-  adoptSuggestion(index: number, listIndex: number): void { this.row.adoptSuggestion(index, listIndex) }
+  adoptSuggestion(index: number, listIndex: number): void {
+    this.row.adoptSuggestion(index, listIndex)
+  }
 
-  adopt(index: number, record: unknown): void { this.row.adopt(index, record) }
+  adopt(index: number, record: unknown): void {
+    this.row.adopt(index, record)
+  }
 
   refresh(): void {
     if (this.row.refresh()) this.captured.captureRow()
   }
 
-  typedAt(index: number): string { return this.row.typedAt(index) }
+  typedAt(index: number): string {
+    return this.row.typedAt(index)
+  }
 
-  windowColumnsAt(index: number): Column[] { return this.row.windowColumnsAt(index) }
+  windowColumnsAt(index: number): Column[] {
+    return this.row.windowColumnsAt(index)
+  }
 
   jumpFrom(index: number): boolean {
     this.row.settle(index)
@@ -157,9 +194,13 @@ export class CaptureLedger {
     return true
   }
 
-  giveUp(): boolean { return this.captured.giveUp() }
+  giveUp(): boolean {
+    return this.captured.giveUp()
+  }
 
-  get split(): SplitState { return this.row.split }
+  get split(): SplitState {
+    return this.row.split
+  }
 
   splitAnchor(): number {
     const key = this.row.split.split?.amountColumn ?? ''
@@ -205,39 +246,73 @@ export class CaptureLedger {
     this.host.report()
   }
 
-  get capturedValues(): readonly (readonly string[])[] { return this.captured.values }
+  get capturedValues(): readonly (readonly string[])[] {
+    return this.captured.values
+  }
 
-  get correctionSlot(): number | null { return this.captured.correctionSlot }
+  get correctionSlot(): number | null {
+    return this.captured.correctionSlot
+  }
 
-  pendingMarks(): PendingRow[] { return this.captured.pendingMarks() }
+  pendingMarks(): PendingRow[] {
+    return this.captured.pendingMarks()
+  }
 
-  hasFailed(): boolean { return this.captured.hasFailed() }
+  hasFailed(): boolean {
+    return this.captured.hasFailed()
+  }
 
-  capturedStatus(index: number): RowState { return this.captured.statusAt(index) }
+  capturedStatus(index: number): RowState {
+    return this.captured.statusAt(index)
+  }
 
-  capturedKeyAt(index: number): string { return this.captured.keyAt(index) }
+  capturedKeyAt(index: number): string {
+    return this.captured.keyAt(index)
+  }
 
-  bringBackCaptured(index: number): void { this.captured.bringBack(index) }
+  bringBackCaptured(index: number): void {
+    this.captured.bringBack(index)
+  }
 
-  removeCaptured(index: number): void { this.captured.remove(index) }
+  removeCaptured(index: number): void {
+    this.captured.remove(index)
+  }
 
-  get changedRows(): readonly { record: string; values: readonly string[] }[] { return this.booked.changedRows }
+  get changedRows(): readonly { record: string; values: readonly string[] }[] {
+    return this.booked.changedRows
+  }
 
-  statusOf(rawIndex: number): RowState { return this.booked.statusOf(rawIndex) }
+  statusOf(rawIndex: number): RowState {
+    return this.booked.statusOf(rawIndex)
+  }
 
-  isChanged(rawIndex: number, columnsIndex: number): boolean { return this.booked.isChanged(rawIndex, columnsIndex) }
+  isChanged(rawIndex: number, columnsIndex: number): boolean {
+    return this.booked.isChanged(rawIndex, columnsIndex)
+  }
 
-  cellValue(rawIndex: number, columnsIndex: number): string { return this.booked.cellValue(rawIndex, columnsIndex) }
+  cellValue(rawIndex: number, columnsIndex: number): string {
+    return this.booked.cellValue(rawIndex, columnsIndex)
+  }
 
-  typeCell(rawIndex: number, columnsIndex: number, text: string): void { this.booked.typeCell(rawIndex, columnsIndex, text) }
+  typeCell(rawIndex: number, columnsIndex: number, text: string): void {
+    this.booked.typeCell(rawIndex, columnsIndex, text)
+  }
 
-  leaveCell(rawIndex: number, columnsIndex: number, text: string): void { this.booked.leaveCell(rawIndex, columnsIndex, text) }
+  leaveCell(rawIndex: number, columnsIndex: number, text: string): void {
+    this.booked.leaveCell(rawIndex, columnsIndex, text)
+  }
 
-  keyCell(rawIndex: number, columnsIndex: number, e: KeyboardEvent): void { this.booked.keyCell(rawIndex, columnsIndex, e) }
+  keyCell(rawIndex: number, columnsIndex: number, e: KeyboardEvent): void {
+    this.booked.keyCell(rawIndex, columnsIndex, e)
+  }
 
-  writes(kind: PendingKind, key: string): void { this.outbound.writes(kind, key) }
+  writes(kind: PendingKind, key: string): void {
+    this.outbound.writes(kind, key)
+  }
 
-  failed(kind: PendingKind, key: string): void { this.outbound.failed(kind, key) }
+  failed(kind: PendingKind, key: string): void {
+    this.outbound.failed(kind, key)
+  }
 
   runDone(kind: PendingKind, written: readonly WrittenRow[]): void {
     const keys = written.map((z) => z.key)

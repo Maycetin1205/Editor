@@ -27,7 +27,7 @@ export function PageBar() {
       aria-label="Seiten"
       data-ff-editor-helper
     >
-      {pages.map((p) => (
+      {pages.map((p) =>
         rename?.id === p.id ? (
           <Field
             key={p.id}
@@ -66,8 +66,8 @@ export function PageBar() {
               </Button>
             )}
           </Fragment>
-        )
-      ))}
+        ),
+      )}
       {pageTypes.map((def) => (
         <Button
           key={def.type}

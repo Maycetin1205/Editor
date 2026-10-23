@@ -42,9 +42,10 @@ function keepChoice(choice: ZoomChoice): void {
 }
 
 export function zoomStep(from: number, direction: 1 | -1): number {
-  const next = direction > 0
-    ? ZOOM_STEPS.find((step) => step > from + 0.005)
-    : [...ZOOM_STEPS].reverse().find((step) => step < from - 0.005)
+  const next =
+    direction > 0
+      ? ZOOM_STEPS.find((step) => step > from + 0.005)
+      : [...ZOOM_STEPS].reverse().find((step) => step < from - 0.005)
   return next ?? (direction > 0 ? ZOOM_MOST : ZOOM_LEAST)
 }
 
@@ -78,8 +79,11 @@ function steadyAnchor(box: HTMLElement, paper: HTMLElement, zoom: number, chosen
   const chosen = chosenId === null ? null : paper.querySelector(`[data-block-id="${CSS.escape(chosenId)}"]`)
   if (chosen) {
     const at = chosen.getBoundingClientRect()
-    const seen = at.right > view.left && at.left < view.left + box.clientWidth
-      && at.bottom > view.top && at.top < view.top + box.clientHeight
+    const seen =
+      at.right > view.left &&
+      at.left < view.left + box.clientWidth &&
+      at.bottom > view.top &&
+      at.top < view.top + box.clientHeight
     return {
       clientX: seen ? Math.max(at.left, view.left) : view.left + SHEET_MARGIN,
       clientY: seen ? Math.max(at.top, view.top) : view.top + SHEET_MARGIN,

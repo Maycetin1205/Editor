@@ -24,7 +24,8 @@ function nodesWhere(tree: MaskTree, fits: (node: BlockNode) => boolean): BlockNo
 
 export function valueSpotsInTree(tree: MaskTree): ValueSpotsTarget[] {
   return nodesWhere(tree, () => true).flatMap((node) =>
-    (capability(blockType(node.type), 'actionValue')?.spots ?? []).map((spot) => ({ node, spot })))
+    (capability(blockType(node.type), 'actionValue')?.spots ?? []).map((spot) => ({ node, spot })),
+  )
 }
 
 export function sourcesIdsInChainsOf(node: BlockNode): string[] {
@@ -67,9 +68,7 @@ export function bindableSpotsOf(node: BlockNode | undefined): readonly BindableS
 export function selectionSourceIdOf(node: BlockNode | undefined): string {
   if (!node) return ''
   const choice = capability(blockType(node.type), 'recordPick')
-  const prop = choice && propertyVisible(choice.when, node.values)
-    ? choice.sourceProp ?? SOURCE_PROP
-    : SOURCE_PROP
+  const prop = choice && propertyVisible(choice.when, node.values) ? (choice.sourceProp ?? SOURCE_PROP) : SOURCE_PROP
   const value = node.values[prop]
   return typeof value === 'string' ? value : ''
 }
@@ -103,10 +102,9 @@ export function carriesChanges(node: BlockNode): boolean {
   const flag = (binding.entryFlag ?? []).find((s) => s.key === key)
   if (!flag) return false
 
-  return binding.entries(node.values[binding.prop]).some((entry) =>
-    flagFor(binding, entry).includes(flag)
-      && flagOn(flag, entry)
-      && binding.fieldOf(entry) !== '')
+  return binding
+    .entries(node.values[binding.prop])
+    .some((entry) => flagFor(binding, entry).includes(flag) && flagOn(flag, entry) && binding.fieldOf(entry) !== '')
 }
 
 export function changeCarrierInTree(tree: MaskTree): BlockNode[] {

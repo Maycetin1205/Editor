@@ -1,12 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type DragEvent,
-  type ReactNode,
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type ReactNode } from 'react'
 import { fitZoom, FIT_LEAST, SE_FRAME_HEIGHT, SE_FRAME_WIDTH } from '../../core/block/frameFit'
 import { GRID, gridAreaStyle } from '../../core/block/grid'
 import { freeRowOn } from '../../core/block/gridArea'
@@ -36,19 +28,22 @@ export function Canvas() {
 
   const [dragOffset, setDragOffset] = useState<DragOffset | null>(null)
 
-  const dnd = useMemo<DndState>(() => ({
-    dragId,
-    dropTarget,
-    dragOffset,
-    setDragId,
-    setDropTarget,
-    setDragOffset,
-    reset: () => {
-      setDragId(null)
-      setDropTarget(null)
-      setDragOffset(null)
-    },
-  }), [dragId, dropTarget, dragOffset, setDropTarget])
+  const dnd = useMemo<DndState>(
+    () => ({
+      dragId,
+      dropTarget,
+      dragOffset,
+      setDragId,
+      setDropTarget,
+      setDragOffset,
+      reset: () => {
+        setDragId(null)
+        setDropTarget(null)
+        setDragOffset(null)
+      },
+    }),
+    [dragId, dropTarget, dragOffset, setDropTarget],
+  )
 
   const maskRows = mainPage ? freeRowOn(ed.tree, ed.rootId) : 0
 

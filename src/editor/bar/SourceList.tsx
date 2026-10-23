@@ -4,12 +4,7 @@ import { Plus, X } from '@/editor/icons/icon'
 import { Button } from '@/editor/widgets/Button'
 import type { BlockNode } from '../../core/block/tree'
 import { sourcesKey } from '../../core/data/dataSources'
-import {
-  EXTRA_SOURCES_PROP,
-  extraSourcesProperty,
-  type ExtraSource,
-  type KeyPair,
-} from '../../core/data/extraSources'
+import { EXTRA_SOURCES_PROP, extraSourcesProperty, type ExtraSource, type KeyPair } from '../../core/data/extraSources'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
 import { originPair, pairOrigin, type ValueOrigin } from '../../core/data/valueOrigin'
@@ -68,7 +63,9 @@ export function SourceList({ block, part = 'all' }: SourceListProps) {
 
   function originOf(index: number, pair: KeyPair): ValueOrigin | null {
     const partner = partnerOf(index)
-    return pairOrigin(pair, (value) => (partner === '' ? { kind: 'row', value } : { kind: 'helper', sourceId: partner, value }))
+    return pairOrigin(pair, (value) =>
+      partner === '' ? { kind: 'row', value } : { kind: 'helper', sourceId: partner, value },
+    )
   }
 
   const fromPartner = (p: KeyPair, fromField: string): KeyPair => ({ fromField, toField: p.toField })
@@ -90,35 +87,37 @@ export function SourceList({ block, part = 'all' }: SourceListProps) {
     const same = partner === partnerOf(index)
     change(index, {
       partnerId: partner,
-      pairs: pairs.map((p, x) => (x === at
-        ? next
-        : (same || p.from !== undefined ? p : fromPartner(p, '')))),
+      pairs: pairs.map((p, x) => (x === at ? next : same || p.from !== undefined ? p : fromPartner(p, ''))),
     })
   }
 
   const sourcesSelection = (value: string, title: string, onValue: (v: string) => void) => (
     <Labeled label={title}>
       <PickerControl
-      name={title}
-      className="w-full"
-      groups={[{
-        key: 'sources',
-        entries: options(value).map((s) => ({
-          value: s.id,
-          name: s.name,
-          badge: sourcesKey(s),
-        })),
-      }]}
-      value={value}
-      emptyText="Keine"
-      onChoose={onValue}
+        name={title}
+        className="w-full"
+        groups={[
+          {
+            key: 'sources',
+            entries: options(value).map((s) => ({
+              value: s.id,
+              name: s.name,
+              badge: sourcesKey(s),
+            })),
+          },
+        ]}
+        value={value}
+        emptyText="Keine"
+        onChoose={onValue}
       />
     </Labeled>
   )
 
   if (library.length === 0) {
     return (
-      <Button className="self-start" onClick={() => ed.showData(true)}>Daten öffnen</Button>
+      <Button className="self-start" onClick={() => ed.showData(true)}>
+        Daten öffnen
+      </Button>
     )
   }
 
@@ -126,58 +125,58 @@ export function SourceList({ block, part = 'all' }: SourceListProps) {
     <div className="flex flex-col gap-2">
       {part !== 'helpers' && sourcesSelection(first, 'Datenquelle', (v) => ed.updateProperty(block.id, SOURCE_PROP, v))}
 
-      {part !== 'own' && extra.map((q, i) => (
-        <div key={i} className="flex flex-col gap-[6px] border-b border-line-soft pb-[8px]">
-          <div className="flex items-center gap-1">
-            <PickerControl
-              name={`Hilfsquelle ${i + 1}`}
-              className="min-w-0 flex-1"
-              groups={[{
-                key: 'sources',
-                entries: options(q.sourceId).map((s) => ({
-                  value: s.id,
-                  name: s.name,
-                  badge: sourcesKey(s),
-                })),
-              }]}
-              value={q.sourceId}
-              emptyText="Keine"
-              onChoose={(v) => change(i, { sourceId: v })}
-            />
-            <Button
-              onlyIcon
-              aria-label={`Hilfsquelle ${i + 1} entfernen`}
-              onClick={() => setExtra(extra.filter((_, at) => at !== i))}
-            >
-              <X size={13} />
-            </Button>
-          </div>
+      {part !== 'own' &&
+        extra.map((q, i) => (
+          <div key={i} className="flex flex-col gap-[6px] border-b border-line-soft pb-[8px]">
+            <div className="flex items-center gap-1">
+              <PickerControl
+                name={`Hilfsquelle ${i + 1}`}
+                className="min-w-0 flex-1"
+                groups={[
+                  {
+                    key: 'sources',
+                    entries: options(q.sourceId).map((s) => ({
+                      value: s.id,
+                      name: s.name,
+                      badge: sourcesKey(s),
+                    })),
+                  },
+                ]}
+                value={q.sourceId}
+                emptyText="Keine"
+                onChoose={(v) => change(i, { sourceId: v })}
+              />
+              <Button
+                onlyIcon
+                aria-label={`Hilfsquelle ${i + 1} entfernen`}
+                onClick={() => setExtra(extra.filter((_, at) => at !== i))}
+              >
+                <X size={13} />
+              </Button>
+            </div>
 
-          {q.sourceId !== '' && (
-            <KeyPairRows
-              pairs={q.pairs}
-              left={(pair, at) => (
-                <OriginPicker
-                  name={`Wert ${at + 1}`}
-                  origin={originOf(i, pair)}
-                  reach={reachFor(i)}
-                  onChoose={(origin) => setOrigin(i, at, origin)}
-                />
-              )}
-              rightFields={fieldsOf(q.sourceId)}
-              rightName={(at) => `Feld ${at + 1} der Hilfsquelle ${i + 1}`}
-              removeName={(at) => `Zeile ${at + 1} entfernen`}
-              onChange={(keyPairs) => change(i, { pairs: keyPairs })}
-            />
-          )}
-        </div>
-      ))}
+            {q.sourceId !== '' && (
+              <KeyPairRows
+                pairs={q.pairs}
+                left={(pair, at) => (
+                  <OriginPicker
+                    name={`Wert ${at + 1}`}
+                    origin={originOf(i, pair)}
+                    reach={reachFor(i)}
+                    onChoose={(origin) => setOrigin(i, at, origin)}
+                  />
+                )}
+                rightFields={fieldsOf(q.sourceId)}
+                rightName={(at) => `Feld ${at + 1} der Hilfsquelle ${i + 1}`}
+                removeName={(at) => `Zeile ${at + 1} entfernen`}
+                onChange={(keyPairs) => change(i, { pairs: keyPairs })}
+              />
+            )}
+          </div>
+        ))}
 
       {part !== 'own' && first !== '' && (
-        <Button
-          className="self-start"
-          onClick={() => setExtra([...extra, { sourceId: '', partnerId: '', pairs: [] }])}
-        >
+        <Button className="self-start" onClick={() => setExtra([...extra, { sourceId: '', partnerId: '', pairs: [] }])}>
           <Plus size={13} /> Hilfsquelle
         </Button>
       )}

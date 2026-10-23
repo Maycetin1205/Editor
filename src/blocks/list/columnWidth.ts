@@ -15,11 +15,7 @@ export interface WidthsHost {
   discard: () => void
 }
 
-function spreadDrag(
-  leftStart: number,
-  rightStart: number,
-  wantedDx: number,
-): { left: number; right: number } {
+function spreadDrag(leftStart: number, rightStart: number, wantedDx: number): { left: number; right: number } {
   const bottomDx = COLUMNS_MIN_WIDTH - leftStart
   const topDx = rightStart - COLUMNS_MIN_WIDTH
   const dx = bottomDx > topDx ? 0 : Math.min(topDx, Math.max(bottomDx, Math.round(wantedDx)))
@@ -29,8 +25,9 @@ function spreadDrag(
 function startDrag(e: PointerEvent, index: number, host: WidthsHost): void {
   if (e.button !== 0) return
   const head = (e.currentTarget as HTMLElement | null)?.parentElement
-  const cells = [...(head?.children ?? [])]
-    .filter((k): k is HTMLElement => k instanceof HTMLElement && k.tagName === 'DIV')
+  const cells = [...(head?.children ?? [])].filter(
+    (k): k is HTMLElement => k instanceof HTMLElement && k.tagName === 'DIV',
+  )
   const left = cells[index]
   const right = cells[index + 1]
   if (!left || !right) return
@@ -54,11 +51,12 @@ function startDrag(e: PointerEvent, index: number, host: WidthsHost): void {
 
   const measured = cells.map((k) => Math.max(1, Math.round(k.getBoundingClientRect().width / zoom)))
 
-  const asPair = (): WidthsChange[] => measured.map((width, i) => {
-    if (i === index) return { index: i, width: last.left }
-    if (i === index + 1) return { index: i, width: last.right }
-    return { index: i, width }
-  })
+  const asPair = (): WidthsChange[] =>
+    measured.map((width, i) => {
+      if (i === index) return { index: i, width: last.left }
+      if (i === index + 1) return { index: i, width: last.right }
+      return { index: i, width }
+    })
 
   function onMove(ev: PointerEvent): void {
     last = spreadDrag(leftStart, rightStart, (ev.clientX - startX) / zoom)
@@ -88,18 +86,18 @@ function startDrag(e: PointerEvent, index: number, host: WidthsHost): void {
   window.addEventListener('blur', onCancel)
 }
 
-export function widthsHandles(
-  columnsCount: number,
-  host: WidthsHost,
-): TemplateResult[] {
-  return Array.from({ length: Math.max(0, columnsCount - 1) }, (_, i) => html`<span
+export function widthsHandles(columnsCount: number, host: WidthsHost): TemplateResult[] {
+  return Array.from(
+    { length: Math.max(0, columnsCount - 1) },
+    (_, i) => html`<span
     class="width-handle"
     role="presentation"
     style="grid-row: 1; grid-column: ${i + 1}"
     @pointerdown=${(e: PointerEvent) => startDrag(e, i, host)}
     @click=${(e: MouseEvent) => e.stopPropagation()}
     @dblclick=${(e: MouseEvent) => e.stopPropagation()}
-  ></span>`)
+  ></span>`,
+  )
 }
 
 interface WidthsStateHost {

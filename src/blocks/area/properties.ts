@@ -4,17 +4,20 @@ const FOLDS = { key: 'appearance', equals: 'fold' }
 const HEADED = { key: 'appearance', equals: 'headed', otherwise: FOLDS }
 
 export const areaProperties = {
-  appearance: choiceProperty([
-    { value: 'plain', name: 'Frei' },
-    { value: 'box', name: 'Kasten' },
-    { value: 'headed', name: 'Kopfzeile' },
-    { value: 'fold', name: 'Klappbar' },
-    { value: 'band', name: 'Band' },
-  ], {
-    default: 'box',
-    label: 'Form',
-    attribute: 'appearance',
-  }),
+  appearance: choiceProperty(
+    [
+      { value: 'plain', name: 'Frei' },
+      { value: 'box', name: 'Kasten' },
+      { value: 'headed', name: 'Kopfzeile' },
+      { value: 'fold', name: 'Klappbar' },
+      { value: 'band', name: 'Band' },
+    ],
+    {
+      default: 'box',
+      label: 'Form',
+      attribute: 'appearance',
+    },
+  ),
   heading: textProperty({
     default: 'Bereich',
     label: 'Titel',

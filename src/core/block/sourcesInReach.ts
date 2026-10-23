@@ -8,12 +8,7 @@ import { sourcesIdsInChainsOf, carriesOwnSource, maySelectionFollows } from './t
 import { calculationsProperty, fieldBindingsOf } from '../data/calculation'
 import type { DataSource } from '../data/dataSources'
 import { followsSelectionProperty } from '../data/selectionFollow'
-import {
-  completePairs,
-  extraSourcesProperty,
-  sourceUsable,
-  type SourceInReach,
-} from '../data/extraSources'
+import { completePairs, extraSourcesProperty, sourceUsable, type SourceInReach } from '../data/extraSources'
 
 export function sourcesCarrier(tree: MaskTree, id: string): BlockNode | undefined {
   let cur: BlockNode | undefined = tree[id]
@@ -42,11 +37,7 @@ export function ownSourcesOf(carrier: BlockNode, library: readonly DataSource[])
   return acc
 }
 
-export function sourcesInReach(
-  tree: MaskTree,
-  id: string,
-  library: readonly DataSource[],
-): SourceInReach[] {
+export function sourcesInReach(tree: MaskTree, id: string, library: readonly DataSource[]): SourceInReach[] {
   const carrier = sourcesCarrier(tree, id)
   return carrier ? ownSourcesOf(carrier, library) : []
 }
@@ -80,11 +71,7 @@ export function sourceIdsUsedBy(node: BlockNode): string[] {
   return ids
 }
 
-export function firstSourceInReach(
-  tree: MaskTree,
-  id: string,
-  library: readonly DataSource[],
-): DataSource | undefined {
+export function firstSourceInReach(tree: MaskTree, id: string, library: readonly DataSource[]): DataSource | undefined {
   const carrier = sourcesCarrier(tree, id)
   if (!carrier) return undefined
   const sourceId = declaredValue(carrier, SOURCE_PROPERTY)

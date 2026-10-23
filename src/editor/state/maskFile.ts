@@ -38,13 +38,9 @@ export interface MaskFileAt {
   modified: number
 }
 
-type UnpackResult =
-  | { ok: true; content: MaskContent; note: ReadNote }
-  | { ok: false; why: string }
+type UnpackResult = { ok: true; content: MaskContent; note: ReadNote } | { ok: false; why: string }
 
-type EntryRead =
-  | { ok: true; content: MaskContent; note: ReadNote; modified: number }
-  | { ok: false; why: string }
+type EntryRead = { ok: true; content: MaskContent; note: ReadNote; modified: number } | { ok: false; why: string }
 
 const NO_MASK = 'ist keine Maske des Editors.'
 
@@ -56,20 +52,22 @@ export function packMask(
 ): string {
   const used = collectDataSources(tree, sources)
   const kept = leftoverForFile(tree, sources, leftover)
-  return JSON.stringify(
-    {
-      kind: MASK_FILE_KIND,
-      fileVersion: MASK_FILE_VERSION,
-      schemaVersion: CURRENT_SCHEMA_VERSION,
-      editorVersion: EDITOR_VERSION,
-      tree: treeForFile(tree, leftover),
-      dataSources: used,
-      relation: collectRelation(tree, relation, used),
-      ...(kept ? { leftover: kept } : {}),
-    },
-    null,
-    2,
-  ) + '\n'
+  return (
+    JSON.stringify(
+      {
+        kind: MASK_FILE_KIND,
+        fileVersion: MASK_FILE_VERSION,
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+        editorVersion: EDITOR_VERSION,
+        tree: treeForFile(tree, leftover),
+        dataSources: used,
+        relation: collectRelation(tree, relation, used),
+        ...(kept ? { leftover: kept } : {}),
+      },
+      null,
+      2,
+    ) + '\n'
+  )
 }
 
 function maskFileName(): string {
@@ -92,8 +90,9 @@ async function saveMask(editor: EditorStore): Promise<void> {
   if (disk.attached && disk.locked) {
     editor.showNotice({
       title: 'Nur zum Ansehen geöffnet',
-      lead: `„${disk.name}“ ist zum Schutz nur zum Ansehen geöffnet. „Trotzdem speichern“ schreibt die Maske ab jetzt `
-        + 'in die Datei; was dieser Editor nicht lesen kann, bleibt darin erhalten. Vorher legt er eine Sicherung an.',
+      lead:
+        `„${disk.name}“ ist zum Schutz nur zum Ansehen geöffnet. „Trotzdem speichern“ schreibt die Maske ab jetzt ` +
+        'in die Datei; was dieser Editor nicht lesen kann, bleibt darin erhalten. Vorher legt er eine Sicherung an.',
       action: {
         label: 'Trotzdem speichern',
         run: () => {
@@ -111,7 +110,10 @@ async function saveMask(editor: EditorStore): Promise<void> {
   try {
     if (!disk.attached && !(await editor.folderReady())) return
   } catch (error) {
-    editor.showNotice({ title: 'Nicht gespeichert', lead: `Der Ordner der Masken ließ sich nicht öffnen: ${reasonOf(error)}.` })
+    editor.showNotice({
+      title: 'Nicht gespeichert',
+      lead: `Der Ordner der Masken ließ sich nicht öffnen: ${reasonOf(error)}.`,
+    })
     return
   }
   const text = packed(editor)
@@ -124,10 +126,11 @@ async function saveMask(editor: EditorStore): Promise<void> {
   } catch (error) {
     editor.showNotice({
       title: 'Nicht gespeichert',
-      lead: (disk.attached
-        ? `„${disk.name}“ ließ sich nicht schreiben: ${reasonOf(error)}.`
-        : `Im Ordner „${editor.maskFolder.name}“ ließ sich keine Datei anlegen: ${reasonOf(error)}.`)
-        + ' Die Maske bleibt im Browser; „Speichern“ versucht es noch einmal.',
+      lead:
+        (disk.attached
+          ? `„${disk.name}“ ließ sich nicht schreiben: ${reasonOf(error)}.`
+          : `Im Ordner „${editor.maskFolder.name}“ ließ sich keine Datei anlegen: ${reasonOf(error)}.`) +
+        ' Die Maske bleibt im Browser; „Speichern“ versucht es noch einmal.',
     })
     return
   }
@@ -190,13 +193,15 @@ export function readNotice(editor: EditorStore, name: string, note: ReadNote, lo
       : `„${name}“ wurde mit einer neueren Fassung des Editors gespeichert (${note.newer}, dieser hat ${EDITOR_VERSION}).`,
     note.lines.length === 0
       ? ''
-      : `In „${name}“ kennt dieser Editor einige Teile nicht. Sie bleiben unverändert in der Datei, `
-        + 'erscheinen hier aber nicht und kommen nicht in den Export.',
+      : `In „${name}“ kennt dieser Editor einige Teile nicht. Sie bleiben unverändert in der Datei, ` +
+        'erscheinen hier aber nicht und kommen nicht in den Export.',
     locked
-      ? 'Damit nichts verloren geht, ist die Maske nur zum Ansehen geöffnet: Änderungen kommen nicht in die Datei. '
-        + '„Trotzdem bearbeiten“ hebt das auf.'
+      ? 'Damit nichts verloren geht, ist die Maske nur zum Ansehen geöffnet: Änderungen kommen nicht in die Datei. ' +
+        '„Trotzdem bearbeiten“ hebt das auf.'
       : '',
-  ].filter((part) => part !== '').join(' ')
+  ]
+    .filter((part) => part !== '')
+    .join(' ')
   return {
     title: note.newer !== null ? 'Maske aus einer neueren Fassung' : 'Nicht alles gelesen',
     lead,
@@ -261,13 +266,20 @@ function unpack(text: string): UnpackResult {
   }
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { ok: false, why: NO_MASK }
   if ((raw as Record<string, unknown>).kind === LIBRARY_FILE_KIND) {
-    return { ok: false, why: 'ist eine Kundendatei mit Quellen und Relationen, keine Maske. '
-      + 'Sie wird im Fenster „Daten“ mit „Bibliothek laden“ geladen.' }
+    return {
+      ok: false,
+      why:
+        'ist eine Kundendatei mit Quellen und Relationen, keine Maske. ' +
+        'Sie wird im Fenster „Daten“ mit „Bibliothek laden“ geladen.',
+    }
   }
   const file = raw as Record<string, unknown>
   const result = readMask(file)
   if (!result.ok) {
-    return { ok: false, why: result.why === 'lift' ? whyNotLifted(file.schemaVersion) : 'ist beschädigt: der Anfang der Maske fehlt.' }
+    return {
+      ok: false,
+      why: result.why === 'lift' ? whyNotLifted(file.schemaVersion) : 'ist beschädigt: der Anfang der Maske fehlt.',
+    }
   }
   const { read } = result
   return {
@@ -280,8 +292,10 @@ function unpack(text: string): UnpackResult {
 function whyNotLifted(step: unknown): string {
   if (typeof step !== 'number') return NO_MASK
   if (step > CURRENT_SCHEMA_VERSION) {
-    return `kommt aus einer neueren Fassung des Editors (Stufe ${step}, dieser kennt bis ${CURRENT_SCHEMA_VERSION}). `
-      + 'Erst den Editor auf den neuesten Stand bringen.'
+    return (
+      `kommt aus einer neueren Fassung des Editors (Stufe ${step}, dieser kennt bis ${CURRENT_SCHEMA_VERSION}). ` +
+      'Erst den Editor auf den neuesten Stand bringen.'
+    )
   }
   return `kommt aus einer zu alten Fassung des Editors (Stufe ${step}), die dieser nicht mehr liest.`
 }

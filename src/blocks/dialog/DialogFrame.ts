@@ -149,10 +149,12 @@ export class DialogFrame extends LitElement {
   }
 
   close(): void {
-    this.dispatchEvent(new CustomEvent(DIALOG_CLOSE_EVENT, {
-      bubbles: true,
-      composed: true,
-    }))
+    this.dispatchEvent(
+      new CustomEvent(DIALOG_CLOSE_EVENT, {
+        bubbles: true,
+        composed: true,
+      }),
+    )
   }
 
   override connectedCallback(): void {

@@ -98,7 +98,7 @@ export function cardOf<P extends string>(
       ?data-ff-bound=${isBound}
       @click=${report}
       @dblclick=${report}
-    >${isBound ? el.spotTexts[prop] ?? '' : spots.find((s) => s.prop === prop)?.name ?? ''}</span>`
+    >${isBound ? (el.spotTexts[prop] ?? '') : (spots.find((s) => s.prop === prop)?.name ?? '')}</span>`
   }
   const avatar = (): TemplateResult | typeof nothing => {
     if (!shows('avatar')) return nothing

@@ -11,8 +11,7 @@ export interface ChoiceOption {
   disabled?: boolean
 }
 
-interface ChoiceProps
-  extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'value' | 'onChange' | 'children'> {
+interface ChoiceProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'value' | 'onChange' | 'children'> {
   options: readonly ChoiceOption[]
   value: string
 
@@ -42,11 +41,7 @@ export const Choice = forwardRef<HTMLSelectElement, ChoiceProps>(
             </option>
           ))}
         </select>
-        <ChevronDown
-          size={13}
-          aria-hidden
-          className="pointer-events-none absolute right-[9px] text-muted"
-        />
+        <ChevronDown size={13} aria-hidden className="pointer-events-none absolute right-[9px] text-muted" />
       </span>
     )
   },

@@ -7,13 +7,13 @@ import { PickerControl } from '../controls/PickerControl'
 import { encodeOrigin } from '../origin/origins'
 import { termOrigin, unitGroups, UNITS, type Names } from './calculationWords'
 
-const PAIR_COLUMNS = [
-  { name: 'Einheit 1' },
-  { name: 'Einheit 2' },
-  { name: 'Faktor', width: 110, right: true },
-]
+const PAIR_COLUMNS = [{ name: 'Einheit 1' }, { name: 'Einheit 2' }, { name: 'Faktor', width: 110, right: true }]
 
-export function UnitsPane({ term, names, onChange }: {
+export function UnitsPane({
+  term,
+  names,
+  onChange,
+}: {
   term: UnitsTerm
   names: Names
   onChange: (term: UnitsTerm) => void

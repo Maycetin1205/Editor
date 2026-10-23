@@ -23,8 +23,7 @@ export function freePagesName(assign: readonly string[], base: string): string {
 }
 
 export function activePagesRoot(tree: MaskTree, activePageId: string): string {
-  return activePageId === ROOT_ID || (tree[activePageId] && isPagesBlock(tree[activePageId]))
-    ? activePageId : ROOT_ID
+  return activePageId === ROOT_ID || (tree[activePageId] && isPagesBlock(tree[activePageId])) ? activePageId : ROOT_ID
 }
 
 export function pageOf(tree: MaskTree, id: string): string {
@@ -42,23 +41,18 @@ export function pagesOfMask(tree: MaskTree): PagesEntry[] {
     .filter((n): n is BlockNode => Boolean(n) && isPagesBlock(n))
     .map((n) => ({
       id: n.id,
-      name: typeof n.values.name === 'string' && n.values.name !== ''
-        ? n.values.name
-        : blockType(n.type)?.name ?? 'Seite',
+      name:
+        typeof n.values.name === 'string' && n.values.name !== ''
+          ? n.values.name
+          : (blockType(n.type)?.name ?? 'Seite'),
       isMainPage: false,
     }))
   return [{ id: ROOT_ID, name: 'Hauptseite', isMainPage: true }, ...pages]
 }
 
-function uniquePageName(
-  pages: readonly PagesEntry[],
-  ownId: string,
-  wanted: string,
-): string {
+function uniquePageName(pages: readonly PagesEntry[], ownId: string, wanted: string): string {
   const key = (s: string): string => s.trim().toLocaleLowerCase('de-DE')
-  const taken = new Set(
-    pages.filter((s) => s.id !== ownId).map((s) => key(s.name)),
-  )
+  const taken = new Set(pages.filter((s) => s.id !== ownId).map((s) => key(s.name)))
   const base = wanted.trim()
   let name = base
   for (let n = 2; taken.has(key(name)); n++) name = `${base} ${n}`
@@ -80,7 +74,5 @@ export function writeValue(
 export function childrenInFlow(tree: MaskTree, parentId: string): BlockNode[] {
   const parent = tree[parentId]
   if (!parent) return []
-  return parent.childIds
-    .map((id) => tree[id])
-    .filter((n): n is BlockNode => Boolean(n) && !isPagesBlock(n))
+  return parent.childIds.map((id) => tree[id]).filter((n): n is BlockNode => Boolean(n) && !isPagesBlock(n))
 }

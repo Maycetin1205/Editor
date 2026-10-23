@@ -107,7 +107,9 @@ function sendChange(el: FormField): void {
 function wire(el: FormField): void {
   if (wired.has(el)) return
   wired.add(el)
-  el.addEventListener('input', () => { writeLocal(el) })
+  el.addEventListener('input', () => {
+    writeLocal(el)
+  })
   el.addEventListener('change', () => {
     writeLocal(el)
     sendChange(el)

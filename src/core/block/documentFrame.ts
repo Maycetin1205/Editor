@@ -5,9 +5,7 @@ export const DOCUMENT_FRAME_PROP = 'documentFrame'
 export const FRAME_SPOTS = 5
 
 function frameNumber(raw: unknown): string {
-  const text = typeof raw === 'string'
-    ? raw.trim()
-    : typeof raw === 'number' && Number.isFinite(raw) ? String(raw) : ''
+  const text = typeof raw === 'string' ? raw.trim() : typeof raw === 'number' && Number.isFinite(raw) ? String(raw) : ''
   if (!/^\d{1,5}$/.test(text) || Number(text) === 0) return ''
   return text.padStart(FRAME_SPOTS, '0')
 }

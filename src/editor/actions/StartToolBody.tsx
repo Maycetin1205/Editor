@@ -6,7 +6,14 @@ import { Places } from './Places'
 import type { StepBodyProps } from './stepPiece'
 
 function toolTemplate(step: StartToolStep): RelationTemplate {
-  return { id: 'tool', name: 'Tool', verb: 'PUT_RELATION', nr: step.toolNumber, parameter: [], extraParameterAllowed: true }
+  return {
+    id: 'tool',
+    name: 'Tool',
+    verb: 'PUT_RELATION',
+    nr: step.toolNumber,
+    parameter: [],
+    extraParameterAllowed: true,
+  }
 }
 
 export function StartToolBody({ step, reach, onChange }: StepBodyProps) {
@@ -33,8 +40,8 @@ export function StartToolBody({ step, reach, onChange }: StepBodyProps) {
         onChange={(filled) => onChange({ ...step, parameter: [...filled.extraParameter] })}
       />
       <p className="px-[12px] py-[8px] text-muted">
-        SoftEngine startet das Tool mit dieser Nummer; die Stellen gehen als Parameter mit.
-        Eine Antwort kommt nicht zurück. Die Nummern stehen in SoftEngine unter Werkzeuge.
+        SoftEngine startet das Tool mit dieser Nummer; die Stellen gehen als Parameter mit. Eine Antwort kommt nicht
+        zurück. Die Nummern stehen in SoftEngine unter Werkzeuge.
       </p>
     </div>
   )

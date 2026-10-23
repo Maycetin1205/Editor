@@ -5,29 +5,17 @@ import { sourcePreset } from '../../core/data/presets/presets'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
 import { SourceBelow, SourceSettings } from './SourceSettings'
-import {
-  codeReads,
-  fieldFrom,
-  lengthReads,
-  nameTaken,
-  newSource,
-  tableKind,
-  tableText,
-  withEntry,
-} from './sourceEdit'
+import { codeReads, fieldFrom, lengthReads, nameTaken, newSource, tableKind, tableText, withEntry } from './sourceEdit'
 
-const SOURCE_COLUMNS = [
-  { name: 'Name' },
-  { name: 'Tabelle', width: 110, mono: true },
-]
+const SOURCE_COLUMNS = [{ name: 'Name' }, { name: 'Tabelle', width: 110, mono: true }]
 
 const at = (v: readonly string[], k: number): string => v[k] ?? ''
 
 export function SourcesTab() {
   const store = useDataSources()
   const ed = useEditor()
-  const [markedId, setMarkedId] = useState<string | null>(
-    () => (ed.selectedId === null ? null : ed.dataSourceFor(ed.selectedId)?.id ?? null),
+  const [markedId, setMarkedId] = useState<string | null>(() =>
+    ed.selectedId === null ? null : (ed.dataSourceFor(ed.selectedId)?.id ?? null),
   )
   const marked = store.list.find((s) => s.id === markedId) ?? store.list[0]
   const taken = (name: string, except?: string) => nameTaken(store.list, name, except)
@@ -65,9 +53,7 @@ export function SourcesTab() {
         </Grid>
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
-        {marked
-          ? <SourcePart key={marked.id} source={marked} />
-          : <Strip>{null}</Strip>}
+        {marked ? <SourcePart key={marked.id} source={marked} /> : <Strip>{null}</Strip>}
       </div>
     </>
   )
@@ -99,7 +85,9 @@ function SourcePart({ source }: { source: DataSource }) {
             cells={[f.code, f.name, f.length === undefined ? '' : String(f.length)]}
             marked={markedAt === i}
             tips
-            valid={(v) => codeReads(at(v, 0)) && at(v, 1).trim() !== '' && lengthReads(at(v, 2)) && codeFree(at(v, 0), i)}
+            valid={(v) =>
+              codeReads(at(v, 0)) && at(v, 1).trim() !== '' && lengthReads(at(v, 2)) && codeFree(at(v, 0), i)
+            }
             onMark={() => setMarkedAt(i)}
             onSave={(v) => setFields(fields.map((o, k) => (k === i ? fieldFrom(at(v, 0), at(v, 1), at(v, 2)) : o)))}
             onRemove={() => {
@@ -110,9 +98,12 @@ function SourcePart({ source }: { source: DataSource }) {
         ))}
         <GridNewLine
           names={['Neues Feld, Code', 'Neues Feld, Name', 'Neues Feld, Max. Länge']}
-          valid={(v) => (at(v, 0).trim() === '' || (codeReads(at(v, 0)) && codeFree(at(v, 0)))) && lengthReads(at(v, 2))}
+          valid={(v) =>
+            (at(v, 0).trim() === '' || (codeReads(at(v, 0)) && codeFree(at(v, 0)))) && lengthReads(at(v, 2))
+          }
           onAdd={(v) => {
-            if (!codeReads(at(v, 0)) || at(v, 1).trim() === '' || !lengthReads(at(v, 2)) || !codeFree(at(v, 0))) return false
+            if (!codeReads(at(v, 0)) || at(v, 1).trim() === '' || !lengthReads(at(v, 2)) || !codeFree(at(v, 0)))
+              return false
             setFields([...fields, fieldFrom(at(v, 0), at(v, 1), at(v, 2))])
             return true
           }}

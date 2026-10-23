@@ -26,7 +26,9 @@ export const push: DeliveryAdapter<'push'> = {
   fetchOn: 'never',
   export: (delivery, source, context) => ({
     ...(delivery.path === 'Var' ? { openRecord: true } : {}),
-    fields: withoutTablePrefix(context.orderedFields(source), source.tableId).split(',').filter((code) => code !== ''),
+    fields: withoutTablePrefix(context.orderedFields(source), source.tableId)
+      .split(',')
+      .filter((code) => code !== ''),
   }),
   readExported: (entry) => ({ kind: 'push', openRecord: entry.openRecord === true }),
   relationIds: () => [],

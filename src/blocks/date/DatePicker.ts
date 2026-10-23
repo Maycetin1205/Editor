@@ -51,7 +51,9 @@ export class DatePicker extends BlockElement {
     this.setDay(this.day)
 
     this.unlistenDay?.()
-    this.unlistenDay = onChosenDay(() => { this.day = chosenDay() })
+    this.unlistenDay = onChosenDay(() => {
+      this.day = chosenDay()
+    })
   }
 
   override disconnectedCallback(): void {

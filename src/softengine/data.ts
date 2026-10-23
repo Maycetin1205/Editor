@@ -19,7 +19,9 @@ export function sourceFromList(list: unknown, id: string): RuntimeSource | undef
       name: entry.name,
       tableId: entry.tableId,
       recordField: typeof entry.recordField === 'string' ? entry.recordField : '',
-      fields: Array.isArray(entry.fields) ? entry.fields.filter((code): code is string => typeof code === 'string') : [],
+      fields: Array.isArray(entry.fields)
+        ? entry.fields.filter((code): code is string => typeof code === 'string')
+        : [],
       delivery: runtimeDeliveryFrom(entry),
     }
   }
@@ -29,7 +31,11 @@ export function sourceFromList(list: unknown, id: string): RuntimeSource | undef
 export function rowsFromQueryAnswer(raw: unknown): unknown[] | undefined {
   let answer = raw
   if (typeof answer === 'string') {
-    try { answer = JSON.parse(answer) } catch { return undefined }
+    try {
+      answer = JSON.parse(answer)
+    } catch {
+      return undefined
+    }
   }
   if (!isObject(answer) || Array.isArray(answer)) return undefined
 
@@ -68,8 +74,20 @@ function asTrimmedString(v: unknown): string {
 
 const ENTITY = /&(#x[0-9a-f]+|#[0-9]+|[a-z]+);/gi
 const NAMED: Readonly<Record<string, string>> = {
-  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
-  auml: 'ä', ouml: 'ö', uuml: 'ü', Auml: 'Ä', Ouml: 'Ö', Uuml: 'Ü', szlig: 'ß', euro: '€',
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+  auml: 'ä',
+  ouml: 'ö',
+  uuml: 'ü',
+  Auml: 'Ä',
+  Ouml: 'Ö',
+  Uuml: 'Ü',
+  szlig: 'ß',
+  euro: '€',
 }
 
 function decodeEntities(s: string): string {
@@ -150,8 +168,14 @@ function jsonOrNothing(text: string): unknown {
 function rowsOfEntry(entry: unknown): unknown[] {
   if (!isObject(entry)) return Array.isArray(entry) ? entry : []
   const candidates = [
-    entry.Zeilen, entry.zeilen, entry.Saetze, entry.saetze,
-    entry.Rows, entry.rows, entry.Daten, entry.daten,
+    entry.Zeilen,
+    entry.zeilen,
+    entry.Saetze,
+    entry.saetze,
+    entry.Rows,
+    entry.rows,
+    entry.Daten,
+    entry.daten,
   ]
   for (const c of candidates) {
     if (Array.isArray(c)) return c
@@ -211,8 +235,10 @@ function loopRows(data: JsonObject, alias: string): unknown[] {
   } else if (isObject(sfl)) {
     for (const key of Object.keys(sfl)) {
       const entry = sfl[key]
-      if (sameAlias(key, alias)
-        || (isObject(entry) && (sameAlias(entry.ALIAS, alias) || sameAlias(entry.alias, alias)))) {
+      if (
+        sameAlias(key, alias) ||
+        (isObject(entry) && (sameAlias(entry.ALIAS, alias) || sameAlias(entry.alias, alias)))
+      ) {
         const rows = rowsOfEntry(entry)
         if (rows.length > 0) return rows
       }
@@ -284,7 +310,11 @@ export function rowsOfSource(source: RuntimeSource, seData: unknown): unknown[] 
 export function dataFromContent(raw: unknown): JsonObject | undefined {
   let data = raw
   if (typeof data === 'string') {
-    try { data = JSON.parse(data) } catch { return undefined }
+    try {
+      data = JSON.parse(data)
+    } catch {
+      return undefined
+    }
   }
   if (!isObject(data) || !isObject(data.Daten)) return undefined
   const block = data.Daten
@@ -297,7 +327,11 @@ export function dataFromContent(raw: unknown): JsonObject | undefined {
 export function messagesContent(eventData: unknown): unknown {
   let d = eventData
   if (typeof d === 'string') {
-    try { d = JSON.parse(d) } catch { return undefined }
+    try {
+      d = JSON.parse(d)
+    } catch {
+      return undefined
+    }
   }
   if (!isObject(d) || !isObject(d.MSG)) return undefined
   return d.MSG.DATA

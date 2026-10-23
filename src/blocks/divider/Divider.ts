@@ -19,9 +19,9 @@ export class Divider extends BlockElement {
     const direction = this.direction === 'vertical' ? 'vertical' : 'horizontal'
     const word = this.word.trim()
     return html`<div class="divider ${direction}" role="separator" aria-orientation=${direction}><div
-      class="line"></div>${word === ''
-        ? nothing
-        : html`<span class="word">${word}</span><div class="line"></div>`}</div>`
+      class="line"></div>${
+        word === '' ? nothing : html`<span class="word">${word}</span><div class="line"></div>`
+      }</div>`
   }
 }
 

@@ -7,15 +7,7 @@ import { rowsIndexOf } from '../../list'
 import { cellsFields, enterCell } from '../cells'
 import type { CaptureColumn } from '../column'
 import type { RowState, RowsStatus } from './outbound'
-import {
-  cellIn,
-  dropCell,
-  dropRecord,
-  hasRecordIn,
-  recordsIn,
-  setCell,
-  type Cells,
-} from './recordCells'
+import { cellIn, dropCell, dropRecord, hasRecordIn, recordsIn, setCell, type Cells } from './recordCells'
 
 const BOOKED_ROWS = '.body > .row:not(.capture)'
 
@@ -64,8 +56,9 @@ export class BookedRows {
   }
 
   get changedRows(): readonly { record: string; values: readonly string[] }[] {
-    return this.rowsOf(recordsIn(this.changes)
-      .filter((record) => this.status('changed', record, 'changed').status !== 'writes'))
+    return this.rowsOf(
+      recordsIn(this.changes).filter((record) => this.status('changed', record, 'changed').status !== 'writes'),
+    )
   }
 
   private rowsOf(records: readonly string[]): { record: string; values: readonly string[] }[] {
@@ -112,8 +105,9 @@ export class BookedRows {
 
   isChanged(rawIndex: number, columnsIndex: number): boolean {
     const record = this.recordOf(rawIndex)
-    return cellIn(this.changes, record, columnsIndex) !== undefined
-      || cellIn(this.sent, record, columnsIndex) !== undefined
+    return (
+      cellIn(this.changes, record, columnsIndex) !== undefined || cellIn(this.sent, record, columnsIndex) !== undefined
+    )
   }
 
   cellValue(rawIndex: number, columnsIndex: number): string {
@@ -128,11 +122,7 @@ export class BookedRows {
     return this.host.dataRows()[rawIndex]?.[columnsIndex] ?? ''
   }
 
-  private computedCell(
-    rawIndex: number,
-    record: string,
-    columnsIndex: number,
-  ): string | null {
+  private computedCell(rawIndex: number, record: string, columnsIndex: number): string | null {
     if (this.changes.size === 0 && this.sent.size === 0) return null
     if (!hasRecordIn(this.changes, record) && !hasRecordIn(this.sent, record)) return null
     const calculations = this.host.calculations()
@@ -143,7 +133,7 @@ export class BookedRows {
     const row = this.host.dataRows()[rawIndex]
     const computed = rowValues(calculations, slotOf, (slot) => {
       const own = cellIn(this.changes, record, slot) ?? cellIn(this.sent, record, slot)
-      return own ?? (leadSlots.has(slot) ? '' : row?.[slot] ?? '')
+      return own ?? (leadSlots.has(slot) ? '' : (row?.[slot] ?? ''))
     })
     return computed.get(columnsIndex) ?? null
   }
@@ -164,9 +154,10 @@ export class BookedRows {
       return
     }
     const original = this.host.dataRows()[rawIndex]?.[columnsIndex] ?? ''
-    const changed = text === original
-      ? dropCell(this.changes, record, columnsIndex)
-      : setCell(this.changes, record, columnsIndex, text)
+    const changed =
+      text === original
+        ? dropCell(this.changes, record, columnsIndex)
+        : setCell(this.changes, record, columnsIndex, text)
     if (changed) this.host.report()
   }
 
@@ -200,12 +191,7 @@ export class BookedRows {
     this.cellNeighbour(arrow ? stripeOf(this.host.layout(), columnsIndex) : [columnsIndex], field, step, e.key)
   }
 
-  private cellNeighbour(
-    slots: readonly number[],
-    of: HTMLInputElement,
-    step: number,
-    key: string,
-  ): void {
+  private cellNeighbour(slots: readonly number[], of: HTMLInputElement, step: number, key: string): void {
     const fields = cellsFields(this.host.block.shadowRoot, BOOKED_ROWS, slots)
     const now = fields.indexOf(of)
     if (now < 0) return
@@ -235,9 +221,7 @@ export class BookedRows {
       this.host.columns().forEach((_, column) => {
         const value = cellIn(this.changes, record, column)
         if (value === undefined) return
-        const before = rawIndex === undefined
-          ? ''
-          : this.host.dataRows()[rawIndex]?.[column] ?? ''
+        const before = rawIndex === undefined ? '' : (this.host.dataRows()[rawIndex]?.[column] ?? '')
 
         if (valueEquals(value, before)) return
         setCell(this.sent, record, column, value)

@@ -1,9 +1,4 @@
-import {
-  listForExport,
-  withEntryValue,
-  type EntrySwitch,
-  type ListBinding,
-} from '../../core/block/listBinding'
+import { listForExport, withEntryValue, type EntrySwitch, type ListBinding } from '../../core/block/listBinding'
 import { entryEventKeys, type EntryEvents } from '../../core/block/capability'
 import { listProperty, type Property } from '../../core/block/property'
 import { isUnread } from '../../core/unread'
@@ -104,9 +99,8 @@ export const LINES_BINDING: ListBinding<ValueLine, 'lines'> = {
   withoutEditorMarks: (line) => withEntryValue(line, 'labelTyped', undefined),
 
   entryAdd: (lines) => [...lines, newLine(lines.length)],
-  entryRemove: (lines, index) => (lines.length <= 1 || index < 0 || index >= lines.length
-    ? null
-    : lines.filter((_, i) => i !== index)),
+  entryRemove: (lines, index) =>
+    lines.length <= 1 || index < 0 || index >= lines.length ? null : lines.filter((_, i) => i !== index),
   entryMove: withMovedLine,
 
   entryHeads: true,
@@ -119,10 +113,14 @@ export const LINES_BINDING: ListBinding<ValueLine, 'lines'> = {
 const NEW_LINES = 3
 
 export function linesProperty(): Property<ValueLine[]> {
-  return listProperty<ValueLine[]>(coerceLines, {
-    default: Array.from({ length: NEW_LINES }, (_, i) => newLine(i)),
-    label: 'Zeilen',
-    place: 'block',
-    attribute: 'lines',
-  }, (value) => listForExport(value, LINES_BINDING))
+  return listProperty<ValueLine[]>(
+    coerceLines,
+    {
+      default: Array.from({ length: NEW_LINES }, (_, i) => newLine(i)),
+      label: 'Zeilen',
+      place: 'block',
+      attribute: 'lines',
+    },
+    (value) => listForExport(value, LINES_BINDING),
+  )
 }

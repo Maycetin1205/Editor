@@ -1,13 +1,7 @@
 import { html, type ReactiveController, type TemplateResult } from 'lit'
 import { sendSpotClick, type BlockElement } from '../base/BlockElement'
 import { giverIdOf, clearSelection, setSelection, rowsToSelection } from '../../runtime/selection'
-import {
-  automaticColumns,
-  fetchEntries,
-  openLookup,
-  closeLookupFor,
-  type Entry,
-} from './lookup'
+import { automaticColumns, fetchEntries, openLookup, closeLookupFor, type Entry } from './lookup'
 import type { Column } from '../parts/column'
 import { keyOf, SuggestionState } from './suggestionState'
 import { orderedSuggestions } from './suggestionList'
@@ -16,10 +10,7 @@ import { rowFits } from '../parts/cellSearch'
 import { maskState } from '../../runtime/maskState'
 import { icon } from '../parts/icons'
 
-function findOnlyHit(
-  entries: readonly Entry[],
-  fieldEmpty: boolean,
-): Entry | null {
+function findOnlyHit(entries: readonly Entry[], fieldEmpty: boolean): Entry | null {
   return fieldEmpty && entries.length === 1 ? entries[0] : null
 }
 
@@ -88,38 +79,41 @@ export class LookupControl implements ReactiveController {
   }
 
   render(inputClass: string, title: string): TemplateResult {
-    return html`${inputSpotTpl({
-      value: this.inField,
-      title,
+    return html`${inputSpotTpl(
+      {
+        value: this.inField,
+        title,
 
-      placeholder: '',
-      inputClass,
-      holderClass: 'lookup',
-      suggestions: this.list.hit,
-      columns: this.windowColumns(),
-      typed: this.typed ?? '',
-      mark: this.list.mark,
-      beside: html`<button
+        placeholder: '',
+        inputClass,
+        holderClass: 'lookup',
+        suggestions: this.list.hit,
+        columns: this.windowColumns(),
+        typed: this.typed ?? '',
+        mark: this.list.mark,
+        beside: html`<button
         class="magnifier"
         type="button"
         aria-label="Nachschlagen"
         title="Nachschlagen"
         @click=${(e: MouseEvent) => this.onMagnifier(e)}
       >${icon('magnifier')}</button>`,
-    }, {
-      typing: (value) => {
-        this.typed = value
-        this.list.restart()
-        this.host.report()
       },
-      key: (e) => this.key(e),
-      leave: () => this.leave(),
-      chooseSuggestion: (i) => this.adoptSuggestion(i),
-      setMark: (i) => {
-        this.list.setMark(i)
-        this.host.report()
+      {
+        typing: (value) => {
+          this.typed = value
+          this.list.restart()
+          this.host.report()
+        },
+        key: (e) => this.key(e),
+        leave: () => this.leave(),
+        chooseSuggestion: (i) => this.adoptSuggestion(i),
+        setMark: (i) => {
+          this.list.setMark(i)
+          this.host.report()
+        },
       },
-    })}`
+    )}`
   }
 
   private onMagnifier(e: MouseEvent): void {
@@ -140,8 +134,7 @@ export class LookupControl implements ReactiveController {
       height: this.host.height(),
       searchText,
 
-      backFocus: () => this.host.block.shadowRoot
-        ?.querySelector<HTMLInputElement>('.lookup .ctrl')?.focus(),
+      backFocus: () => this.host.block.shadowRoot?.querySelector<HTMLInputElement>('.lookup .ctrl')?.focus(),
       onAdopt: (display, value, record) => this.adoptAndReport(display, value, record),
     })
   }
@@ -158,7 +151,9 @@ export class LookupControl implements ReactiveController {
 
     const columns = this.windowColumns()
     const texts = (e: Entry): string[] => [
-      e.display, e.value, ...columns.map((s) => (s.field === '' ? '' : maskState.host.readField(e.record, s.field))),
+      e.display,
+      e.value,
+      ...columns.map((s) => (s.field === '' ? '' : maskState.host.readField(e.record, s.field))),
     ]
     const hit = typed.trim() === '' ? result.entries : result.entries.filter((e) => rowFits(texts(e), typed))
     return orderedSuggestions(hit, typed, texts)

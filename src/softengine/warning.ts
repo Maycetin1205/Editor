@@ -1,7 +1,9 @@
 type Warn = (what: string, detail?: unknown) => void
 
 const sink: { warn: Warn } = {
-  warn: (what, detail) => { console.warn('[ff]', what, ...(detail === undefined ? [] : [detail])) },
+  warn: (what, detail) => {
+    console.warn('[ff]', what, ...(detail === undefined ? [] : [detail]))
+  },
 }
 
 export function wireWarning(warn: Warn): void {

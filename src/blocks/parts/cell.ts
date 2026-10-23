@@ -55,7 +55,9 @@ export function greyCellTpl(at: number, part: GreyPart | null, spot?: number): T
     part?.column.hidden === true ? 'hidden' : '',
     part?.typable === true ? 'typable' : '',
     part?.held === true ? 'held' : '',
-  ].filter((k) => k !== '').join(' ')
+  ]
+    .filter((k) => k !== '')
+    .join(' ')
   return html`<div
     class=${classes}
     role="cell"
@@ -63,7 +65,15 @@ export function greyCellTpl(at: number, part: GreyPart | null, spot?: number): T
     data-ff-entry=${spot ?? nothing}
     data-ff-below=${spot === undefined ? nothing : ''}
     data-ff-editable=${spot === undefined ? nothing : ''}
-  >${part === null ? nothing : html`<span class="head-text">${part.column.title}</span>${part.typable
-    ? part.content
-    : part.content === '' ? nothing : html`<span class="sub-value">${part.content}</span>`}`}</div>`
+  >${
+    part === null
+      ? nothing
+      : html`<span class="head-text">${part.column.title}</span>${
+          part.typable
+            ? part.content
+            : part.content === ''
+              ? nothing
+              : html`<span class="sub-value">${part.content}</span>`
+        }`
+  }</div>`
 }

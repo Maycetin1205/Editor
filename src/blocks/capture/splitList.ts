@@ -49,10 +49,14 @@ export function splitListTpl(state: SplitState, amountTitle: string, act: SplitA
   const name = maskState.host.source(split.sourceId)?.name ?? ''
   const total = state.total
   const rest = state.rest
-  const right = columns.map((c) => c.field === split.stockField || state.rows.every((row) => {
-    const t = splitColumnText(row, c)
-    return t === '' || asNumber(t) !== null
-  }))
+  const right = columns.map(
+    (c) =>
+      c.field === split.stockField ||
+      state.rows.every((row) => {
+        const t = splitColumnText(row, c)
+        return t === '' || asNumber(t) !== null
+      }),
+  )
   const grid = {
     'grid-template-columns': [
       `${TICK_WIDTH}px`,
@@ -96,7 +100,9 @@ export function splitListTpl(state: SplitState, amountTitle: string, act: SplitA
           class=${classes('split-row', marked && 'marked', on && 'on')}
           role="option"
           aria-selected=${on ? 'true' : 'false'}
-          ${ref((el) => { if (marked) keepInSight(el) })}
+          ${ref((el) => {
+            if (marked) keepInSight(el)
+          })}
           @click=${() => act.mark(i)}
         >
           <div><span

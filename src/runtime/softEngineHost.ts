@@ -42,7 +42,11 @@ function watchJobs(): void {
 }
 
 export const softEngineHost: MaskHost = {
-  start: () => { startSe(); announceEditing(); watchJobs() },
+  start: () => {
+    startSe()
+    announceEditing()
+    watchJobs()
+  },
   hasData: hasSeData,
   onData: onSeData,
 

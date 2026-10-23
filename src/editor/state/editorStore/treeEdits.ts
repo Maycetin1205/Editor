@@ -23,9 +23,7 @@ export function blockAdded(
   const parent = tree[parentId]
   if (!parent || !mayContain(parent.type, type)) return null
   const spec = gridMetricsOf(blockType(type))
-  const slot = isGridArea(parent)
-    ? slotOn(tree, parent.id, spec.startWidth, spec.startHeight, rows)
-    : undefined
+  const slot = isGridArea(parent) ? slotOn(tree, parent.id, spec.startWidth, spec.startHeight, rows) : undefined
   if (slot === null) return null
   const { nodes, rootId } = newSubtree(type)
   const node = nodes[rootId]
@@ -36,9 +34,7 @@ export function blockAdded(
     node.values = { ...node.values, gridX: slot.x, gridY: slot.y, gridW: w, gridH: spec.startHeight }
   }
   const childIds = [...parent.childIds]
-  const at = index === undefined
-    ? childIds.length
-    : Math.max(0, Math.min(index, childIds.length))
+  const at = index === undefined ? childIds.length : Math.max(0, Math.min(index, childIds.length))
   childIds.splice(at, 0, node.id)
   return {
     tree: { ...tree, ...nodes, [parent.id]: { ...parent, childIds } },
@@ -70,10 +66,7 @@ export function inSubtree(tree: MaskTree, ancestorId: string, id: string): boole
   return false
 }
 
-type PropertyOutcome =
-  | { kind: 'changed'; tree: MaskTree }
-  | { kind: 'same' }
-  | { kind: 'refused' }
+type PropertyOutcome = { kind: 'changed'; tree: MaskTree } | { kind: 'same' } | { kind: 'refused' }
 
 export function propertyUpdated(
   tree: MaskTree,
@@ -100,22 +93,22 @@ export function propertyUpdated(
     const plain = other.plainNameProp
     return plain === undefined || properties[plain] === undefined
       ? [[key, other.default]]
-      : [[key, other.default], [plain, properties[plain].default]]
+      : [
+          [key, other.default],
+          [plain, properties[plain].default],
+        ]
   })
   const list = capability(def, 'list')?.binding
   const entries = list?.sourceProp === name ? node.values[list.prop] : undefined
   if (list && Array.isArray(entries) && entries.length > 0) dependents.push([list.prop, []])
-  if (name === SOURCE_PROP && def && hasCapability(def, 'source')) dependents.push(...ownFieldsDropped(def, node.values))
+  if (name === SOURCE_PROP && def && hasCapability(def, 'source'))
+    dependents.push(...ownFieldsDropped(def, node.values))
   const next: MaskTree = {
     ...tree,
     [id]: { ...node, values: { ...node.values, ...Object.fromEntries(dependents), [name]: value } },
   }
 
-  const cleaned = withoutColumnsPointer(
-    next,
-    id,
-    droppedKeys(def, name, node.values[name], value),
-  )
+  const cleaned = withoutColumnsPointer(next, id, droppedKeys(def, name, node.values[name], value))
   return { kind: 'changed', tree: cleaned.tree }
 }
 

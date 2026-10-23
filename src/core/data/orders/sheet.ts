@@ -46,9 +46,8 @@ export function withoutTablePrefix(felder: string, tableId: string): string {
   const prefix = `${tableId}_`
   const codes: string[] = []
   for (const code of felder.split(',')) {
-    const bare = code.startsWith(prefix) && /^\d+_\d+$/.test(code.slice(prefix.length))
-      ? code.slice(prefix.length)
-      : code
+    const bare =
+      code.startsWith(prefix) && /^\d+_\d+$/.test(code.slice(prefix.length)) ? code.slice(prefix.length) : code
     if (!codes.includes(bare)) codes.push(bare)
   }
   return codes.join(',')
@@ -65,14 +64,11 @@ function varTogether(entries: readonly VarEntry[]): VarEntry[] {
     }
     perId.set(entry.ID, codes)
   }
-  return [...perId]
-    .filter(([, codes]) => codes.length > 0)
-    .map(([ID, codes]) => ({ ID, FELDER: codes.join(',') }))
+  return [...perId].filter(([, codes]) => codes.length > 0).map(([ID, codes]) => ({ ID, FELDER: codes.join(',') }))
 }
 
 export function sheetFrom(parts: readonly SheetPart[]): SheetPart {
-  const all = <B extends keyof Sheet>(block: B): Sheet[B][number][] =>
-    parts.flatMap((part) => part[block] ?? [])
+  const all = <B extends keyof Sheet>(block: B): Sheet[B][number][] => parts.flatMap((part) => part[block] ?? [])
   const vars = varTogether(all('VAR'))
   const dataset = all('DATASET')
   const mask = all('MASKE')

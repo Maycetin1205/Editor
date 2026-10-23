@@ -25,7 +25,15 @@ interface SpotFieldPickerProps {
 }
 
 export function SpotFieldPicker({
-  editor, block, spot, sources, sourcesChoice, anchor, top, left, onClose,
+  editor,
+  block,
+  spot,
+  sources,
+  sourcesChoice,
+  anchor,
+  top,
+  left,
+  onClose,
 }: SpotFieldPickerProps) {
   const current = spotBinding(block, spot, sources)
   const latest = (): string => spotBinding(editor.getNode(block.id) ?? block, spot, sources)
@@ -56,10 +64,14 @@ export function SpotFieldPicker({
       spotLabel={spot.name}
       groups={pickerGroups(sources)}
       current={current}
-      several={spot.several ? {
-        joiner: bindingJoiner(current),
-        onJoiner: (joiner) => bind(joinedBinding(bindingFields(latest()), joiner)),
-      } : undefined}
+      several={
+        spot.several
+          ? {
+              joiner: bindingJoiner(current),
+              onJoiner: (joiner) => bind(joinedBinding(bindingFields(latest()), joiner)),
+            }
+          : undefined
+      }
       anchor={anchor}
       top={top}
       left={left}

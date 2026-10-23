@@ -45,7 +45,9 @@ export class Button extends BlockElement {
 
   private wired = false
 
-  private readonly count = (): void => { this.open = openRows(this) }
+  private readonly count = (): void => {
+    this.open = openRows(this)
+  }
 
   constructor() {
     super()

@@ -17,33 +17,42 @@ const WITH_LABEL = { key: 'showLabel', equals: true }
 const BOUND = { key: 'textField', notEquals: '' }
 
 export const textProperties = {
-  size: ladderProperty(TEXT_SIZE_STEPS.map((value) => ({ value, name: value })), {
-    default: '13',
-    min: 8,
-    max: 96,
-    label: 'Größe',
-    place: 'font',
-    attribute: 'size',
-  }),
+  size: ladderProperty(
+    TEXT_SIZE_STEPS.map((value) => ({ value, name: value })),
+    {
+      default: '13',
+      min: 8,
+      max: 96,
+      label: 'Größe',
+      place: 'font',
+      attribute: 'size',
+    },
+  ),
   symbol: symbolProperty(),
-  align: segmentProperty([
-    { value: 'left', name: 'Links' },
-    { value: 'center', name: 'Mitte' },
-    { value: 'right', name: 'Rechts' },
-  ], {
-    default: 'left',
-    label: 'Ausrichtung',
-    attribute: 'align',
-  }),
-  border: choiceProperty([
-    { value: 'none', name: 'Ohne' },
-    { value: 'line', name: 'Linie unten' },
-    { value: 'box', name: 'Kasten' },
-  ], {
-    default: 'none',
-    label: 'Rahmen',
-    attribute: 'border',
-  }),
+  align: segmentProperty(
+    [
+      { value: 'left', name: 'Links' },
+      { value: 'center', name: 'Mitte' },
+      { value: 'right', name: 'Rechts' },
+    ],
+    {
+      default: 'left',
+      label: 'Ausrichtung',
+      attribute: 'align',
+    },
+  ),
+  border: choiceProperty(
+    [
+      { value: 'none', name: 'Ohne' },
+      { value: 'line', name: 'Linie unten' },
+      { value: 'box', name: 'Kasten' },
+    ],
+    {
+      default: 'none',
+      label: 'Rahmen',
+      attribute: 'border',
+    },
+  ),
   text: textProperty({
     default: 'Text',
     label: 'Text',

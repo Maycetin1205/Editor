@@ -10,12 +10,15 @@ export interface SelectionFollow {
 
 export const SELECTION_FOLLOW_PROP = 'followsSelection'
 
-export const followsSelectionProperty: Property<SelectionFollow[]> = listProperty<SelectionFollow[]>(selectionFollowsFrom, {
-  default: [],
-  label: 'Folgt der Auswahl',
-  place: 'none',
-  attribute: 'followsselection',
-})
+export const followsSelectionProperty: Property<SelectionFollow[]> = listProperty<SelectionFollow[]>(
+  selectionFollowsFrom,
+  {
+    default: [],
+    label: 'Folgt der Auswahl',
+    place: 'none',
+    attribute: 'followsselection',
+  },
+)
 
 export function followUsable(f: SelectionFollow): boolean {
   const pairs = completePairs(f)

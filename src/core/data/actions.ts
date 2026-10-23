@@ -57,9 +57,7 @@ export const RECORD_PLACEHOLDER = ['PINDEX', 'DROP_PINDEX'] as const
 // FROM_VALUE: the value a card of a board leaves when it moves.
 export const ACTION_PLACEHOLDER = [...RECORD_PLACEHOLDER, 'VALUE', 'FROM_VALUE', 'NOW_DATE', 'NOW_TIME'] as const
 
-export function relationParameterDefault(
-  relation: Pick<RelationTemplate, 'parameter'>,
-): Parameter[] {
+export function relationParameterDefault(relation: Pick<RelationTemplate, 'parameter'>): Parameter[] {
   return relation.parameter.map((raw) => {
     const placeholder = /^\{([A-Za-z0-9_]+)\}$/.exec(raw)?.[1]
     return placeholder && (ACTION_PLACEHOLDER as readonly string[]).includes(placeholder)
@@ -86,10 +84,11 @@ export interface RuntimeValues {
 export function checkParameterBinding(raw: unknown): Parameter | null {
   if (!isUnread<Parameter>(raw)) return null
   if (
-    typeof raw.source !== 'string'
-    || !(SAVED_PARAM_SOURCES as readonly string[]).includes(raw.source)
-    || typeof raw.value !== 'string'
-  ) return null
+    typeof raw.source !== 'string' ||
+    !(SAVED_PARAM_SOURCES as readonly string[]).includes(raw.source) ||
+    typeof raw.value !== 'string'
+  )
+    return null
   if (raw.sourceId !== undefined && typeof raw.sourceId !== 'string') return null
   if (raw.blockId !== undefined && typeof raw.blockId !== 'string') return null
   if (raw.resultField !== undefined && typeof raw.resultField !== 'string') return null
@@ -99,8 +98,6 @@ export function checkParameterBinding(raw: unknown): Parameter | null {
     ...(typeof raw.sourceId === 'string' ? { sourceId: raw.sourceId } : {}),
     ...(typeof raw.blockId === 'string' ? { blockId: raw.blockId } : {}),
 
-    ...(raw.source === 'stepResult' && typeof raw.resultField === 'string'
-      ? { resultField: raw.resultField }
-      : {}),
+    ...(raw.source === 'stepResult' && typeof raw.resultField === 'string' ? { resultField: raw.resultField } : {}),
   }
 }

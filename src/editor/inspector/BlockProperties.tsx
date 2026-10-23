@@ -43,24 +43,30 @@ export function BlockProperties({ block, def, folds, onRemove }: BlockProperties
   const ed = useEditor()
   const library = useDataSources().list
 
-  const session = useMemo(() => ({
-    onBeginEditing: () => ed.beginTransaction(),
-    onEndEditing: () => ed.endTransaction(),
-  }), [ed])
+  const session = useMemo(
+    () => ({
+      onBeginEditing: () => ed.beginTransaction(),
+      onEndEditing: () => ed.endTransaction(),
+    }),
+    [ed],
+  )
 
   const sourceInReach = ed.dataSourceFor(block.id)
-  const at = (where: PropertyPlace): DeclaredProperty[] => (def ? propertiesFor(block, def, where) : [])
-    .filter(({ property }) => controlShown(property, block, sourceInReach, library))
-  const controls = (props: DeclaredProperty[]) => props.map(({ key, property }) => (
-    <BarControl
-      key={key}
-      block={block}
-      propertyKey={key}
-      property={property}
-      sourceInReach={sourceInReach}
-      session={session}
-    />
-  ))
+  const at = (where: PropertyPlace): DeclaredProperty[] =>
+    (def ? propertiesFor(block, def, where) : []).filter(({ property }) =>
+      controlShown(property, block, sourceInReach, library),
+    )
+  const controls = (props: DeclaredProperty[]) =>
+    props.map(({ key, property }) => (
+      <BarControl
+        key={key}
+        block={block}
+        propertyKey={key}
+        property={property}
+        sourceInReach={sourceInReach}
+        session={session}
+      />
+    ))
 
   const choices = at('bar')
   const fonts = at('font')
@@ -68,8 +74,10 @@ export function BlockProperties({ block, def, folds, onRemove }: BlockProperties
   // whether text and field show theirs here too is open (docs/offen.md).
   const spots = def ? bindableSpotsOf(block).filter((spot) => !Object.hasOwn(def.properties, spot.prop)) : []
   const searchWindow = capability(def, 'lookupWindow')?.window
-  const windowShown = searchWindow !== undefined && searchWindow.entriesProp === undefined
-    && propertyVisible(searchWindow.when, block.values)
+  const windowShown =
+    searchWindow !== undefined &&
+    searchWindow.entriesProp === undefined &&
+    propertyVisible(searchWindow.when, block.values)
   const helpers = carriesOwnSource(block) ? capability(def, 'source')?.helpers : undefined
   const follows = maySelectionFollows(block) && followOffered(ed.tree, block, library)
 
@@ -79,7 +87,11 @@ export function BlockProperties({ block, def, folds, onRemove }: BlockProperties
   return (
     <>
       <div className="flex h-[52px] shrink-0 items-center gap-[10px] pl-[16px] pr-[8px]">
-        {createElement(BLOCK_ICONS[block.type] ?? Component, { size: 18, className: 'shrink-0 text-ink-2', 'aria-hidden': true })}
+        {createElement(BLOCK_ICONS[block.type] ?? Component, {
+          size: 18,
+          className: 'shrink-0 text-ink-2',
+          'aria-hidden': true,
+        })}
         <span className="shrink-0 text-title font-bold text-ink">{kind}</span>
         <span className="min-w-0 flex-1 truncate text-muted" title={what !== kind ? what : undefined}>
           {what !== kind && `„${what}“`}

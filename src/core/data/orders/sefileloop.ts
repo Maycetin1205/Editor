@@ -32,10 +32,7 @@ export const sefileloop: OrderAdapter<'sefileloop'> = {
   },
   needsTable: true,
   sheet(sources, fields) {
-    const ordered = [
-      ...sources.filter((s) => !s.order.underHeader),
-      ...sources.filter((s) => s.order.underHeader),
-    ]
+    const ordered = [...sources.filter((s) => !s.order.underHeader), ...sources.filter((s) => s.order.underHeader)]
     return {
       SEFILELOOP: ordered.map((s) => {
         const headerKey = headerKeyOf(s)

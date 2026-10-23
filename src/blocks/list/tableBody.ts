@@ -3,12 +3,7 @@ import { repeat } from 'lit/directives/repeat.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { columnsChoiceTpl, type ColumnsChoiceAct, type ColumnsChoicePlacement } from './columnPicker'
 import { markHit } from '../parts/cellSearch'
-import {
-  shownValue,
-  type Column,
-  type ColumnView,
-  type ColumnsGrid,
-} from '../parts/column'
+import { shownValue, type Column, type ColumnView, type ColumnsGrid } from '../parts/column'
 import { figureAt, greyCellTpl, type GreyPart, type RowLayout } from '../parts/cell'
 import { widthsHandles, type WidthsHost } from './columnWidth'
 import { moveRowsFocus, focusFirstRow, focusSearchRow } from './rowActivation'
@@ -107,11 +102,14 @@ interface BodyAct {
 
 function ruler(placement: BodyPlacement): TemplateResult {
   const ticks = placement.rulerTicks ?? 0
-  return html`<div class="ruler" role="presentation">${Array.from({ length: ticks }, () => html`<div
+  return html`<div class="ruler" role="presentation">${Array.from(
+    { length: ticks },
+    () => html`<div
     class="row"
     role="presentation"
     style=${styleMap(placement.cols)}
-  >${placement.columns.map(() => html`<div role="cell"></div>`)}</div>`)}</div>`
+  >${placement.columns.map(() => html`<div role="cell"></div>`)}</div>`,
+  )}</div>`
 }
 
 interface CellPart {
@@ -151,7 +149,9 @@ function cellTpl(
     s.hidden === true ? 'hidden' : '',
     figureAt(placement.layout, slot) !== null ? 'right' : '',
     main.typable ? 'typable' : '',
-  ].filter((k) => k !== '').join(' ')
+  ]
+    .filter((k) => k !== '')
+    .join(' ')
   return html`<div class=${classes === '' ? nothing : classes} role="cell">${main.content}</div>`
 }
 
@@ -173,28 +173,21 @@ function greyParts(
   return parts.some((part) => part !== null) ? parts : null
 }
 
-function rowTpl(
-  placement: BodyPlacement,
-  act: BodyAct,
-  rawIndex: number | null,
-  viewIndex: number,
-): TemplateResult {
+function rowTpl(placement: BodyPlacement, act: BodyAct, rawIndex: number | null, viewIndex: number): TemplateResult {
   const activatable = rawIndex !== null
   const decoration = placement.decoration(rawIndex)
   const grey = greyParts(placement, decoration, rawIndex)
   return html`<div
-    class="row${
-      rawIndex !== null && placement.showsRows ? ' selectable' : ''}${
-      rawIndex !== null && rawIndex === placement.selectionIndex ? ' selected' : ''}${
-      grey !== null ? ' subline' : ''}${
-      decoration.className === '' ? '' : ' ' + decoration.className}"
+    class="row${rawIndex !== null && placement.showsRows ? ' selectable' : ''}${
+      rawIndex !== null && rawIndex === placement.selectionIndex ? ' selected' : ''
+    }${grey !== null ? ' subline' : ''}${decoration.className === '' ? '' : ' ' + decoration.className}"
     role="row"
     data-status=${decoration.status === '' ? nothing : decoration.status}
     data-ff-row=${rawIndex === null ? nothing : placement.keyOf(rawIndex)}
     tabindex=${activatable ? '0' : nothing}
-    aria-selected=${placement.selectionSemantics && rawIndex !== null
-      ? String(rawIndex === placement.selectionIndex)
-      : nothing}
+    aria-selected=${
+      placement.selectionSemantics && rawIndex !== null ? String(rawIndex === placement.selectionIndex) : nothing
+    }
     style=${styleMap(placement.cols)}
     @click=${(e: MouseEvent) => {
       const chosen = rawIndex !== null && rawIndex === placement.selectionIndex
@@ -228,37 +221,35 @@ function rowTpl(
   </div>`
 }
 
-function headCellTpl(
-  placement: BodyPlacement,
-  act: BodyAct,
-  s: Column,
-  slot: number,
-  i: number,
-): TemplateResult {
+function headCellTpl(placement: BodyPlacement, act: BodyAct, s: Column, slot: number, i: number): TemplateResult {
   return html`<div
-    class=${[
-      s.hidden === true ? 'hidden' : '',
-      figureAt(placement.layout, slot) !== null ? 'right' : '',
-      placement.held(slot) ? 'held' : '',
-    ].filter((k) => k !== '').join(' ') || nothing}
+    class=${
+      [
+        s.hidden === true ? 'hidden' : '',
+        figureAt(placement.layout, slot) !== null ? 'right' : '',
+        placement.held(slot) ? 'held' : '',
+      ]
+        .filter((k) => k !== '')
+        .join(' ') || nothing
+    }
     role="columnheader"
     data-ff-editable
     data-ff-entry=${placement.preview ? slot : nothing}
     style="grid-row: 1; grid-column: ${i + 1}"
     @click=${() => act.clickHead(slot)}
-    @contextmenu=${placement.columnPickerOn
-      ? (e: MouseEvent) => act.openColumnPicker(e)
-      : nothing}
-  ><span class="head-text">${s.title}</span>${placement.required(slot)
-    ? html`<em class="required">*</em>`
-    : nothing}${!placement.editable && placement.sortColumn === slot
-    ? html`<span class="sort-arrow">${placement.sortAscending ? ' ▲' : ' ▼'}</span>`
-    : ''}</div>`
+    @contextmenu=${placement.columnPickerOn ? (e: MouseEvent) => act.openColumnPicker(e) : nothing}
+  ><span class="head-text">${s.title}</span>${placement.required(slot) ? html`<em class="required">*</em>` : nothing}${
+    !placement.editable && placement.sortColumn === slot
+      ? html`<span class="sort-arrow">${placement.sortAscending ? ' ▲' : ' ▼'}</span>`
+      : ''
+  }</div>`
 }
 
 export function tableBody(placement: BodyPlacement, act: BodyAct): TemplateResult {
   return html`
-      ${placement.showSearch ? html`<div class="search-row">
+      ${
+        placement.showSearch
+          ? html`<div class="search-row">
         <div class="search">
           <span class="search-icon">${icon('magnifier')}</span>
           <input
@@ -272,13 +263,19 @@ export function tableBody(placement: BodyPlacement, act: BodyAct): TemplateResul
             }}
           />
         </div>
-      </div>` : ''}
+      </div>`
+          : ''
+      }
       <div class="body" role="table" tabindex="-1">
       <div class="head" role="row" style=${styleMap(placement.cols)}>
         ${placement.columns.map((s, i) => headCellTpl(placement, act, s, placement.slots[i], i))}
         ${widthsHandles(placement.columns.length, act.widths)}
       </div>
-        ${repeat(placement.rows, (rawIndex) => placement.keyOf(rawIndex), (rawIndex, viewIndex) => rowTpl(placement, act, rawIndex, viewIndex))}
+        ${repeat(
+          placement.rows,
+          (rawIndex) => placement.keyOf(rawIndex),
+          (rawIndex, viewIndex) => rowTpl(placement, act, rawIndex, viewIndex),
+        )}
         ${placement.bottom}
         ${ruler(placement)}
       </div>
@@ -306,10 +303,7 @@ interface FootAct {
   page: (to: number) => void
 }
 
-export function tableFoot(
-  placement: FootPlacement,
-  act: FootAct,
-): TemplateResult | typeof nothing {
+export function tableFoot(placement: FootPlacement, act: FootAct): TemplateResult | typeof nothing {
   if (placement.empty) return nothing
 
   const saysSomething = placement.pageCount > 1 || placement.searchesActive || placement.totals.length > 0
@@ -321,14 +315,23 @@ export function tableFoot(
       total: placement.total,
       searchesActive: placement.searchesActive,
     })}</div>
-    ${placement.totals.length === 0 ? nothing : html`<div class="totals">
-      ${placement.totals.map((s) => html`<span class="total">
+    ${
+      placement.totals.length === 0
+        ? nothing
+        : html`<div class="totals">
+      ${placement.totals.map(
+        (s) => html`<span class="total">
         <span class="total-title">${s.title}</span>
         <b>${s.text}</b>
-      </span>`)}
-    </div>`}
+      </span>`,
+      )}
+    </div>`
+    }
     <div class="foot-right">
-      ${!placement.paging || placement.pageCount <= 1 ? nothing : html`<div class="page-nav">
+      ${
+        !placement.paging || placement.pageCount <= 1
+          ? nothing
+          : html`<div class="page-nav">
         <button
           aria-label="Seite zurück"
           ?disabled=${placement.page <= 0}
@@ -340,7 +343,8 @@ export function tableFoot(
           ?disabled=${placement.page >= placement.pageCount - 1}
           @click=${() => act.page(placement.page + 1)}
         >›</button>
-      </div>`}
+      </div>`
+      }
     </div>
   </div>`
 }

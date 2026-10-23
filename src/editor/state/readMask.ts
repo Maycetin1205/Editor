@@ -18,9 +18,7 @@ interface MaskRead {
   lines: NoticeLine[]
 }
 
-type MaskReadResult =
-  | { ok: true; read: MaskRead }
-  | { ok: false; why: 'lift' | 'root' }
+type MaskReadResult = { ok: true; read: MaskRead } | { ok: false; why: 'lift' | 'root' }
 
 // Reads the state of a mask as a file or the browser holds it. Whatever this
 // editor cannot read goes into the leftover; lines name what of it is new,
@@ -39,8 +37,9 @@ export function readMask(raw: Record<string, unknown>, knownSources: readonly un
   })
   const relation = checkRelationTemplates(o.relation)
   const taken = new Set(relation.map((r) => r.id))
-  const relationLeft = (Array.isArray(o.relation) ? o.relation as unknown[] : [])
-    .filter((entry) => !taken.has(idOf(entry)))
+  const relationLeft = (Array.isArray(o.relation) ? (o.relation as unknown[]) : []).filter(
+    (entry) => !taken.has(idOf(entry)),
+  )
 
   return {
     ok: true,
@@ -94,9 +93,14 @@ function missedLines(missed: readonly Missed[], known: Known): NoticeLine[] {
     name: `Baustein „${type}“`,
     detail: n === 1 ? 'diesem Editor unbekannt' : `${n}-mal, diesem Editor unbekannt`,
   }))
-  const placeless = lost === 0 ? [] : [{
-    name: lost === 1 ? 'Ein Baustein' : `${lost} Bausteine`,
-    detail: 'ohne gültigen Platz in der Maske',
-  }]
+  const placeless =
+    lost === 0
+      ? []
+      : [
+          {
+            name: lost === 1 ? 'Ein Baustein' : `${lost} Bausteine`,
+            detail: 'ohne gültigen Platz in der Maske',
+          },
+        ]
   return [...unknown, ...lines, ...placeless]
 }

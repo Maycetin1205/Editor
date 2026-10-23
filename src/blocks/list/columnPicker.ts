@@ -53,11 +53,15 @@ export function columnsChoiceTpl(
           @click=${() => act.toggle(s.key)}
         ><span class="picker-check">${on ? '✓' : ''}</span>${s.title}</button>`
       })}
-      ${placement.away.size === 0 ? nothing : html`<button
+      ${
+        placement.away.size === 0
+          ? nothing
+          : html`<button
         class="picker-all"
         type="button"
         @click=${act.showAll}
-      >Alle zeigen</button>`}
+      >Alle zeigen</button>`
+      }
     </div>`
 }
 

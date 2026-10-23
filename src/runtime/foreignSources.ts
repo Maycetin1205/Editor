@@ -1,9 +1,4 @@
-import {
-  completePairs,
-  extraSourcesProperty,
-  sourceUsable,
-  type KeyPair,
-} from '../core/data/extraSources'
+import { completePairs, extraSourcesProperty, sourceUsable, type KeyPair } from '../core/data/extraSources'
 import { splitBinding } from '../core/block/blockType'
 import { readActionValue } from '../core/block/registry'
 import { BLOCK_ID_ATTR } from '../core/data/actions'
@@ -27,8 +22,9 @@ export function outsideValue(pair: KeyPair, el: Element): string | undefined {
     return record === undefined ? '' : host.readField(record, pair.fromField)
   }
   if (pair.from === 'formField') {
-    const field = Array.from(el.ownerDocument.querySelectorAll(`[${BLOCK_ID_ATTR}]`))
-      .find((candidate) => candidate.getAttribute(BLOCK_ID_ATTR) === pair.fromField)
+    const field = Array.from(el.ownerDocument.querySelectorAll(`[${BLOCK_ID_ATTR}]`)).find(
+      (candidate) => candidate.getAttribute(BLOCK_ID_ATTR) === pair.fromField,
+    )
     return field ? readActionValue(field, pair.fromProp ?? 'value').trim() : ''
   }
   return undefined
@@ -47,11 +43,10 @@ function keyFrom(values: readonly string[]): string {
   return parts.join(KEY_DIVIDER)
 }
 
-export function extraSourcesOf(
-  el: HTMLElement,
-): { sourceId: string; partnerId: string; pairs: KeyPair[] }[] {
+export function extraSourcesOf(el: HTMLElement): { sourceId: string; partnerId: string; pairs: KeyPair[] }[] {
   const { type, attribute } = extraSourcesProperty
-  return type.fromAttribute(el.getAttribute(attribute), [])
+  return type
+    .fromAttribute(el.getAttribute(attribute), [])
     .filter(sourceUsable)
     .map((q) => ({
       sourceId: q.sourceId,

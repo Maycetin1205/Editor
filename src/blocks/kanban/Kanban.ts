@@ -65,8 +65,9 @@ export class Kanban extends BlockElement {
   }
 
   cardValues(row: unknown, read: DataPreamble['read']): Record<string, string> {
-    const bound = Object.fromEntries(CARD_SPOTS.map(({ prop }) =>
-      [prop, spotValue('', this[`${prop}Field`], row, read)]))
+    const bound = Object.fromEntries(
+      CARD_SPOTS.map(({ prop }) => [prop, spotValue('', this[`${prop}Field`], row, read)]),
+    )
     return { ...bound, avatar: this.avatarField === '' ? '' : read(row, this.avatarField) }
   }
 
@@ -123,7 +124,11 @@ export class Kanban extends BlockElement {
 
   // The upper right corner of a card: its time, how long it waits, its
   // amount or a fixed word, as the column says.
-  private corner(column: KanbanColumn | undefined, card: Card<CardSpot>, values: CardValues): TemplateResult | typeof nothing {
+  private corner(
+    column: KanbanColumn | undefined,
+    card: Card<CardSpot>,
+    values: CardValues,
+  ): TemplateResult | typeof nothing {
     const { shows, spot } = card
     switch (column?.corner ?? 'time') {
       case 'time':
@@ -175,7 +180,9 @@ export class Kanban extends BlockElement {
       draggable="false"
       aria-label=${next.heading}
       ?disabled=${card === null || this.board.writes}
-      @click=${(e: Event) => { e.stopPropagation() }}
+      @click=${(e: Event) => {
+        e.stopPropagation()
+      }}
       @change=${(e: Event) => {
         const select = e.target as HTMLSelectElement
         const chosen = select.value
@@ -188,7 +195,12 @@ export class Kanban extends BlockElement {
     </select>`
   }
 
-  private foot(spot: Spot, card: CardData | null, look: Card<CardSpot>, values: CardValues): TemplateResult | typeof nothing {
+  private foot(
+    spot: Spot,
+    card: CardData | null,
+    look: Card<CardSpot>,
+    values: CardValues,
+  ): TemplateResult | typeof nothing {
     const column = this.columns[spot.column]
     const button = this.button(spot.column, card)
     const pick = this.pick(spot, card)
@@ -211,21 +223,25 @@ export class Kanban extends BlockElement {
     const corner = this.corner(column, look, values)
     const main = shows('avatar') || line || shows('heading2') || corner !== nothing
     return html`
-      ${main
-        ? html`<div class="main">
+      ${
+        main
+          ? html`<div class="main">
             ${avatar()}
             <div class="ident">
-              ${line
-                ? html`<div class="line">
+              ${
+                line
+                  ? html`<div class="line">
                     ${shows('heading') ? spotTpl('heading', 'name') : nothing}
                     ${shows('subline') ? spotTpl('subline', 'meta') : nothing}
                   </div>`
-                : nothing}
+                  : nothing
+              }
               ${shows('heading2') ? spotTpl('heading2', 'owner') : nothing}
             </div>
             ${corner}
           </div>`
-        : nothing}
+          : nothing
+      }
       ${shows('text') ? spotTpl('text', 'text') : nothing}
       ${shows('date') ? spotTpl('date', 'date') : nothing}
       ${until ? html`<span class="until${until.late ? ' late' : ''}">${until.text}</span>` : nothing}
@@ -262,9 +278,11 @@ export class Kanban extends BlockElement {
     const byTime = column?.byTime === true
     if (this.preview) {
       if (spot.place !== 0) return this.empty(column)
-      return html`${byTime ? SAMPLE_HOUR_LINE : nothing}<div class="card">${
-        this.cardContent(spot, null, byTime ? SAMPLE_UNTIL : null)
-      }</div>`
+      return html`${byTime ? SAMPLE_HOUR_LINE : nothing}<div class="card">${this.cardContent(
+        spot,
+        null,
+        byTime ? SAMPLE_UNTIL : null,
+      )}</div>`
     }
     const cards = this.board.cardsAt(spot)
     if (cards.length === 0) return this.empty(column)
@@ -296,9 +314,11 @@ export class Kanban extends BlockElement {
         ${occupancy ? html`<span class="dot"></span>` : nothing}
         <span class="head-text">${place.name}</span>
         ${subtitle === '' ? nothing : html`<span class="place-sub">${subtitle}</span>`}
-        ${occupancy
-          ? html`<span class="state">${taken ? 'Belegt' : 'Frei'}</span>`
-          : html`<span class="place-count">${this.count(board.cardsAt(spot))}</span>`}
+        ${
+          occupancy
+            ? html`<span class="state">${taken ? 'Belegt' : 'Frei'}</span>`
+            : html`<span class="place-count">${this.count(board.cardsAt(spot))}</span>`
+        }
       </div>
       <div class="place-body">${this.cardsAt(spot)}</div>
     </div>`
@@ -310,7 +330,8 @@ export class Kanban extends BlockElement {
     return html`<div class="summary">${this.columns.map((column, i) => {
       const rooms = column.occupancy && column.places.length > 1
       const taken = column.places.filter((_, p) => this.taken({ column: i, place: p })).length
-      const shown = this.preview && !rooms ? '' : rooms ? `${taken} / ${column.places.length}` : this.board.allIn(i).length
+      const shown =
+        this.preview && !rooms ? '' : rooms ? `${taken} / ${column.places.length}` : this.board.allIn(i).length
       return html`<span class="pill tone-${toneValue(column.tone)}">
         <span class="dot"></span>
         <span class="pill-name">${column.heading}</span>
@@ -340,9 +361,11 @@ export class Kanban extends BlockElement {
             </div>
             ${subtitle === '' ? nothing : html`<div class="sub">${subtitle}</div>`}
             <div class="body">
-              ${single
-                ? this.cardsAt(only)
-                : column.places.map((place, p) => this.placeTpl({ column: i, place: p }, place))}
+              ${
+                single
+                  ? this.cardsAt(only)
+                  : column.places.map((place, p) => this.placeTpl({ column: i, place: p }, place))
+              }
             </div>
           </div>`
         })}
@@ -354,7 +377,9 @@ export class Kanban extends BlockElement {
     super.connectedCallback()
     boardRegister(this)
     if (this.preview) return
-    this.unlistenSearch ??= onSearchText(() => { this.requestUpdate() })
+    this.unlistenSearch ??= onSearchText(() => {
+      this.requestUpdate()
+    })
     if (this.clock !== null) return
     this.clock = setInterval(() => {
       if (this.board.dragging !== '' || !this.columns.some((c) => c.byTime || c.corner === 'wait')) return

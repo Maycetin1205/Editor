@@ -45,7 +45,9 @@ export function Result({ template, filled, reach }: { template: RelationTemplate
         return (
           <span key={k}>
             !
-            {entry !== '' && <span className="font-semibold text-ink">{b.source === 'fixed' ? entry : `{${entry}}`}</span>}
+            {entry !== '' && (
+              <span className="font-semibold text-ink">{b.source === 'fixed' ? entry : `{${entry}}`}</span>
+            )}
           </span>
         )
       })}
@@ -56,7 +58,16 @@ export function Result({ template, filled, reach }: { template: RelationTemplate
 
 type Open = { at: number; list: 'origin' | 'entry' } | null
 
-export function Places({ template, filled, reach, extras = true, fill = true, fold = false, wrap = false, onChange }: {
+export function Places({
+  template,
+  filled,
+  reach,
+  extras = true,
+  fill = true,
+  fold = false,
+  wrap = false,
+  onChange,
+}: {
   template: RelationTemplate
   filled: Filled
   reach: Reach
@@ -79,9 +90,12 @@ export function Places({ template, filled, reach, extras = true, fill = true, fo
   const shown = all.map((b, i) => !(folding && shut) || !placeEmpty(b) || selected === i || pending?.at === i)
   const hidden = shown.filter((s) => !s).length
 
-  const set = (i: number, b: Parameter) => onChange(i < fixedCount
-    ? { ...filled, parameter: filled.parameter.map((x, k) => (k === i ? b : x)) }
-    : { ...filled, extraParameter: filled.extraParameter.map((x, k) => (k === i - fixedCount ? b : x)) })
+  const set = (i: number, b: Parameter) =>
+    onChange(
+      i < fixedCount
+        ? { ...filled, parameter: filled.parameter.map((x, k) => (k === i ? b : x)) }
+        : { ...filled, extraParameter: filled.extraParameter.map((x, k) => (k === i - fixedCount ? b : x)) },
+    )
   const take = (i: number, value: string) => {
     setPending(null)
     setOpen(null)
@@ -149,12 +163,17 @@ export function Places({ template, filled, reach, extras = true, fill = true, fo
               setPending(null)
               setSelected(null)
             }}
-            onRemove={i >= fixedCount
-              ? () => {
-                  onChange({ ...filled, extraParameter: filled.extraParameter.filter((_, k) => k !== i - fixedCount) })
-                  setSelected(null)
-                }
-              : undefined}
+            onRemove={
+              i >= fixedCount
+                ? () => {
+                    onChange({
+                      ...filled,
+                      extraParameter: filled.extraParameter.filter((_, k) => k !== i - fixedCount),
+                    })
+                    setSelected(null)
+                  }
+                : undefined
+            }
           />
         )
       })}
@@ -197,8 +216,25 @@ function FoldLine({ shut, onToggle, children }: { shut: boolean; onToggle: () =>
 }
 
 function PlaceLine({
-  nr, raw, binding, origin, originText, entry, on, wraps, open, origins, entries,
-  onSelect, onOpen, onOrigin, onTake, onType, onMove, onDone, onRemove,
+  nr,
+  raw,
+  binding,
+  origin,
+  originText,
+  entry,
+  on,
+  wraps,
+  open,
+  origins,
+  entries,
+  onSelect,
+  onOpen,
+  onOrigin,
+  onTake,
+  onType,
+  onMove,
+  onDone,
+  onRemove,
 }: {
   nr: number
   raw: string
@@ -224,75 +260,92 @@ function PlaceLine({
   const entryRef = useRef<HTMLButtonElement>(null)
   const input = useRef<HTMLInputElement>(null)
   const text = wraps ? CELL_TEXT_WRAPPED : CELL_TEXT
-  const typed = origin === '' || origin === 'fixed' || (origin.startsWith('adopt:') && binding.source === 'fixed' && binding.value !== '')
+  const typed =
+    origin === '' ||
+    origin === 'fixed' ||
+    (origin.startsWith('adopt:') && binding.source === 'fixed' && binding.value !== '')
   const chosen = !typed && origin !== 'previous' && origin !== 'variable'
-  useEffect(() => { if (on && typed && open === null) input.current?.focus() }, [on, typed, open])
+  useEffect(() => {
+    if (on && typed && open === null) input.current?.focus()
+  }, [on, typed, open])
 
   const onKey = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === 'ArrowDown') { e.preventDefault(); onMove(1) }
-    if (e.key === 'ArrowUp') { e.preventDefault(); onMove(-1) }
-    if (e.key === 'F4') { e.preventDefault(); onOpen('origin') }
+    if (e.key === 'Enter' || e.key === 'ArrowDown') {
+      e.preventDefault()
+      onMove(1)
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      onMove(-1)
+    }
+    if (e.key === 'F4') {
+      e.preventDefault()
+      onOpen('origin')
+    }
   }
 
   return (
     <tr onClick={onSelect} className={cn('group cursor-default', on ? MARKED : LINE_HOVER)}>
       {on && open === null && <OnEscape run={onDone} />}
       <td className={cn(TD, 'px-[10px] text-right font-mono text-dense', !on && 'text-muted')}>{nr}</td>
-      <td className={cn(TD, 'px-[10px] font-mono text-dense', wraps ? 'break-words py-[5px]' : 'truncate')} title={raw}>{raw}</td>
+      <td className={cn(TD, 'px-[10px] font-mono text-dense', wraps ? 'break-words py-[5px]' : 'truncate')} title={raw}>
+        {raw}
+      </td>
       <td className={cn(TD, !on && 'text-muted')} onClick={on ? undefined : () => onOpen('origin')}>
-        {on
-          ? (
-              <ChoiceCell
-                label={originText}
-                on={on}
-                open={open === 'origin'}
-                groups={origins}
-                value={origin}
-                cellRef={originRef}
-                wrap={wraps}
-                onOpen={(o) => onOpen(o ? 'origin' : null)}
-                onChoose={onOrigin}
-              />
-            )
-          : <span className={text}>{originText}</span>}
+        {on ? (
+          <ChoiceCell
+            label={originText}
+            on={on}
+            open={open === 'origin'}
+            groups={origins}
+            value={origin}
+            cellRef={originRef}
+            wrap={wraps}
+            onOpen={(o) => onOpen(o ? 'origin' : null)}
+            onChoose={onOrigin}
+          />
+        ) : (
+          <span className={text}>{originText}</span>
+        )}
       </td>
       <td className={cn(TD, 'relative')} onClick={on || !chosen ? undefined : () => onOpen('entry')}>
-        {on && typed
-          ? (
-              <input
-                ref={input}
-                aria-label={`${nr} ${raw}`}
-                value={binding.source === 'fixed' ? binding.value : ''}
-                placeholder={raw}
-                spellCheck={false}
-                onChange={(e) => onType(e.currentTarget.value)}
-                onKeyDown={onKey}
-                className={cn(INPUT, 'placeholder:font-mono placeholder:text-dense placeholder:text-muted/60')}
-              />
-            )
-          : on && chosen
-            ? (
-                <ChoiceCell
-                  label={entry}
-                  on={on}
-                  open={open === 'entry'}
-                  groups={entries}
-                  value=""
-                  cellRef={entryRef}
-                  wrap={wraps}
-                  onOpen={(o) => onOpen(o ? 'entry' : null)}
-                  onChoose={onTake}
-                />
-              )
-            : entry === ''
-              ? <span className={cn(text, 'font-mono text-dense opacity-40')}>{raw}</span>
-              : <span className={text}>{entry}</span>}
+        {on && typed ? (
+          <input
+            ref={input}
+            aria-label={`${nr} ${raw}`}
+            value={binding.source === 'fixed' ? binding.value : ''}
+            placeholder={raw}
+            spellCheck={false}
+            onChange={(e) => onType(e.currentTarget.value)}
+            onKeyDown={onKey}
+            className={cn(INPUT, 'placeholder:font-mono placeholder:text-dense placeholder:text-muted/60')}
+          />
+        ) : on && chosen ? (
+          <ChoiceCell
+            label={entry}
+            on={on}
+            open={open === 'entry'}
+            groups={entries}
+            value=""
+            cellRef={entryRef}
+            wrap={wraps}
+            onOpen={(o) => onOpen(o ? 'entry' : null)}
+            onChoose={onTake}
+          />
+        ) : entry === '' ? (
+          <span className={cn(text, 'font-mono text-dense opacity-40')}>{raw}</span>
+        ) : (
+          <span className={text}>{entry}</span>
+        )}
         {on && onRemove && (
           <button
             type="button"
             aria-label={`Stelle ${nr} entfernen`}
             title="Stelle entfernen"
-            onClick={(e) => { e.stopPropagation(); onRemove() }}
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove()
+            }}
             className="absolute inset-y-0 right-0 flex items-center px-[8px] text-muted hover:text-error"
           >
             <Trash2 size={13} />

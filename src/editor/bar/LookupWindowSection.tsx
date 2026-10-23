@@ -3,12 +3,7 @@ import type { BlockNode } from '../../core/block/tree'
 import { propertyVisible } from '../../core/block/property'
 import type { LookupWindow } from '../../core/block/capability'
 import { blockType } from '../../core/block/registry'
-import {
-  blockElementInEditor,
-  windowStateOf,
-  openLookupInEditor,
-  type WindowState,
-} from '../canvas/lookupWindowState'
+import { blockElementInEditor, windowStateOf, openLookupInEditor, type WindowState } from '../canvas/lookupWindowState'
 import { useEditor } from '../state/useEditor'
 
 interface LookupWindowSectionProps {
@@ -40,9 +35,7 @@ export function LookupWindowSection({ block, window }: LookupWindowSectionProps)
     <div className="flex flex-col gap-2">
       {states.map(({ slot, state }) => (
         <div key={slot} className="flex min-w-0 flex-col gap-1">
-          {window.entriesProp !== undefined && (
-            <p className="text-ui font-medium text-ink">{state.title}</p>
-          )}
+          {window.entriesProp !== undefined && <p className="text-ui font-medium text-ink">{state.title}</p>}
           <p className="text-dense text-muted">
             {state.provided ? 'Spalten: ' : 'Automatisch: '}
             {state.columns.map((s) => (s.title === '' ? s.field : s.title)).join(', ')}

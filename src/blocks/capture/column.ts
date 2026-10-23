@@ -40,9 +40,7 @@ function capturePart(raw: unknown): Partial<CaptureColumn> {
 
     ...(typeof under === 'string' && under.trim() !== '' ? { under: under.trim() } : {}),
 
-    ...(typeof fillField === 'string' && fillField.trim() !== ''
-      ? { fillField: fillField.trim() }
-      : {}),
+    ...(typeof fillField === 'string' && fillField.trim() !== '' ? { fillField: fillField.trim() } : {}),
 
     ...(Array.isArray(windowColumns) && windowColumns.length > 0
       ? { windowColumns: coerceColumns(windowColumns) }
@@ -81,11 +79,8 @@ const SUBLINE: EntrySwitch<CaptureColumn> = {
   name: 'In der Unterzeile',
   short: 'Unterzeile',
   valueOf: (column) => column.subline,
-  withValue: (column, on) => withEntryValue(
-    withEntryValue(column, 'subline', on),
-    'under',
-    on === true ? column.under : undefined,
-  ),
+  withValue: (column, on) =>
+    withEntryValue(withEntryValue(column, 'subline', on), 'under', on === true ? column.under : undefined),
 }
 
 export function greyLine(columns: readonly CaptureColumn[], shown: readonly number[]): Map<number, number> {
@@ -109,7 +104,10 @@ export function greyLine(columns: readonly CaptureColumn[], shown: readonly numb
 function placedUnder(columns: readonly CaptureColumn[], index: number, key: string): CaptureColumn[] | null {
   const target = columns.findIndex((c) => c.key === key && c.subline !== true)
   if (columns[index]?.subline !== true || target === -1) return null
-  const under = greyLine(columns, columns.map((_, i) => i))
+  const under = greyLine(
+    columns,
+    columns.map((_, i) => i),
+  )
   const left = [...under].find(([, slot]) => slot === index)?.[0]
   const there = under.get(target)
   if (there === index) return null
@@ -140,8 +138,9 @@ export const CAPTURE_COLUMNS_BINDING: ListBinding<CaptureColumn, 'columns'> = {
   ...COLUMNS_BINDING,
   entries: coerceCaptureColumns,
 
-  entryFlag: (COLUMNS_BINDING.entryFlag ?? [])
-    .flatMap((s): EntrySwitch<CaptureColumn>[] => (s.key === 'total' ? [s, EDITABLE, REQUIRED, SUBLINE] : [s])),
+  entryFlag: (COLUMNS_BINDING.entryFlag ?? []).flatMap((s): EntrySwitch<CaptureColumn>[] =>
+    s.key === 'total' ? [s, EDITABLE, REQUIRED, SUBLINE] : [s],
+  ),
 
   entryFieldChoice: [FILL_FIELD],
 
@@ -155,10 +154,14 @@ export function columnEditable(column: CaptureColumn): boolean {
 }
 
 export function captureColumnsProperty(): Property<CaptureColumn[]> {
-  return listProperty<CaptureColumn[]>(coerceCaptureColumns, {
-    default: defaultColumns(),
-    label: 'Spalten',
-    place: 'block',
-    attribute: 'columns',
-  }, (value) => listForExport(value, CAPTURE_COLUMNS_BINDING))
+  return listProperty<CaptureColumn[]>(
+    coerceCaptureColumns,
+    {
+      default: defaultColumns(),
+      label: 'Spalten',
+      place: 'block',
+      attribute: 'columns',
+    },
+    (value) => listForExport(value, CAPTURE_COLUMNS_BINDING),
+  )
 }

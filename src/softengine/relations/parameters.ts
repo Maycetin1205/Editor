@@ -9,17 +9,14 @@ function resolveBlockValue(binding: Parameter, runtime: unknown): string {
   if (!isObject(runtime)) return ''
   const doc = runtime.document as ParentNode | undefined
   if (!doc || typeof doc.querySelectorAll !== 'function') return ''
-  const element = Array.from(doc.querySelectorAll<HTMLElement>(`[${BLOCK_ID_ATTR}]`))
-    .find((candidate) => candidate.getAttribute(BLOCK_ID_ATTR) === binding.blockId)
+  const element = Array.from(doc.querySelectorAll<HTMLElement>(`[${BLOCK_ID_ATTR}]`)).find(
+    (candidate) => candidate.getAttribute(BLOCK_ID_ATTR) === binding.blockId,
+  )
   if (!element) return ''
   return readActionValue(element, binding.value)
 }
 
-export function parameterResolve(
-  binding: Parameter,
-  values: RuntimeValues,
-  runtime: unknown = seWindow(),
-): string {
+export function parameterResolve(binding: Parameter, values: RuntimeValues, runtime: unknown = seWindow()): string {
   if (binding.source === 'omitted') return ''
   if (binding.source === 'fixed') return binding.value
   if (binding.source === 'context') return values.context[binding.value] ?? ''
@@ -61,8 +58,9 @@ export function parameterResolve(
   const rows = overlaid(source, rowsOfSource(source, runtime.SEDATA))
   const pindex = values.context.PINDEX ?? ''
 
-  const row = pindex !== '' && source.recordField !== ''
-    ? rows.find((entry) => fieldRead(entry, source.recordField) === pindex)
-    : rows[0]
+  const row =
+    pindex !== '' && source.recordField !== ''
+      ? rows.find((entry) => fieldRead(entry, source.recordField) === pindex)
+      : rows[0]
   return row ? fieldRead(row, binding.value) : ''
 }

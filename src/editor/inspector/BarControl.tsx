@@ -49,14 +49,7 @@ interface PickerCase {
   onChoose: (value: string) => void
 }
 
-export function BarControl({
-  block,
-  propertyKey,
-  property,
-  sourceInReach,
-  session,
-  entry,
-}: BarControlProps) {
+export function BarControl({ block, propertyKey, property, sourceInReach, session, entry }: BarControlProps) {
   const ed = useEditor()
   const inLine = useContext(LabelsShown)
 
@@ -68,12 +61,18 @@ export function BarControl({
 
   const fieldSource = fieldSourceOf(property, block, sourceInReach, sources.list)
 
-  const parent = property.nameFromParentField === undefined
-    ? undefined
-    : entry ? block : block.parentId ? ed.getNode(block.parentId) : undefined
-  const parentField = parent && property.nameFromParentField !== undefined
-    ? boundField(String(parent.values[property.nameFromParentField] ?? ''), ed.sourcesFor(parent.id))?.name ?? ''
-    : ''
+  const parent =
+    property.nameFromParentField === undefined
+      ? undefined
+      : entry
+        ? block
+        : block.parentId
+          ? ed.getNode(block.parentId)
+          : undefined
+  const parentField =
+    parent && property.nameFromParentField !== undefined
+      ? (boundField(String(parent.values[property.nameFromParentField] ?? ''), ed.sourcesFor(parent.id))?.name ?? '')
+      : ''
 
   if (!controlShown(property, block, sourceInReach, sources.list)) return null
 
@@ -82,14 +81,16 @@ export function BarControl({
       case 'source':
         return {
           denominator: 'Quelle',
-          groups: [{
-            key: 'sources',
-            entries: sources.list.map((q) => ({
-              value: q.id,
-              name: q.name,
-              badge: sourcesKey(q),
-            })),
-          }],
+          groups: [
+            {
+              key: 'sources',
+              entries: sources.list.map((q) => ({
+                value: q.id,
+                name: q.name,
+                badge: sourcesKey(q),
+              })),
+            },
+          ],
           value: typeof value === 'string' ? value : '',
           emptyText: 'Keine',
           onChoose: (newId) => {
@@ -100,16 +101,18 @@ export function BarControl({
       case 'field':
         return {
           denominator: 'Feld',
-          groups: [{
-            key: 'fields',
-            name: fieldSource?.name,
-            badge: fieldSource ? sourcesKey(fieldSource) : undefined,
-            entries: (fieldSource?.fields ?? []).map((f) => ({
-              value: f.code,
-              name: f.name,
-              badge: f.code,
-            })),
-          }],
+          groups: [
+            {
+              key: 'fields',
+              name: fieldSource?.name,
+              badge: fieldSource ? sourcesKey(fieldSource) : undefined,
+              entries: (fieldSource?.fields ?? []).map((f) => ({
+                value: f.code,
+                name: f.name,
+                badge: f.code,
+              })),
+            },
+          ],
           value: value == null ? '' : String(value),
           emptyText: 'Nicht gebunden',
           onChoose: (code) => {
@@ -134,11 +137,7 @@ export function BarControl({
     const { denominator, ...rest } = fall
     return (
       <Labeled label={property.label}>
-        <PickerControl
-          name={`${denominator} für ${property.label}`}
-          className={inLine ? 'w-full' : 'w-36'}
-          {...rest}
-        />
+        <PickerControl name={`${denominator} für ${property.label}`} className={inLine ? 'w-full' : 'w-36'} {...rest} />
       </Labeled>
     )
   }
@@ -153,17 +152,15 @@ export function BarControl({
         const code = String(parent.values[property.nameFromParentField] ?? '')
         if (code === '') {
           const parentProperty = blockType(parent.type)?.properties[property.nameFromParentField]
-          return parentProperty
-            ? (
-                <BarControl
-                  block={parent}
-                  propertyKey={property.nameFromParentField}
-                  property={parentProperty}
-                  sourceInReach={ed.dataSourceFor(parent.id)}
-                  session={session}
-                />
-              )
-            : null
+          return parentProperty ? (
+            <BarControl
+              block={parent}
+              propertyKey={property.nameFromParentField}
+              property={parentProperty}
+              sourceInReach={ed.dataSourceFor(parent.id)}
+              session={session}
+            />
+          ) : null
         }
         return (
           <Labeled label={`${parentField !== '' ? parentField : code} =`}>
@@ -192,31 +189,26 @@ export function BarControl({
     case 'segment':
       return (
         <Labeled label={property.label}>
-          <SegmentControl
-            name={property.label}
-            options={options}
-            value={String(value ?? '')}
-            onChange={set}
-          />
+          <SegmentControl name={property.label} options={options} value={String(value ?? '')} onChange={set} />
         </Labeled>
       )
     case 'choice':
       if (options.length > 1 && options.every((o) => o.icon !== undefined || o.value === '')) {
         return <SymbolChoice label={property.label} options={options} value={String(value ?? '')} onChange={set} />
       }
-      return options.length > 0 && options.every((o) => o.color !== undefined)
-        ? <SwatchChoice label={property.label} options={options} value={String(value ?? '')} onChange={set} />
-        : (
-            <Labeled label={property.label}>
-              <Choice
-                aria-label={property.label}
-                className={inLine ? 'w-full' : 'w-auto'}
-                options={options}
-                value={String(value ?? '')}
-                onChoose={set}
-              />
-            </Labeled>
-          )
+      return options.length > 0 && options.every((o) => o.color !== undefined) ? (
+        <SwatchChoice label={property.label} options={options} value={String(value ?? '')} onChange={set} />
+      ) : (
+        <Labeled label={property.label}>
+          <Choice
+            aria-label={property.label}
+            className={inLine ? 'w-full' : 'w-auto'}
+            options={options}
+            value={String(value ?? '')}
+            onChoose={set}
+          />
+        </Labeled>
+      )
     default:
       return null
   }

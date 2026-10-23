@@ -1,11 +1,5 @@
 import { createElement, type ReactElement } from 'react'
-import {
-  AlignCenter,
-  AlignLeft,
-  AlignRight,
-  type Icon,
-  type IconProps,
-} from '@/editor/icons/icon'
+import { AlignCenter, AlignLeft, AlignRight, type Icon, type IconProps } from '@/editor/icons/icon'
 
 const ICONS: Record<string, Icon> = {
   left: AlignLeft,

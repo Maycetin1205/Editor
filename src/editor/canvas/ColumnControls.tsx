@@ -5,11 +5,7 @@ import { cn } from '@/editor/widgets/cn'
 import { cssZoomOf } from '../../blocks/base/cssZoom'
 import type { Frame, HeadPlace } from '../../blocks/base/headsReport'
 import type { BlockNode } from '../../core/block/tree'
-import {
-  listDefaultTitle,
-  withInner,
-  type ListBinding,
-} from '../../core/block/blockType'
+import { listDefaultTitle, withInner, type ListBinding } from '../../core/block/blockType'
 import { useEditorInstance } from '../state/EditorContext'
 import type { ListPick } from './ListEntryBar'
 import { useHeadsPlaced } from './useHeadsPlaced'
@@ -63,8 +59,12 @@ function ColumnPlus({ frame, x, y, down, label, onAdd }: ColumnPlusProps) {
       const edge = canvas && sheet ? sheet.left + canvas.clientWidth : document.documentElement.clientWidth
       const left = Math.min((at?.left ?? 0) + x * zoom + (down ? 0 : PLUS_GAP), edge - PLUS_SIZE - PLUS_GAP)
       const top = (at?.top ?? 0) + y * zoom + (down ? PLUS_GAP : -PLUS_SIZE / 2)
-      const shown = at !== undefined && sheet !== undefined
-        && left >= sheet.left && top >= sheet.top && top + PLUS_SIZE <= sheet.bottom
+      const shown =
+        at !== undefined &&
+        sheet !== undefined &&
+        left >= sheet.left &&
+        top >= sheet.top &&
+        top + PLUS_SIZE <= sheet.bottom
       setPlace((before) => {
         if (!shown) return null
         return before?.left === left && before.top === top ? before : { left, top }
@@ -117,7 +117,15 @@ function bindRequest(prop: string, key: string | undefined, s: HeadPlace, frame:
 }
 
 export function ColumnControls({
-  block, selected, open, openSpot, binding, element, host, container, onSelect,
+  block,
+  selected,
+  open,
+  openSpot,
+  binding,
+  element,
+  host,
+  container,
+  onSelect,
 }: ColumnControlsProps) {
   const editor = useEditorInstance()
 
@@ -138,8 +146,13 @@ export function ColumnControls({
     container.current.dispatchEvent(bindRequest(binding.prop, keyAt(s.path.index), s, host.current))
   }
 
-  const anchor = openSpot === null ? undefined : spots.find((s) => s.path.index === openSpot.index
-    && s.path.inner === openSpot.inner && s.below === (openSpot.below === true))
+  const anchor =
+    openSpot === null
+      ? undefined
+      : spots.find(
+          (s) =>
+            s.path.index === openSpot.index && s.path.inner === openSpot.inner && s.below === (openSpot.below === true),
+        )
   const anchorKey = anchor === undefined ? undefined : keyAt(anchor.path.index)
   useLayoutEffect(() => {
     if (anchor && container.current && host.current) {
@@ -166,7 +179,10 @@ export function ColumnControls({
       const at = s.path.inner
       if (at === undefined) {
         const next = [...entries]
-        next[s.path.index] = binding.withTypedTitle(entry, typed === '' ? listDefaultTitle(binding, s.path.index) : typed)
+        next[s.path.index] = binding.withTypedTitle(
+          entry,
+          typed === '' ? listDefaultTitle(binding, s.path.index) : typed,
+        )
         editor.updateProperty(block.id, binding.prop, next)
         return
       }
@@ -271,9 +287,8 @@ export function ColumnControls({
   if (heads.length === 0) return null
   const first = heads[0]
   const last = heads[heads.length - 1]
-  const line = drag === null
-    ? null
-    : drag.slot < heads.length ? startOf(heads[drag.slot]) : startOf(last) + lengthOf(last)
+  const line =
+    drag === null ? null : drag.slot < heads.length ? startOf(heads[drag.slot]) : startOf(last) + lengthOf(last)
   const edge = Math.max(...heads.map((s) => s.left + s.width))
   const topLine = heads.reduce((a, s) => (s.top < a.top ? s : a), first)
   const foot = Math.max(...heads.map((s) => s.top + s.height))
@@ -306,19 +321,21 @@ export function ColumnControls({
           }}
         />
       ))}
-      {open !== null && placing !== undefined && places.map((p) => (
-        <div
-          key={p.key}
-          className="pointer-events-auto absolute cursor-pointer hover:bg-selection/[.08]"
-          style={{ left: p.left, top: p.top, width: p.width, height: p.height }}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => {
-            e.stopPropagation()
-            const next = placing.placed(entries, open, p.key)
-            if (next !== null) editor.updateProperty(block.id, binding.prop, next)
-          }}
-        />
-      ))}
+      {open !== null &&
+        placing !== undefined &&
+        places.map((p) => (
+          <div
+            key={p.key}
+            className="pointer-events-auto absolute cursor-pointer hover:bg-selection/[.08]"
+            style={{ left: p.left, top: p.top, width: p.width, height: p.height }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation()
+              const next = placing.placed(entries, open, p.key)
+              if (next !== null) editor.updateProperty(block.id, binding.prop, next)
+            }}
+          />
+        ))}
       {selected && added !== null && (
         <ColumnPlus
           frame={host}
@@ -334,9 +351,11 @@ export function ColumnControls({
       {line !== null && (
         <div
           className={cn('absolute rounded bg-selection', down ? 'h-[3px]' : 'w-[3px]')}
-          style={down
-            ? { top: line - 1, left: first.left, width: first.width }
-            : { left: line - 1, top: first.top, height: first.height }}
+          style={
+            down
+              ? { top: line - 1, left: first.left, width: first.width }
+              : { left: line - 1, top: first.top, height: first.height }
+          }
         />
       )}
     </div>

@@ -40,7 +40,14 @@ function RelationTab({ group, step, context, reach, onChange }: StepBodyProps & 
   )
 }
 
-function RelationBody({ step, group, template, relations, reach, onChange }: {
+function RelationBody({
+  step,
+  group,
+  template,
+  relations,
+  reach,
+  onChange,
+}: {
   step: RelationStep
   group: 'read' | 'write'
   template: RelationTemplate | undefined
@@ -74,7 +81,12 @@ function RelationBody({ step, group, template, relations, reach, onChange }: {
           <PickerControl
             name="Relation"
             className="w-full"
-            groups={[{ key: 'relations', entries: offered.map((r) => ({ value: r.id, name: r.name, badge: relationSyntaxAsText(r) })) }]}
+            groups={[
+              {
+                key: 'relations',
+                entries: offered.map((r) => ({ value: r.id, name: r.name, badge: relationSyntaxAsText(r) })),
+              },
+            ]}
             value={template.id}
             onChoose={choose}
           />
@@ -86,7 +98,9 @@ function RelationBody({ step, group, template, relations, reach, onChange }: {
           filled={step}
           reach={reach}
           fold
-          onChange={(filled) => onChange({ ...step, parameter: [...filled.parameter], extraParameter: [...filled.extraParameter] })}
+          onChange={(filled) =>
+            onChange({ ...step, parameter: [...filled.parameter], extraParameter: [...filled.extraParameter] })
+          }
         />
       </div>
       <div className="flex min-h-0 flex-col overflow-y-auto">
@@ -96,7 +110,11 @@ function RelationBody({ step, group, template, relations, reach, onChange }: {
           onClick={() => setShowResult(!showResult)}
           className="flex h-[36px] shrink-0 items-center gap-[8px] border-b border-line-soft bg-panel px-[12px] text-left text-ui font-bold text-ink transition-colors hover:bg-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
         >
-          <ChevronDown size={14} aria-hidden className={cn('shrink-0 text-muted transition-transform', !showResult && '-rotate-90')} />
+          <ChevronDown
+            size={14}
+            aria-hidden
+            className={cn('shrink-0 text-muted transition-transform', !showResult && '-rotate-90')}
+          />
           Ergebnis
         </button>
         {showResult && <Result template={template} filled={step} reach={reach} />}
@@ -107,7 +125,10 @@ function RelationBody({ step, group, template, relations, reach, onChange }: {
   )
 }
 
-function RelationList({ relations, onChoose }: {
+function RelationList({
+  relations,
+  onChoose,
+}: {
   relations: readonly RelationTemplate[]
   onChoose: (id: string) => void
 }) {
@@ -125,10 +146,17 @@ function RelationList({ relations, onChoose }: {
           className={STRIP_FIELD}
         />
       </Strip>
-      <Grid columns={[{ name: 'Syntax', mono: true }, { name: 'Bezeichnung', width: 300 }]}>
+      <Grid
+        columns={[
+          { name: 'Syntax', mono: true },
+          { name: 'Bezeichnung', width: 300 },
+        ]}
+      >
         {hits.map((r) => (
           <tr key={r.id} className={cn('cursor-pointer', LINE_HOVER)} onClick={() => onChoose(r.id)}>
-            <td className={cn(TD, 'truncate px-[10px] font-mono text-dense')} title={relationSyntaxAsText(r)}>{relationSyntaxAsText(r)}</td>
+            <td className={cn(TD, 'truncate px-[10px] font-mono text-dense')} title={relationSyntaxAsText(r)}>
+              {relationSyntaxAsText(r)}
+            </td>
             <td className={cn(TD, 'truncate px-[10px]')}>{r.name}</td>
           </tr>
         ))}

@@ -33,8 +33,9 @@ function withCurrentNames(value: unknown): unknown {
   }
   if (Array.isArray(value)) return value.map(withCurrentNames)
   if (typeof value !== 'object' || value === null) return value
-  return Object.fromEntries(Object.entries(value)
-    .map(([key, entry]) => [key === 'on' ? 'ascending' : key, withCurrentNames(entry)]))
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entry]) => [key === 'on' ? 'ascending' : key, withCurrentNames(entry)]),
+  )
 }
 
 export function makeOperatorState<T>(
@@ -72,8 +73,7 @@ export function makeOperatorState<T>(
     try {
       if (state === null) localStorage.removeItem(key)
       else localStorage.setItem(key, JSON.stringify(state))
-    } catch {
-    }
+    } catch {}
   }
 
   return { read, remember }

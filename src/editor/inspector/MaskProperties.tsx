@@ -14,8 +14,14 @@ import { useEditor } from '../state/useEditor'
 
 export function MaskProperties() {
   const ed = useEditor()
-  const nameSession = useInputSession(() => ed.beginTransaction(), () => ed.endTransaction())
-  const frameSession = useInputSession(() => ed.beginTransaction(), () => ed.endTransaction())
+  const nameSession = useInputSession(
+    () => ed.beginTransaction(),
+    () => ed.endTransaction(),
+  )
+  const frameSession = useInputSession(
+    () => ed.beginTransaction(),
+    () => ed.endTransaction(),
+  )
   const maskName = String(ed.tree[ROOT_ID]?.values[MASK_NAME_PROP] ?? '')
   const frameRaw = String(ed.tree[ROOT_ID]?.values[DOCUMENT_FRAME_PROP] ?? '')
 
@@ -101,9 +107,11 @@ function ExportTarget() {
           className={`${OPENER} min-w-0 flex-1`}
         >
           <FolderOpen size={14} aria-hidden className="shrink-0 text-muted" />
-          {target === ''
-            ? <span className="truncate font-normal text-muted">Wählen</span>
-            : <span className="truncate">{target}</span>}
+          {target === '' ? (
+            <span className="truncate font-normal text-muted">Wählen</span>
+          ) : (
+            <span className="truncate">{target}</span>
+          )}
         </button>
         {target !== '' && (
           <Button

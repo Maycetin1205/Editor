@@ -114,21 +114,12 @@ interface FieldRowProps {
 
 function FieldRow({ label, display }: FieldRowProps) {
   return (
-    <MenuRow
-      active
-      aria-pressed
-      className="shrink-0 px-1.5"
-    >
-
+    <MenuRow active aria-pressed className="shrink-0 px-1.5">
       <span className="w-24 shrink-0 truncate text-ui text-muted">{label}</span>
-      <span
-        className={cn('min-w-0 flex-1 truncate text-ui', display.empty ? 'text-muted' : 'text-ink')}
-      >
+      <span className={cn('min-w-0 flex-1 truncate text-ui', display.empty ? 'text-muted' : 'text-ink')}>
         {display.name}
       </span>
-      {display.key !== undefined && display.key !== '' && (
-        <Badge className="max-w-[45%]">{display.key}</Badge>
-      )}
+      {display.key !== undefined && display.key !== '' && <Badge className="max-w-[45%]">{display.key}</Badge>}
     </MenuRow>
   )
 }
@@ -161,9 +152,7 @@ export function FieldPicker({
       onClose={onClose}
     >
       <div className="flex min-h-0 flex-1 flex-col gap-1.5">
-        <p className="shrink-0 truncate px-1.5 pt-0.5 text-dense font-semibold text-muted">
-          {spotLabel}
-        </p>
+        <p className="shrink-0 truncate px-1.5 pt-0.5 text-dense font-semibold text-muted">{spotLabel}</p>
 
         {sourcesChoice ? (
           sourcesChoice.entries.length === 0 ? (
@@ -188,52 +177,43 @@ export function FieldPicker({
           )
         ) : (
           <>
+            <FieldRow label="Feld" display={displayOf(chosen, groups)} />
 
-        <FieldRow label="Feld" display={displayOf(chosen, groups)} />
+            {several && bindingFields(chosen).length > 1 && (
+              <div className="flex shrink-0 items-center gap-2 px-1.5">
+                <span className="w-24 shrink-0 truncate text-ui text-muted">Trenner</span>
+                <Segment
+                  name="Trenner"
+                  options={JOINER_OPTIONS}
+                  value={several.joiner}
+                  onChoose={(joiner) => several.onJoiner(bindingJoiner(joiner))}
+                />
+              </div>
+            )}
 
-        {several && bindingFields(chosen).length > 1 && (
-          <div className="flex shrink-0 items-center gap-2 px-1.5">
-            <span className="w-24 shrink-0 truncate text-ui text-muted">Trenner</span>
-            <Segment
-              name="Trenner"
-              options={JOINER_OPTIONS}
-              value={several.joiner}
-              onChoose={(joiner) => several.onJoiner(bindingJoiner(joiner))}
+            <Separator className="shrink-0" />
+
+            <p className="flex shrink-0 items-baseline gap-2 px-1.5 text-dense font-semibold text-muted">
+              <span className="min-w-0 truncate">Feld wählen</span>
+              {groups.length === 1 && <span className="min-w-0 truncate">aus {groups[0].name}</span>}
+            </p>
+
+            <List
+              fill
+              searchable
+              groups={listGroups(groups.length === 1 ? [{ ...groups[0], name: '' }] : groups)}
+              value={chosen}
+              values={several ? bindingFields(chosen) : undefined}
+              emptyText={NOT_BOUND}
+              onChoose={onPick}
             />
-          </div>
-        )}
-
-        <Separator className="shrink-0" />
-
-        <p className="flex shrink-0 items-baseline gap-2 px-1.5 text-dense font-semibold text-muted">
-          <span className="min-w-0 truncate">
-            Feld wählen
-          </span>
-          {groups.length === 1 && (
-            <span className="min-w-0 truncate">
-              aus {groups[0].name}
-            </span>
-          )}
-        </p>
-
-        <List
-          fill
-          searchable
-          groups={listGroups(
-            groups.length === 1
-              ? [{ ...groups[0], name: '' }]
-              : groups,
-          )}
-          value={chosen}
-          values={several ? bindingFields(chosen) : undefined}
-          emptyText={NOT_BOUND}
-          onChoose={onPick}
-        />
           </>
         )}
         {onRemove !== undefined && (
           <div className="flex shrink-0 items-center justify-end gap-2 border-t border-line px-1.5 pt-1.5">
-            <Button kind="risk" onClick={onRemove}>{removeLabel ?? 'Entfernen'}</Button>
+            <Button kind="risk" onClick={onRemove}>
+              {removeLabel ?? 'Entfernen'}
+            </Button>
           </div>
         )}
       </div>

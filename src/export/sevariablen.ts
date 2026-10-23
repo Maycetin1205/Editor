@@ -16,7 +16,11 @@ export function buildSevariablen(
   const fields = (s: DataSource, wildcard: boolean): string =>
     orderedFields(s, usedFields.get(s.id), getKey.get(s.id) ?? [], wildcard)
   const parts = ORDER_KINDS.map((kind) =>
-    orderAdapter(kind).sheet(used.filter((s) => s.order.kind === kind), fields))
+    orderAdapter(kind).sheet(
+      used.filter((s) => s.order.kind === kind),
+      fields,
+    ),
+  )
   const sheet = {
     ...sheetFrom(parts),
     ...(getRelation.length > 0 ? { GET_RELATION: getRelation } : {}),

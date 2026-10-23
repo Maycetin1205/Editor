@@ -88,8 +88,10 @@ export function valuesKept(tree: MaskTree, left: Leftover): Record<string, strin
     const node = tree[id]
     if (!node) continue
     const keys = Object.entries(kept)
-      .filter(([key, { readAs }]) => !Object.hasOwn(node.values, key)
-        || (readAs !== undefined && same(node.values[key], readAs)))
+      .filter(
+        ([key, { readAs }]) =>
+          !Object.hasOwn(node.values, key) || (readAs !== undefined && same(node.values[key], readAs)),
+      )
       .map(([key]) => key)
     if (keys.length > 0) out[id] = keys
   }
@@ -117,7 +119,14 @@ export function leftoverForFile(
   }
   if (Object.keys(chains).length > 0) part.chains = chains
   const dataSources = left.dataSources
-    .filter(({ raw, readAs }) => readAs === undefined || same(sources.find((s) => s.id === idOf(raw)), readAs))
+    .filter(
+      ({ raw, readAs }) =>
+        readAs === undefined ||
+        same(
+          sources.find((s) => s.id === idOf(raw)),
+          readAs,
+        ),
+    )
     .map(({ raw }) => raw)
   if (dataSources.length > 0) part.dataSources = dataSources
   if (left.relation.length > 0) part.relation = [...left.relation]
@@ -131,7 +140,10 @@ export function withLeftover(
   kept: unknown,
 ): { state: Record<string, unknown>; known: Known } {
   const known = {
-    nodes: new Set<string>(), chains: new Set<string>(), dataSources: new Set<string>(), relation: new Set<string>(),
+    nodes: new Set<string>(),
+    chains: new Set<string>(),
+    dataSources: new Set<string>(),
+    relation: new Set<string>(),
   }
   if (!isPlain(kept)) return { state, known }
   const tree: Record<string, unknown> = isPlain(state.tree) ? { ...state.tree } : {}
@@ -144,7 +156,7 @@ export function withLeftover(
     const parentId = isPlain(raw) ? raw.parentId : undefined
     const parent = typeof parentId === 'string' ? tree[parentId] : undefined
     if (!isPlain(parent) || !Array.isArray(parent.childIds) || parent.childIds.includes(id)) continue
-    const childIds = [...parent.childIds as unknown[]]
+    const childIds = [...(parent.childIds as unknown[])]
     const at = typeof places[id] === 'number' ? Math.min(Math.max(0, places[id]), childIds.length) : childIds.length
     childIds.splice(at, 0, id)
     tree[parentId as string] = { ...parent, childIds }
@@ -169,7 +181,7 @@ export function withLeftover(
 // there only what an older editor made of it.
 function listWith(list: unknown, kept: unknown, known: Set<string>): unknown {
   if (!Array.isArray(kept)) return list
-  const out: unknown[] = Array.isArray(list) ? [...list as unknown[]] : []
+  const out: unknown[] = Array.isArray(list) ? [...(list as unknown[])] : []
   for (const raw of kept as unknown[]) {
     const id = idOf(raw)
     if (id !== '') known.add(id)

@@ -33,8 +33,12 @@ function relationNrOf(node: BlockNode): string {
 }
 
 export function pictureAlias(node: BlockNode): string {
-  if (node.type !== PICTURE_TYPE || String(node.values.pictureField ?? '') === '' || relationNrOf(node) === '') return ''
-  return `FFBild${node.id.replace(/[^0-9a-zA-Z]/g, '').slice(0, 12).toUpperCase()}`
+  if (node.type !== PICTURE_TYPE || String(node.values.pictureField ?? '') === '' || relationNrOf(node) === '')
+    return ''
+  return `FFBild${node.id
+    .replace(/[^0-9a-zA-Z]/g, '')
+    .slice(0, 12)
+    .toUpperCase()}`
 }
 
 function fullField(node: BlockNode, sources: readonly DataSource[]): string {
@@ -52,7 +56,12 @@ export function pictureRelations(tree: MaskTree, sources: readonly DataSource[])
     const alias = pictureAlias(node)
     if (alias !== '') {
       const nr = relationNrOf(node)
-      const flags = FLAGS[nr] ?? String(node.values.moreValues ?? '').split(/[;,]/).map((v) => v.trim()).filter((v) => v !== '')
+      const flags =
+        FLAGS[nr] ??
+        String(node.values.moreValues ?? '')
+          .split(/[;,]/)
+          .map((v) => v.trim())
+          .filter((v) => v !== '')
       out.push({
         ID: nr,
         ...(nr in FLAGS ? { FORMAT: 'P' as const } : {}),

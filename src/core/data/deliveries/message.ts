@@ -33,17 +33,20 @@ function restrictionRead(raw: unknown): QueryRestriction | undefined {
   if (!isUnread<QueryRestriction>(raw)) return undefined
   const documentKind = typeof raw.documentKind === 'string' ? raw.documentKind.trim() : ''
   const a = raw.address
-  const address = isUnread<{ sourceId: string; code: string }>(a)
-    && typeof a.sourceId === 'string' && a.sourceId !== ''
-    && typeof a.code === 'string' && a.code !== ''
-    ? { sourceId: a.sourceId, code: a.code }
-    : null
+  const address =
+    isUnread<{ sourceId: string; code: string }>(a) &&
+    typeof a.sourceId === 'string' &&
+    a.sourceId !== '' &&
+    typeof a.code === 'string' &&
+    a.code !== ''
+      ? { sourceId: a.sourceId, code: a.code }
+      : null
   const restriction = { documentKind, address }
   return restricts(restriction) ? restriction : undefined
 }
 
 const withRestriction = (restriction: QueryRestriction | undefined): { restriction?: QueryRestriction } =>
-  (restricts(restriction) ? { restriction } : {})
+  restricts(restriction) ? { restriction } : {}
 
 export const message: DeliveryAdapter<'message'> = {
   kind: 'message',
@@ -55,16 +58,28 @@ export const message: DeliveryAdapter<'message'> = {
   }),
   readExported(entry) {
     const query = entry.query
-    if (!isUnread<RuntimeQuery>(query) || typeof query.id !== 'string' || query.id === ''
-      || typeof query.fields !== 'string') return null
+    if (
+      !isUnread<RuntimeQuery>(query) ||
+      typeof query.id !== 'string' ||
+      query.id === '' ||
+      typeof query.fields !== 'string'
+    )
+      return null
     return {
       kind: 'message',
       query: { id: query.id, fields: query.fields, ...withRestriction(restrictionRead(query.restriction)) },
     }
   },
   relationIds: () => [],
-  bindings: (delivery): Parameter[] => (delivery.restriction?.address
-    ? [{ source: 'dataField', value: delivery.restriction.address.code, sourceId: delivery.restriction.address.sourceId }]
-    : []),
+  bindings: (delivery): Parameter[] =>
+    delivery.restriction?.address
+      ? [
+          {
+            source: 'dataField',
+            value: delivery.restriction.address.code,
+            sourceId: delivery.restriction.address.sourceId,
+          },
+        ]
+      : [],
   giverFields: () => [],
 }

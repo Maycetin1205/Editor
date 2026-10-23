@@ -23,7 +23,15 @@ import { calculationReach, columnEntries, sourceGroup } from '../origin/reach'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
 import { useView } from '../state/useView'
-import { columnTitle, sentenceText, termName, termOrigin, termOriginKey, termsText, type Names } from './calculationWords'
+import {
+  columnTitle,
+  sentenceText,
+  termName,
+  termOrigin,
+  termOriginKey,
+  termsText,
+  type Names,
+} from './calculationWords'
 import { TermLine } from './TermLine'
 import { UnitsPane } from './UnitsPane'
 
@@ -59,31 +67,51 @@ export function OpenCalculationWindow() {
     <CalculationWindow
       key={`${open.blockId}:${open.column}:${own.key}`}
       calculation={own}
-      names={list
-        ? {
-            lead: open.column,
-            reach: {
-              row: columnEntries(block),
-              helpers: sourcesInReach(ed.tree, block.id, library).slice(1).map((q) => sourceGroup(q.source)),
-            },
-          }
-        : { lead: '', leadName: blockName(block, library), reach: calculationReach(ed.tree, library) }}
+      names={
+        list
+          ? {
+              lead: open.column,
+              reach: {
+                row: columnEntries(block),
+                helpers: sourcesInReach(ed.tree, block.id, library)
+                  .slice(1)
+                  .map((q) => sourceGroup(q.source)),
+              },
+            }
+          : { lead: '', leadName: blockName(block, library), reach: calculationReach(ed.tree, library) }
+      }
       onApply={(next) => {
-        ed.updateProperty(block.id, prop, present === undefined
-          ? [...all, next]
-          : all.map((b) => (b.key === next.key ? next : b)))
+        ed.updateProperty(
+          block.id,
+          prop,
+          present === undefined ? [...all, next] : all.map((b) => (b.key === next.key ? next : b)),
+        )
         close()
       }}
-      onRemove={present === undefined ? undefined : () => {
-        ed.updateProperty(block.id, prop, all.filter((b) => b.key !== own.key))
-        close()
-      }}
+      onRemove={
+        present === undefined
+          ? undefined
+          : () => {
+              ed.updateProperty(
+                block.id,
+                prop,
+                all.filter((b) => b.key !== own.key),
+              )
+              close()
+            }
+      }
       onClose={close}
     />
   )
 }
 
-function CalculationWindow({ calculation, names, onApply, onRemove, onClose }: {
+function CalculationWindow({
+  calculation,
+  names,
+  onApply,
+  onRemove,
+  onClose,
+}: {
   calculation: Calculation
   names: Names
   onApply: (b: Calculation) => void
@@ -122,9 +150,8 @@ function CalculationWindow({ calculation, names, onApply, onRemove, onClose }: {
     if (origin) setTerm(i, { ...origin, divides: terms[i]?.divides ?? false })
   }
 
-  const unitsAt = selected !== null && terms[selected]?.kind === 'units'
-    ? selected
-    : terms.findIndex((t) => t.kind === 'units')
+  const unitsAt =
+    selected !== null && terms[selected]?.kind === 'units' ? selected : terms.findIndex((t) => t.kind === 'units')
   const units = terms[unitsAt]
   const complete = terms.filter((t) => !(t.kind === 'fixed' && t.value.trim() === ''))
   const ready = complete.length > 0 && complete.every((t) => t.kind !== 'fixed' || asNumber(t.value) !== null)
@@ -133,23 +160,27 @@ function CalculationWindow({ calculation, names, onApply, onRemove, onClose }: {
   return (
     <Window
       title="Berechnung"
-      beside={(
+      beside={
         <span className="min-w-0 truncate border-l border-line-soft pl-[14px] font-mono text-dense text-muted">
           {sentenceText(finished, names)}
         </span>
-      )}
+      }
       width={1040}
       height={640}
       level={50}
-      foot={(
+      foot={
         <>
           {onRemove !== undefined && (
-            <Button kind="risk" className="mr-auto" onClick={onRemove}>Berechnung entfernen</Button>
+            <Button kind="risk" className="mr-auto" onClick={onRemove}>
+              Berechnung entfernen
+            </Button>
           )}
           <Button onClick={onClose}>Abbrechen</Button>
-          <Button kind="primary" disabled={!ready} onClick={() => onApply(finished)}>Übernehmen</Button>
+          <Button kind="primary" disabled={!ready} onClick={() => onApply(finished)}>
+            Übernehmen
+          </Button>
         </>
-      )}
+      }
       onClose={onClose}
     >
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_320px]">
@@ -159,7 +190,9 @@ function CalculationWindow({ calculation, names, onApply, onRemove, onClose }: {
             <tr className="cursor-default">
               <td className={TD} />
               <td className={cn(TD, 'px-[10px] font-mono text-dense text-muted')}>=</td>
-              <td className={cn(TD, 'px-[10px] text-muted')}>{names.leadName === undefined ? KIND_NAMES.row : KIND_NAMES.block}</td>
+              <td className={cn(TD, 'px-[10px] text-muted')}>
+                {names.leadName === undefined ? KIND_NAMES.row : KIND_NAMES.block}
+              </td>
               <td className={cn(TD, 'truncate px-[10px] font-semibold')}>{columnTitle(names, draft.lead)}</td>
             </tr>
             {terms.map((term, i) => (
@@ -210,9 +243,20 @@ function CalculationWindow({ calculation, names, onApply, onRemove, onClose }: {
             <span className={NAME}>Zeichen</span>
             <Segment
               name="Rechnung"
-              options={[{ value: 'times', name: '× ÷' }, { value: 'adds', name: '+ −' }]}
+              options={[
+                { value: 'times', name: '× ÷' },
+                { value: 'adds', name: '+ −' },
+              ]}
               value={draft.adds === true ? 'adds' : 'times'}
-              onChoose={(v) => setDraft({ key: draft.key, lead: draft.lead, terms: draft.terms, decimals: draft.decimals, ...(v === 'adds' ? { adds: true } : {}) })}
+              onChoose={(v) =>
+                setDraft({
+                  key: draft.key,
+                  lead: draft.lead,
+                  terms: draft.terms,
+                  decimals: draft.decimals,
+                  ...(v === 'adds' ? { adds: true } : {}),
+                })
+              }
             />
           </div>
           <Strip>Rundung</Strip>
@@ -232,11 +276,7 @@ function CalculationWindow({ calculation, names, onApply, onRemove, onClose }: {
             />
           </div>
           {units?.kind === 'units' && (
-            <UnitsPane
-              term={units}
-              names={names}
-              onChange={(next) => setTerm(unitsAt, next)}
-            />
+            <UnitsPane term={units} names={names} onChange={(next) => setTerm(unitsAt, next)} />
           )}
         </div>
       </div>

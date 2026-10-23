@@ -38,9 +38,13 @@ export function rowsHigh(rows: number): number {
   return rows * GRID.rowPx + (rows - 1) * GRID.gapPx
 }
 
-const cell = (label: string, fallback: number): Property<number> => numberProperty({
-  default: fallback, label, place: 'none', min: 0,
-})
+const cell = (label: string, fallback: number): Property<number> =>
+  numberProperty({
+    default: fallback,
+    label,
+    place: 'none',
+    min: 0,
+  })
 
 export const GRID_PROPERTIES = {
   gridX: cell('Spalte', 0),
@@ -65,9 +69,7 @@ export function gridSlotRead(props: Readonly<Record<string, PropertyValue>>): Gr
   }
 }
 
-export function gridMetricsOf(
-  def: { grid?: Partial<GridMetrics> } | undefined,
-): GridMetrics {
+export function gridMetricsOf(def: { grid?: Partial<GridMetrics> } | undefined): GridMetrics {
   return { ...GRID_FALLBACK, ...(def?.grid ?? {}) }
 }
 
@@ -101,9 +103,7 @@ export function gridSlotStyle(pos: GridSlot): Record<string, string | number> {
 
 const GROW_ROW = `minmax(${GRID.rowPx}px, 1fr)`
 
-export function growRowsTemplate(
-  slots: readonly { slot: GridSlot; grows: boolean }[],
-): string | null {
+export function growRowsTemplate(slots: readonly { slot: GridSlot; grows: boolean }[]): string | null {
   const rows = nextFreeRow(slots.map((s) => s.slot))
   const grows = Array.from({ length: rows }, () => false)
   const fixed = Array.from({ length: rows }, () => false)
@@ -134,8 +134,8 @@ export function firstGap(
   columns: number = GRID.columns,
 ): { x: number; y: number } | null {
   if (rows === null) return { x: 0, y: nextFreeRow(taken) }
-  const free = (x: number, y: number) => taken.every((p) =>
-    x + w <= p.x || p.x + p.w <= x || y + h <= p.y || p.y + p.h <= y)
+  const free = (x: number, y: number) =>
+    taken.every((p) => x + w <= p.x || p.x + p.w <= x || y + h <= p.y || p.y + p.h <= y)
   for (let y = 0; y + h <= rows; y++) {
     for (let x = 0; x + w <= columns; x++) {
       if (free(x, y)) return { x, y }

@@ -1,10 +1,4 @@
-import {
-  html,
-  nothing,
-  type ReactiveController,
-  type ReactiveControllerHost,
-  type TemplateResult,
-} from 'lit'
+import { html, nothing, type ReactiveController, type ReactiveControllerHost, type TemplateResult } from 'lit'
 import { styleMap } from 'lit/directives/style-map.js'
 import { ViewChoices } from './viewChoices'
 import { giverIdOf } from '../../runtime/selection'
@@ -14,31 +8,14 @@ import { TAKES_KEYS_ATTR } from '../../core/block/typingMarks'
 import { SUBLINE_HEIGHT, type MeasureTarget } from './pageSize'
 import { sendPropChange } from '../base/BlockElement'
 import { reportsHeads } from '../base/headsReport'
-import {
-  columnsView,
-  figureOf,
-  type Column,
-  type ColumnView,
-} from '../parts/column'
+import { columnsView, figureOf, type Column, type ColumnView } from '../parts/column'
 import { WidthsState } from './columnWidth'
 import { ColumnsChoiceState } from './columnPicker'
 import { tableRenderModel } from './tableModel'
 import type { ListSettings } from './listDeclaration'
 import type { RowLayout } from '../parts/cell'
-import {
-  WITHOUT_DECORATION,
-  tableFoot,
-  tableBody,
-  type RowsBelow,
-  type RowDecoration,
-} from './tableBody'
-import {
-  activateRow,
-  actionKeyAtRow,
-  takesActionKey,
-  RowsChoice,
-  rowDouble,
-} from './rowActivation'
+import { WITHOUT_DECORATION, tableFoot, tableBody, type RowsBelow, type RowDecoration } from './tableBody'
+import { activateRow, actionKeyAtRow, takesActionKey, RowsChoice, rowDouble } from './rowActivation'
 import {
   followSource,
   unfollowSource,
@@ -49,8 +26,7 @@ import {
   type RowsElement,
 } from './sourceRows'
 
-interface ListElement
-  extends RowsElement, ListSettings, MeasureTarget, ReactiveControllerHost {
+interface ListElement extends RowsElement, ListSettings, MeasureTarget, ReactiveControllerHost {
   readonly columns: readonly Column[]
   readonly preview: boolean
   editable: boolean
@@ -91,8 +67,7 @@ function listEmptyState(question: ListShowQuestion): ListShows {
   if (question.preview) return { rows: false, empty: false }
 
   const anyColumnBound = question.columns.some((column) => column.field.trim() !== '')
-  const empty = question.rowCount === 0
-    || (question.rowsFrom === 'source' && !anyColumnBound)
+  const empty = question.rowCount === 0 || (question.rowsFrom === 'source' && !anyColumnBound)
   return { rows: true, empty }
 }
 
@@ -127,7 +102,11 @@ export class RecordList implements ReactiveController {
       writeColumns: (columns) => sendPropChange(el, 'columns', columns),
       report: () => el.requestUpdate(),
     })
-    this._view = new ViewChoices(el, () => el.listColumns(), () => this.subHeight())
+    this._view = new ViewChoices(
+      el,
+      () => el.listColumns(),
+      () => this.subHeight(),
+    )
     this._choice = new ColumnsChoiceState({
       block: el,
       on: () => this.columnPickerOn,
@@ -135,7 +114,11 @@ export class RecordList implements ReactiveController {
       forgetWidths: () => this._widths.forget(),
     })
     this._rowsChoice = new RowsChoice(el)
-    this._ask = new RowAsk(el, () => this._rowsChoice.slotIn(el.rawRows), (rawIndex) => this.keyOf(rawIndex))
+    this._ask = new RowAsk(
+      el,
+      () => this._rowsChoice.slotIn(el.rawRows),
+      (rawIndex) => this.keyOf(rawIndex),
+    )
     el.addController(this)
     reportsHeads(el)
   }
@@ -265,7 +248,8 @@ export class RecordList implements ReactiveController {
     if (!this.el.hasUpdated) this._view.observe()
     this._view.afterRender()
     this._ask.checkShown()
-    this.el.shadowRoot?.querySelector('.table')
+    this.el.shadowRoot
+      ?.querySelector('.table')
       ?.toggleAttribute(TAKES_KEYS_ATTR, !this.el.preview && takesActionKey(this.el))
   }
 
@@ -326,66 +310,76 @@ export class RecordList implements ReactiveController {
       '--sub-height': `${subHeight}px`,
       '--record-height': `${view.tick + subHeight}px`,
     })}>
-      ${tableBody({
-        columns: visible.columns,
-        slots: visible.slots,
-        cols: view.cols,
-        layout,
-        editable: el.editable,
-        preview: el.preview,
-        columnPickerOn: this.columnPickerOn,
-        columnPicker: this._choice.open === null ? null : {
-          selectable: columns.filter((column) => column.hidden !== true),
-          away: this._choice.away(),
-          left: this._choice.open.left,
-          top: this._choice.open.top,
+      ${tableBody(
+        {
+          columns: visible.columns,
+          slots: visible.slots,
+          cols: view.cols,
+          layout,
+          editable: el.editable,
+          preview: el.preview,
+          columnPickerOn: this.columnPickerOn,
+          columnPicker:
+            this._choice.open === null
+              ? null
+              : {
+                  selectable: columns.filter((column) => column.hidden !== true),
+                  away: this._choice.away(),
+                  left: this._choice.open.left,
+                  top: this._choice.open.top,
+                },
+          selectionSemantics: giverIdOf(el) !== '',
+          showSearch: el.search,
+          searchText: this._view.searchText,
+          sortColumn: this._view.sortColumn,
+          sortAscending: this._view.sortAscending,
+          rows: view.rows,
+          keyOf: (rawIndex) => this.keyOf(rawIndex),
+          valueAt: (row, column) => this.cellValue(row, column),
+          rulerTicks: view.rulerTicks,
+          showsRows: view.showsRows,
+          selectionIndex: this._rowsChoice.slotIn(el.rawRows),
+          decoration,
+          required: (slot) => this.hooks?.required(slot) ?? false,
+          held: (slot) => this.hooks?.held(slot) ?? false,
+          bottom:
+            bottom === null
+              ? nothing
+              : bottom.render({ view: visible, cols: view.cols, layout, rulerTicks: view.rulerTicks }),
         },
-        selectionSemantics: giverIdOf(el) !== '',
-        showSearch: el.search,
-        searchText: this._view.searchText,
-        sortColumn: this._view.sortColumn,
-        sortAscending: this._view.sortAscending,
-        rows: view.rows,
-        keyOf: (rawIndex) => this.keyOf(rawIndex),
-        valueAt: (row, column) => this.cellValue(row, column),
-        rulerTicks: view.rulerTicks,
-        showsRows: view.showsRows,
-        selectionIndex: this._rowsChoice.slotIn(el.rawRows),
-        decoration,
-        required: (slot) => this.hooks?.required(slot) ?? false,
-        held: (slot) => this.hooks?.held(slot) ?? false,
-        bottom: bottom === null
-          ? nothing
-          : bottom.render({ view: visible, cols: view.cols, layout, rulerTicks: view.rulerTicks }),
-      }, {
-        setSearchText: (text) => this._view.setSearchText(text),
-        openColumnPicker: (e) => this.openColumnPicker(e),
-        columnPicker: {
-          toggle: (key) => this._choice.toggle(key),
-          showAll: () => this._choice.showAll(),
-          close: () => this._choice.close(),
+        {
+          setSearchText: (text) => this._view.setSearchText(text),
+          openColumnPicker: (e) => this.openColumnPicker(e),
+          columnPicker: {
+            toggle: (key) => this._choice.toggle(key),
+            showAll: () => this._choice.showAll(),
+            close: () => this._choice.close(),
+          },
+          widths: this._widths.hostForDrag(),
+          clickHead: (i) => this._view.clickSort(i),
+          activateRow: (rawIndex, viewIndex) => {
+            activateRow(el, this._rowsChoice, el.rawRows, rawIndex, viewIndex)
+            el.requestUpdate()
+          },
+          rowDouble: (rawIndex) => rowDouble(el, el.rawRows, rawIndex),
         },
-        widths: this._widths.hostForDrag(),
-        clickHead: (i) => this._view.clickSort(i),
-        activateRow: (rawIndex, viewIndex) => {
-          activateRow(el, this._rowsChoice, el.rawRows, rawIndex, viewIndex)
-          el.requestUpdate()
+      )}
+      ${tableFoot(
+        {
+          showsRows: view.showsRows,
+          visible: view.total,
+          total: el.dataRows.length,
+          searchesActive: this._view.searchesActive,
+          page: view.page,
+          pageCount: view.pageCount,
+          paging: el.paging,
+          totals: view.totals,
+          empty: view.empty,
         },
-        rowDouble: (rawIndex) => rowDouble(el, el.rawRows, rawIndex),
-      })}
-      ${tableFoot({
-        showsRows: view.showsRows,
-        visible: view.total,
-        total: el.dataRows.length,
-        searchesActive: this._view.searchesActive,
-        page: view.page,
-        pageCount: view.pageCount,
-        paging: el.paging,
-        totals: view.totals,
-        empty: view.empty,
-      }, {
-        page: (to) => this._view.goToPage(to),
-      })}
+        {
+          page: (to) => this._view.goToPage(to),
+        },
+      )}
     </div>`
   }
 }

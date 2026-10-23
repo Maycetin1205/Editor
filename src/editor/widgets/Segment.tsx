@@ -16,13 +16,7 @@ interface SegmentProps {
   onChoose: (value: string) => void
 }
 
-export function Segment({
-  name,
-  options,
-  value,
-  id,
-  onChoose,
-}: SegmentProps) {
+export function Segment({ name, options, value, id, onChoose }: SegmentProps) {
   return (
     <div
       id={id}
@@ -45,9 +39,7 @@ export function Segment({
               'flex h-full shrink-0 items-center justify-center whitespace-nowrap rounded-[var(--radius-small)] text-ui font-semibold transition-colors',
               'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent',
               o.icon === undefined ? 'px-[10px]' : 'px-[7px]',
-              chosen
-                ? 'bg-accent text-panel'
-                : 'text-muted hover:bg-hover hover:text-ink',
+              chosen ? 'bg-accent text-panel' : 'text-muted hover:bg-hover hover:text-ink',
             )}
           >
             {o.icon ?? o.name}

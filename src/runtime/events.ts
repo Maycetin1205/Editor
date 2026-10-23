@@ -19,8 +19,9 @@ const running = new WeakMap<HTMLElement, Set<string>>()
 type RowsCarrier = HTMLElement
 
 export function searchCarrier(root: ParentNode, blockId: string): RowsCarrier | undefined {
-  return Array.from(root.querySelectorAll<HTMLElement>(`[${BLOCK_ID_ATTR}]`))
-    .find((el) => el.getAttribute(BLOCK_ID_ATTR) === blockId)
+  return Array.from(root.querySelectorAll<HTMLElement>(`[${BLOCK_ID_ATTR}]`)).find(
+    (el) => el.getAttribute(BLOCK_ID_ATTR) === blockId,
+  )
 }
 
 interface RunRow {
@@ -74,23 +75,27 @@ function bookedRows(raw: readonly { record: string; values: readonly string[] }[
 function rowsOfList(carrier: RowsCarrier, kind: PendingKind): ListRun | undefined {
   if (kind === 'captured') {
     const capture = contractOf(carrier, 'capture')
-    return capture && {
-      report: capture,
-      rows: capture.capturedRows.map((values, slot) => ({
-        record: '',
-        key: capture.capturedKey[slot] ?? String(slot),
-        values,
-        picks: capture.capturedPicks[slot] ?? [],
-      })),
-      open: (key) => capture.capturedKey.includes(key),
-    }
+    return (
+      capture && {
+        report: capture,
+        rows: capture.capturedRows.map((values, slot) => ({
+          record: '',
+          key: capture.capturedKey[slot] ?? String(slot),
+          values,
+          picks: capture.capturedPicks[slot] ?? [],
+        })),
+        open: (key) => capture.capturedKey.includes(key),
+      }
+    )
   }
   const change = contractOf(carrier, 'change')
-  return change && {
-    report: change,
-    rows: bookedRows(change.changedRows),
-    open: (key) => change.changedRows.some((row) => row.record === key),
-  }
+  return (
+    change && {
+      report: change,
+      rows: bookedRows(change.changedRows),
+      open: (key) => change.changedRows.some((row) => row.record === key),
+    }
+  )
 }
 
 function rowsContext(context: PlaceholderValues, row: RunRow): PlaceholderValues {
@@ -108,11 +113,13 @@ async function conditionHolds(condition: StepCondition | undefined): Promise<boo
   await sourceSettled(condition.sourceId)
   const source = maskState.host.source(condition.sourceId)
   const rows = source === undefined ? 0 : maskState.host.rows(source).length
-  return (rows > 0) === condition.rows
+  return rows > 0 === condition.rows
 }
 
 function readsPick(step: RuntimeStep): boolean {
-  return stepAdapter(step.kind).bindings(step).some((b) => b.source === 'splitCell')
+  return stepAdapter(step.kind)
+    .bindings(step)
+    .some((b) => b.source === 'splitCell')
 }
 
 function pickValues(pick: CapturedPick): PickValues {
@@ -158,18 +165,21 @@ async function runSteps(
 
   const rawResults: unknown[] = steps.map((_, i) => start?.rawResults[i])
   const transcript = (): Transcript => ({
-    values, stepResults, rawResults, previousResult,
+    values,
+    stepResults,
+    rawResults,
+    previousResult,
   })
   const own = giverIdOf(el)
   const chosenAtStart = own === '' ? undefined : selectionFor(own)
   const chosenRow = (giverId: string): unknown =>
-    (own !== '' && giverId === own ? chosenAtStart : selectionFor(giverId))
+    own !== '' && giverId === own ? chosenAtStart : selectionFor(giverId)
   const runs = (slot: number): number => (readsPick(steps[slot]) ? picks.length : 1)
-  const laterRuns = (slot: number): boolean => steps.some((_, later) =>
-    later > slot && (!only || only.has(later)) && runs(later) > 0)
+  const laterRuns = (slot: number): boolean =>
+    steps.some((_, later) => later > slot && (!only || only.has(later)) && runs(later) > 0)
   for (const [slot, step] of steps.entries()) {
     if (only && !only.has(slot)) continue
-    if (!await conditionHolds(step.onlyIf)) continue
+    if (!(await conditionHolds(step.onlyIf))) continue
     const rounds: (CapturedPick | undefined)[] = readsPick(step) ? [...picks] : [undefined]
     for (const pick of rounds) {
       const outcome = await stepAdapter(step.kind).run(step, {
@@ -337,9 +347,7 @@ async function runSections(
     let transcript: Transcript | undefined
     for (const section of sections) {
       if (section.kind === 'once') {
-        const result = await runSteps(
-          el, steps, context, undefined, section.slots, transcript,
-        )
+        const result = await runSteps(el, steps, context, undefined, section.slots, transcript)
         transcript = result.transcript
         take(result)
         if (stopped) break
@@ -361,10 +369,16 @@ async function runSections(
 
         let result: RunResult
         try {
-          result = await runSteps(el, steps, rowsContext(context, row),
-            (blockId, columnsIndex) =>
-              (blockId === section.blockId ? String(row.values[columnsIndex] ?? '') : ''),
-            section.slots, transcript, row.key, row.picks)
+          result = await runSteps(
+            el,
+            steps,
+            rowsContext(context, row),
+            (blockId, columnsIndex) => (blockId === section.blockId ? String(row.values[columnsIndex] ?? '') : ''),
+            section.slots,
+            transcript,
+            row.key,
+            row.picks,
+          )
         } catch (error) {
           list.report.rowFailed(section.kind, row.key)
           throw error
@@ -374,12 +388,14 @@ async function runSections(
           list.report.rowFailed(section.kind, row.key, result.reason)
           break
         }
-        list.report.runDone(section.kind, [{
-          key: row.key,
-          record: recordOfRun(result, row),
-          shown: result.shown,
-          ...(result.booked === undefined ? {} : { row: result.booked }),
-        }])
+        list.report.runDone(section.kind, [
+          {
+            key: row.key,
+            record: recordOfRun(result, row),
+            shown: result.shown,
+            ...(result.booked === undefined ? {} : { row: result.booked }),
+          },
+        ])
       }
       if (stopped) break
     }

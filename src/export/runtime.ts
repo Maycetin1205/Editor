@@ -9,9 +9,10 @@ interface RuntimeParts {
 
 const PARTS = JSON.parse(partsRaw) as RuntimeParts
 
-const LOADER = 'var d={},c={};'
-  + 'function __ff(e,o){for(var k in o)Object.defineProperty(e,k,{enumerable:!0,get:o[k]})}'
-  + 'function r(n){var m=c[n];if(!m){m=c[n]={exports:{}};d[n](r,m,m.exports)}return m.exports}'
+const LOADER =
+  'var d={},c={};' +
+  'function __ff(e,o){for(var k in o)Object.defineProperty(e,k,{enumerable:!0,get:o[k]})}' +
+  'function r(n){var m=c[n];if(!m){m=c[n]={exports:{}};d[n](r,m,m.exports)}return m.exports}'
 
 export function runtimeFor(types: Iterable<string>): string {
   const wanted = new Set(types)
@@ -30,7 +31,8 @@ export function runtimeFor(types: Iterable<string>): string {
   }
   starts.forEach((type) => visit(PARTS.blocks[type]))
 
-  const defined = [...needed].sort((a, b) => a - b)
+  const defined = [...needed]
+    .sort((a, b) => a - b)
     .map((id) => `d[${id}]=function(require,module,exports){${PARTS.chunks[id].code}\n};`)
   const started = starts.map((type) => `r(${PARTS.blocks[type]});`)
   return `(function(){${LOADER}\n${defined.join('\n')}\n${started.join('')}})();`

@@ -10,8 +10,21 @@ import { encodeOrigin } from '../origin/origins'
 import { entryGroups, originGroups, originText, pairsText, signOf, type Names } from './calculationWords'
 
 export function TermLine({
-  nr, term, adds, names, origin, entry, on, open,
-  onSelect, onOpen, onSign, onOrigin, onTake, onType, onRemove,
+  nr,
+  term,
+  adds,
+  names,
+  origin,
+  entry,
+  on,
+  open,
+  onSelect,
+  onOpen,
+  onSign,
+  onOrigin,
+  onTake,
+  onType,
+  onRemove,
 }: {
   nr: number
   term: Term
@@ -40,70 +53,72 @@ export function TermLine({
     <tr onClick={onSelect} className={cn('group cursor-default', on ? MARKED : LINE_HOVER)}>
       <td className={cn(TD, 'px-[10px] text-right font-mono text-dense', !on && 'text-muted')}>{nr}</td>
       <td className={cn(TD, 'px-[6px]')}>
-        {on
-          ? (
-              <Segment
-                name="Zeichen"
-                options={[{ value: 'times', name: signOf(signs, false) }, { value: 'divides', name: signOf(signs, true) }]}
-                value={term.divides ? 'divides' : 'times'}
-                onChoose={(v) => onSign(v === 'divides')}
-              />
-            )
-          : <span className="block px-[4px] font-mono">{sign}</span>}
+        {on ? (
+          <Segment
+            name="Zeichen"
+            options={[
+              { value: 'times', name: signOf(signs, false) },
+              { value: 'divides', name: signOf(signs, true) },
+            ]}
+            value={term.divides ? 'divides' : 'times'}
+            onChoose={(v) => onSign(v === 'divides')}
+          />
+        ) : (
+          <span className="block px-[4px] font-mono">{sign}</span>
+        )}
       </td>
       <td className={cn(TD, !on && 'text-muted')}>
-        {on
-          ? (
-              <ChoiceCell
-                label={originText(origin, names)}
-                on={on}
-                open={open === 'origin'}
-                groups={() => originGroups(names)}
-                value={origin}
-                cellRef={originRef}
-                onOpen={(o) => onOpen(o ? 'origin' : null)}
-                onChoose={onOrigin}
-              />
-            )
-          : <span className="block truncate px-[10px]">{originText(origin, names)}</span>}
+        {on ? (
+          <ChoiceCell
+            label={originText(origin, names)}
+            on={on}
+            open={open === 'origin'}
+            groups={() => originGroups(names)}
+            value={origin}
+            cellRef={originRef}
+            onOpen={(o) => onOpen(o ? 'origin' : null)}
+            onChoose={onOrigin}
+          />
+        ) : (
+          <span className="block truncate px-[10px]">{originText(origin, names)}</span>
+        )}
       </td>
       <td className={cn(TD, 'relative')}>
-        {on && typed
-          ? (
-              <input
-                aria-label={`Größe ${nr}`}
-                autoFocus
-                inputMode="decimal"
-                value={term.kind === 'fixed' ? term.value : ''}
-                spellCheck={false}
-                onChange={(e) => onType(e.currentTarget.value)}
-                className={cn(INPUT, 'font-mono')}
-              />
-            )
-          : on && listed
-            ? (
-                <ChoiceCell
-                  label={entry}
-                  on={on}
-                  open={open === 'entry'}
-                  groups={() => entryGroups(origin, names)}
-                  value={term.kind === 'units' ? '' : encodeOrigin(term)}
-                  cellRef={entryRef}
-                  onOpen={(o) => onOpen(o ? 'entry' : null)}
-                  onChoose={onTake}
-                />
-              )
-            : (
-                <span className={cn('block truncate px-[10px]', term.kind === 'units' && !on && 'text-muted')}>
-                  {term.kind === 'units' ? pairsText(term) : entry}
-                </span>
-              )}
+        {on && typed ? (
+          <input
+            aria-label={`Größe ${nr}`}
+            autoFocus
+            inputMode="decimal"
+            value={term.kind === 'fixed' ? term.value : ''}
+            spellCheck={false}
+            onChange={(e) => onType(e.currentTarget.value)}
+            className={cn(INPUT, 'font-mono')}
+          />
+        ) : on && listed ? (
+          <ChoiceCell
+            label={entry}
+            on={on}
+            open={open === 'entry'}
+            groups={() => entryGroups(origin, names)}
+            value={term.kind === 'units' ? '' : encodeOrigin(term)}
+            cellRef={entryRef}
+            onOpen={(o) => onOpen(o ? 'entry' : null)}
+            onChoose={onTake}
+          />
+        ) : (
+          <span className={cn('block truncate px-[10px]', term.kind === 'units' && !on && 'text-muted')}>
+            {term.kind === 'units' ? pairsText(term) : entry}
+          </span>
+        )}
         <button
           type="button"
           tabIndex={-1}
           aria-label={`Größe ${nr} entfernen`}
           title="Entfernen"
-          onClick={(e) => { e.stopPropagation(); onRemove() }}
+          onClick={(e) => {
+            e.stopPropagation()
+            onRemove()
+          }}
           className={binArea(on)}
         >
           <Trash2 size={13} />

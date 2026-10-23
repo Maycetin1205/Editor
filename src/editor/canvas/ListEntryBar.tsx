@@ -54,8 +54,18 @@ interface ListEntryBarProps {
 }
 
 export function ListEntryBar({
-  editor, block, listBinding, pick, sources, groups, sourceFromProp, hasFields, sourcesChoice,
-  searchWindow, element, onClose,
+  editor,
+  block,
+  listBinding,
+  pick,
+  sources,
+  groups,
+  sourceFromProp,
+  hasFields,
+  sourcesChoice,
+  searchWindow,
+  element,
+  onClose,
 }: ListEntryBarProps) {
   const entriesOf = (): unknown[] => listBinding.entries(block.values[listBinding.prop])
 
@@ -92,12 +102,14 @@ export function ListEntryBar({
 
   const perSource = sourceFromProp !== undefined
   const listGroups: PickerGroup[] = perSource
-    ? [{
-        sourceId: '',
-        name: sourceFromProp.name,
-        badge: sourcesKey(sourceFromProp),
-        fields: sourceFromProp.fields,
-      }]
+    ? [
+        {
+          sourceId: '',
+          name: sourceFromProp.name,
+          badge: sourcesKey(sourceFromProp),
+          fields: sourceFromProp.fields,
+        },
+      ]
     : groups
   const titleNow = listBinding.titleOf(entry)
   const defaultTitle = listDefaultTitle(listBinding, pick.index)
@@ -142,9 +154,13 @@ export function ListEntryBar({
         switches={[]}
         actions={[]}
         removeLabel={`${innerBinding.defaultTitle.replace(/\s*\{n\}/, '')} entfernen`}
-        onRemove={innerBinding.entryRemove === undefined ? undefined : () => {
-          if (writeInner((inner) => innerBinding.entryRemove?.(inner, at) ?? null)) onClose()
-        }}
+        onRemove={
+          innerBinding.entryRemove === undefined
+            ? undefined
+            : () => {
+                if (writeInner((inner) => innerBinding.entryRemove?.(inner, at) ?? null)) onClose()
+              }
+        }
         onClose={onClose}
       />
     )
@@ -158,34 +174,42 @@ export function ListEntryBar({
       block={block}
       at={pick}
       name={titleNow === '' ? defaultTitle : titleNow}
-      fields={!hasFields || listBinding.fieldless === true ? [] : [
-        { key: 'field', label: 'Feld', current: listBinding.fieldOf(entry), onChoose: pickField },
-        ...fieldChoicesRead(listBinding, entry).map(({ choice, value }) => ({
-          key: choice.key,
-          label: choice.name,
-          current: value,
-          onlyForeignSources: choice.onlyForeignSources,
-          onChoose: (next: string) => writeInEntry((e) => choice.withValue(e, next, next === '' ? defaultTitle : plainName(next))),
-        })),
-      ]}
+      fields={
+        !hasFields || listBinding.fieldless === true
+          ? []
+          : [
+              { key: 'field', label: 'Feld', current: listBinding.fieldOf(entry), onChoose: pickField },
+              ...fieldChoicesRead(listBinding, entry).map(({ choice, value }) => ({
+                key: choice.key,
+                label: choice.name,
+                current: value,
+                onlyForeignSources: choice.onlyForeignSources,
+                onChoose: (next: string) =>
+                  writeInEntry((e) => choice.withValue(e, next, next === '' ? defaultTitle : plainName(next))),
+              })),
+            ]
+      }
       groups={listGroups}
       sourcesChoice={perSource ? undefined : sourcesChoice}
       nameOf={nameWithSource}
       entries={[
-        ...(innerBinding && innerList.length === 1
-          ? [innerGroup(0, innerBinding, innerList[0])]
-          : []),
-        ...(listBinding.entryProperties === undefined ? [] : [{
-          properties: Object.entries(listBinding.entryProperties),
-          access: {
-            values: entryValues(listBinding, entry),
-            set: (key: string, value: unknown) => editor.updateProperty(
-              block.id,
-              listBinding.prop,
-              entriesWithValue(listBinding, entriesOf(), pick.index, key, value),
-            ),
-          },
-        }]),
+        ...(innerBinding && innerList.length === 1 ? [innerGroup(0, innerBinding, innerList[0])] : []),
+        ...(listBinding.entryProperties === undefined
+          ? []
+          : [
+              {
+                properties: Object.entries(listBinding.entryProperties),
+                access: {
+                  values: entryValues(listBinding, entry),
+                  set: (key: string, value: unknown) =>
+                    editor.updateProperty(
+                      block.id,
+                      listBinding.prop,
+                      entriesWithValue(listBinding, entriesOf(), pick.index, key, value),
+                    ),
+                },
+              },
+            ]),
         ...(listBinding.entryChoice ?? []).map((choice) => ({
           properties: [[choice.key, choice.property] as const],
           access: {
@@ -201,35 +225,53 @@ export function ListEntryBar({
         onToggle: (on) => writeInEntry((e) => s.withValue(e, on)),
       }))}
       actions={[
-        ...(!innerBinding || innerAdd === undefined ? [] : [{
-          label: `${innerBinding.defaultTitle.replace(/\s*\{n\}/, '')} anfügen`,
-          icon: ListPlus,
-          onOpen: () => { writeInner((inner) => innerAdd(inner)) },
-        }]),
-        ...(searchWindow === undefined ? [] : [{
-          label: 'Nachschlagen',
-          icon: Search,
-          onOpen: () => {
-            if (element) openLookupInEditor(editor, element, block.id, searchWindow, pick.index)
-            onClose()
-          },
-        }]),
-        ...(!canCompute(block) || column === '' ? [] : [{
-          label: 'Berechnung',
-          icon: Calculator,
-          onOpen: () => {
-            editor.openCalculation({ blockId: block.id, column })
-            onClose()
-          },
-        }]),
+        ...(!innerBinding || innerAdd === undefined
+          ? []
+          : [
+              {
+                label: `${innerBinding.defaultTitle.replace(/\s*\{n\}/, '')} anfügen`,
+                icon: ListPlus,
+                onOpen: () => {
+                  writeInner((inner) => innerAdd(inner))
+                },
+              },
+            ]),
+        ...(searchWindow === undefined
+          ? []
+          : [
+              {
+                label: 'Nachschlagen',
+                icon: Search,
+                onOpen: () => {
+                  if (element) openLookupInEditor(editor, element, block.id, searchWindow, pick.index)
+                  onClose()
+                },
+              },
+            ]),
+        ...(!canCompute(block) || column === ''
+          ? []
+          : [
+              {
+                label: 'Berechnung',
+                icon: Calculator,
+                onOpen: () => {
+                  editor.openCalculation({ blockId: block.id, column })
+                  onClose()
+                },
+              },
+            ]),
       ]}
       removeLabel={`${listBinding.defaultTitle.replace(/\s*\{n\}/, '')} entfernen`}
-      onRemove={listBinding.entryRemove === undefined ? undefined : () => {
-        const next = listBinding.entryRemove?.(entriesOf(), pick.index) ?? null
-        if (next === null) return
-        editor.updateProperty(block.id, listBinding.prop, next)
-        onClose()
-      }}
+      onRemove={
+        listBinding.entryRemove === undefined
+          ? undefined
+          : () => {
+              const next = listBinding.entryRemove?.(entriesOf(), pick.index) ?? null
+              if (next === null) return
+              editor.updateProperty(block.id, listBinding.prop, next)
+              onClose()
+            }
+      }
       onClose={onClose}
     />
   )

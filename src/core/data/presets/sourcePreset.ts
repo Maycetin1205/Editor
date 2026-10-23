@@ -49,14 +49,9 @@ export interface SourcePreset<P extends PresetId> {
   writes: boolean
 }
 
-export function descriptorFor<P extends PresetId>(
-  preset: SourcePreset<P>,
-  choice: SourceChoice,
-): SourceDescriptor {
+export function descriptorFor<P extends PresetId>(preset: SourcePreset<P>, choice: SourceChoice): SourceDescriptor {
   const recordField = choice.recordField.trim()
-  const write: Write = preset.writes && recordField !== ''
-    ? { kind: 'putRelation', recordField }
-    : { kind: 'none' }
+  const write: Write = preset.writes && recordField !== '' ? { kind: 'putRelation', recordField } : { kind: 'none' }
   if (preset.fetches && choice.load) {
     return { order: { kind: 'none' }, delivery: { kind: 'relationRows', ...choice.load }, write }
   }

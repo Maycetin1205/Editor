@@ -51,7 +51,7 @@ export function EntryActions({ block }: { block: BlockNode }) {
   }
 
   for (const entry of entryChainsOf(block)) {
-    const steps = entry.key === undefined ? 0 : block.chains?.[entry.key]?.length ?? 0
+    const steps = entry.key === undefined ? 0 : (block.chains?.[entry.key]?.length ?? 0)
     if (entry.key === undefined || steps === 0) {
       quiet.push(entry)
       continue

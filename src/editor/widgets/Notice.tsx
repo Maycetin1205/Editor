@@ -20,14 +20,23 @@ export function Notice({ notice, onClose }: { notice: NoticeText; onClose: () =>
       title={notice.title}
       width={460}
       level={60}
-      foot={(
+      foot={
         <>
           {action && (
-            <Button onClick={() => { onClose(); action.run() }}>{action.label}</Button>
+            <Button
+              onClick={() => {
+                onClose()
+                action.run()
+              }}
+            >
+              {action.label}
+            </Button>
           )}
-          <Button kind="primary" autoFocus onClick={onClose}>OK</Button>
+          <Button kind="primary" autoFocus onClick={onClose}>
+            OK
+          </Button>
         </>
-      )}
+      }
       onClose={onClose}
     >
       <div className="min-h-0 flex-1 overflow-y-auto px-[22px] py-[16px] text-ui text-ink-2">

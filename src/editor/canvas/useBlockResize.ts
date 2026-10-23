@@ -13,8 +13,7 @@ export type Edge = 'n' | 'e' | 's' | 'w' | 'ne' | 'se' | 'sw' | 'nw'
 
 export const GRIPS: readonly Edge[] = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw']
 
-const clamp = (value: number, low: number, high: number): number =>
-  Math.max(low, Math.min(value, Math.max(low, high)))
+const clamp = (value: number, low: number, high: number): number => Math.max(low, Math.min(value, Math.max(low, high)))
 
 export function useBlockResize(
   editor: EditorStore,
@@ -42,15 +41,14 @@ export function useBlockResize(
     const stepX = (rect.width / zoom + GRID.gapPx) / start.w
 
     const area = el.parentElement ? areaOf(el.parentElement) : null
-    const capacity = area && node.parentId
-      ? rowsCapacity(editor.tree, node.parentId, area)
-      : null
+    const capacity = area && node.parentId ? rowsCapacity(editor.tree, node.parentId, area) : null
     const { w: minW, h: minH } = leastSize(node, start.h)
 
     const grabRow = edge.includes('s') ? start.y + start.h - 1 : start.y
-    const rowAt = (ev: PointerEvent): number => area
-      ? cellFromPointer(area, ev.clientX, ev.clientY).y
-      : grabRow + Math.round((ev.clientY - e.clientY) / zoom / (GRID.rowPx + GRID.gapPx))
+    const rowAt = (ev: PointerEvent): number =>
+      area
+        ? cellFromPointer(area, ev.clientX, ev.clientY).y
+        : grabRow + Math.round((ev.clientY - e.clientY) / zoom / (GRID.rowPx + GRID.gapPx))
 
     const slotAt = (dx: number, row: number): GridSlot => {
       let { x, y, w, h } = start

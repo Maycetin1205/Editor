@@ -34,10 +34,7 @@ function isInstance<T>(el: Element, element: abstract new (...args: never[]) => 
   return el instanceof element
 }
 
-export function contractOf<A extends ContractKind>(
-  el: Element,
-  kind: A,
-): RuntimeContracts[A] | undefined {
+export function contractOf<A extends ContractKind>(el: Element, kind: A): RuntimeContracts[A] | undefined {
   const def = blockTypeForTag(el.tagName)
   if (!hasCapability(def, kind)) return undefined
   const element = def?.contracts?.[kind]

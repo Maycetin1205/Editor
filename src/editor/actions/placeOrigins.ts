@@ -53,9 +53,10 @@ export function placeGroups(raw: string, reach: Reach): ListGroup[] {
     ].filter((g) => g.entries.length > 0)
   }
   const origins = originsOf(reach)
-  const of = (kinds: readonly OriginKind[]) => origins
-    .filter((o) => kinds.includes(o.kind) && (o.kind !== 'source' || o.entries.length > 0))
-    .map((o) => ({ value: o.key, name: o.name }))
+  const of = (kinds: readonly OriginKind[]) =>
+    origins
+      .filter((o) => kinds.includes(o.kind) && (o.kind !== 'source' || o.entries.length > 0))
+      .map((o) => ({ value: o.key, name: o.name }))
   return [
     { key: 'fixed', entries: [fixed, ...of(['event'])] },
     { key: 'mask', name: 'Maske', entries: of(['captured', 'split', 'changed', 'chosenRow', 'step']) },
@@ -77,7 +78,11 @@ export function placeEntries(key: string, reach: Reach): ListGroup[] {
   const entries = key.startsWith(ADOPT)
     ? adoptFields(reach.sources ?? [])
         .filter((f) => `${ADOPT}${f.sourceId}` === key)
-        .map((f) => ({ value: JSON.stringify({ adopt: { sourceId: f.sourceId, code: f.code } }), name: f.label, badge: f.code }))
-    : originOf(key, reach)?.entries ?? []
+        .map((f) => ({
+          value: JSON.stringify({ adopt: { sourceId: f.sourceId, code: f.code } }),
+          name: f.label,
+          badge: f.code,
+        }))
+    : (originOf(key, reach)?.entries ?? [])
   return entries.length > 0 ? [{ key, entries }] : []
 }

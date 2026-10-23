@@ -7,10 +7,7 @@ interface EditSession {
   finish: () => void
 }
 
-export function useInputSession(
-  onBeginEditing?: () => void,
-  onEndEditing?: () => void,
-): EditSession {
+export function useInputSession(onBeginEditing?: () => void, onEndEditing?: () => void): EditSession {
   const bracket = useRef<GestureBracket | null>(null)
 
   const callbacks = useRef({ onBeginEditing, onEndEditing })

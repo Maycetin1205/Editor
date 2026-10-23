@@ -30,9 +30,5 @@ function SegmentField({ name, value, options, onChange, id }: SegmentControlProp
 export function SegmentControl({ label, ...rest }: SegmentControlProps) {
   if (!label) return <SegmentField {...rest} />
 
-  return (
-    <Row label={label}>
-      {(id) => <SegmentField {...rest} id={id} />}
-    </Row>
-  )
+  return <Row label={label}>{(id) => <SegmentField {...rest} id={id} />}</Row>
 }

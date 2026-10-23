@@ -41,7 +41,7 @@ export async function accessOf(handle: FileSystemHandle): Promise<'granted' | 'a
   const query = (handle as FileSystemHandle & Rights).queryPermission
   if (query === undefined) return 'granted'
   try {
-    return await query.call(handle, { mode: 'readwrite' }) === 'granted' ? 'granted' : 'ask'
+    return (await query.call(handle, { mode: 'readwrite' })) === 'granted' ? 'granted' : 'ask'
   } catch {
     return 'ask'
   }
@@ -51,13 +51,15 @@ export async function askAccess(handle: FileSystemHandle): Promise<boolean> {
   const request = (handle as FileSystemHandle & Rights).requestPermission
   if (request === undefined) return true
   try {
-    return await request.call(handle, { mode: 'readwrite' }) === 'granted'
+    return (await request.call(handle, { mode: 'readwrite' })) === 'granted'
   } catch {
     return false
   }
 }
 
-export function entriesOf(folder: FileSystemDirectoryHandle): AsyncIterable<FileSystemDirectoryHandle | FileSystemFileHandle> {
+export function entriesOf(
+  folder: FileSystemDirectoryHandle,
+): AsyncIterable<FileSystemDirectoryHandle | FileSystemFileHandle> {
   return (folder as FileSystemDirectoryHandle & Walkable).values()
 }
 
@@ -84,7 +86,7 @@ export function fileNameFrom(text: string, fallback: string): string {
 export async function freeFileName(folder: FileSystemDirectoryHandle, base: string, suffix: string): Promise<string> {
   for (let n = 1; ; n++) {
     const name = n === 1 ? `${base}${suffix}` : `${base} ${n}${suffix}`
-    if (await fileIn(folder, name) === null) return name
+    if ((await fileIn(folder, name)) === null) return name
   }
 }
 

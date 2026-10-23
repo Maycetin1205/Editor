@@ -4,7 +4,15 @@ import { Button, PRESSED } from '@/editor/widgets/Button'
 import { Popover } from '@/editor/widgets/Popover'
 import { LabelsShown } from './labelsShown'
 
-export function BarWindow({ label, icon, width = 340, defaultOpen = false, flush = false, onOpen, children }: {
+export function BarWindow({
+  label,
+  icon,
+  width = 340,
+  defaultOpen = false,
+  flush = false,
+  onOpen,
+  children,
+}: {
   label: string
   icon?: Icon
   width?: number
@@ -14,38 +22,32 @@ export function BarWindow({ label, icon, width = 340, defaultOpen = false, flush
   children: (close: () => void) => ReactNode
 }) {
   const [open, setOpen] = useState(defaultOpen)
-  useEffect(() => { if (open) onOpen?.() }, [open, onOpen])
+  useEffect(() => {
+    if (open) onOpen?.()
+  }, [open, onOpen])
   const button = useRef<HTMLButtonElement>(null)
   const toggle = () => setOpen(!open)
   const pressed = open ? PRESSED : undefined
   return (
     <>
-      {icon
-        ? (
-            <Button
-              ref={button}
-              onlyIcon
-              aria-label={label}
-              title={label}
-              aria-haspopup="dialog"
-              aria-expanded={open}
-              className={pressed}
-              onClick={toggle}
-            >
-              {createElement(icon, { size: 15 })}
-            </Button>
-          )
-        : (
-            <Button
-              ref={button}
-              aria-haspopup="dialog"
-              aria-expanded={open}
-              className={pressed}
-              onClick={toggle}
-            >
-              {label}
-            </Button>
-          )}
+      {icon ? (
+        <Button
+          ref={button}
+          onlyIcon
+          aria-label={label}
+          title={label}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          className={pressed}
+          onClick={toggle}
+        >
+          {createElement(icon, { size: 15 })}
+        </Button>
+      ) : (
+        <Button ref={button} aria-haspopup="dialog" aria-expanded={open} className={pressed} onClick={toggle}>
+          {label}
+        </Button>
+      )}
       {open && (
         <Popover name={label} anchor={button} width={width} maxHeight={480} onClose={() => setOpen(false)}>
           <LabelsShown.Provider value>

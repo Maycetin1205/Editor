@@ -30,7 +30,9 @@ const SYMBOLS: readonly { value: string; name: string; icon?: IconName }[] = [
 ]
 
 export function symbolProperty(init: LookInit = {}): Property<string> {
-  const options = SYMBOLS.map((s) => (s.icon ? { value: s.value, name: s.name, icon: ICON_PATHS[s.icon] } : { value: s.value, name: s.name }))
+  const options = SYMBOLS.map((s) =>
+    s.icon ? { value: s.value, name: s.name, icon: ICON_PATHS[s.icon] } : { value: s.value, name: s.name },
+  )
   return choiceProperty(options, { default: '', label: 'Symbol', attribute: 'symbol', ...init })
 }
 

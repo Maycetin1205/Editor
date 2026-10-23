@@ -18,8 +18,9 @@ export const popupClosePiece: StepPiece<'POPUP_CLOSE'> = { words: popupWords, ta
 export const popupTab: StepTabPiece = {
   key: 'POPUP',
   name: 'Popup',
-  start: (id, step) => (step?.kind === 'POPUP_OPEN' || step?.kind === 'POPUP_CLOSE'
-    ? step
-    : { id, kind: 'POPUP_OPEN', resultName: '', popupId: '' }),
+  start: (id, step) =>
+    step?.kind === 'POPUP_OPEN' || step?.kind === 'POPUP_CLOSE'
+      ? step
+      : { id, kind: 'POPUP_OPEN', resultName: '', popupId: '' },
   Body: PopupBody,
 }

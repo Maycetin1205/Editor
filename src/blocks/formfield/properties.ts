@@ -33,19 +33,22 @@ export const TICKED = 'J'
 export const UNTICKED = 'N'
 
 export const formFieldProperties = {
-  fieldType: choiceProperty([
-    { value: 'text', name: 'Text' },
-    { value: 'number', name: 'Zahl' },
-    { value: 'date', name: 'Datum' },
-    { value: 'time', name: 'Uhrzeit' },
-    { value: 'select', name: 'Auswahl' },
-    { value: 'checkbox', name: 'Ankreuzfeld' },
-    { value: 'search', name: 'Suche' },
-  ], {
-    default: 'text',
-    label: 'Feldtyp',
-    attribute: 'fieldtype',
-  }),
+  fieldType: choiceProperty(
+    [
+      { value: 'text', name: 'Text' },
+      { value: 'number', name: 'Zahl' },
+      { value: 'date', name: 'Datum' },
+      { value: 'time', name: 'Uhrzeit' },
+      { value: 'select', name: 'Auswahl' },
+      { value: 'checkbox', name: 'Ankreuzfeld' },
+      { value: 'search', name: 'Suche' },
+    ],
+    {
+      default: 'text',
+      label: 'Feldtyp',
+      attribute: 'fieldtype',
+    },
+  ),
   lookup: booleanProperty({
     default: false,
     label: 'Nachschlagen',

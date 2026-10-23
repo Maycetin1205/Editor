@@ -13,22 +13,22 @@ interface LibraryContent {
   relation: RelationTemplate[]
 }
 
-type LibraryResult =
-  | { ok: true; content: LibraryContent }
-  | { ok: false }
+type LibraryResult = { ok: true; content: LibraryContent } | { ok: false }
 
 export function packLibrary(content: LibraryContent): string {
-  return JSON.stringify(
-    {
-      kind: LIBRARY_FILE_KIND,
-      fileVersion: LIBRARY_FILE_VERSION,
-      schemaVersion: LIBRARY_SCHEMA_VERSION,
-      dataSources: content.dataSources,
-      relation: content.relation,
-    },
-    null,
-    2,
-  ) + '\n'
+  return (
+    JSON.stringify(
+      {
+        kind: LIBRARY_FILE_KIND,
+        fileVersion: LIBRARY_FILE_VERSION,
+        schemaVersion: LIBRARY_SCHEMA_VERSION,
+        dataSources: content.dataSources,
+        relation: content.relation,
+      },
+      null,
+      2,
+    ) + '\n'
+  )
 }
 
 export function saveLibraryAsFile(editor: EditorStore): void {
@@ -92,10 +92,7 @@ function addOn<T extends { id: string }>(
   return { list: added + replaced === 0 ? old : list, added, replaced }
 }
 
-export function missingOn<T extends { id: string }>(
-  old: readonly T[],
-  fromMask: readonly T[],
-): readonly T[] {
+export function missingOn<T extends { id: string }>(old: readonly T[], fromMask: readonly T[]): readonly T[] {
   const known = new Set(old.map((e) => e.id))
   const missing = fromMask.filter((e) => !known.has(e.id))
   return missing.length === 0 ? old : [...old, ...missing]

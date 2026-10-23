@@ -59,10 +59,7 @@ interface QueryAnswer {
   reason?: JobReason
 }
 
-type Wired =
-  | { kind: 'answer'; raw: unknown }
-  | { kind: 'unanswered' }
-  | { kind: 'unsent' }
+type Wired = { kind: 'answer'; raw: unknown } | { kind: 'unanswered' } | { kind: 'unsent' }
 
 interface Wire {
   fits: (raw: unknown) => boolean
@@ -104,7 +101,10 @@ function fitsToQuery(rows: readonly unknown[], fields: string): boolean {
   if (first === undefined || fields.trim() === '*') return true
   if (!isObject(first)) return false
   const key = Object.keys(first)
-  return fields.split(',').map((f) => f.trim()).filter((f) => f !== '')
+  return fields
+    .split(',')
+    .map((f) => f.trim())
+    .filter((f) => f !== '')
     .some((f) => key.some((k) => k === f || k.endsWith(`_${f}`)))
 }
 
@@ -135,12 +135,16 @@ class HostQueue {
 
   watch(listener: (job: JobView) => void): () => void {
     this.watchers.add(listener)
-    return () => { this.watchers.delete(listener) }
+    return () => {
+      this.watchers.delete(listener)
+    }
   }
 
   watchConnection(listener: (lost: boolean) => void): () => void {
     this.connectionWatchers.add(listener)
-    return () => { this.connectionWatchers.delete(listener) }
+    return () => {
+      this.connectionWatchers.delete(listener)
+    }
   }
 
   relation(template: RuntimeRelation, params: readonly string[], options: RunOptions = {}): Promise<RunAnswer> {
@@ -151,31 +155,49 @@ class HostQueue {
         this.end(job, state, answer)
         resolve(answer)
       }
-      job.drop = () => { end('dropped', failedAnswer(STALE)) }
-      job.fail = (reason) => { end('failed', failedAnswer(reason)) }
-      job.start = art === 'get'
-        ? () => { this.startGet(job, template, params, options.recordAnswer === true, end, options.selibGet === true) }
-        : () => {
-          this.runPut(job, template, params, options, end).catch((error: unknown) => {
-            warn(`${job.view.question}: Ablauf gescheitert`, error)
-            if (job.view.state === 'sent') end('unconfirmed', unconfirmedAnswer(NO_CONFIRMATION))
-            else end('failed', failedAnswer(NOT_CONNECTED))
-          })
-        }
+      job.drop = () => {
+        end('dropped', failedAnswer(STALE))
+      }
+      job.fail = (reason) => {
+        end('failed', failedAnswer(reason))
+      }
+      job.start =
+        art === 'get'
+          ? () => {
+              this.startGet(job, template, params, options.recordAnswer === true, end, options.selibGet === true)
+            }
+          : () => {
+              this.runPut(job, template, params, options, end).catch((error: unknown) => {
+                warn(`${job.view.question}: Ablauf gescheitert`, error)
+                if (job.view.state === 'sent') end('unconfirmed', unconfirmedAnswer(NO_CONFIRMATION))
+                else end('failed', failedAnswer(NOT_CONNECTED))
+              })
+            }
       this.enqueue(job)
     })
   }
 
-  query(query: RuntimeQuery, name: string, keys: QueryKeys = ALL_RECORDS, options: RunOptions = {}): Promise<QueryAnswer> {
+  query(
+    query: RuntimeQuery,
+    name: string,
+    keys: QueryKeys = ALL_RECORDS,
+    options: RunOptions = {},
+  ): Promise<QueryAnswer> {
     const job = this.newJob('query', `ERPAPICALL[${query.id}!${query.fields}]`, options)
     return new Promise((resolve) => {
       const end = (state: JobState, answer: QueryAnswer): void => {
         this.end(job, state, answer.reason === undefined ? {} : { reason: answer.reason })
         resolve(answer)
       }
-      job.drop = () => { end('dropped', { reason: STALE }) }
-      job.fail = (reason) => { end('failed', { reason }) }
-      job.start = () => { this.startQuery(job, query, name, keys, end) }
+      job.drop = () => {
+        end('dropped', { reason: STALE })
+      }
+      job.fail = (reason) => {
+        end('failed', { reason })
+      }
+      job.start = () => {
+        this.startQuery(job, query, name, keys, end)
+      }
       this.enqueue(job)
     })
   }
@@ -183,10 +205,12 @@ class HostQueue {
   cancel(which: number | string): void {
     if (which === 0 || which === '') return
     const hits = (job: Job): boolean =>
-      (typeof which === 'number' ? job.view.generation === which : job.view.origin === which)
+      typeof which === 'number' ? job.view.generation === which : job.view.origin === which
     const stale = this.waiting.filter(hits)
     for (const job of stale) this.waiting.splice(this.waiting.indexOf(job), 1)
-    stale.forEach((job) => { job.drop() })
+    stale.forEach((job) => {
+      job.drop()
+    })
     const current = this.current
     if (current !== null && current.view.art !== 'put' && hits(current)) current.drop()
   }
@@ -247,7 +271,9 @@ class HostQueue {
 
   private keepPauseClock(): void {
     if (this.pauseClock !== null || this.waiting.length === 0) return
-    this.pauseClock = setInterval(() => { this.expireWaiting() }, PAUSE_CHECK_MS)
+    this.pauseClock = setInterval(() => {
+      this.expireWaiting()
+    }, PAUSE_CHECK_MS)
   }
 
   private stopPauseClock(): void {
@@ -260,7 +286,9 @@ class HostQueue {
     const now = Date.now()
     const late = this.waiting.filter((job) => now - job.view.queuedAt >= ANSWER_WAIT_MS)
     for (const job of late) this.waiting.splice(this.waiting.indexOf(job), 1)
-    late.forEach((job) => { job.fail(NO_ANSWER) })
+    late.forEach((job) => {
+      job.fail(NO_ANSWER)
+    })
     if (this.waiting.length === 0) this.stopPauseClock()
   }
 
@@ -313,7 +341,10 @@ class HostQueue {
     if (this.listening !== null) return
     const offAnswer = onSeAnswer(this.answered)
     const offArrival = onSeArrival(this.arrived)
-    this.listening = () => { offAnswer(); offArrival() }
+    this.listening = () => {
+      offAnswer()
+      offArrival()
+    }
   }
 
   private rest(): void {
@@ -347,7 +378,12 @@ class HostQueue {
     this.resume()
   }
 
-  private ask(verb: string, body: Record<string, unknown>, fits: (raw: unknown) => boolean, onSent?: () => void): Promise<Wired> {
+  private ask(
+    verb: string,
+    body: Record<string, unknown>,
+    fits: (raw: unknown) => boolean,
+    onSent?: () => void,
+  ): Promise<Wired> {
     return new Promise((settle) => {
       const g = seWindow()
       if (typeof g.basisHTML_SND_MSG !== 'function') {
@@ -391,14 +427,16 @@ class HostQueue {
     const body = selibGet
       ? { NR: template.nr, PARAMS: [...params], ALIAS: 'SEGet', ALS_ARRAY: 'false' }
       : { NR: template.nr, PARAMS: [...params] }
-    void this.ask('GET_RELATION', body, fits, () => { this.sent(job) })
+    void this.ask('GET_RELATION', body, fits, () => {
+      this.sent(job)
+    })
       .then((wired) => {
         if (job.view.state === 'dropped') return
         if (wired.kind === 'unsent') return end('failed', failedAnswer(NOT_CONNECTED))
         if (wired.kind === 'unanswered') return end('failed', failedAnswer(NO_ANSWER))
         const refusal = refusalOf(wired.raw)
         if (refusal !== undefined) return end('failed', failedAnswer(refused(refusal), wired.raw))
-        const value = recordAnswer ? extractRecordAnswer(wired.raw) ?? '' : resultFromAnswer(wired.raw)
+        const value = recordAnswer ? (extractRecordAnswer(wired.raw) ?? '') : resultFromAnswer(wired.raw)
         end('done', { value, raw: wired.raw })
       })
       .catch((error: unknown) => {
@@ -426,17 +464,21 @@ class HostQueue {
       ...(documentKind === '' ? {} : { BELART: documentKind }),
       ...(address === '' ? {} : { VON_ADRNR: address, BIS_ADRNR: address }),
     }
-    void this.ask('ERPAPICALL', body, fits, () => { this.sent(job) }).then((wired) => {
-      if (job.view.state === 'dropped') return
-      if (wired.kind === 'unsent') return end('failed', { reason: NOT_CONNECTED })
-      if (wired.kind === 'unanswered') return end('failed', { reason: NO_ANSWER })
-      const refusal = refusalOf(wired.raw)
-      if (refusal !== undefined) return end('failed', { reason: refused(refusal) })
-      end('done', { rows: rowsFromQueryAnswer(wired.raw) ?? [] })
-    }).catch((error: unknown) => {
-      warn(`${job.view.question}: Antwort nicht lesbar`, error)
-      end('failed', { reason: NO_ANSWER })
+    void this.ask('ERPAPICALL', body, fits, () => {
+      this.sent(job)
     })
+      .then((wired) => {
+        if (job.view.state === 'dropped') return
+        if (wired.kind === 'unsent') return end('failed', { reason: NOT_CONNECTED })
+        if (wired.kind === 'unanswered') return end('failed', { reason: NO_ANSWER })
+        const refusal = refusalOf(wired.raw)
+        if (refusal !== undefined) return end('failed', { reason: refused(refusal) })
+        end('done', { rows: rowsFromQueryAnswer(wired.raw) ?? [] })
+      })
+      .catch((error: unknown) => {
+        warn(`${job.view.question}: Antwort nicht lesbar`, error)
+        end('failed', { reason: NO_ANSWER })
+      })
   }
 
   private positionsWatch(confirm: PutConfirm): PositionsWatch {
@@ -450,13 +492,14 @@ class HostQueue {
       OHNE_LEERFELDER: POSITIONS_QUERY.withoutEmpty,
       FELDER: fields,
     }
-    const match = confirm.kind === 'removed'
-      ? (rows: readonly unknown[]): Hit | undefined =>
-        (positionGone(rows, confirm, known, fieldRead) ? { kind: 'removed' } : undefined)
-      : (rows: readonly unknown[]): Hit | undefined => {
-        const row = writtenPosition(rows, confirm, known, fieldRead)
-        return row === undefined ? undefined : { kind: 'added', row }
-      }
+    const match =
+      confirm.kind === 'removed'
+        ? (rows: readonly unknown[]): Hit | undefined =>
+            positionGone(rows, confirm, known, fieldRead) ? { kind: 'removed' } : undefined
+        : (rows: readonly unknown[]): Hit | undefined => {
+            const row = writtenPosition(rows, confirm, known, fieldRead)
+            return row === undefined ? undefined : { kind: 'added', row }
+          }
     return { confirm, shape, body, fields, match }
   }
 
@@ -531,17 +574,23 @@ class HostQueue {
 
     const deadline = Date.now() + WRITE_WAIT_MS
     const told = (): boolean => signal.arrived || signal.refusal !== undefined || signal.answer !== undefined
-    const nap = (ms: number): Promise<typeof NAPPED> => new Promise((done) => {
-      if (told()) {
-        done(NAPPED)
-        return
-      }
-      const clock = setTimeout(() => { done(NAPPED) }, Math.max(0, ms))
-      signal.wake = () => {
-        clearTimeout(clock)
-        done(NAPPED)
-      }
-    })
+    const nap = (ms: number): Promise<typeof NAPPED> =>
+      new Promise((done) => {
+        if (told()) {
+          done(NAPPED)
+          return
+        }
+        const clock = setTimeout(
+          () => {
+            done(NAPPED)
+          },
+          Math.max(0, ms),
+        )
+        signal.wake = () => {
+          clearTimeout(clock)
+          done(NAPPED)
+        }
+      })
 
     let asks = watch !== undefined
     let asking: Promise<unknown[] | undefined> | null = null

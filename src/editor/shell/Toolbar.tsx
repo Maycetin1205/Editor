@@ -45,10 +45,11 @@ export function Toolbar() {
     if (orphans.length > 0) {
       ed.showNotice({
         title: 'Export abgebrochen',
-        lead: (orphans.length === 1
-          ? 'Nichts exportiert. Diese Quelle fragt mit einer Relation, die es nicht mehr gibt, und bliebe in der Maske leer.'
-          : 'Nichts exportiert. Diese Quellen fragen mit einer Relation, die es nicht mehr gibt, und blieben in der Maske leer.')
-          + ' Im Datenfenster bei der Quelle „Liefert“ neu wählen:',
+        lead:
+          (orphans.length === 1
+            ? 'Nichts exportiert. Diese Quelle fragt mit einer Relation, die es nicht mehr gibt, und bliebe in der Maske leer.'
+            : 'Nichts exportiert. Diese Quellen fragen mit einer Relation, die es nicht mehr gibt, und blieben in der Maske leer.') +
+          ' Im Datenfenster bei der Quelle „Liefert“ neu wählen:',
         lines: orphans.map((name) => ({ name })),
       })
       return
@@ -59,9 +60,10 @@ export function Toolbar() {
     if (aside.length > 0) {
       ed.showNotice({
         title: 'Export ohne einige Teile',
-        lead: 'Noch nichts exportiert. Diese Teile der Maske kann dieser Editor nicht lesen. In der Datei der Maske '
-          + 'bleiben sie erhalten, in den Export kommen sie aber nicht. Hat die Maske in SoftEngine sie schon, '
-          + 'fehlen sie dort nach dem Export:',
+        lead:
+          'Noch nichts exportiert. Diese Teile der Maske kann dieser Editor nicht lesen. In der Datei der Maske ' +
+          'bleiben sie erhalten, in den Export kommen sie aber nicht. Hat die Maske in SoftEngine sie schon, ' +
+          'fehlen sie dort nach dem Export:',
         lines: aside,
         action: { label: 'Trotzdem exportieren', run: () => void handleExport(true) },
       })
@@ -85,20 +87,25 @@ export function Toolbar() {
     if (failed.length > 0) {
       ed.showNotice({
         title: 'Export abgebrochen',
-        lead: failed.length === 1
-          ? 'Nichts exportiert. Diese Prüfung der fertigen Maske ist nicht bestanden:'
-          : 'Nichts exportiert. Diese Prüfungen der fertigen Maske sind nicht bestanden:',
+        lead:
+          failed.length === 1
+            ? 'Nichts exportiert. Diese Prüfung der fertigen Maske ist nicht bestanden:'
+            : 'Nichts exportiert. Diese Prüfungen der fertigen Maske sind nicht bestanden:',
         lines: failed.map((c) => ({ name: c.name, detail: c.detail })),
       })
       return
     }
 
     const names = frame === '' ? MASK_NAMES : documentFileNames(frame)
-    const why = folder === null
-      ? null
-      : folder.ok
-        ? await writeExport(folder.folder, [{ name: names.html, text: html }, { name: names.sevariablen, text: sevariablen }])
-        : folder.why
+    const why =
+      folder === null
+        ? null
+        : folder.ok
+          ? await writeExport(folder.folder, [
+              { name: names.html, text: html },
+              { name: names.sevariablen, text: sevariablen },
+            ])
+          : folder.why
     const written = folder !== null && why === null
     if (!written) {
       downloadFile(names.html, html, 'text/html')
@@ -106,9 +113,12 @@ export function Toolbar() {
     }
 
     const lost = lostBindings(ed.tree, ed.dataSources.list)
-    const gaps = lost.length === 0 ? '' : lost.length === 1
-      ? ' Diese Stelle bleibt in der Maske leer, weil ihre Quelle das Feld nicht hat:'
-      : ' Diese Stellen bleiben in der Maske leer, weil ihre Quelle das Feld nicht hat:'
+    const gaps =
+      lost.length === 0
+        ? ''
+        : lost.length === 1
+          ? ' Diese Stelle bleibt in der Maske leer, weil ihre Quelle das Feld nicht hat:'
+          : ' Diese Stellen bleiben in der Maske leer, weil ihre Quelle das Feld nicht hat:'
     const lines = lost.map((l) => ({
       name: l.blockName,
       detail: l.sourceName === '' ? `Feld ${l.code}, ohne Quelle` : `Feld ${l.code} fehlt in „${l.sourceName}“`,
@@ -191,7 +201,12 @@ export function Toolbar() {
           disabled={ed.blockCount === 0}
           title={target === '' ? 'Lädt die Maske herunter' : `Schreibt die Maske in den Ordner „${target}“`}
         >
-          <DoneLabel done={view.done === 'exported'} icon={<Download size={14} />} label="Exportieren" doneLabel="Exportiert" />
+          <DoneLabel
+            done={view.done === 'exported'}
+            icon={<Download size={14} />}
+            label="Exportieren"
+            doneLabel="Exportiert"
+          />
         </Button>
       </nav>
 
@@ -233,15 +248,18 @@ function OnlyToSee() {
     <button
       type="button"
       title="Änderungen kommen nicht in die Datei der Maske"
-      onClick={() => ed.showNotice({
-        title: 'Nur zum Ansehen',
-        lead: `„${ed.maskOnDisk.name}“ ist zum Schutz nur zum Ansehen geöffnet: Änderungen hier kommen nicht in die Datei. `
-          + (aside.length > 0
-            ? 'Diese Teile kann dieser Editor nicht lesen; in der Datei bleiben sie in jedem Fall erhalten:'
-            : 'Die Datei stammt aus einer neueren Fassung des Editors.'),
-        lines: aside,
-        action: { label: 'Trotzdem bearbeiten', run: () => ed.unlockMask() },
-      })}
+      onClick={() =>
+        ed.showNotice({
+          title: 'Nur zum Ansehen',
+          lead:
+            `„${ed.maskOnDisk.name}“ ist zum Schutz nur zum Ansehen geöffnet: Änderungen hier kommen nicht in die Datei. ` +
+            (aside.length > 0
+              ? 'Diese Teile kann dieser Editor nicht lesen; in der Datei bleiben sie in jedem Fall erhalten:'
+              : 'Die Datei stammt aus einer neueren Fassung des Editors.'),
+          lines: aside,
+          action: { label: 'Trotzdem bearbeiten', run: () => ed.unlockMask() },
+        })
+      }
       className="mr-[8px] flex shrink-0 items-center gap-[6px] rounded-full bg-pending-soft px-[10px] py-[3px] text-dense font-semibold text-pending transition-colors hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
     >
       <Eye size={13} /> <span className={LABEL}>Nur zum Ansehen</span>

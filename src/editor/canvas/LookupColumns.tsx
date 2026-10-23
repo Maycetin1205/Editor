@@ -7,22 +7,13 @@ import { cssZoomOf } from '../../blocks/base/cssZoom'
 import type { HeadsPlaced } from '../../blocks/base/headsReport'
 import type { DialogFrame } from '../../blocks/dialog/DialogFrame'
 import type { Table } from '../../blocks/table/Table'
-import {
-  newColumn,
-  COLUMNS_MAX,
-  DEFAULT_TITLE,
-  type Column,
-} from '../../blocks/parts/column'
+import { newColumn, COLUMNS_MAX, DEFAULT_TITLE, type Column } from '../../blocks/parts/column'
 import { fieldOf, sourcesKey } from '../../core/data/dataSources'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
 import { useView } from '../state/useView'
 import type { OpenLookup } from '../state/EditorStore'
-import {
-  windowFrameInEditor,
-  windowStateOf,
-  type WindowState,
-} from './lookupWindowState'
+import { windowFrameInEditor, windowStateOf, type WindowState } from './lookupWindowState'
 import { widthFromLength } from './fieldWidth'
 import { FieldPicker, type PickerGroup } from './FieldPicker'
 import { axesOf, dragSize } from './dragSize'
@@ -51,13 +42,15 @@ function headsOnScreen(table: Table | null, placed: HeadsPlaced): Head[] {
   if (table === null) return []
   const at = table.getBoundingClientRect()
   const zoom = cssZoomOf(table)
-  return placed.heads.filter((head) => !head.below).map((head) => ({
-    slot: head.path.index,
-    left: at.left + head.left * zoom,
-    top: at.top + head.top * zoom,
-    width: head.width * zoom,
-    height: head.height * zoom,
-  }))
+  return placed.heads
+    .filter((head) => !head.below)
+    .map((head) => ({
+      slot: head.path.index,
+      left: at.left + head.left * zoom,
+      top: at.top + head.top * zoom,
+      width: head.width * zoom,
+      height: head.height * zoom,
+    }))
 }
 
 interface Metrics {
@@ -115,12 +108,17 @@ function Heads({ open }: { open: OpenLookup }) {
   if (state === null) return null
 
   const source = library.find((s) => s.id === state.sourceId)
-  const groups: PickerGroup[] = source === undefined ? [] : [{
-    sourceId: '',
-    name: source.name,
-    badge: sourcesKey(source),
-    fields: source.fields,
-  }]
+  const groups: PickerGroup[] =
+    source === undefined
+      ? []
+      : [
+          {
+            sourceId: '',
+            name: source.name,
+            badge: sourcesKey(source),
+            fields: source.fields,
+          },
+        ]
 
   const change = (slot: number, part: Partial<Column>): void => {
     state.setColumns(state.columns.map((s, i) => (i === slot ? { ...s, ...part } : s)))
@@ -132,15 +130,14 @@ function Heads({ open }: { open: OpenLookup }) {
     setChosen(slot)
   }
 
-  const headOfPickers = chosen === null
-    ? undefined
-    : heads.find((k) => k.slot === chosen)
+  const headOfPickers = chosen === null ? undefined : heads.find((k) => k.slot === chosen)
   const columnOfPickers = chosen === null ? undefined : state.columns[chosen]
   const defaultTitle = DEFAULT_TITLE.replace('{n}', String((chosen ?? 0) + 1))
 
-  const plus = state.columns.length < COLUMNS_MAX && heads.length > 0
-    ? { right: Math.max(...heads.map((h) => h.left + h.width)), top: Math.min(...heads.map((h) => h.top)) }
-    : null
+  const plus =
+    state.columns.length < COLUMNS_MAX && heads.length > 0
+      ? { right: Math.max(...heads.map((h) => h.left + h.width)), top: Math.min(...heads.map((h) => h.top)) }
+      : null
   const rect = frame?.windowBox() ?? null
   const box = rect === null ? null : { left: rect.left, top: rect.top, width: rect.width, height: rect.height }
 
@@ -185,9 +182,11 @@ function Heads({ open }: { open: OpenLookup }) {
                 key={edge}
                 edge={edge}
                 onStart={(e) => dragSize(ed, e, edge, box, (axis, value) => state.setMetrics(axis, value))}
-                onReset={() => ed.transaction(() => {
-                  for (const axis of axesOf(edge)) state.setMetrics(axis, undefined)
-                })}
+                onReset={() =>
+                  ed.transaction(() => {
+                    for (const axis of axesOf(edge)) state.setMetrics(axis, undefined)
+                  })
+                }
               />
             ))}
           </div>
@@ -236,15 +235,19 @@ function Heads({ open }: { open: OpenLookup }) {
             const width = widthFromLength(field?.length)
             change(chosen, {
               field: value,
-              title: value === '' ? defaultTitle : (plainName !== '' ? plainName : value),
+              title: value === '' ? defaultTitle : plainName !== '' ? plainName : value,
               ...(width === undefined ? {} : { width }),
             })
           }}
           removeLabel="Spalte entfernen"
-          onRemove={!state.provided && state.columns.length <= 1 ? undefined : () => {
-            state.setColumns(state.columns.filter((_, i) => i !== chosen))
-            setChosen(null)
-          }}
+          onRemove={
+            !state.provided && state.columns.length <= 1
+              ? undefined
+              : () => {
+                  state.setColumns(state.columns.filter((_, i) => i !== chosen))
+                  setChosen(null)
+                }
+          }
           onClose={() => setChosen(null)}
         />
       )}

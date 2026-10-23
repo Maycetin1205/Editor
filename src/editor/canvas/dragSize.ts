@@ -12,10 +12,7 @@ interface Size {
 }
 
 export function axesOf(edge: Edge): Axis[] {
-  return [
-    ...(/[ew]/.test(edge) ? ['width' as const] : []),
-    ...(/[ns]/.test(edge) ? ['height' as const] : []),
-  ]
+  return [...(/[ew]/.test(edge) ? ['width' as const] : []), ...(/[ns]/.test(edge) ? ['height' as const] : [])]
 }
 
 export function dragSize(

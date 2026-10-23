@@ -17,10 +17,12 @@ function giversFor(tree: Readonly<MaskTree>, block: BlockNode): BlockNode[] {
 }
 
 export function followOffered(tree: Readonly<MaskTree>, block: BlockNode, library: readonly DataSource[]): boolean {
-  return followOf(block) !== undefined
-    || giversFor(tree, block).length > 0
-    || valueSpotsInTree(tree).some(({ node }) => node.id !== block.id)
-    || openDocumentOf(library) !== undefined
+  return (
+    followOf(block) !== undefined ||
+    giversFor(tree, block).length > 0 ||
+    valueSpotsInTree(tree).some(({ node }) => node.id !== block.id) ||
+    openDocumentOf(library) !== undefined
+  )
 }
 
 function followOn(block: BlockNode, giverId: string, library: readonly DataSource[]): SelectionFollow[] {
@@ -33,7 +35,8 @@ function followOn(block: BlockNode, giverId: string, library: readonly DataSourc
 
 function followOnFormField(block: BlockNode, fieldId: string, prop: string): SelectionFollow[] {
   const before = followOf(block)
-  if (before?.giverId === '' && before.pairs.some((p) => p.from === 'formField' && p.fromField === fieldId)) return [before]
+  if (before?.giverId === '' && before.pairs.some((p) => p.from === 'formField' && p.fromField === fieldId))
+    return [before]
   return [{ giverId: '', pairs: [{ fromField: fieldId, toField: '', from: 'formField', fromProp: prop }] }]
 }
 
@@ -60,7 +63,11 @@ export function followByClick(
   return spot ? followOnFormField(follower, clicked.id, spot.prop) : null
 }
 
-export function followedName(follow: SelectionFollow, tree: Readonly<MaskTree>, library: readonly DataSource[]): string {
+export function followedName(
+  follow: SelectionFollow,
+  tree: Readonly<MaskTree>,
+  library: readonly DataSource[],
+): string {
   const giver = tree[follow.giverId]
   if (giver) return blockName(giver, library)
   const pair = follow.pairs[0]

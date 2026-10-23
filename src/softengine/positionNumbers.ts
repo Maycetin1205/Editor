@@ -2,10 +2,7 @@ const MAX_POSITIONS = 999
 
 const MAX_GAP = 100
 
-export type PositionStep =
-  | { kind: 'row'; row: Record<string, string> }
-  | { kind: 'gap' }
-  | { kind: 'stop' }
+export type PositionStep = { kind: 'row'; row: Record<string, string> } | { kind: 'gap' } | { kind: 'stop' }
 
 export async function rowsByNumber(
   step: (position: number) => Promise<PositionStep>,

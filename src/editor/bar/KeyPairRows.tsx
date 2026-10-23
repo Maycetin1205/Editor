@@ -43,42 +43,47 @@ export function KeyPairRows({
   return (
     <>
       {pairs.map((pair, at) => (
-        <div key={at} className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] items-center gap-x-[6px]">
+        <div
+          key={at}
+          className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] items-center gap-x-[6px]"
+        >
           <PickerControl
             className="w-full"
             name={rightName(at)}
-            groups={[{
-              key: 'fields',
-              entries: rightFields.map((f) => ({ value: f.code, name: f.name, badge: f.code })),
-            }]}
+            groups={[
+              {
+                key: 'fields',
+                entries: rightFields.map((f) => ({ value: f.code, name: f.name, badge: f.code })),
+              },
+            ]}
             value={pair.toField}
             emptyText="Nicht gebunden"
             onChoose={(code) => setPair(at, { toField: code })}
           />
-          {comparable
-            ? (
-                <Button
-                  onlyIcon
-                  aria-label={pair.unequal ? 'Ungleich' : 'Gleich'}
-                  title={pair.unequal ? 'Ungleich' : 'Gleich'}
-                  onClick={() => onChange(pairs.map((p, i) => {
+          {comparable ? (
+            <Button
+              onlyIcon
+              aria-label={pair.unequal ? 'Ungleich' : 'Gleich'}
+              title={pair.unequal ? 'Ungleich' : 'Gleich'}
+              onClick={() =>
+                onChange(
+                  pairs.map((p, i) => {
                     if (i !== at) return p
                     const { unequal, ...rest } = p
                     return unequal ? rest : { ...rest, unequal: true }
-                  }))}
-                >
-                  {pair.unequal ? '≠' : '='}
-                </Button>
-              )
-            : <span className="text-muted">=</span>}
+                  }),
+                )
+              }
+            >
+              {pair.unequal ? '≠' : '='}
+            </Button>
+          ) : (
+            <span className="text-muted">=</span>
+          )}
           <div className="flex min-w-0 [&>*]:w-full [&>*]:flex-1">{left(pair, at)}</div>
           <span className="flex items-center">
             {pairs.length > 1 && (
-              <Button
-                onlyIcon
-                aria-label={removeName(at)}
-                onClick={() => onChange(pairs.filter((_, x) => x !== at))}
-              >
+              <Button onlyIcon aria-label={removeName(at)} onClick={() => onChange(pairs.filter((_, x) => x !== at))}>
                 <X size={13} />
               </Button>
             )}

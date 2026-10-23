@@ -40,7 +40,11 @@ export interface EntryEvents<E = unknown, K extends string = string> {
 }
 
 export function entryEventKeys(prefix: string, count: number): EventDef[] {
-  return Array.from({ length: count }, (_, i) => ({ key: `${prefix}${i + 1}`, name: `${prefix} ${i + 1}`, entry: true }))
+  return Array.from({ length: count }, (_, i) => ({
+    key: `${prefix}${i + 1}`,
+    name: `${prefix} ${i + 1}`,
+    entry: true,
+  }))
 }
 
 export interface BlockLookupWindow<K extends string = string> {
@@ -69,26 +73,16 @@ export interface EntryLookupWindow<K extends string = string> {
 export type LookupWindow<K extends string = string> = BlockLookupWindow<K> | EntryLookupWindow<K>
 
 export type Capability<K extends string = string> =
-
   | { kind: 'source'; when?: Condition<K>; helpers?: 'beside' | 'apart'; after?: K }
-
   | { kind: 'recordPick'; sourceProp?: K; when?: Condition<K>; gives?: Condition<K> }
-
   | { kind: 'followsSelection' }
-
   | { kind: 'bindable'; spots: readonly BindableSpot[] }
-
   | { kind: 'actionValue'; spots: readonly ValueSpot[] }
-
   | { kind: 'list'; binding: ListBinding<unknown, K> }
   | { kind: 'lookupWindow'; window: LookupWindow<K> }
-
   | { kind: 'capture'; when?: Condition<K> }
-
   | { kind: 'change'; key: string }
-
   | { kind: 'holdsSent' }
-
   | { kind: 'compute'; prop: K }
   | { kind: 'events'; list: readonly EventDef[]; entries?: EntryEvents<unknown, K> }
 
@@ -111,10 +105,7 @@ export function hasCapability(carrier: HasCapabilities | undefined, kind: Capabi
   return capability(carrier, kind) !== undefined
 }
 
-export function applies(
-  f: { when?: Condition } | undefined,
-  values: Readonly<Record<string, PropertyValue>>,
-): boolean {
+export function applies(f: { when?: Condition } | undefined, values: Readonly<Record<string, PropertyValue>>): boolean {
   return f !== undefined && propertyVisible(f.when, values)
 }
 
@@ -130,9 +121,7 @@ export function bindingAttr(prop: string): BindingAttr {
   return `${prop.toLowerCase()}field`
 }
 
-type BindableSpotProp<Props> = keyof Props extends infer K
-  ? K extends BindingProp<infer P> ? P : never
-  : never
+type BindableSpotProp<Props> = keyof Props extends infer K ? (K extends BindingProp<infer P> ? P : never) : never
 
 type BindableSpotsFor<Props> = ReadonlyArray<
   Omit<BindableSpot, 'prop' | 'previewProp' | 'nameProp' | 'weaveProp' | 'when'> & {
@@ -208,7 +197,6 @@ export interface RuntimeContracts {
 
 export type ContractKind = keyof RuntimeContracts
 
-type ContractClass<A extends ContractKind> =
-  abstract new (...args: never[]) => RuntimeContracts[A]
+type ContractClass<A extends ContractKind> = abstract new (...args: never[]) => RuntimeContracts[A]
 
 export type ContractClasses = { readonly [A in ContractKind]?: ContractClass<A> }

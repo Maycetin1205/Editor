@@ -27,7 +27,11 @@ export function SpotRows({ block, spots }: { block: BlockNode; spots: readonly B
   return spots.map((spot) => <SpotRow key={spot.prop} block={block} spot={spot} sources={sources} />)
 }
 
-function SpotRow({ block, spot, sources }: {
+function SpotRow({
+  block,
+  spot,
+  sources,
+}: {
   block: BlockNode
   spot: BindableSpot
   sources: readonly SourceInReach[]

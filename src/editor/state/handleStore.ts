@@ -21,7 +21,7 @@ export async function keptHandle<T>(key: string): Promise<T | null> {
   try {
     const db = await opened()
     try {
-      const value = await done(db.transaction(STORE).objectStore(STORE).get(key)) as T | undefined
+      const value = (await done(db.transaction(STORE).objectStore(STORE).get(key))) as T | undefined
       return value ?? null
     } finally {
       db.close()
@@ -39,6 +39,5 @@ export async function keepHandle(key: string, value: unknown): Promise<void> {
     } finally {
       db.close()
     }
-  } catch {
-  }
+  } catch {}
 }

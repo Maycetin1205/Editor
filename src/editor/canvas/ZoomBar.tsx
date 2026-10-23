@@ -10,7 +10,12 @@ import { ZOOM_LEAST, ZOOM_MOST, ZOOM_PRESETS, zoomStep, type SheetZoom } from '.
 const PERCENT = new Intl.NumberFormat('de-DE', { style: 'percent', maximumFractionDigits: 0 })
 
 const MINUS = ['M5 12h14']
-const FIT = ['M8 3H5a2 2 0 0 0-2 2v3', 'M21 8V5a2 2 0 0 0-2-2h-3', 'M3 16v3a2 2 0 0 0 2 2h3', 'M16 21h3a2 2 0 0 0 2-2v-3']
+const FIT = [
+  'M8 3H5a2 2 0 0 0-2 2v3',
+  'M21 8V5a2 2 0 0 0-2-2h-3',
+  'M3 16v3a2 2 0 0 0 2 2h3',
+  'M16 21h3a2 2 0 0 0 2-2v-3',
+]
 
 function Glyph({ paths, size = 14 }: { paths: readonly string[]; size?: number }) {
   return (
@@ -26,7 +31,9 @@ function Glyph({ paths, size = 14 }: { paths: readonly string[]; size?: number }
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      {paths.map((d) => <path key={d} d={d} />)}
+      {paths.map((d) => (
+        <path key={d} d={d} />
+      ))}
     </svg>
   )
 }
@@ -100,7 +107,12 @@ export function ZoomBar({ zoom, choice, fit, choose }: SheetZoom) {
       {open && (
         <Popover name="Zoomstufe" anchor={opener} width={184} onClose={() => setOpen(false)}>
           <div role="menu" aria-label="Zoomstufe" className="flex flex-col">
-            <MenuRow role="menuitemradio" aria-checked={choice === 'fit'} active={choice === 'fit'} onClick={() => pick('fit')}>
+            <MenuRow
+              role="menuitemradio"
+              aria-checked={choice === 'fit'}
+              active={choice === 'fit'}
+              onClick={() => pick('fit')}
+            >
               Einpassen
               <span className="ml-auto font-normal tabular-nums text-muted">{PERCENT.format(fit)}</span>
             </MenuRow>

@@ -5,24 +5,10 @@ import { deliveryAdapter } from '../../core/data/deliveries/deliveries'
 import { blockType } from '../../core/block/registry'
 import { rowsToSelection } from '../../runtime/selection'
 import { maskState } from '../../runtime/maskState'
-import {
-  DIALOG_FRAME_TAG,
-  WINDOW_HEIGHT,
-  WINDOW_WIDTH,
-  type DialogFrame,
-} from '../dialog/DialogFrame'
+import { DIALOG_FRAME_TAG, WINDOW_HEIGHT, WINDOW_WIDTH, type DialogFrame } from '../dialog/DialogFrame'
 import { LOOKUP_KEY_PART } from '../list/operatorState'
-import {
-  coerceColumns,
-  COLUMN_ACCESS,
-  DEFAULT_TITLE,
-  FIELD_KEY_PREFIX,
-  type Column,
-} from '../parts/column'
-import {
-  ROW_ACTIVATED_EVENT,
-  type RowActivatedDetail,
-} from '../list/rowActivation'
+import { coerceColumns, COLUMN_ACCESS, DEFAULT_TITLE, FIELD_KEY_PREFIX, type Column } from '../parts/column'
+import { ROW_ACTIVATED_EVENT, type RowActivatedDetail } from '../list/rowActivation'
 import type { HandedRow, RowsFrom } from '../list/sourceRows'
 
 const WINDOW_TABLE_TYPE = 'table'
@@ -135,11 +121,7 @@ function onlyOneColumn(displayField: string, storageField: string): boolean {
   return display === '' || display === storageField.trim()
 }
 
-export function lookupEntries(
-  rows: readonly unknown[],
-  displayField: string,
-  storageField: string,
-): Entry[] {
+export function lookupEntries(rows: readonly unknown[], displayField: string, storageField: string): Entry[] {
   const displayCode = displayField.trim()
   const entries: Entry[] = []
   const singleColumn = onlyOneColumn(displayField, storageField)
@@ -157,18 +139,11 @@ export function lookupEntries(
   return entries
 }
 
-function windowEntries(
-  el: HTMLElement,
-  rows: unknown[],
-  displayField: string,
-  storageField: string,
-): Entry[] {
+function windowEntries(el: HTMLElement, rows: unknown[], displayField: string, storageField: string): Entry[] {
   return lookupEntries(rowsToSelection(el, rows), displayField, storageField)
 }
 
-type EntriesResult =
-  | { ok: true; entries: Entry[] }
-  | { ok: false }
+type EntriesResult = { ok: true; entries: Entry[] } | { ok: false }
 
 export function sourcesRows(sourceId: string): unknown[] | null {
   const source = maskState.host.source(sourceId)
@@ -230,15 +205,15 @@ function windowTable(tag: string, args: LookupArgs, entries: readonly Entry[]): 
   table.rowsFrom = 'handed'
   table.columns = columns
 
-  const singleColumn = onlyOneColumn(
-    displayFieldOf(own, args.storageField),
-    args.storageField,
-  )
+  const singleColumn = onlyOneColumn(displayFieldOf(own, args.storageField), args.storageField)
   table.handedRows = entries.map((e) => ({
     rawRow: e.record,
-    cells: own.length > 0
-      ? own.map((s) => (s.field === '' ? '' : maskState.host.readField(e.record, s.field)))
-      : (singleColumn ? [e.value] : [e.display, e.value]),
+    cells:
+      own.length > 0
+        ? own.map((s) => (s.field === '' ? '' : maskState.host.readField(e.record, s.field)))
+        : singleColumn
+          ? [e.value]
+          : [e.display, e.value],
   }))
   return table
 }
@@ -262,7 +237,8 @@ export function openLookup(args: LookupArgs): void {
   const table = windowTable(tag, args, found)
   const holder = document.createElement('div')
   holder.style.display = 'contents'
-  render(html`<ff-dialog
+  render(
+    html`<ff-dialog
     viewport
     escape-closes
     data-ff-lookup
@@ -271,7 +247,9 @@ export function openLookup(args: LookupArgs): void {
     .height=${args.height}
     @ff-dialog-close=${() => close()}
     @click=${(e: Event) => e.stopPropagation()}
-  >${table}</ff-dialog>`, holder)
+  >${table}</ff-dialog>`,
+    holder,
+  )
 
   const dialog = holder.querySelector<DialogFrame>(DIALOG_FRAME_TAG)
   table.addEventListener(ROW_ACTIVATED_EVENT, (event) => {

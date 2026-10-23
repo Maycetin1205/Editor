@@ -45,20 +45,14 @@ function asNumber(v: unknown): number | undefined {
   return Number.isFinite(number) ? Math.round(number) : undefined
 }
 
-function stateAtBlock(
-  ed: EditorStore,
-  block: BlockNode,
-  window: BlockLookupWindow,
-): WindowState | null {
+function stateAtBlock(ed: EditorStore, block: BlockNode, window: BlockLookupWindow): WindowState | null {
   const sourceId = String(block.values[window.sourceProp ?? ''] ?? '')
   if (sourceId === '') return null
   const declared = blockType(block.type)?.properties ?? {}
   const provided = coerceLookupColumns(block.values[window.columnsKey])
   const storageField = String(block.values[window.storageFieldProp ?? ''] ?? '')
   const storageTitle = String(block.values[window.storageTitleProp ?? ''] ?? '')
-  const columns = provided.length > 0
-    ? provided
-    : automaticColumns({ storageField, storageTitle })
+  const columns = provided.length > 0 ? provided : automaticColumns({ storageField, storageTitle })
   return {
     sourceId,
     storageField,
@@ -66,12 +60,11 @@ function stateAtBlock(
     title: String(block.values[window.titleProp ?? ''] ?? ''),
     columns,
     provided: provided.length > 0,
-    width: asNumber(block.values[window.widthKey])
-      ?? asNumber(declared[window.widthKey]?.default)
-      ?? windowWidthFor(columns.length),
-    height: asNumber(block.values[window.heightKey])
-      ?? asNumber(declared[window.heightKey]?.default)
-      ?? WINDOW_HEIGHT,
+    width:
+      asNumber(block.values[window.widthKey]) ??
+      asNumber(declared[window.widthKey]?.default) ??
+      windowWidthFor(columns.length),
+    height: asNumber(block.values[window.heightKey]) ?? asNumber(declared[window.heightKey]?.default) ?? WINDOW_HEIGHT,
     setColumns: (next) => {
       ed.updateProperty(block.id, window.columnsKey, [...next])
     },
@@ -83,12 +76,7 @@ function stateAtBlock(
   }
 }
 
-function statePerEntry(
-  ed: EditorStore,
-  block: BlockNode,
-  window: EntryLookupWindow,
-  slot: number,
-): WindowState | null {
+function statePerEntry(ed: EditorStore, block: BlockNode, window: EntryLookupWindow, slot: number): WindowState | null {
   const prop = window.entriesProp
   const entries = coerceCaptureColumns(block.values[prop])
   const entry = entries[slot]
@@ -98,16 +86,17 @@ function statePerEntry(
   if (sourceId === '') return null
   const title = entry.title
 
-  const fromColumns = windowColumnsIn({
-    columns: entries,
-    sourceId: declaredValue(block, SOURCE_PROPERTY),
-    calculations: [],
-    pairsTo: () => [],
-    partnerOf: () => '',
-  }, slot)
-  const columns = fromColumns.length > 0
-    ? fromColumns
-    : automaticColumns({ storageField: code, storageTitle: title })
+  const fromColumns = windowColumnsIn(
+    {
+      columns: entries,
+      sourceId: declaredValue(block, SOURCE_PROPERTY),
+      calculations: [],
+      pairsTo: () => [],
+      partnerOf: () => '',
+    },
+    slot,
+  )
+  const columns = fromColumns.length > 0 ? fromColumns : automaticColumns({ storageField: code, storageTitle: title })
 
   const write = (change: (column: CaptureColumn) => CaptureColumn): void => {
     const now = ed.getNode(block.id)
@@ -127,10 +116,10 @@ function statePerEntry(
     columns,
     provided: coerceLookupColumns(entry.windowColumns).length > 0,
     ...entryWindowSize(entry, columns.length),
-    setColumns: (next) => write((column) =>
-      withEntryValue(column, 'windowColumns', next.length === 0 ? undefined : [...next])),
-    setMetrics: (axis, value) => write((column) =>
-      withEntryValue(column, axis === 'width' ? 'windowWidth' : 'windowHeight', value)),
+    setColumns: (next) =>
+      write((column) => withEntryValue(column, 'windowColumns', next.length === 0 ? undefined : [...next])),
+    setMetrics: (axis, value) =>
+      write((column) => withEntryValue(column, axis === 'width' ? 'windowWidth' : 'windowHeight', value)),
   }
 }
 
@@ -142,9 +131,7 @@ export function windowStateOf(
 ): WindowState | null {
   const block = ed.getNode(blockId)
   if (!block) return null
-  return window.entriesProp === undefined
-    ? stateAtBlock(ed, block, window)
-    : statePerEntry(ed, block, window, slot)
+  return window.entriesProp === undefined ? stateAtBlock(ed, block, window) : statePerEntry(ed, block, window, slot)
 }
 
 export function blockElementInEditor(blockId: string, tag: string): HTMLElement | null {
@@ -155,18 +142,10 @@ export function blockElementInEditor(blockId: string, tag: string): HTMLElement 
 }
 
 export function windowFrameInEditor(): DialogFrame | null {
-  return document.body.querySelector<DialogFrame>(
-    `${DIALOG_FRAME_TAG}[data-ff-lookup]`,
-  )
+  return document.body.querySelector<DialogFrame>(`${DIALOG_FRAME_TAG}[data-ff-lookup]`)
 }
 
-function wireWidths(
-  frame: DialogFrame,
-  ed: EditorStore,
-  blockId: string,
-  window: LookupWindow,
-  slot: number,
-): void {
+function wireWidths(frame: DialogFrame, ed: EditorStore, blockId: string, window: LookupWindow, slot: number): void {
   frame.querySelector('ff-table')?.addEventListener(PROP_CHANGE, (event) => {
     const detail = (event as CustomEvent<PropChange>).detail
     if (detail.prop !== 'columns') return
@@ -222,8 +201,12 @@ function closesOnClickBeside(frame: DialogFrame): void {
       document.removeEventListener('pointerdown', beside, true)
       return
     }
-    const inside = e.composedPath().some((t) => t instanceof HTMLElement
-      && (t.getAttribute('role') === 'dialog' || t.dataset.ffEditorHelper !== undefined))
+    const inside = e
+      .composedPath()
+      .some(
+        (t) =>
+          t instanceof HTMLElement && (t.getAttribute('role') === 'dialog' || t.dataset.ffEditorHelper !== undefined),
+      )
     if (!inside) frame.close()
   }
   document.addEventListener('pointerdown', beside, true)

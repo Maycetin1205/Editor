@@ -89,8 +89,10 @@ function squeezeCss(code, id) {
       const raw = part.value.raw
       // The parser's span of a template part may include its delimiter
       // (` or } at the start); the raw text tells where it really begins.
-      const start = code.startsWith(raw, part.start) ? part.start
-        : code.startsWith(raw, part.start + 1) ? part.start + 1
+      const start = code.startsWith(raw, part.start)
+        ? part.start
+        : code.startsWith(raw, part.start + 1)
+          ? part.start + 1
           : -1
       if (start < 0) throw new Error(`${path.relative(root, id)}: css-Template nicht wiedergefunden.`)
       const text = squeezeCssText(raw, index === 0, index === parts.length - 1)
@@ -148,7 +150,8 @@ async function bundleBlocks(entries) {
 const MODULE_TAG = /^Object\.defineProperty\(exports,Symbol\.toStringTag,\{value:`Module`\}\);?/
 const CHUNK_REQUIRE = /require\(["']\.\/([^"']+)["']\)/g
 const ONE_EXPORT = /Object\.defineProperty\(exports,"([\w$]+)",\{enumerable:!0,get:function\(\)\{return ([^{}]*)\}\}\)/g
-const EXPORT_RUN = /(?:Object\.defineProperty\(exports,"[\w$]+",\{enumerable:!0,get:function\(\)\{return [^{}]*\}\}\),?)+/g
+const EXPORT_RUN =
+  /(?:Object\.defineProperty\(exports,"[\w$]+",\{enumerable:!0,get:function\(\)\{return [^{}]*\}\}\),?)+/g
 
 function foldExports(code) {
   return code.replace(EXPORT_RUN, (run) => {
@@ -172,7 +175,9 @@ function chunkCode(chunk, idOf) {
 function runtimeParts(chunks, entries) {
   // Numbered by name, not by the order rolldown emits them, so the numbers hold
   // still between two builds of the same code.
-  const sorted = [...chunks].sort((a, b) => a.name.localeCompare(b.name, 'en') || a.fileName.localeCompare(b.fileName, 'en'))
+  const sorted = [...chunks].sort(
+    (a, b) => a.name.localeCompare(b.name, 'en') || a.fileName.localeCompare(b.fileName, 'en'),
+  )
   const ids = new Map(sorted.map((chunk, index) => [chunk.fileName, index]))
   const idOf = (file) => {
     const id = ids.get(file)
@@ -180,7 +185,8 @@ function runtimeParts(chunks, entries) {
     return id
   }
   for (const chunk of sorted) {
-    if (chunk.dynamicImports.length > 0) throw new Error(`${chunk.fileName}: der Lader kennt kein dynamisches import().`)
+    if (chunk.dynamicImports.length > 0)
+      throw new Error(`${chunk.fileName}: der Lader kennt kein dynamisches import().`)
   }
 
   const blocks = {}
@@ -210,6 +216,6 @@ if (!unchanged) fs.writeFileSync(OUT, json)
 
 const kb = Math.round(Buffer.byteLength(json) / 1024)
 console.log(
-  `Laufzeit: ${entries.length} Bausteine in ${parts.chunks.length} Teilen, ${kb} KB`
-  + ` -> ${path.relative(root, OUT)}${unchanged ? ' (unveraendert)' : ''}, ${Date.now() - started} ms`,
+  `Laufzeit: ${entries.length} Bausteine in ${parts.chunks.length} Teilen, ${kb} KB` +
+    ` -> ${path.relative(root, OUT)}${unchanged ? ' (unveraendert)' : ''}, ${Date.now() - started} ms`,
 )

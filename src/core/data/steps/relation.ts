@@ -49,18 +49,22 @@ function relationFields(
 function withBindings(step: RelationStep, map: (binding: Parameter) => Parameter): RelationStep {
   const parameter = step.parameter.map(map)
   const extraParameter = step.extraParameter.map(map)
-  const changed = parameter.some((b, i) => b !== step.parameter[i])
-    || extraParameter.some((b, i) => b !== step.extraParameter[i])
+  const changed =
+    parameter.some((b, i) => b !== step.parameter[i]) || extraParameter.some((b, i) => b !== step.extraParameter[i])
   return changed ? { ...step, parameter, extraParameter } : step
 }
 
 type Run = Parameters<StepAdapter<'RELATION'>['run']>[1]
 
 function sourceOfBlock(el: Element | undefined): string {
-  return el === undefined ? '' : readDeclared(el, SOURCE_PROPERTY) ?? ''
+  return el === undefined ? '' : (readDeclared(el, SOURCE_PROPERTY) ?? '')
 }
 
-function positionsWrite(template: RuntimeRelation, bindings: readonly Parameter[], run: Run): PositionsWrite | undefined {
+function positionsWrite(
+  template: RuntimeRelation,
+  bindings: readonly Parameter[],
+  run: Run,
+): PositionsWrite | undefined {
   if (template.nr.trim() === POSITION_DELETE_NR) {
     const row = run.parameterValues.chosenRow?.(run.origin.getAttribute(BLOCK_ID_ATTR) ?? '')
     const sourceId = sourceOfBlock(run.origin)
@@ -69,8 +73,9 @@ function positionsWrite(template: RuntimeRelation, bindings: readonly Parameter[
   if (RECORD_PLACEHOLDER.some((name) => (run.values[name] ?? '') !== '')) return undefined
   const blockId = bindings.find((b) => COLUMN_PARAM_SOURCES[b.source] === 'captured')?.blockId
   if (blockId === undefined || blockId === '') return undefined
-  const block = Array.from(run.root.querySelectorAll(`[${BLOCK_ID_ATTR}]`))
-    .find((el) => el.getAttribute(BLOCK_ID_ATTR) === blockId)
+  const block = Array.from(run.root.querySelectorAll(`[${BLOCK_ID_ATTR}]`)).find(
+    (el) => el.getAttribute(BLOCK_ID_ATTR) === blockId,
+  )
   const sourceId = sourceOfBlock(block)
   return sourceId === '' ? undefined : { kind: 'added', sourceId }
 }
@@ -120,13 +125,14 @@ export const relation: StepAdapter<'RELATION'> = {
 
     const bindings = [...step.parameter, ...step.extraParameter]
 
-    const missingRecord = RECORD_PLACEHOLDER.find((name) =>
-      bindings.some((b) => b.source === 'context' && b.value === name)
-      && (run.values[name] ?? '') === '')
+    const missingRecord = RECORD_PLACEHOLDER.find(
+      (name) => bindings.some((b) => b.source === 'context' && b.value === name) && (run.values[name] ?? '') === '',
+    )
     if (missingRecord !== undefined) return { failed: true }
 
-    const missingAnswer = bindings.some((b) =>
-      b.source === 'stepResult' && run.parameterValues.stepRawResults?.[Number(b.value)] === undefined)
+    const missingAnswer = bindings.some(
+      (b) => b.source === 'stepResult' && run.parameterValues.stepRawResults?.[Number(b.value)] === undefined,
+    )
     if (missingAnswer) return { failed: true, reason: NO_CONFIRMATION }
 
     const params = bindings.map((binding) => run.host.resolveParameter(binding, run.parameterValues))

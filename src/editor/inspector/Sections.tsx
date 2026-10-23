@@ -28,7 +28,12 @@ export interface Folds {
   toggle: (name: string) => void
 }
 
-function Section({ name, summary, folds, children }: {
+function Section({
+  name,
+  summary,
+  folds,
+  children,
+}: {
   name: string
   summary: string
   folds: Folds
@@ -43,7 +48,11 @@ function Section({ name, summary, folds, children }: {
         onClick={() => folds.toggle(name)}
         className="flex h-[40px] items-center gap-[8px] pl-[12px] pr-[16px] text-left transition-colors hover:bg-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
       >
-        <ChevronDown size={14} aria-hidden className={cn('shrink-0 text-muted transition-transform', folded && '-rotate-90')} />
+        <ChevronDown
+          size={14}
+          aria-hidden
+          className={cn('shrink-0 text-muted transition-transform', folded && '-rotate-90')}
+        />
         <span className="shrink-0 font-bold text-ink">{name}</span>
         {folded && <span className="min-w-0 flex-1 truncate text-right text-dense text-muted">{summary}</span>}
       </button>
@@ -56,7 +65,8 @@ function Section({ name, summary, folds, children }: {
   )
 }
 
-const count = (n: number, one: string, many: string): string => (n === 0 ? 'nichts' : n === 1 ? `1 ${one}` : `${n} ${many}`)
+const count = (n: number, one: string, many: string): string =>
+  n === 0 ? 'nichts' : n === 1 ? `1 ${one}` : `${n} ${many}`
 
 function changedOf(block: BlockNode, props: readonly DeclaredProperty[]): string {
   const changed = props.filter(({ key, property }) => block.values[key] !== property.default)
@@ -91,7 +101,18 @@ interface SectionsProps {
 }
 
 export function Sections({
-  block, controls, sourceProps, shows, spots, lookupProps, searchWindow, helpers, follows, waiting, events, folds,
+  block,
+  controls,
+  sourceProps,
+  shows,
+  spots,
+  lookupProps,
+  searchWindow,
+  helpers,
+  follows,
+  waiting,
+  events,
+  folds,
 }: SectionsProps) {
   const ed = useEditor()
   const library = useDataSources().list
@@ -138,10 +159,16 @@ export function Sections({
         </Section>
       )}
       {follows && (
-        <Section name="Folgt der Auswahl" summary={follow ? followedName(follow, ed.tree, library) : 'nichts'} folds={folds}>
-          {follow !== undefined && !waiting
-            ? <SelectionFollowSection block={block} onPick={() => ed.pickFollowFor(block.id)} />
-            : <FollowPick block={block} />}
+        <Section
+          name="Folgt der Auswahl"
+          summary={follow ? followedName(follow, ed.tree, library) : 'nichts'}
+          folds={folds}
+        >
+          {follow !== undefined && !waiting ? (
+            <SelectionFollowSection block={block} onPick={() => ed.pickFollowFor(block.id)} />
+          ) : (
+            <FollowPick block={block} />
+          )}
         </Section>
       )}
       {(events.length > 0 || entries) && (

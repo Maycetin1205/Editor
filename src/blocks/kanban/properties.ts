@@ -13,16 +13,19 @@ export const kanbanProperties = {
   // A value no column and no place takes: into the catch-all column, or the
   // card is left out, as a finished appointment. An empty value always goes
   // to the catch-all column.
-  others: segmentProperty([
-    { value: 'catch', name: 'In Auffangspalte' },
-    { value: 'hide', name: 'Ausblenden' },
-  ], {
-    default: 'catch',
-    label: 'Anderer Wert',
-    place: 'source',
-    attribute: 'others',
-    needsSource: true,
-  }),
+  others: segmentProperty(
+    [
+      { value: 'catch', name: 'In Auffangspalte' },
+      { value: 'hide', name: 'Ausblenden' },
+    ],
+    {
+      default: 'catch',
+      label: 'Anderer Wert',
+      place: 'source',
+      attribute: 'others',
+      needsSource: true,
+    },
+  ),
   dayField: DAY_FIELD_PROPERTY,
   avatarField: avatarBinding('Avatar'),
   columns: kanbanColumnsProperty(),

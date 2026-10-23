@@ -28,8 +28,7 @@ export function PopupPage({ popupId }: { popupId: string }) {
   useEffect(() => {
     const el = wrapRef.current
     if (!el) return
-    const observers = new ResizeObserver(() =>
-      setStage({ b: el.clientWidth, h: el.clientHeight }))
+    const observers = new ResizeObserver(() => setStage({ b: el.clientWidth, h: el.clientHeight }))
     observers.observe(el)
     return () => observers.disconnect()
   }, [])
@@ -37,7 +36,9 @@ export function PopupPage({ popupId }: { popupId: string }) {
   useEffect(() => {
     const el = wrapRef.current
     if (!el) return
-    const toMainPage = (): void => { ed.setActivePage(ed.pages[0].id) }
+    const toMainPage = (): void => {
+      ed.setActivePage(ed.pages[0].id)
+    }
     el.addEventListener(DIALOG_CLOSE_EVENT, toMainPage)
     return () => el.removeEventListener(DIALOG_CLOSE_EVENT, toMainPage)
   }, [ed])
@@ -77,11 +78,7 @@ export function PopupPage({ popupId }: { popupId: string }) {
         commitDrop(e, ed, dnd)
       }}
     >
-      <BlockHost
-        block={node}
-        selected={selected}
-        onSelect={() => ed.selectBlock(node.id)}
-      >
+      <BlockHost block={node} selected={selected} onSelect={() => ed.selectBlock(node.id)}>
         <NodeList parentId={node.id} />
       </BlockHost>
 
@@ -95,13 +92,18 @@ export function PopupPage({ popupId }: { popupId: string }) {
             <Grip
               key={edge}
               edge={edge}
-              onStart={(e) => dragSize(ed, e, edge, { width: visibleWidth, height: visibleHeight },
-                (axis, value) => ed.updateProperty(node.id, POPUP_SIZE[axis], value))}
-              onReset={() => ed.transaction(() => {
-                for (const axis of axesOf(edge)) {
-                  ed.updateProperty(node.id, POPUP_SIZE[axis], declared[POPUP_SIZE[axis]]?.default)
-                }
-              })}
+              onStart={(e) =>
+                dragSize(ed, e, edge, { width: visibleWidth, height: visibleHeight }, (axis, value) =>
+                  ed.updateProperty(node.id, POPUP_SIZE[axis], value),
+                )
+              }
+              onReset={() =>
+                ed.transaction(() => {
+                  for (const axis of axesOf(edge)) {
+                    ed.updateProperty(node.id, POPUP_SIZE[axis], declared[POPUP_SIZE[axis]]?.default)
+                  }
+                })
+              }
             />
           ))}
         </div>

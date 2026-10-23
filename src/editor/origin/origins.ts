@@ -35,19 +35,23 @@ export const decodeOrigin = (raw: string): ValueOrigin => JSON.parse(raw) as Val
 
 export function originKey(o: ValueOrigin): string {
   switch (o.kind) {
-    case 'helper': return `helper:${o.sourceId ?? ''}`
+    case 'helper':
+      return `helper:${o.sourceId ?? ''}`
     case 'document':
     case 'source':
       return `${o.kind}:${o.sourceId}`
-    case 'formField': return `formField:${o.blockId}:${o.prop}`
+    case 'formField':
+      return `formField:${o.blockId}:${o.prop}`
     case 'chosenRow':
     case 'captured':
     case 'changed':
     case 'split':
     case 'sum':
       return `${o.kind}:${o.blockId}`
-    case 'step': return `step:${o.stepId}`
-    default: return o.kind
+    case 'step':
+      return `step:${o.stepId}`
+    default:
+      return o.kind
   }
 }
 
@@ -69,48 +73,62 @@ export function originsOf(reach: Reach): Origin[] {
   const opened = reach.document
   const all: Origin[] = [
     ...(reach.events
-      ? [origin(
-          KIND_NAMES.event,
-          ACTION_PLACEHOLDER.map((v) => ({ value: v, name: EVENT_VALUES[v] ?? v })),
-          (value) => ({ kind: 'event', value }),
-        )]
+      ? [
+          origin(
+            KIND_NAMES.event,
+            ACTION_PLACEHOLDER.map((v) => ({ value: v, name: EVENT_VALUES[v] ?? v })),
+            (value) => ({ kind: 'event', value }),
+          ),
+        ]
       : []),
     ...(reach.row ? [origin(KIND_NAMES.row, reach.row, (value) => ({ kind: 'row', value }))] : []),
     ...(reach.captures ?? []).map((g) =>
-      origin(`Erfasste Zeile: ${g.name}`, g.entries, (value) => ({ kind: 'captured', blockId: g.id, value }))),
+      origin(`Erfasste Zeile: ${g.name}`, g.entries, (value) => ({ kind: 'captured', blockId: g.id, value })),
+    ),
     ...(reach.changes ?? []).map((g) =>
-      origin(`Geänderte Zeile: ${g.name}`, g.entries, (value) => ({ kind: 'changed', blockId: g.id, value }))),
+      origin(`Geänderte Zeile: ${g.name}`, g.entries, (value) => ({ kind: 'changed', blockId: g.id, value })),
+    ),
     ...(reach.splits ?? []).map((g) =>
-      origin(`Verteilt: ${g.name}`, g.entries, (value) => ({ kind: 'split', blockId: g.id, value }))),
+      origin(`Verteilt: ${g.name}`, g.entries, (value) => ({ kind: 'split', blockId: g.id, value })),
+    ),
     ...(reach.givers ?? []).map((g) =>
-      origin(`Gewählte Zeile: ${g.name}`, g.entries, (value) => ({ kind: 'chosenRow', blockId: g.id, value }))),
+      origin(`Gewählte Zeile: ${g.name}`, g.entries, (value) => ({ kind: 'chosenRow', blockId: g.id, value })),
+    ),
     ...(reach.sums ?? []).map((g) =>
-      origin(`Summe: ${g.name}`, g.entries, (value) => ({ kind: 'sum', blockId: g.id, value }))),
+      origin(`Summe: ${g.name}`, g.entries, (value) => ({ kind: 'sum', blockId: g.id, value })),
+    ),
     ...(reach.steps ?? []).map((s) =>
-      origin(`Schritt ${s.nr}: ${s.name}`, [{ value: '', name: 'Antwort' }], () => ({ kind: 'step', stepId: s.id }))),
+      origin(`Schritt ${s.nr}: ${s.name}`, [{ value: '', name: 'Antwort' }], () => ({ kind: 'step', stepId: s.id })),
+    ),
     ...(reach.helpers ?? []).map((g) =>
-      origin(g.name, g.entries, (value) => ({ kind: 'helper', sourceId: g.id, value }))),
+      origin(g.name, g.entries, (value) => ({ kind: 'helper', sourceId: g.id, value })),
+    ),
     ...(opened
       ? [origin(opened.name, opened.entries, (value) => ({ kind: 'document', sourceId: opened.id, value }))]
       : []),
     ...(reach.formFields ?? []).map((f) =>
-      origin(f.name, [{ value: '', name: 'Inhalt' }], () => ({ kind: 'formField', blockId: f.blockId, prop: f.prop }))),
+      origin(f.name, [{ value: '', name: 'Inhalt' }], () => ({ kind: 'formField', blockId: f.blockId, prop: f.prop })),
+    ),
     ...(reach.sources ?? []).map((s) =>
-      origin(s.name, fieldEntries(s), (value) => ({ kind: 'source', sourceId: s.id, value }))),
+      origin(s.name, fieldEntries(s), (value) => ({ kind: 'source', sourceId: s.id, value })),
+    ),
   ]
   listed.set(reach, all)
   return all
 }
 
-export const originOf = (key: string, reach: Reach): Origin | undefined =>
-  originsOf(reach).find((o) => o.key === key)
+export const originOf = (key: string, reach: Reach): Origin | undefined => originsOf(reach).find((o) => o.key === key)
 
 export function originName(key: string, reach: Reach): string {
   switch (key) {
-    case 'fixed': return KIND_NAMES.fixed
-    case 'previous': return KIND_NAMES.previous
-    case 'variable': return KIND_NAMES.variable
-    default: return originOf(key, reach)?.name ?? ''
+    case 'fixed':
+      return KIND_NAMES.fixed
+    case 'previous':
+      return KIND_NAMES.previous
+    case 'variable':
+      return KIND_NAMES.variable
+    default:
+      return originOf(key, reach)?.name ?? ''
   }
 }
 

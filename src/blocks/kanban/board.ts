@@ -85,17 +85,26 @@ export class Board {
     const hideOthers = el.others === 'hide'
     this.cards = preamble.rows.flatMap((row, i) => {
       const spot = spotOf(columns, field, row, hideOthers)
-      return spot === null ? [] : [{
-        key: keys[i],
-        row,
-        record: recordOf(preamble.source, row),
-        spot,
-        values: el.cardValues(row, preamble.read),
-      }]
+      return spot === null
+        ? []
+        : [
+            {
+              key: keys[i],
+              row,
+              record: recordOf(preamble.source, row),
+              spot,
+              values: el.cardValues(row, preamble.read),
+            },
+          ]
     })
     if (delivery && !this.writes) this.moved.clear()
     if (!this.cards.some((card) => card.key === this.dragging)) this.endDrag()
-    const hit = relocateSelection(giverIdOf(el), this.cards, (card) => card.row, (card) => card.key)
+    const hit = relocateSelection(
+      giverIdOf(el),
+      this.cards,
+      (card) => card.row,
+      (card) => card.key,
+    )
     this.chosen = hit.length > 0 ? this.cards[hit[0]].key : ''
     el.requestUpdate()
   }
@@ -191,7 +200,9 @@ export class Board {
 }
 
 const link = makeDataLink<BoardElement & { board: Board }>({
-  hydrate: (el, delivery) => { el.board.hydrate(delivery) },
+  hydrate: (el, delivery) => {
+    el.board.hydrate(delivery)
+  },
 })
 
 export const boardRegister = link.connect

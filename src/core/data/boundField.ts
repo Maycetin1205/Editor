@@ -4,9 +4,7 @@ import type { SourceInReach } from './extraSources'
 
 export function sourceInReachOf(binding: string, sources: readonly SourceInReach[]): DataSource | undefined {
   const { sourceId } = splitBinding(binding)
-  return sourceId === ''
-    ? sources[0]?.source
-    : sources.find((q) => q.source.id === sourceId)?.source
+  return sourceId === '' ? sources[0]?.source : sources.find((q) => q.source.id === sourceId)?.source
 }
 
 export function boundField(binding: string, sources: readonly SourceInReach[]): DataField | undefined {

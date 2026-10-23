@@ -12,8 +12,9 @@ export function sendStartTool(toolNumber: string, params: readonly string[]): bo
   const g = seWindow()
   const message: { NR: string; PARAMS?: string[] } = { NR: toolNumber }
   if (params.length > 0) message.PARAMS = [...params]
-  if (typeof g.basisHTML_SND_MSG === 'function'
-    && hostCall(() => g.basisHTML_SND_MSG('START_TOOL', message))) return true
-  return typeof g.sendBWLinkIntern === 'function'
-    && hostCall(() => g.sendBWLinkIntern(startToolLink(toolNumber, params)))
+  if (typeof g.basisHTML_SND_MSG === 'function' && hostCall(() => g.basisHTML_SND_MSG('START_TOOL', message)))
+    return true
+  return (
+    typeof g.sendBWLinkIntern === 'function' && hostCall(() => g.sendBWLinkIntern(startToolLink(toolNumber, params)))
+  )
 }

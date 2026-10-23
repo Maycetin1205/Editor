@@ -11,8 +11,8 @@ interface LadderControlProps {
 }
 
 const STEP =
-  'flex h-full shrink-0 items-center justify-center rounded-[var(--radius-small)] px-[5px] text-muted transition-colors'
-  + ' hover:bg-hover hover:text-ink disabled:cursor-not-allowed disabled:opacity-[.45] disabled:hover:bg-transparent'
+  'flex h-full shrink-0 items-center justify-center rounded-[var(--radius-small)] px-[5px] text-muted transition-colors' +
+  ' hover:bg-hover hover:text-ink disabled:cursor-not-allowed disabled:opacity-[.45] disabled:hover:bg-transparent'
 
 export function LadderControl({ property, value, onChange }: LadderControlProps) {
   const name = property.label

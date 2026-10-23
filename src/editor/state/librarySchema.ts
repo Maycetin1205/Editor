@@ -20,11 +20,23 @@ function to(o: Record<string, unknown>, pairs: Record<string, string>): void {
 }
 
 function liftV9Keys(x: unknown): void {
-  if (Array.isArray(x)) { x.forEach(liftV9Keys); return }
+  if (Array.isArray(x)) {
+    x.forEach(liftV9Keys)
+    return
+  }
   if (!isPlainObject(x)) return
-  if ('childIds' in x) to(x, { type: 'typ', props: 'werte', events: 'ketten', parentId: 'elternId', childIds: 'kinderIds' })
-  if ('resultKey' in x) to(x, { type: 'art', resultKey: 'ergebnisName', params: 'parameter', extraParams: 'zusatzParameter', toolParams: 'toolParameter' })
-  if ('source' in x && 'value' in x && !('id' in x)) to(x, { source: 'quelle', value: 'wert', dataSourceId: 'quelleId', blockId: 'bausteinId' })
+  if ('childIds' in x)
+    to(x, { type: 'typ', props: 'werte', events: 'ketten', parentId: 'elternId', childIds: 'kinderIds' })
+  if ('resultKey' in x)
+    to(x, {
+      type: 'art',
+      resultKey: 'ergebnisName',
+      params: 'parameter',
+      extraParams: 'zusatzParameter',
+      toolParams: 'toolParameter',
+    })
+  if ('source' in x && 'value' in x && !('id' in x))
+    to(x, { source: 'quelle', value: 'wert', dataSourceId: 'quelleId', blockId: 'bausteinId' })
   if ('kind' in x && 'fields' in x) to(x, { kind: 'art', fields: 'felder', indexField: 'satzFeld' })
   if ('code' in x && 'label' in x) to(x, { label: 'name' })
   if ('verb' in x && 'params' in x) to(x, { params: 'parameter', allowExtraParams: 'zusatzParameterErlaubt' })
@@ -41,34 +53,61 @@ function liftKey<T>(raw: T): T {
 }
 
 const PARAMETER_KEYS: Record<string, string> = {
-  quelle: 'source', wert: 'value', bausteinId: 'blockId',
-  quelleId: 'sourceId', ergebnisFeld: 'resultField',
+  quelle: 'source',
+  wert: 'value',
+  bausteinId: 'blockId',
+  quelleId: 'sourceId',
+  ergebnisFeld: 'resultField',
 }
 
 const PARAMETER_SOURCES: Record<string, string> = {
-  erfassungszelle: 'captureCell', aenderungszelle: 'changeCell', loeschzelle: 'deleteCell',
-  gewaehlte_zeile: 'chosenRow', se_variable: 'seVariable', datenfeld: 'dataField', aus: 'from',
+  erfassungszelle: 'captureCell',
+  aenderungszelle: 'changeCell',
+  loeschzelle: 'deleteCell',
+  gewaehlte_zeile: 'chosenRow',
+  se_variable: 'seVariable',
+  datenfeld: 'dataField',
+  aus: 'from',
 }
 
 const SOURCE_KEYS: Record<string, string> = {
-  art: 'kind', felder: 'fields', satzFeld: 'recordField', kopfsatzIndex: 'headerKeyIndex',
-  lieferung: 'delivery', ladeRelation: 'loadRelation', holWert: 'getValue',
-  feldVorsatz: 'fieldPrefix', bereich: 'area', zeichen: 'icon',
-  belegartFeld: 'documentKindField', belegnummerFeld: 'documentNumberField',
-  jahrFeld: 'yearField', archivFeld: 'archiveField', endeFelder: 'endFields',
-  zusatzParameterErlaubt: 'extraParameterAllowed', offenerSatz: 'openRecord',
+  art: 'kind',
+  felder: 'fields',
+  satzFeld: 'recordField',
+  kopfsatzIndex: 'headerKeyIndex',
+  lieferung: 'delivery',
+  ladeRelation: 'loadRelation',
+  holWert: 'getValue',
+  feldVorsatz: 'fieldPrefix',
+  bereich: 'area',
+  zeichen: 'icon',
+  belegartFeld: 'documentKindField',
+  belegnummerFeld: 'documentNumberField',
+  jahrFeld: 'yearField',
+  archivFeld: 'archiveField',
+  endeFelder: 'endFields',
+  zusatzParameterErlaubt: 'extraParameterAllowed',
+  offenerSatz: 'openRecord',
 }
 
 const SOURCE_KINDS: Record<string, string> = {
-  adressstamm: 'addressMaster', artikelstamm: 'itemMaster', beleg: 'document',
-  belegposition: 'documentItem', datei: 'file', relationswert: 'relationValue',
-  erpabfrage: 'erpQuery', erpmaske: 'erpMask',
+  adressstamm: 'addressMaster',
+  artikelstamm: 'itemMaster',
+  beleg: 'document',
+  belegposition: 'documentItem',
+  datei: 'file',
+  relationswert: 'relationValue',
+  erpabfrage: 'erpQuery',
+  erpmaske: 'erpMask',
 }
 
 const DELIVERY_VALUES: Record<string, string> = { liste: 'list', offenerSatz: 'openRecord' }
 
 function renameDeep(x: unknown, pairs: Record<string, string>): void {
-  if (Array.isArray(x)) { x.forEach((e) => renameDeep(e, pairs)); return }
+  if (Array.isArray(x)) {
+    x.forEach((e) => renameDeep(e, pairs))
+    return
+  }
   if (!isPlainObject(x)) return
   to(x, pairs)
   for (const value of Object.values(x)) renameDeep(value, pairs)
@@ -103,8 +142,11 @@ function liftLibraries(state: Record<string, unknown>): void {
 }
 
 const PARAMETER_SOURCES_19: Record<string, string> = {
-  from: 'omitted', previous_result: 'previousResult', step_result: 'stepResult',
-  block_value: 'blockValue', data_field: 'dataField',
+  from: 'omitted',
+  previous_result: 'previousResult',
+  step_result: 'stepResult',
+  block_value: 'blockValue',
+  data_field: 'dataField',
 }
 
 const FIELD_KEYS_19: Record<string, string> = { icon: 'length' }
@@ -137,9 +179,7 @@ function text(value: unknown): string {
 
 function descriptorSource(source: Record<string, unknown>): Record<string, unknown> {
   if ('preset' in source || !isPresetId(source.kind)) return source
-  const {
-    kind, idbId, recordField, headerKeyIndex, delivery, loadRelation, getValue, area, ...kept
-  } = source
+  const { kind, idbId, recordField, headerKeyIndex, delivery, loadRelation, getValue, area, ...kept } = source
   const preset = sourcePreset(kind)
   return {
     ...kept,
@@ -166,8 +206,14 @@ function liftToDescriptors(state: Record<string, unknown>): void {
 const OLD_ANSWER_LENGTH = 255
 
 function positionEntryFor(nr: string, relations: unknown[]): string {
-  const present = relations.find((r) => isPlainObject(r) && r.verb === 'GET_RELATION'
-    && r.nr === nr && isPlainObject(r.positions) && typeof r.id === 'string')
+  const present = relations.find(
+    (r) =>
+      isPlainObject(r) &&
+      r.verb === 'GET_RELATION' &&
+      r.nr === nr &&
+      isPlainObject(r.positions) &&
+      typeof r.id === 'string',
+  )
   if (isPlainObject(present) && typeof present.id === 'string') return present.id
   let id = `positions-${nr}`
   for (let n = 2; relations.some((r) => isPlainObject(r) && r.id === id); n++) id = `positions-${nr}-${n}`
@@ -191,7 +237,9 @@ function liftLoadRelations(state: Record<string, unknown>): void {
     const delivery = source.delivery
     const load = isPlainObject(source.loadRelation)
       ? source.loadRelation
-      : isPlainObject(delivery) && delivery.kind === 'relationRows' ? delivery : null
+      : isPlainObject(delivery) && delivery.kind === 'relationRows'
+        ? delivery
+        : null
     if (!load || typeof load.nr !== 'string' || 'relationId' in load) continue
     const nr = load.nr.trim()
     if (!/^\d+$/.test(nr) || !checkLoadRelation({ ...load, relationId: nr })) continue

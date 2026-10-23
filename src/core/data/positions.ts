@@ -59,9 +59,7 @@ interface PositionsLook {
   readField(row: unknown, code: string): string
 }
 
-export type PositionsWrite =
-  | { kind: 'added'; sourceId: string }
-  | { kind: 'removed'; sourceId: string; row: unknown }
+export type PositionsWrite = { kind: 'added'; sourceId: string } | { kind: 'removed'; sourceId: string; row: unknown }
 
 function listsPositions(source: Pick<DataSource, 'tableId' | 'delivery'>): boolean {
   return source.tableId === POSITIONS_TABLE && source.delivery.kind === 'push' && source.delivery.path !== 'Var'
@@ -92,7 +90,8 @@ function placeValue(put: RuntimeRelation, params: readonly string[], name: strin
 }
 
 function documentRows(look: PositionsLook): unknown[] {
-  return look.sources()
+  return look
+    .sources()
     .filter((s) => s.tableId === DOCUMENT_TABLE && s.delivery.kind === 'push')
     .flatMap((s) => look.rows(s))
 }
@@ -104,10 +103,11 @@ function openDocument(
   fromRow: unknown,
 ): OpenDocument | undefined {
   const rows = documentRows(look)
-  const number = placeValue(put, params, PLACES.documentNumber)
-    || look.readField(fromRow, POSITION_FIELDS.documentNumber)
-    || rows.map((r) => look.readField(r, POSITION_FIELDS.documentNumber)).find((v) => v !== '')
-    || ''
+  const number =
+    placeValue(put, params, PLACES.documentNumber) ||
+    look.readField(fromRow, POSITION_FIELDS.documentNumber) ||
+    rows.map((r) => look.readField(r, POSITION_FIELDS.documentNumber)).find((v) => v !== '') ||
+    ''
   if (number === '') return undefined
   const own = rows.filter((r) => look.readField(r, POSITION_FIELDS.documentNumber) === number)
   const field = (code: string): string => own.map((r) => look.readField(r, code)).find((v) => v !== '') ?? ''
@@ -205,7 +205,10 @@ export function writtenPosition(
     if (read(row, POSITION_FIELDS.article).toUpperCase() !== article) return false
     return quantity === undefined || sameQuantity(read(row, POSITION_FIELDS.quantity), quantity)
   })
-  return hits.reduce<unknown>((best, row) => (best === undefined || numberOf(row, read) > numberOf(best, read) ? row : best), undefined)
+  return hits.reduce<unknown>(
+    (best, row) => (best === undefined || numberOf(row, read) > numberOf(best, read) ? row : best),
+    undefined,
+  )
 }
 
 export function positionGone(
@@ -220,7 +223,8 @@ export function positionGone(
     return gone.ident !== '' ? own.ident === gone.ident : own.number === gone.number
   }
   if (rows.some(carries)) return false
-  const othersKnown = [...known.idents].some((ident) => ident !== gone.ident)
-    || [...known.numbers].some((number) => number !== gone.number)
+  const othersKnown =
+    [...known.idents].some((ident) => ident !== gone.ident) ||
+    [...known.numbers].some((number) => number !== gone.number)
   return rows.length > 0 || !othersKnown
 }

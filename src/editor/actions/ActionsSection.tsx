@@ -30,7 +30,9 @@ export function ActionsSection({ block, events }: { block: BlockNode; events: re
 
   return (
     <div className="flex flex-col gap-[10px]">
-      {events.map((ev) => <EventChain key={ev.key} block={block} ev={ev} context={context} />)}
+      {events.map((ev) => (
+        <EventChain key={ev.key} block={block} ev={ev} context={context} />
+      ))}
     </div>
   )
 }
@@ -39,10 +41,11 @@ export function EventChain({ block, ev, context }: { block: BlockNode; ev: Event
   const ed = useEditor()
   const opened = useView().stepWindow
   const chain = chainOf(ed, block.id, ev.key)
-  const set = (steps: Step[]) => ed.transaction(() => {
-    setChain(ed, block.id, ev.key, steps)
-    if (steps.length === 0) releaseEmptyEntryKeys(ed, block.id)
-  })
+  const set = (steps: Step[]) =>
+    ed.transaction(() => {
+      setChain(ed, block.id, ev.key, steps)
+      if (steps.length === 0) releaseEmptyEntryKeys(ed, block.id)
+    })
   return (
     <section className="flex flex-col gap-[4px]">
       <span className="truncate text-dense font-semibold text-muted">{ev.name}</span>
@@ -54,19 +57,33 @@ export function EventChain({ block, ev, context }: { block: BlockNode; ev: Event
             step={step}
             context={context}
             open={opened?.blockId === block.id && opened.stepId === step.id}
-            onOpen={() => ed.openStep({ blockId: block.id, eventKey: ev.key, stepId: step.id, tab: stepPiece(step.kind).tab(step, context) })}
-            onUp={i === 0 ? undefined : () => {
-              const next = [...chain]
-              next.splice(i - 1, 0, ...next.splice(i, 1))
-              set(next)
-            }}
+            onOpen={() =>
+              ed.openStep({
+                blockId: block.id,
+                eventKey: ev.key,
+                stepId: step.id,
+                tab: stepPiece(step.kind).tab(step, context),
+              })
+            }
+            onUp={
+              i === 0
+                ? undefined
+                : () => {
+                    const next = [...chain]
+                    next.splice(i - 1, 0, ...next.splice(i, 1))
+                    set(next)
+                  }
+            }
             onRemove={() => set(chain.filter((s) => s.id !== step.id))}
           />
         ))}
         <button
           type="button"
           onClick={() => ed.openStep({ blockId: block.id, eventKey: ev.key, stepId: null, tab: NEW_STEP_TAB })}
-          className={cn('flex h-[30px] w-full items-center gap-[8px] px-[8px] text-left text-muted hover:text-ink', LINE_HOVER)}
+          className={cn(
+            'flex h-[30px] w-full items-center gap-[8px] px-[8px] text-left text-muted hover:text-ink',
+            LINE_HOVER,
+          )}
         >
           <Plus size={13} className="text-accent" /> Schritt hinzufügen
         </button>
@@ -91,9 +108,12 @@ export function OpenStepWindow() {
       chain={chain}
       context={context}
       onApply={(next) => {
-        setChain(ed, opened.blockId, opened.eventKey, chain.some((s) => s.id === next.id)
-          ? chain.map((s) => (s.id === next.id ? next : s))
-          : [...chain, next])
+        setChain(
+          ed,
+          opened.blockId,
+          opened.eventKey,
+          chain.some((s) => s.id === next.id) ? chain.map((s) => (s.id === next.id ? next : s)) : [...chain, next],
+        )
         ed.openStep(null)
       }}
       onClose={() => {
@@ -106,7 +126,15 @@ export function OpenStepWindow() {
 
 const LINE = 'group flex h-[30px] items-center gap-[8px] border-b border-line-soft px-[8px]'
 
-function StepLine({ nr, step, context, open, onOpen, onUp, onRemove }: {
+function StepLine({
+  nr,
+  step,
+  context,
+  open,
+  onOpen,
+  onUp,
+  onRemove,
+}: {
   nr: number
   step: Step
   context: StepContext
@@ -118,11 +146,27 @@ function StepLine({ nr, step, context, open, onOpen, onUp, onRemove }: {
   const ends = (
     <span className="ml-auto flex shrink-0 items-center opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
       {onUp && (
-        <Button onlyIcon aria-label="Schritt nach oben" title="Nach oben" onClick={(e) => { e.stopPropagation(); onUp() }}>
+        <Button
+          onlyIcon
+          aria-label="Schritt nach oben"
+          title="Nach oben"
+          onClick={(e) => {
+            e.stopPropagation()
+            onUp()
+          }}
+        >
           <ArrowUp size={12} />
         </Button>
       )}
-      <Button onlyIcon aria-label="Schritt entfernen" title="Entfernen" onClick={(e) => { e.stopPropagation(); onRemove() }}>
+      <Button
+        onlyIcon
+        aria-label="Schritt entfernen"
+        title="Entfernen"
+        onClick={(e) => {
+          e.stopPropagation()
+          onRemove()
+        }}
+      >
         <X size={13} />
       </Button>
     </span>
@@ -134,7 +178,9 @@ function StepLine({ nr, step, context, open, onOpen, onUp, onRemove }: {
   return (
     <Clickable open={open} onClick={onOpen}>
       {number}
-      <span className={cn('min-w-0 truncate', !known && 'opacity-60')}>{condition === '' ? words : `${words}, ${condition}`}</span>
+      <span className={cn('min-w-0 truncate', !known && 'opacity-60')}>
+        {condition === '' ? words : `${words}, ${condition}`}
+      </span>
       {short !== '' && (
         <span className="shrink-0 border-l border-line pl-[8px] font-mono text-dense opacity-70">{short}</span>
       )}
@@ -150,7 +196,9 @@ function Clickable({ open, onClick, children }: { open: boolean; onClick: () => 
       tabIndex={0}
       aria-expanded={open}
       onClick={onClick}
-      onKeyDown={(e) => { if (e.key === 'Enter') onClick() }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') onClick()
+      }}
       className={cn(LINE, 'cursor-pointer', open ? LINE_CHOSEN : LINE_HOVER)}
     >
       {children}

@@ -6,15 +6,17 @@ import { boundNames } from '../core/data/boundField'
 import type { DataSource } from '../core/data/dataSources'
 
 export function previewSpotsOf(node: BlockNode): Map<string, BindableSpot> {
-  return new Map(bindableSpotsOf(node).flatMap((spot) => (spot.previewProp === undefined
-    ? []
-    : [[spot.previewProp, spot] as const])))
+  return new Map(
+    bindableSpotsOf(node).flatMap((spot) =>
+      spot.previewProp === undefined ? [] : [[spot.previewProp, spot] as const],
+    ),
+  )
 }
 
 export function nameSpotsOf(node: BlockNode): Map<string, BindableSpot> {
-  return new Map(bindableSpotsOf(node).flatMap((spot) => (spot.nameProp === undefined
-    ? []
-    : [[spot.nameProp, spot] as const])))
+  return new Map(
+    bindableSpotsOf(node).flatMap((spot) => (spot.nameProp === undefined ? [] : [[spot.nameProp, spot] as const])),
+  )
 }
 
 export function namesRaw(node: BlockNode, spot: BindableSpot, sources: readonly DataSource[]): string {

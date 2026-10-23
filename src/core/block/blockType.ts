@@ -4,7 +4,6 @@ import type { PropertyMap, PropertyValue } from './property'
 
 export {
   entriesWithValue,
-  
   entryValues,
   fieldChoicesRead,
   innerOf,
@@ -12,15 +11,10 @@ export {
   flagOn,
   flagFor,
   withInner,
-  
   type ListBinding,
 } from './listBinding'
 
-export {
-  bindingWithSource,
-  SOURCES_DIVIDER,
-  splitBinding,
-} from './binding'
+export { bindingWithSource, SOURCES_DIVIDER, splitBinding } from './binding'
 
 export type Category = 'input' | 'display' | 'layout'
 
@@ -51,7 +45,5 @@ export interface BlockDeclaration {
   grid?: Partial<GridMetrics>
 }
 
-export type BlockType = BlockDeclaration & Required<Pick<
-  BlockDeclaration,
-  'properties' | 'capabilities' | 'takesChildren'
->>
+export type BlockType = BlockDeclaration &
+  Required<Pick<BlockDeclaration, 'properties' | 'capabilities' | 'takesChildren'>>

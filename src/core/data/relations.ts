@@ -2,9 +2,7 @@ import { isUnread, type Unread } from '../unread'
 
 export type RelationVerb = 'GET_RELATION' | 'PUT_RELATION' | 'PUTADD_RELATION'
 
-export const RELATION_VERBS: readonly RelationVerb[] = [
-  'GET_RELATION', 'PUT_RELATION', 'PUTADD_RELATION',
-]
+export const RELATION_VERBS: readonly RelationVerb[] = ['GET_RELATION', 'PUT_RELATION', 'PUTADD_RELATION']
 
 export type PlaceholderValues = Readonly<Record<string, string | undefined>>
 
@@ -20,7 +18,14 @@ type SlotRole =
   | `fixed:${string}`
 
 const NAMED_SLOT_ROLES = [
-  'documentKind', 'position', 'length', 'documentNumber', 'year', 'archive', 'positionNumber', 'empty',
+  'documentKind',
+  'position',
+  'length',
+  'documentNumber',
+  'year',
+  'archive',
+  'positionNumber',
+  'empty',
 ] as const
 
 type NamedSlotRole = (typeof NAMED_SLOT_ROLES)[number]
@@ -60,8 +65,18 @@ export const POSITIONS_RELATION: Omit<RelationTemplate, 'id'> = {
   parameter: ['BELART', 'POS', 'LEN', 'NR', 'JAHR', 'ARCHIV', 'I1', 'I2', 'I3', 'I4', 'I5', 'I6'],
   positions: {
     slots: [
-      'documentKind', 'position', 'length', 'documentNumber', 'year', 'archive',
-      'empty', 'empty', 'positionNumber', 'empty', 'empty', 'empty',
+      'documentKind',
+      'position',
+      'length',
+      'documentNumber',
+      'year',
+      'archive',
+      'empty',
+      'empty',
+      'positionNumber',
+      'empty',
+      'empty',
+      'empty',
     ],
     answerLength: 255,
   },
@@ -69,8 +84,18 @@ export const POSITIONS_RELATION: Omit<RelationTemplate, 'id'> = {
 
 export const OLD_POSITIONS_PARAMETER = ['BELART', 'POS', 'LEN', 'BELNR', 'JAHR', 'ARCHIV', '', 'POSNR', '', '', '', '']
 export const OLD_POSITIONS_SLOTS: readonly SlotRole[] = [
-  'documentKind', 'position', 'length', 'documentNumber', 'year', 'archive',
-  'empty', 'positionNumber', 'empty', 'empty', 'empty', 'empty',
+  'documentKind',
+  'position',
+  'length',
+  'documentNumber',
+  'year',
+  'archive',
+  'empty',
+  'positionNumber',
+  'empty',
+  'empty',
+  'empty',
+  'empty',
 ]
 
 const sameList = (a: readonly string[], b: readonly string[]): boolean =>
@@ -135,10 +160,7 @@ export interface RelationAnswer {
   failed?: boolean
 }
 
-type RelationSyntax = Pick<
-  RelationTemplate,
-  'verb' | 'nr' | 'parameter' | 'extraParameterAllowed'
->
+type RelationSyntax = Pick<RelationTemplate, 'verb' | 'nr' | 'parameter' | 'extraParameterAllowed'>
 
 export function relIdFromIdbId(idbId: string): string {
   return idbId.replace(/^IDB/, '')
@@ -221,8 +243,9 @@ export function relationFitsToSearch(
 ): boolean {
   const needle = query.trim().toLocaleLowerCase('de')
   if (needle === '') return true
-  return [relation.name, relation.nr, relationSyntaxAsText(relation)]
-    .some((value) => value.toLocaleLowerCase('de').includes(needle))
+  return [relation.name, relation.nr, relationSyntaxAsText(relation)].some((value) =>
+    value.toLocaleLowerCase('de').includes(needle),
+  )
 }
 
 export function checkRelationTemplates(raw: unknown): RelationTemplate[] {

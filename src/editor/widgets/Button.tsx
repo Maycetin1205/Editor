@@ -20,18 +20,16 @@ const ONLY_ICON: Record<ButtonKind, string> = {
 export const PRESSED = 'border-accent bg-accent-soft text-accent hover:bg-accent-soft'
 
 export const OPENER =
-  'flex h-control shrink-0 items-center gap-[6px] rounded border border-line bg-panel px-[8px] text-ui font-semibold text-ink transition-colors'
-  + ' hover:bg-hover aria-expanded:border-accent aria-expanded:bg-accent-soft'
-  + ' focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
+  'flex h-control shrink-0 items-center gap-[6px] rounded border border-line bg-panel px-[8px] text-ui font-semibold text-ink transition-colors' +
+  ' hover:bg-hover aria-expanded:border-accent aria-expanded:bg-accent-soft' +
+  ' focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
 
 interface ButtonBase extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   kind?: ButtonKind
   children: ReactNode
 }
 
-type ButtonProps =
-  & ButtonBase
-  & ({ onlyIcon: true; 'aria-label': string } | { onlyIcon?: false })
+type ButtonProps = ButtonBase & ({ onlyIcon: true; 'aria-label': string } | { onlyIcon?: false })
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ kind = 'silent', onlyIcon = false, className, type = 'button', ...rest }, ref) => (

@@ -1,12 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useRef,
-  useState,
-  type FocusEvent,
-  type KeyboardEvent,
-  type ReactNode,
-} from 'react'
+import { createContext, useContext, useRef, useState, type FocusEvent, type KeyboardEvent, type ReactNode } from 'react'
 import { Plus, Trash2 } from '@/editor/icons/icon'
 import { cn } from './cn'
 import { binArea, LINE_HOVER, ROW_CHOSEN } from './lineLook'
@@ -29,13 +21,16 @@ const TYPING = 'bg-panel'
 
 export function Strip({ children, right, wrap = false }: { children: ReactNode; right?: ReactNode; wrap?: boolean }) {
   return (
-    <div className={cn(
-      'flex shrink-0 items-center gap-[8px] border-b border-line-soft bg-panel px-[12px] text-ui font-bold text-ink',
-      wrap ? 'min-h-[36px] py-[8px]' : 'h-[36px]',
-    )}
+    <div
+      className={cn(
+        'flex shrink-0 items-center gap-[8px] border-b border-line-soft bg-panel px-[12px] text-ui font-bold text-ink',
+        wrap ? 'min-h-[36px] py-[8px]' : 'h-[36px]',
+      )}
     >
       <span className={cn('flex min-w-0 items-center gap-[8px]', !wrap && 'truncate')}>{children}</span>
-      {right !== undefined && <span className="ml-auto flex shrink-0 items-center text-dense font-semibold text-muted">{right}</span>}
+      {right !== undefined && (
+        <span className="ml-auto flex shrink-0 items-center text-dense font-semibold text-muted">{right}</span>
+      )}
     </div>
   )
 }
@@ -47,7 +42,13 @@ export const STRIP_FIELD = 'h-[28px] w-[260px]'
 const ColumnsOf = createContext<readonly GridColumn[]>([])
 const Wraps = createContext(false)
 
-export function Grid({ columns, fill = true, wrap = false, onEmpty, children }: {
+export function Grid({
+  columns,
+  fill = true,
+  wrap = false,
+  onEmpty,
+  children,
+}: {
   columns: readonly GridColumn[]
   fill?: boolean
   wrap?: boolean
@@ -57,15 +58,23 @@ export function Grid({ columns, fill = true, wrap = false, onEmpty, children }: 
   return (
     <div
       className={cn('overflow-y-auto overflow-x-hidden', fill && 'min-h-0 flex-1')}
-      onClick={(e) => { if (e.target === e.currentTarget) onEmpty?.() }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onEmpty?.()
+      }}
     >
       <table className="w-full table-fixed border-collapse text-ui">
         <colgroup>
-          {columns.map((c, k) => <col key={k} style={c.width === undefined ? undefined : { width: c.width }} />)}
+          {columns.map((c, k) => (
+            <col key={k} style={c.width === undefined ? undefined : { width: c.width }} />
+          ))}
         </colgroup>
         <thead className="sticky top-0 z-[1]">
           <tr>
-            {columns.map((c, k) => <th key={k} className={cn(TH, c.right && 'text-right')}>{c.name}</th>)}
+            {columns.map((c, k) => (
+              <th key={k} className={cn(TH, c.right && 'text-right')}>
+                {c.name}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
@@ -84,7 +93,16 @@ const leavesLine = (e: FocusEvent<HTMLElement>): boolean =>
 const inputClass = (c: GridColumn, bad: boolean): string =>
   cn(INPUT, c.mono && 'font-mono text-dense', c.right && 'text-right', bad && 'text-error')
 
-function Inputs({ names, draft, at, bad, onDraft, onEnter, onLeave, onEscape }: {
+function Inputs({
+  names,
+  draft,
+  at,
+  bad,
+  onDraft,
+  onEnter,
+  onLeave,
+  onEscape,
+}: {
   names: readonly string[]
   draft: readonly string[]
   at: number
@@ -111,7 +129,9 @@ function Inputs({ names, draft, at, bad, onDraft, onEnter, onLeave, onEscape }: 
           e.preventDefault()
           onEnter()
         }}
-        onBlur={(e) => { if (leavesLine(e)) onLeave() }}
+        onBlur={(e) => {
+          if (leavesLine(e)) onLeave()
+        }}
       />
     </td>
   ))
@@ -124,7 +144,10 @@ function Bin({ name, marked, onRemove }: { name: string; marked: boolean; onRemo
       tabIndex={-1}
       aria-label={name}
       title="Löschen"
-      onClick={(e) => { e.stopPropagation(); onRemove() }}
+      onClick={(e) => {
+        e.stopPropagation()
+        onRemove()
+      }}
       className={binArea(marked)}
     >
       <Trash2 size={13} />
@@ -132,7 +155,17 @@ function Bin({ name, marked, onRemove }: { name: string; marked: boolean; onRemo
   )
 }
 
-export function GridLine({ cells, names = [], marked, tips = false, valid, onMark, onSave, onRemove, removeName }: {
+export function GridLine({
+  cells,
+  names = [],
+  marked,
+  tips = false,
+  valid,
+  onMark,
+  onSave,
+  onRemove,
+  removeName,
+}: {
   cells: readonly string[]
   names?: readonly string[]
   marked: boolean
@@ -164,8 +197,12 @@ export function GridLine({ cells, names = [], marked, tips = false, valid, onMar
 
   const onKey = (e: KeyboardEvent<HTMLTableRowElement>) => {
     if (draft !== null || e.target !== e.currentTarget) return
-    const next = e.key === 'ArrowDown' ? e.currentTarget.nextElementSibling
-      : e.key === 'ArrowUp' ? e.currentTarget.previousElementSibling : null
+    const next =
+      e.key === 'ArrowDown'
+        ? e.currentTarget.nextElementSibling
+        : e.key === 'ArrowUp'
+          ? e.currentTarget.previousElementSibling
+          : null
     if (next instanceof HTMLElement && next.dataset.gridLine !== undefined) {
       e.preventDefault()
       next.focus()
@@ -184,40 +221,53 @@ export function GridLine({ cells, names = [], marked, tips = false, valid, onMar
       onFocus={onMark}
       onClick={onMark}
       onKeyDown={onKey}
-      className={cn(
-        'group cursor-default outline-none',
-        draft !== null ? TYPING : marked ? MARKED : LINE_HOVER,
-      )}
+      className={cn('group cursor-default outline-none', draft !== null ? TYPING : marked ? MARKED : LINE_HOVER)}
     >
-      {draft !== null
-        ? (
-            <Inputs
-              names={names}
-              draft={draft}
-              at={at}
-              bad={!ok}
-              onDraft={setDraft}
-              onEnter={() => { if (ok) { save(); row.current?.focus() } }}
-              onLeave={() => (ok ? save() : setDraft(null))}
-              onEscape={() => { setDraft(null); row.current?.focus() }}
-            />
-          )
-        : columns.map((c, k) => (
-            <td
-              key={k}
-              className={cn(TD, c.mono && 'font-mono text-dense', c.right && 'text-right', k === last && 'relative')}
-              title={tips ? cells[k] : undefined}
-              onDoubleClick={() => edit(k)}
-            >
-              <span className={cn(wraps ? CELL_TEXT_WRAPPED : CELL_TEXT, wraps && k === last && onRemove && 'pr-[30px]')}>{cells[k]}</span>
-              {k === last && onRemove && <Bin name={removeName ?? `${cells[0] ?? ''} löschen`} marked={marked} onRemove={onRemove} />}
-            </td>
-          ))}
+      {draft !== null ? (
+        <Inputs
+          names={names}
+          draft={draft}
+          at={at}
+          bad={!ok}
+          onDraft={setDraft}
+          onEnter={() => {
+            if (ok) {
+              save()
+              row.current?.focus()
+            }
+          }}
+          onLeave={() => (ok ? save() : setDraft(null))}
+          onEscape={() => {
+            setDraft(null)
+            row.current?.focus()
+          }}
+        />
+      ) : (
+        columns.map((c, k) => (
+          <td
+            key={k}
+            className={cn(TD, c.mono && 'font-mono text-dense', c.right && 'text-right', k === last && 'relative')}
+            title={tips ? cells[k] : undefined}
+            onDoubleClick={() => edit(k)}
+          >
+            <span className={cn(wraps ? CELL_TEXT_WRAPPED : CELL_TEXT, wraps && k === last && onRemove && 'pr-[30px]')}>
+              {cells[k]}
+            </span>
+            {k === last && onRemove && (
+              <Bin name={removeName ?? `${cells[0] ?? ''} löschen`} marked={marked} onRemove={onRemove} />
+            )}
+          </td>
+        ))
+      )}
     </tr>
   )
 }
 
-export function GridNewLine({ names, valid, onAdd }: {
+export function GridNewLine({
+  names,
+  valid,
+  onAdd,
+}: {
   names: readonly string[]
   valid: (v: readonly string[]) => boolean
   onAdd: (v: readonly string[]) => boolean
@@ -244,8 +294,12 @@ export function GridNewLine({ names, valid, onAdd }: {
             spellCheck={false}
             className={inputClass(c, !ok)}
             onChange={(e) => setV(v.map((x, i) => (i === k ? e.currentTarget.value : x)))}
-            onKeyDown={(e) => { if (e.key === 'Enter' && add()) first.current?.focus() }}
-            onBlur={(e) => { if (leavesLine(e)) add() }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && add()) first.current?.focus()
+            }}
+            onBlur={(e) => {
+              if (leavesLine(e)) add()
+            }}
           />
         </td>
       ))}
@@ -260,7 +314,9 @@ export function GridAddLine({ children, onAdd }: { children: ReactNode; onAdd: (
     <tr className={cn('cursor-pointer text-muted hover:text-ink', LINE_HOVER)} onClick={onAdd}>
       <td className={TD} />
       <td className={cn(TD, 'px-[10px]')} colSpan={columns.length - 1}>
-        <span className="flex items-center gap-[8px]"><Plus size={13} className="text-accent" /> {children}</span>
+        <span className="flex items-center gap-[8px]">
+          <Plus size={13} className="text-accent" /> {children}
+        </span>
       </td>
     </tr>
   )

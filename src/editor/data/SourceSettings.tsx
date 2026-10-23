@@ -18,7 +18,16 @@ import type { ListGroup } from '@/editor/widgets/List'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
 import { useRelations } from '../state/useRelations'
-import { deliveries, deliveryOf, NEW_POSITIONS, oncePerRelation, withDelivery, withPreset, withSettings, type SourceData } from './sourceEdit'
+import {
+  deliveries,
+  deliveryOf,
+  NEW_POSITIONS,
+  oncePerRelation,
+  withDelivery,
+  withPreset,
+  withSettings,
+  type SourceData,
+} from './sourceEdit'
 
 const EMPTY: Parameter = { source: 'fixed', value: '' }
 const PICKER = 'h-[28px]'
@@ -44,12 +53,16 @@ function useSource(source: DataSource) {
     valued,
     save: (next: SourceData) => store.update(source.id, next),
     saveValue: (relationId: string, parameter: readonly Parameter[]) =>
-      store.update(source.id, withSettings(source, { choice: { getValue: { relationId, parameter: [...parameter] } } })),
+      store.update(
+        source.id,
+        withSettings(source, { choice: { getValue: { relationId, parameter: [...parameter] } } }),
+      ),
   }
 }
 
 export function SourceSettings({ source }: { source: DataSource }) {
-  const { store, relationStore, relations, choice, listed, getters, getValue, valued, save, saveValue } = useSource(source)
+  const { store, relationStore, relations, choice, listed, getters, getValue, valued, save, saveValue } =
+    useSource(source)
   const preset = sourcePreset(source.preset)
   const delivers = deliveries(source, relations)
   const restriction = choice.restriction
@@ -65,7 +78,9 @@ export function SourceSettings({ source }: { source: DataSource }) {
           wrap
           groups={[{ key: 'kinds', entries: PRESET_IDS.map((id) => ({ value: id, name: sourcePreset(id).name })) }]}
           value={source.preset}
-          onChoose={(id) => { if (id !== source.preset) save(withPreset(source, id as PresetId)) }}
+          onChoose={(id) => {
+            if (id !== source.preset) save(withPreset(source, id as PresetId))
+          }}
         />
       </Setting>
 
@@ -140,7 +155,12 @@ export function SourceSettings({ source }: { source: DataSource }) {
           <RelationChoice
             getters={getters}
             value={getValue.relationId}
-            onChoose={(t) => saveValue(t.id, relationParameterDefault(t).map((b) => (getValueSourceAllowed(b.source) ? b : EMPTY)))}
+            onChoose={(t) =>
+              saveValue(
+                t.id,
+                relationParameterDefault(t).map((b) => (getValueSourceAllowed(b.source) ? b : EMPTY)),
+              )
+            }
           />
         </Setting>
       )}
@@ -170,7 +190,11 @@ export function SourceBelow({ source }: { source: DataSource }) {
   return listed.order.kind === 'mask' ? <MaskFields source={source} /> : null
 }
 
-function RelationChoice({ getters, value, onChoose }: {
+function RelationChoice({
+  getters,
+  value,
+  onChoose,
+}: {
   getters: readonly RelationTemplate[]
   value: string
   onChoose: (relation: RelationTemplate) => void
@@ -180,7 +204,16 @@ function RelationChoice({ getters, value, onChoose }: {
       name="Relation"
       className={cn(PICKER, 'w-auto min-w-[280px]')}
       wrap
-      groups={[{ key: 'relations', entries: oncePerRelation(getters, value).map((r) => ({ value: r.id, name: r.name, badge: relationSyntaxAsText(r) })) }]}
+      groups={[
+        {
+          key: 'relations',
+          entries: oncePerRelation(getters, value).map((r) => ({
+            value: r.id,
+            name: r.name,
+            badge: relationSyntaxAsText(r),
+          })),
+        },
+      ]}
       value={value}
       onChoose={(id) => {
         const t = getters.find((r) => r.id === id)
@@ -209,7 +242,12 @@ function Setting({ name, children }: { name: string; children: ReactNode }) {
   )
 }
 
-function TextCell({ name, value, valid, onSave }: {
+function TextCell({
+  name,
+  value,
+  valid,
+  onSave,
+}: {
   name: string
   value: string
   valid: (text: string) => boolean
@@ -229,13 +267,13 @@ function TextCell({ name, value, valid, onSave }: {
       spellCheck={false}
       onChange={(e) => setDraft(e.currentTarget.value)}
       onKeyDown={(e) => {
-        if (e.key === 'Enter') { commit(); e.currentTarget.blur() }
+        if (e.key === 'Enter') {
+          commit()
+          e.currentTarget.blur()
+        }
       }}
       onBlur={commit}
-      className={cn(
-        INPUT_EDGE, PICKER, 'w-[110px] px-[8px] font-mono',
-        ok ? 'text-ink' : 'text-error',
-      )}
+      className={cn(INPUT_EDGE, PICKER, 'w-[110px] px-[8px] font-mono', ok ? 'text-ink' : 'text-error')}
     />
   )
 }
@@ -260,10 +298,13 @@ function MaskFields({ source }: { source: DataSource }) {
           onClick={() => {
             const read = readMaskFields(text)
             if (read === null) return
-            store.update(source.id, withSettings(source, {
-              fields: read.fields,
-              ...(read.prefix !== '' ? { fieldPrefix: read.prefix } : {}),
-            }))
+            store.update(
+              source.id,
+              withSettings(source, {
+                fields: read.fields,
+                ...(read.prefix !== '' ? { fieldPrefix: read.prefix } : {}),
+              }),
+            )
             setText('')
           }}
         >

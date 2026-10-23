@@ -36,7 +36,9 @@ export function NodeList({ parentId }: { parentId: string }) {
 
   return (
     <>
-      {nodes.map((node) => <CanvasNode key={node.id} node={node} parentId={parentId} />)}
+      {nodes.map((node) => (
+        <CanvasNode key={node.id} node={node} parentId={parentId} />
+      ))}
       {ghost && <GridGhost slot={ghost} free={ghost.free} />}
     </>
   )
@@ -68,22 +70,17 @@ function CanvasNode({ node, parentId }: { node: BlockNode; parentId: string }) {
         ...areaColumnsStyle(node),
         ...(carried
           ? {
-            position: 'relative' as const,
-            zIndex: 50,
-            pointerEvents: 'none' as const,
-            opacity: 0.9,
-            transform: `translate(${carried.dx}px, ${carried.dy}px)`,
-            filter: 'drop-shadow(0 8px 20px color-mix(in srgb, var(--wb-ink) 18%, transparent))',
-          }
+              position: 'relative' as const,
+              zIndex: 50,
+              pointerEvents: 'none' as const,
+              opacity: 0.9,
+              transform: `translate(${carried.dx}px, ${carried.dy}px)`,
+              filter: 'drop-shadow(0 8px 20px color-mix(in srgb, var(--wb-ink) 18%, transparent))',
+            }
           : {}),
       }}
     >
-      <BlockHost
-        block={node}
-        selected={ed.selectedId === node.id}
-        onSelect={() => ed.chooseHit(node.id)}
-        grid
-      >
+      <BlockHost block={node} selected={ed.selectedId === node.id} onSelect={() => ed.chooseHit(node.id)} grid>
         {isContainer && <NodeList parentId={node.id} />}
       </BlockHost>
     </div>

@@ -39,11 +39,12 @@ export function orderedSuggestions<T extends Suggestion>(
 
 function areaLimits(el: HTMLElement): { left: number; right: number } {
   let left = 0
-  let right = typeof window !== 'undefined' && window.innerWidth > 0
-    ? window.innerWidth
-    : (typeof document !== 'undefined' && document.documentElement?.clientWidth > 0
+  let right =
+    typeof window !== 'undefined' && window.innerWidth > 0
+      ? window.innerWidth
+      : typeof document !== 'undefined' && document.documentElement?.clientWidth > 0
         ? document.documentElement.clientWidth
-        : 10000)
+        : 10000
 
   const table = el.closest?.('.table')
   if (table instanceof (globalThis.HTMLElement ?? Object) && typeof table.getBoundingClientRect === 'function') {
@@ -56,7 +57,10 @@ function areaLimits(el: HTMLElement): { left: number; right: number } {
   }
 
   const root = typeof el.getRootNode === 'function' ? el.getRootNode() : null
-  if (root instanceof (globalThis.ShadowRoot ?? Object) && (root as ShadowRoot).host instanceof (globalThis.HTMLElement ?? Object)) {
+  if (
+    root instanceof (globalThis.ShadowRoot ?? Object) &&
+    (root as ShadowRoot).host instanceof (globalThis.HTMLElement ?? Object)
+  ) {
     const parent = (root as ShadowRoot).host.parentElement
     if (parent && typeof parent.getBoundingClientRect === 'function') {
       const pRect = parent.getBoundingClientRect()
@@ -77,12 +81,13 @@ export function alignSuggestionsFrom(el: HTMLElement): void {
 
   el.style.maxWidth = ''
 
-  const holderRect = typeof parent.getBoundingClientRect === 'function'
-    ? parent.getBoundingClientRect()
-    : { left: 0, right: 0, width: 0 }
+  const holderRect =
+    typeof parent.getBoundingClientRect === 'function'
+      ? parent.getBoundingClientRect()
+      : { left: 0, right: 0, width: 0 }
   const holderWidth = parent.offsetWidth || holderRect.width || 0
   const holderLeft = holderRect.left || 0
-  const holderRight = holderRect.right || (holderLeft + holderWidth)
+  const holderRight = holderRect.right || holderLeft + holderWidth
 
   const need = el.offsetWidth || (typeof el.getBoundingClientRect === 'function' ? el.getBoundingClientRect().width : 0)
   if (need <= 0) return
@@ -141,17 +146,22 @@ export function suggestionListTpl(args: {
       }
     })}
     @mousedown=${(e: MouseEvent) => e.preventDefault()}
-  >${columns.some((s) => s.title !== '')
-    ? html`<div class="suggestion-head" role="presentation">${columns.map((s) => html`<div>${s.title}</div>`)}</div>`
-    : nothing
-  }${args.entries.map((entry, i) => html`<div
+  >${
+    columns.some((s) => s.title !== '')
+      ? html`<div class="suggestion-head" role="presentation">${columns.map((s) => html`<div>${s.title}</div>`)}</div>`
+      : nothing
+  }${args.entries.map(
+    (entry, i) => html`<div
       class=${i === args.mark ? 'suggestion marked' : 'suggestion'}
       role="option"
       aria-selected=${i === args.mark ? 'true' : 'false'}
-      ${ref((el) => { if (i === args.mark) keepInSight(el) })}
+      ${ref((el) => {
+        if (i === args.mark) keepInSight(el)
+      })}
       @click=${() => args.onChoose(i)}
       @mouseenter=${() => args.onMark(i)}
-    >${columns.map((s) => html`<div>${markHit(cellText(entry, s), args.typed)}</div>`)}</div>`)}</div>`
+    >${columns.map((s) => html`<div>${markHit(cellText(entry, s), args.typed)}</div>`)}</div>`,
+  )}</div>`
 }
 
 export const suggestionStyle = css`

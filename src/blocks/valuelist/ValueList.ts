@@ -66,22 +66,28 @@ export class ValueList extends BlockElement {
 
   private lineTpl(line: ValueLine, i: number, kind: 'line' | 'sum'): TemplateResult {
     const value = this.preview
-      ? this.spotTexts[`${LINES_BINDING.prop}.${i}`] ?? ''
+      ? (this.spotTexts[`${LINES_BINDING.prop}.${i}`] ?? '')
       : shownHeld(line, this.lineValues[i] ?? '')
     const click = this.clickOf(line)
     const live = click !== undefined && !this.preview
-    const run = (): void => { if (click !== undefined) void runEvent(this, click, {}) }
+    const run = (): void => {
+      if (click !== undefined) void runEvent(this, click, {})
+    }
     return html`<div
       class="${kind}${click !== undefined ? ' link' : ''}"
       data-ff-entry=${this.preview ? i : nothing}
       role=${live ? 'button' : nothing}
       tabindex=${live ? 0 : nothing}
       @click=${live ? run : nothing}
-      @keydown=${live ? (e: KeyboardEvent) => {
-        if (e.key !== 'Enter' && e.key !== ' ') return
-        e.preventDefault()
-        run()
-      } : nothing}
+      @keydown=${
+        live
+          ? (e: KeyboardEvent) => {
+              if (e.key !== 'Enter' && e.key !== ' ') return
+              e.preventDefault()
+              run()
+            }
+          : nothing
+      }
     ><span
       class="label head-text"
     >${line.label}</span><span
@@ -103,7 +109,8 @@ export class ValueList extends BlockElement {
 
   private readChains(): void {
     this.chains = chainsRead(this.getAttribute(CHAINS_ATTR))
-    if (Object.values(this.chains).some((chain) => chain.some((s) => stepAdapter(s.kind).answers))) maskState.host.start()
+    if (Object.values(this.chains).some((chain) => chain.some((s) => stepAdapter(s.kind).answers)))
+      maskState.host.start()
     this.requestUpdate()
   }
 }
@@ -112,9 +119,10 @@ const link = makeDataLink<ValueList>({
   hydrate: (el) => {
     const data = readDataPreamble(el)
     const row = data === null ? undefined : firstRowToSelection(el, data.rows)
-    el.lineValues = data === null || row === undefined
-      ? []
-      : el.lines.map((line) => (line.field === '' ? '' : data.read(row, line.field)))
+    el.lineValues =
+      data === null || row === undefined
+        ? []
+        : el.lines.map((line) => (line.field === '' ? '' : data.read(row, line.field)))
   },
 })
 

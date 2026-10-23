@@ -1,7 +1,9 @@
 import { deepClone } from '../../core/deepClone'
 import { Subject } from './Subject'
 
-interface LibraryEntry { id: string }
+interface LibraryEntry {
+  id: string
+}
 
 export class LibraryStore<T extends LibraryEntry> extends Subject<LibraryStore<T>> {
   private _entries: T[]
@@ -12,8 +14,12 @@ export class LibraryStore<T extends LibraryEntry> extends Subject<LibraryStore<T
     this._entries = deepClone(stock) as T[]
   }
 
-  get list(): readonly T[] { return this._entries }
-  get version(): number { return this._version }
+  get list(): readonly T[] {
+    return this._entries
+  }
+  get version(): number {
+    return this._version
+  }
 
   get(id: string): T | undefined {
     return this._entries.find((e) => e.id === id)
@@ -66,5 +72,4 @@ export class LibraryStore<T extends LibraryEntry> extends Subject<LibraryStore<T
     this._entries = next
     this.notify(this)
   }
-
 }

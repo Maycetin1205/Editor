@@ -8,11 +8,7 @@ import { startTool, type RuntimeStartToolStep, type StartToolStep } from './star
 export type Step = RelationStep | PopupOpenStep | PopupCloseStep | ConfirmStep | StartToolStep
 
 export type RuntimeStep = (
-  | RuntimeRelationStep
-  | RuntimePopupOpenStep
-  | RuntimePopupCloseStep
-  | RuntimeConfirmStep
-  | RuntimeStartToolStep
+  RuntimeRelationStep | RuntimePopupOpenStep | RuntimePopupCloseStep | RuntimeConfirmStep | RuntimeStartToolStep
 ) & { onlyIf?: StepCondition }
 
 export type StepKind = Step['kind']

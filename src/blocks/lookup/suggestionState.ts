@@ -49,11 +49,14 @@ interface KeysPlacement {
   jumps: boolean
 }
 
-function keyAction(key: string, l: KeysPlacement & {
-  hit: number
+function keyAction(
+  key: string,
+  l: KeysPlacement & {
+    hit: number
 
-  markByHand: boolean
-}): KeyAction {
+    markByHand: boolean
+  },
+): KeyAction {
   const unique = l.markByHand || l.hit === 1
 
   if (key === 'Tab') {

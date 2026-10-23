@@ -1,20 +1,18 @@
 import { BLOCK_ID_ATTR } from '../core/data/actions'
 import { completePairs } from '../core/data/extraSources'
-import {
-  followsSelectionProperty,
-  followUsable,
-  type SelectionFollow,
-} from '../core/data/selectionFollow'
+import { followsSelectionProperty, followUsable, type SelectionFollow } from '../core/data/selectionFollow'
 import { outsideValue } from './foreignSources'
 import { maskState } from './maskState'
 
 export function traitOf(row: unknown): string {
   if (row == null) return ''
   try {
-    return JSON.stringify(row, (_key, value: unknown) => {
-      if (typeof value !== 'object' || value === null || Array.isArray(value)) return value
-      return Object.fromEntries(Object.entries(value).sort(([a], [b]) => (a < b ? -1 : 1)))
-    }) ?? ''
+    return (
+      JSON.stringify(row, (_key, value: unknown) => {
+        if (typeof value !== 'object' || value === null || Array.isArray(value)) return value
+        return Object.fromEntries(Object.entries(value).sort(([a], [b]) => (a < b ? -1 : 1)))
+      }) ?? ''
+    )
   } catch {
     return ''
   }
@@ -126,13 +124,16 @@ export function clearSelection(giverId: string): void {
 
 function followsFromAttribute(el: HTMLElement): SelectionFollow[] {
   const { type, attribute } = followsSelectionProperty
-  return type.fromAttribute(el.getAttribute(attribute), [])
+  return type
+    .fromAttribute(el.getAttribute(attribute), [])
     .filter((f) => f.giverId !== '' || followUsable(f))
     .map((f) => ({ giverId: f.giverId, pairs: completePairs(f) }))
 }
 
 export function selectionGiverOf(el: HTMLElement): string[] {
-  return followsFromAttribute(el).map((f) => f.giverId).filter((id) => id !== '')
+  return followsFromAttribute(el)
+    .map((f) => f.giverId)
+    .filter((id) => id !== '')
 }
 
 export function followsFormField(el: HTMLElement, blockId: string): boolean {
@@ -143,18 +144,20 @@ export function rowsToSelection(el: HTMLElement, rows: unknown[]): unknown[] {
   const host = maskState.host
   let out = rows
   for (const follow of followsFromAttribute(el)) {
-    const needsRow = follow.giverId !== ''
-      && (follow.pairs.length === 0 || follow.pairs.some((p) => p.from === undefined))
+    const needsRow =
+      follow.giverId !== '' && (follow.pairs.length === 0 || follow.pairs.some((p) => p.from === undefined))
     const selection = needsRow ? selectionFor(follow.giverId) : undefined
     if (needsRow && selection === undefined) return []
 
     const expected = follow.pairs.map((p) => outsideValue(p, el) ?? host.readField(selection, p.fromField))
     if (follow.pairs.some((p, i) => !p.unequal && expected[i].trim() === '')) return []
 
-    out = out.filter((row) => follow.pairs.every((p, i) => {
-      if (p.unequal) return expected[i].trim() === '' || expected[i] !== host.readField(row, p.toField)
-      return expected[i] === host.readField(row, p.toField)
-    }))
+    out = out.filter((row) =>
+      follow.pairs.every((p, i) => {
+        if (p.unequal) return expected[i].trim() === '' || expected[i] !== host.readField(row, p.toField)
+        return expected[i] === host.readField(row, p.toField)
+      }),
+    )
   }
   return out
 }

@@ -8,16 +8,12 @@ export interface DeclaredProperty {
   property: Property<unknown>
 }
 
-export function propertiesFor(
-  block: BlockNode,
-  def: BlockType,
-  place: PropertyPlace,
-): DeclaredProperty[] {
-  const directBound = new Set<string>(
-    (capability(def, 'bindable')?.spots ?? []).map((s) => bindingProp(s.prop)),
-  )
+export function propertiesFor(block: BlockNode, def: BlockType, place: PropertyPlace): DeclaredProperty[] {
+  const directBound = new Set<string>((capability(def, 'bindable')?.spots ?? []).map((s) => bindingProp(s.prop)))
   const plainNames = new Set(
-    Object.values(def.properties).map((p) => p.plainNameProp).filter((n) => n !== undefined),
+    Object.values(def.properties)
+      .map((p) => p.plainNameProp)
+      .filter((n) => n !== undefined),
   )
   const out: DeclaredProperty[] = []
   for (const [key, property] of Object.entries(def.properties)) {

@@ -15,10 +15,10 @@ const FIXED = 'Feste Zahl'
 export const UNITS = 'Faktor aus zwei Einheiten'
 
 export const columnTitle = (names: Names, key: string): string =>
-  (names.leadName !== undefined && key === '' ? names.leadName : valueName({ kind: 'row', value: key }, names.reach))
+  names.leadName !== undefined && key === '' ? names.leadName : valueName({ kind: 'row', value: key }, names.reach)
 
 export const termsText = (count: number): string =>
-  (count === 0 ? 'Keine' : count === 1 ? '1 Größe' : `${count} Größen`)
+  count === 0 ? 'Keine' : count === 1 ? '1 Größe' : `${count} Größen`
 
 export function pairsText(term: UnitsTerm): string {
   return term.table.map((p) => `${p.first}/${p.second} ${numberText(p.factor, DECIMALS_MAX)}`).join(', ')
@@ -60,7 +60,13 @@ export const termOriginKey = (term: Term): string => (term.kind === 'units' ? 'u
 export function originGroups(names: Names): ListGroup[] {
   return [
     { key: 'mask', entries: originsOf(names.reach).map((o) => ({ value: o.key, name: o.name })) },
-    { key: 'more', entries: [{ value: 'fixed', name: FIXED }, { value: 'units', name: UNITS }] },
+    {
+      key: 'more',
+      entries: [
+        { value: 'fixed', name: FIXED },
+        { value: 'units', name: UNITS },
+      ],
+    },
   ]
 }
 

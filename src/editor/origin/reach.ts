@@ -53,8 +53,11 @@ export interface Reach {
 export const fieldEntries = (source: DataSource | undefined): ReachEntry[] =>
   (source?.fields ?? []).map((f) => ({ value: f.code, name: f.name || f.code, badge: f.code }))
 
-export const sourceGroup = (source: DataSource): ReachGroup =>
-  ({ id: source.id, name: source.name, entries: fieldEntries(source) })
+export const sourceGroup = (source: DataSource): ReachGroup => ({
+  id: source.id,
+  name: source.name,
+  entries: fieldEntries(source),
+})
 
 export const openDocumentOf = (library: readonly DataSource[]): DataSource | undefined =>
   library.find((s) => s.preset === 'document')
@@ -89,8 +92,11 @@ export function giverGroup(node: BlockNode, sources: readonly DataSource[]): Rea
   return { id: node.id, name: source ? `${name} (${source.name})` : name, entries: fieldEntries(source) }
 }
 
-const rowsGroup = (node: BlockNode, sources: readonly DataSource[]): ReachGroup =>
-  ({ id: node.id, name: blockName(node, sources), entries: columnEntries(node) })
+const rowsGroup = (node: BlockNode, sources: readonly DataSource[]): ReachGroup => ({
+  id: node.id,
+  name: blockName(node, sources),
+  entries: columnEntries(node),
+})
 
 const SPLIT_AMOUNT_NAME = 'Verteilte Menge'
 
@@ -100,11 +106,13 @@ function splitGroups(tree: MaskTree, sources: readonly DataSource[]): ReachGroup
     if (split === undefined) return []
     const source = sources.find((s) => s.id === split.sourceId)
     const name = blockName(node, sources)
-    return [{
-      id: node.id,
-      name: source ? `${name} (${source.name})` : name,
-      entries: [{ value: '', name: SPLIT_AMOUNT_NAME }, ...fieldEntries(source)],
-    }]
+    return [
+      {
+        id: node.id,
+        name: source ? `${name} (${source.name})` : name,
+        entries: [{ value: '', name: SPLIT_AMOUNT_NAME }, ...fieldEntries(source)],
+      },
+    ]
   })
 }
 

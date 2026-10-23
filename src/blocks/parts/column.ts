@@ -113,12 +113,22 @@ function asWidth(v: unknown): number | undefined {
 }
 
 const KNOWN_FACTS: readonly string[] = [
-  'key', 'title', 'field', 'width', 'total', 'figure', 'amount', 'euro', 'hidden', 'titleTyped',
+  'key',
+  'title',
+  'field',
+  'width',
+  'total',
+  'figure',
+  'amount',
+  'euro',
+  'hidden',
+  'titleTyped',
 ]
 
 function extraFacts(entry: object): object {
-  return Object.fromEntries(Object.entries(entry)
-    .filter(([key, value]) => value !== undefined && !KNOWN_FACTS.includes(key)))
+  return Object.fromEntries(
+    Object.entries(entry).filter(([key, value]) => value !== undefined && !KNOWN_FACTS.includes(key)),
+  )
 }
 
 function asColumn(raw: unknown, index: number): Column {
@@ -172,9 +182,7 @@ export function columnsTemplate(
 ): string {
   const own = columns.map((s, i) => widths(i) ?? s.width)
   const set = own.filter((w): w is number => w !== undefined)
-  const middle = set.length === 0
-    ? 1
-    : Math.max(1, Math.round(set.reduce((a, b) => a + b, 0) / set.length))
+  const middle = set.length === 0 ? 1 : Math.max(1, Math.round(set.reduce((a, b) => a + b, 0) / set.length))
   return own.map((w) => `minmax(0, ${w ?? middle}fr)`).join(' ')
 }
 
@@ -188,11 +196,7 @@ function withoutColumn(columns: readonly Column[], index: number): Column[] | nu
   return columns.filter((_, i) => i !== index)
 }
 
-function withMovedColumn(
-  columns: readonly Column[],
-  from: number,
-  to: number,
-): Column[] | null {
+function withMovedColumn(columns: readonly Column[], from: number, to: number): Column[] | null {
   if (from < 0 || from >= columns.length) return null
   const target = Math.max(0, Math.min(to, columns.length - 1))
   if (target === from) return null
@@ -246,11 +250,14 @@ function withHolding<E extends Holder>(entry: E, holding: string): E {
 export function holdingChoice<E extends Holder>(label: string): EntryChoice<E> {
   return {
     key: 'holding',
-    property: segmentProperty([
-      { value: TEXT, name: 'Text' },
-      { value: FIGURE, name: 'Zahl' },
-      { value: AMOUNT, name: 'Betrag' },
-    ], { default: TEXT, label }),
+    property: segmentProperty(
+      [
+        { value: TEXT, name: 'Text' },
+        { value: FIGURE, name: 'Zahl' },
+        { value: AMOUNT, name: 'Betrag' },
+      ],
+      { default: TEXT, label },
+    ),
     valueOf: holdingOf,
     withValue: withHolding,
   }
@@ -303,10 +310,14 @@ export const COLUMNS_BINDING: ListBinding<Column, 'columns'> = {
 }
 
 export function columnsProperty(): Property<Column[]> {
-  return listProperty<Column[]>(coerceColumns, {
-    default: defaultColumns(),
-    label: 'Spalten',
-    place: 'block',
-    attribute: 'columns',
-  }, (value) => listForExport(value, COLUMNS_BINDING))
+  return listProperty<Column[]>(
+    coerceColumns,
+    {
+      default: defaultColumns(),
+      label: 'Spalten',
+      place: 'block',
+      attribute: 'columns',
+    },
+    (value) => listForExport(value, COLUMNS_BINDING),
+  )
 }

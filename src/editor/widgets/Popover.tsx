@@ -79,8 +79,7 @@ export function Popover({
         top = bottomFits ? a.bottom + 4 : Math.max(EDGE, a.top - 4 - own.height)
         left = Math.max(EDGE, Math.min(a.left, maxLeft))
       }
-      setSlot((before) =>
-        before?.top === top && before.left === left ? before : { top, left: left })
+      setSlot((before) => (before?.top === top && before.left === left ? before : { top, left: left }))
     }
     measure()
     const ro = new ResizeObserver(measure)
@@ -89,8 +88,8 @@ export function Popover({
   }, [anchor, atTop, atLeft])
 
   useEffect(() => {
-    const inFamily = (e: Event): boolean => e.composedPath().some((el) => el instanceof HTMLElement
-      && el.dataset.ffPopoverFamily?.split(' ').includes(id))
+    const inFamily = (e: Event): boolean =>
+      e.composedPath().some((el) => el instanceof HTMLElement && el.dataset.ffPopoverFamily?.split(' ').includes(id))
     const onto = (e: PointerEvent) => {
       const target = e.target as Node
       if (inFamily(e)) return

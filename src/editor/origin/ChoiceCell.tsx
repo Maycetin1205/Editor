@@ -4,7 +4,17 @@ import { cn } from '@/editor/widgets/cn'
 import { List, type ListGroup } from '@/editor/widgets/List'
 import { Popover } from '@/editor/widgets/Popover'
 
-export function ChoiceCell({ label, on, open, groups, value, cellRef, wrap = false, onOpen, onChoose }: {
+export function ChoiceCell({
+  label,
+  on,
+  open,
+  groups,
+  value,
+  cellRef,
+  wrap = false,
+  onOpen,
+  onChoose,
+}: {
   label: ReactNode
   on: boolean
   open: boolean

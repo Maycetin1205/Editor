@@ -41,9 +41,10 @@ export class EditorPersistence {
   static load(): { library: StoredLibrary; mask: StoredMask } {
     const stored = loadLibraryFromStorage()
     const mask = loadFromStorage(stored.dataSources) ?? emptyMask()
-    const library = mask.dataSources && mask.dataSources.length > 0
-      ? { ...stored, dataSources: missingOn(stored.dataSources, mask.dataSources) }
-      : stored
+    const library =
+      mask.dataSources && mask.dataSources.length > 0
+        ? { ...stored, dataSources: missingOn(stored.dataSources, mask.dataSources) }
+        : stored
     return { library, mask }
   }
 
@@ -59,7 +60,9 @@ export class EditorPersistence {
     this._keptAt = at
   }
 
-  get keptAt(): number { return this._keptAt }
+  get keptAt(): number {
+    return this._keptAt
+  }
 
   plan(): void {
     this.planner.plan()
@@ -77,19 +80,24 @@ export class EditorPersistence {
       this.keptText = text
       this._keptAt = Date.now()
     }
-    persistMask({
-      tree: state.tree,
-      selectedId: state.selectedId,
-      activePageId: state.activePageId ?? ROOT_ID,
-      file: this.maskOnDisk.path,
-      savedAt: this._keptAt,
-      leftover,
-      locked: this.maskOnDisk.locked,
-    }, state.dataSources)
+    persistMask(
+      {
+        tree: state.tree,
+        selectedId: state.selectedId,
+        activePageId: state.activePageId ?? ROOT_ID,
+        file: this.maskOnDisk.path,
+        savedAt: this._keptAt,
+        leftover,
+        locked: this.maskOnDisk.locked,
+      },
+      state.dataSources,
+    )
     void this.maskOnDisk.writeAgain(text)
-    void this.libraryOnDisk.writeAgain(persistLibrary({
-      dataSources: state.dataSources,
-      relation: state.relation,
-    }))
+    void this.libraryOnDisk.writeAgain(
+      persistLibrary({
+        dataSources: state.dataSources,
+        relation: state.relation,
+      }),
+    )
   }
 }

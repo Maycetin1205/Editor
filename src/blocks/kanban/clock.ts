@@ -19,8 +19,7 @@ const minuteNow = (now: Date): number => now.getHours() * 60 + now.getMinutes()
 
 const isToday = (now: Date): boolean => chosenDay() === dayOf(now)
 
-const clockOf = (now: Date): string =>
-  now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+const clockOf = (now: Date): string => now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 
 // How long a card has waited since a time of today, as "14 Min.".
 export function waitOf(since: string, now: Date): string | null {
@@ -42,8 +41,7 @@ function untilOf(minute: number, now: number): Until | null {
   return away > 0 ? { text: `in ${text}`, late: false } : { text: `vor ${text}`, late: true }
 }
 
-const hourLine = (hour: number): TemplateResult =>
-  html`<div class="hour">${String(hour).padStart(2, '0')} Uhr</div>`
+const hourLine = (hour: number): TemplateResult => html`<div class="hour">${String(hour).padStart(2, '0')} Uhr</div>`
 
 const nowLine = (now: Date): TemplateResult => html`<div class="now">Jetzt · ${clockOf(now)}</div>`
 

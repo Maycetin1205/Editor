@@ -20,7 +20,9 @@ export function setSearchText(value: string): void {
 export function onSearchText(cb: () => void): () => void {
   const listeners = maskState.search.listeners
   listeners.add(cb)
-  return () => { listeners.delete(cb) }
+  return () => {
+    listeners.delete(cb)
+  }
 }
 
 // Whether one of the texts holds every word searched for, in any order.

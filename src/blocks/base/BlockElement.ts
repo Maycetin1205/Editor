@@ -23,7 +23,10 @@ import { NOTICE_ATTR, noticeStateOf, type NoticeState } from '../../runtime/noti
 import { startRename } from './inlineRename'
 import { busyLineTpl, noticeStyle } from './notice'
 
-type BlockShape<P extends PropertyMap = PropertyMap> = Omit<BlockDeclaration, 'type' | 'tag' | 'properties' | 'capabilities'> & {
+type BlockShape<P extends PropertyMap = PropertyMap> = Omit<
+  BlockDeclaration,
+  'type' | 'tag' | 'properties' | 'capabilities'
+> & {
   properties?: P
   capabilities?: readonly Capability<keyof P & string>[]
 }
@@ -33,7 +36,7 @@ interface BlockElementClass {
   readonly tag: string
   declaredProperties: PropertyMap
   createProperty(name: PropertyKey, options: PropertyDeclaration): void
-  new(): BlockElement
+  new (): BlockElement
 }
 
 function holdsWhile<V>(property: Property<V>, when: Condition | undefined): Property<V> {
@@ -45,7 +48,11 @@ function ownProperties(shape: BlockShape): PropertyMap {
   const source = capability({ capabilities: shape.capabilities ?? [] }, 'source')
   if (!source) return Object.fromEntries(own)
   const at = own.findIndex(([key]) => key === source.after) + 1
-  return Object.fromEntries([...own.slice(0, at), [SOURCE_PROP, holdsWhile(SOURCE_PROPERTY, source.when)], ...own.slice(at)])
+  return Object.fromEntries([
+    ...own.slice(0, at),
+    [SOURCE_PROP, holdsWhile(SOURCE_PROPERTY, source.when)],
+    ...own.slice(at),
+  ])
 }
 
 function either(test: Condition, then: Condition, otherwise: Condition): Condition {
@@ -104,8 +111,7 @@ export function sendPropChange(el: HTMLElement, prop: string, value: unknown): v
 export const SPOT_CLICK = 'ff-spot-click'
 
 export type SpotClick =
-  | { kind: 'binding'; click: MouseEvent; prop: string; rect: DOMRect }
-  | { kind: 'lookupWindow'; click: MouseEvent }
+  { kind: 'binding'; click: MouseEvent; prop: string; rect: DOMRect } | { kind: 'lookupWindow'; click: MouseEvent }
 
 export function sendSpotClick(el: BlockElement, detail: SpotClick): void {
   if (el.preview) el.dispatchEvent(new CustomEvent<SpotClick>(SPOT_CLICK, { detail }))
@@ -125,7 +131,8 @@ export abstract class BlockElement extends LitElement {
 
   static busyLine = false
 
-  static override styles: CSSResultGroup = [css`
+  static override styles: CSSResultGroup = [
+    css`
     /* Marked text as on the sheet around the block. */
     ::selection { background: var(--se-selection-ground); color: var(--se-ink); }
     :host { display: block; }
@@ -152,7 +159,9 @@ export abstract class BlockElement extends LitElement {
       text-underline-offset: 3px;
     }
     :host([preview][data-editable]) [data-ff-bound] { cursor: pointer; }
-  `, noticeStyle]
+  `,
+    noticeStyle,
+  ]
 
   @property({ type: Boolean, reflect: true, attribute: 'data-editable' })
   editable = false

@@ -1,15 +1,15 @@
 import { html, type TemplateResult } from 'lit'
 
 export function plainText(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/ß/g, 'ss')
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
+  return text.toLowerCase().replace(/ß/g, 'ss').normalize('NFD').replace(/\p{M}/gu, '')
 }
 
 function wordsOf(text: string): string[] {
-  return text.trim().toLowerCase().split(/\s+/).filter((w) => w !== '')
+  return text
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((w) => w !== '')
 }
 
 export function rowFits(row: readonly string[], searchText: string): boolean {

@@ -38,15 +38,22 @@ export class DataList extends BlockElement {
           key: keys[i],
           row,
           values: {
-            ...Object.fromEntries(ROW_SPOTS.map(({ prop }) =>
-              [prop, spotValue('', this[`${prop}Field`], row, preamble.read)])),
+            ...Object.fromEntries(
+              ROW_SPOTS.map(({ prop }) => [prop, spotValue('', this[`${prop}Field`], row, preamble.read)]),
+            ),
             avatar: this.avatarField === '' ? '' : preamble.read(row, this.avatarField),
           },
         }))
       : []
-    const hit = this.pick === 'one'
-      ? relocateSelection(giverIdOf(this), this.items, (item) => item.row, (item) => item.key)
-      : []
+    const hit =
+      this.pick === 'one'
+        ? relocateSelection(
+            giverIdOf(this),
+            this.items,
+            (item) => item.row,
+            (item) => item.key,
+          )
+        : []
     this.chosen = new Set(hit.slice(0, 1).map((i) => this.items[i].key))
   }
 
@@ -55,7 +62,13 @@ export class DataList extends BlockElement {
   }
 
   private row(item: Item | null): TemplateResult {
-    const { shows, spot, avatar } = cardOf(this, ROW_SPOTS, (prop) => this[`${prop}Field`], this.reportSpot, item?.values ?? null)
+    const { shows, spot, avatar } = cardOf(
+      this,
+      ROW_SPOTS,
+      (prop) => this[`${prop}Field`],
+      this.reportSpot,
+      item?.values ?? null,
+    )
     const content = html`${avatar()}
       <span class="ident">
         ${shows('heading') ? spot('heading', 'name') : nothing}
@@ -64,7 +77,9 @@ export class DataList extends BlockElement {
       ${shows('aside') ? spot('aside', 'aside') : nothing}`
     if (item === null || this.pick !== 'one') return html`<div class="row">${content}</div>`
     const chosen = this.chosen.has(item.key)
-    const pick = (): void => { this.choose(item) }
+    const pick = (): void => {
+      this.choose(item)
+    }
     return html`<div
       class="row${chosen ? ' chosen' : ''}"
       role="button"
@@ -97,7 +112,9 @@ export class DataList extends BlockElement {
 }
 
 const link = makeDataLink<DataList>({
-  hydrate: (el) => { el.hydrate() },
+  hydrate: (el) => {
+    el.hydrate()
+  },
 })
 
 defineBlock(DataList, {

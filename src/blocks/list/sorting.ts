@@ -29,11 +29,7 @@ function detectKind(values: readonly string[]): Kind {
 
 const textCompare = new Intl.Collator('de', { numeric: true, sensitivity: 'base' })
 
-export function sortIndices(
-  rows: readonly (readonly string[])[],
-  column: number,
-  ascending: boolean,
-): number[] {
+export function sortIndices(rows: readonly (readonly string[])[], column: number, ascending: boolean): number[] {
   if (column < 0 || rows.length === 0) return rows.map((_, i) => i)
 
   const cell = (i: number): string => rows[i][column] ?? ''
@@ -51,9 +47,11 @@ export function sortIndices(
       if (textB === '') return -EMPTY_LAST
 
       const d =
-        kind === 'number' ? (asNumber(textA) ?? 0) - (asNumber(textB) ?? 0)
-        : kind === 'date' ? (asDate(textA) ?? 0) - (asDate(textB) ?? 0)
-        : textCompare.compare(textA, textB)
+        kind === 'number'
+          ? (asNumber(textA) ?? 0) - (asNumber(textB) ?? 0)
+          : kind === 'date'
+            ? (asDate(textA) ?? 0) - (asDate(textB) ?? 0)
+            : textCompare.compare(textA, textB)
 
       return d !== 0 ? d * direction : a - b
     })

@@ -2,7 +2,13 @@ import type { ReactNode } from 'react'
 import { Check } from '@/editor/icons/icon'
 import { cn } from './cn'
 
-export function DoneLabel({ done, icon, label, doneLabel, labelClassName }: {
+export function DoneLabel({
+  done,
+  icon,
+  label,
+  doneLabel,
+  labelClassName,
+}: {
   done: boolean
   icon: ReactNode
   label: string

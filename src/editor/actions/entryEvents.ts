@@ -35,8 +35,10 @@ export function entryChainsOf(block: BlockNode): EntryChain[] {
 }
 
 export function entryStepCount(block: BlockNode): number {
-  return entryChainsOf(block)
-    .reduce((n, { key }) => n + (key === undefined ? 0 : block.chains?.[key]?.length ?? 0), 0)
+  return entryChainsOf(block).reduce(
+    (n, { key }) => n + (key === undefined ? 0 : (block.chains?.[key]?.length ?? 0)),
+    0,
+  )
 }
 
 // The key under which the chain of the entry sits; an entry without one takes
@@ -56,7 +58,11 @@ export function claimEntryKey(ed: EditorStore, blockId: string, index: number): 
   const key = free.find((k) => (node.chains?.[k]?.length ?? 0) === 0) ?? free[0]
   if (key === undefined) return null
   ed.transaction(() => {
-    ed.updateProperty(blockId, at.binding.prop, entries.map((e, i) => (i === index ? at.events.withKey(e, key) : e)))
+    ed.updateProperty(
+      blockId,
+      at.binding.prop,
+      entries.map((e, i) => (i === index ? at.events.withKey(e, key) : e)),
+    )
     const chains = ed.tree[blockId]?.chains
     if ((chains?.[key]?.length ?? 0) > 0) {
       const rest = { ...chains }

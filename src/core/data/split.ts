@@ -43,13 +43,15 @@ function columnFrom(raw: unknown, at: number): SplitColumn | null {
   if (!isUnread<SplitColumn>(raw)) return null
   const field = text(raw.field)
   if (field === '') return null
-  const width = typeof raw.width === 'number' && Number.isFinite(raw.width) && raw.width > 0
-    ? Math.round(raw.width)
-    : undefined
-  const soon = typeof raw.soonDays === 'number' && Number.isInteger(raw.soonDays)
-    && raw.soonDays >= 0 && raw.soonDays <= SOON_DAYS_MAX
-    ? raw.soonDays
-    : undefined
+  const width =
+    typeof raw.width === 'number' && Number.isFinite(raw.width) && raw.width > 0 ? Math.round(raw.width) : undefined
+  const soon =
+    typeof raw.soonDays === 'number' &&
+    Number.isInteger(raw.soonDays) &&
+    raw.soonDays >= 0 &&
+    raw.soonDays <= SOON_DAYS_MAX
+      ? raw.soonDays
+      : undefined
   return {
     key: text(raw.key) || `split-${at}`,
     title: typeof raw.title === 'string' ? raw.title : '',

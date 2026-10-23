@@ -8,10 +8,7 @@ import type { Unread } from '../../unread'
 export type Delivery = PushDelivery | MessageDelivery | RelationRowsDelivery | RelationValueDelivery
 
 export type RuntimeDelivery =
-  | RuntimePushDelivery
-  | RuntimeMessageDelivery
-  | RuntimeRelationRowsDelivery
-  | RuntimeRelationValueDelivery
+  RuntimePushDelivery | RuntimeMessageDelivery | RuntimeRelationRowsDelivery | RuntimeRelationValueDelivery
 
 export type DeliveryKind = Delivery['kind']
 

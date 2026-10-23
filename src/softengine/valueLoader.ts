@@ -1,14 +1,7 @@
 import type { RuntimeGetValue } from '../core/data/deliveries/relationValue'
 import { reportTrigger, seWindow } from './bridge'
 import { fetchedRowsFor, setFetchedRows } from './fetchedRows'
-import {
-  cancelJobs,
-  relationRun,
-  fieldFromAnswer,
-  relationFromList,
-  parameterResolve,
-  resultList,
-} from './relations'
+import { cancelJobs, relationRun, fieldFromAnswer, relationFromList, parameterResolve, resultList } from './relations'
 
 interface ValueSource {
   id: string
@@ -19,24 +12,19 @@ const generations = new Map<string, number>()
 
 const asked = new Map<string, string>()
 
-function rowFromAnswer(
-  value: string,
-  raw: unknown,
-  fields: readonly string[],
-): Record<string, string> {
+function rowFromAnswer(value: string, raw: unknown, fields: readonly string[]): Record<string, string> {
   const row: Record<string, string> = {}
   fields.forEach((code, slot) => {
     const fromAnswer = fieldFromAnswer(raw, code)
-    row[code] = fromAnswer !== '' ? fromAnswer : (slot === 0 ? value : '')
+    row[code] = fromAnswer !== '' ? fromAnswer : slot === 0 ? value : ''
   })
   return row
 }
 
 function rowsFromAnswer(value: string, raw: unknown, fields: readonly string[]): Record<string, string>[] {
   const list = resultList(raw)
-  const rows = list === undefined
-    ? [rowFromAnswer(value, raw, fields)]
-    : list.map((entry) => rowFromAnswer('', entry, fields))
+  const rows =
+    list === undefined ? [rowFromAnswer(value, raw, fields)] : list.map((entry) => rowFromAnswer('', entry, fields))
   return rows.filter((row) => Object.values(row).some((v) => v !== ''))
 }
 
@@ -53,7 +41,8 @@ export async function fetchValueSource(
   if (!relation || relation.verb !== 'GET_RELATION') return
 
   const params = get.parameter.map((binding) =>
-    parameterResolve(binding, { context: {}, previousResult: '', ...(chosen ? { chosenRow: chosen } : {}) }))
+    parameterResolve(binding, { context: {}, previousResult: '', ...(chosen ? { chosenRow: chosen } : {}) }),
+  )
 
   const origin = `source ${source.id}`
   const print = JSON.stringify(params)

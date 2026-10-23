@@ -6,7 +6,11 @@ export interface FoldTab<K extends string> {
   name: string
 }
 
-export function FoldedColumn<K extends string>({ side, tabs, onOpen }: {
+export function FoldedColumn<K extends string>({
+  side,
+  tabs,
+  onOpen,
+}: {
   side: 'left' | 'right'
   tabs: readonly FoldTab<K>[]
   onOpen: (key: K) => void

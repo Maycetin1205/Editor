@@ -4,18 +4,15 @@ import { capability } from '../../core/block/capability'
 import { COLUMN_PARAM_SOURCES } from '../../core/data/actions'
 import { stepAdapter, type Step } from '../../core/data/steps/steps'
 
-export function droppedKeys(
-  def: BlockType | undefined,
-  attr: string,
-  old: unknown,
-  next: unknown,
-): string[] {
+export function droppedKeys(def: BlockType | undefined, attr: string, old: unknown, next: unknown): string[] {
   const b = capability(def, 'list')?.binding
   const keyOf = b?.keyOf
   if (!b || keyOf === undefined || b.prop !== attr) return []
-  const keys = (value: unknown): string[] => b.entries(value)
-    .map(keyOf)
-    .filter((key) => key !== '')
+  const keys = (value: unknown): string[] =>
+    b
+      .entries(value)
+      .map(keyOf)
+      .filter((key) => key !== '')
   const stays = new Set(keys(next))
   return keys(old).filter((key) => !stays.has(key))
 }
@@ -27,9 +24,7 @@ function stepWithoutPointer(
 ): { step: Step; hit: number } | null {
   let hit = 0
   const next = stepAdapter(step.kind).withBindings(step, (b) => {
-    const shows = COLUMN_PARAM_SOURCES[b.source] !== undefined
-      && (b.blockId ?? '') === blockId
-      && away.has(b.value)
+    const shows = COLUMN_PARAM_SOURCES[b.source] !== undefined && (b.blockId ?? '') === blockId && away.has(b.value)
     if (!shows) return b
     hit++
 
@@ -45,11 +40,7 @@ interface Cleared {
   blocks: number
 }
 
-export function withoutColumnsPointer(
-  tree: MaskTree,
-  blockId: string,
-  dropped: readonly string[],
-): Cleared {
+export function withoutColumnsPointer(tree: MaskTree, blockId: string, dropped: readonly string[]): Cleared {
   if (dropped.length === 0) return { tree, parameter: 0, blocks: 0 }
   const away = new Set(dropped)
   let parameter = 0

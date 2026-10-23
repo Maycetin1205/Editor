@@ -61,10 +61,7 @@ interface InputSpotAct {
   setMark: (index: number) => void
 }
 
-export function inputSpotTpl(
-  placement: InputSpotPlacement,
-  act: InputSpotAct,
-): TemplateResult {
+export function inputSpotTpl(placement: InputSpotPlacement, act: InputSpotAct): TemplateResult {
   return html`<div
     class=${placement.listToTop === true ? `${placement.holderClass} upward` : placement.holderClass}
   >
@@ -84,13 +81,17 @@ export function inputSpotTpl(
       @focus=${placement.marksOnEntering === true ? marking.focus : nothing}
     />
     ${placement.beside ?? nothing}
-    ${placement.suggestions.length === 0 ? nothing : suggestionListTpl({
-      entries: placement.suggestions,
-      columns: placement.columns,
-      typed: placement.typed,
-      mark: placement.mark,
-      onChoose: (i) => act.chooseSuggestion(i),
-      onMark: (i) => act.setMark(i),
-    })}
+    ${
+      placement.suggestions.length === 0
+        ? nothing
+        : suggestionListTpl({
+            entries: placement.suggestions,
+            columns: placement.columns,
+            typed: placement.typed,
+            mark: placement.mark,
+            onChoose: (i) => act.chooseSuggestion(i),
+            onMark: (i) => act.setMark(i),
+          })
+    }
   </div>`
 }

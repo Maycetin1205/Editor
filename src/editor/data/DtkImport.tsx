@@ -9,7 +9,11 @@ import type { DtkTable } from '../../core/data/dtkImport'
 import { useDataSources } from '../state/useDataSources'
 import { newSource } from './sourceEdit'
 
-export function DtkImport({ fileName, tables, onClose }: {
+export function DtkImport({
+  fileName,
+  tables,
+  onClose,
+}: {
   fileName: string
   tables: readonly DtkTable[]
   onClose: () => void
@@ -21,12 +25,13 @@ export function DtkImport({ fileName, tables, onClose }: {
   )
   const count = [...ticked].filter((k) => !present.has(k)).length
 
-  const toggle = (key: string) => setTicked((old) => {
-    const next = new Set(old)
-    if (next.has(key)) next.delete(key)
-    else next.add(key)
-    return next
-  })
+  const toggle = (key: string) =>
+    setTicked((old) => {
+      const next = new Set(old)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
 
   const adopt = () => {
     for (const t of tables) {

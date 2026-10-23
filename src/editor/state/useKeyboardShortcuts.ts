@@ -45,14 +45,7 @@ function windowOpen(): boolean {
   return document.querySelector('[role="dialog"]') !== null
 }
 
-type KeyEffect =
-  | 'nothing'
-  | 'save'
-  | 'delete'
-  | 'deselect'
-  | 'back'
-  | 'forward'
-  | 'duplicate'
+type KeyEffect = 'nothing' | 'save' | 'delete' | 'deselect' | 'back' | 'forward' | 'duplicate'
 
 interface KeyPlacement {
   key: string
@@ -97,8 +90,16 @@ export function useKeyboardShortcuts() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const chosen = editor.selectedId
-      if (chosen !== null && e.key.startsWith('Arrow') && !e.ctrlKey && !e.metaKey && !e.altKey
-        && !inInputField(e) && !inDataPanel(e) && !windowOpen()) {
+      if (
+        chosen !== null &&
+        e.key.startsWith('Arrow') &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.altKey &&
+        !inInputField(e) &&
+        !inDataPanel(e) &&
+        !windowOpen()
+      ) {
         e.preventDefault()
         nudge(editor, chosen, e.key, e.shiftKey)
         return

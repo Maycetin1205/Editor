@@ -10,13 +10,7 @@ interface BadgeProps {
 
 export function Badge({ children, technical = true, className }: BadgeProps) {
   return (
-    <span
-      className={cn(
-        'min-w-0 shrink-0 truncate text-dense text-muted',
-        technical && 'font-mono',
-        className,
-      )}
-    >
+    <span className={cn('min-w-0 shrink-0 truncate text-dense text-muted', technical && 'font-mono', className)}>
       {children}
     </span>
   )

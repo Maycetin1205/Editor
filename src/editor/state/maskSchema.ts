@@ -46,8 +46,21 @@ function liftTo22(tree: unknown): void {
 
 const COLUMN_VALUES_23 = ['heading', 'tone', 'catchAll']
 const CARD_VALUES_23 = [
-  'chipTone', 'heading', 'heading2', 'time', 'date', 'subline', 'text', 'chip',
-  'headingField', 'heading2Field', 'timeField', 'dateField', 'sublineField', 'textField', 'chipField',
+  'chipTone',
+  'heading',
+  'heading2',
+  'time',
+  'date',
+  'subline',
+  'text',
+  'chip',
+  'headingField',
+  'heading2Field',
+  'timeField',
+  'dateField',
+  'sublineField',
+  'textField',
+  'chipField',
 ]
 
 function picked(values: unknown, keys: readonly string[]): Record<string, unknown> {
@@ -66,9 +79,7 @@ function liftTo23(tree: unknown): void {
   for (const board of Object.values(tree)) {
     if (!isPlainObject(board) || board.type !== 'kanban' || !Array.isArray(board.childIds)) continue
     const values = isPlainObject(board.values) ? board.values : {}
-    const children = board.childIds
-      .map((id) => (typeof id === 'string' ? tree[id] : undefined))
-      .filter(isPlainObject)
+    const children = board.childIds.map((id) => (typeof id === 'string' ? tree[id] : undefined)).filter(isPlainObject)
     const columns = children
       .filter((child) => child.type === 'kanban-column')
       .map((child) => {
@@ -104,8 +115,11 @@ function liftTo24(tree: unknown): void {
       for (const childId of node.childIds) {
         const child = typeof childId === 'string' ? tree[childId] : undefined
         if (!isPlainObject(child) || !isPlainObject(child.values)) continue
-        const x = Math.min(columns - 1, Math.round(cellOf(child.values, 'gridX', 0) * columns / OLD_AREA_COLUMNS))
-        const w = Math.max(1, Math.round(cellOf(child.values, 'gridW', OLD_AREA_COLUMNS) * columns / OLD_AREA_COLUMNS))
+        const x = Math.min(columns - 1, Math.round((cellOf(child.values, 'gridX', 0) * columns) / OLD_AREA_COLUMNS))
+        const w = Math.max(
+          1,
+          Math.round((cellOf(child.values, 'gridW', OLD_AREA_COLUMNS) * columns) / OLD_AREA_COLUMNS),
+        )
         child.values.gridX = x
         child.values.gridW = Math.min(w, columns - x)
       }
@@ -141,12 +155,14 @@ function liftTo25(tree: unknown): void {
       const factors = (list: unknown, divides: boolean) =>
         (Array.isArray(list) ? list : []).flatMap((f) => termFrom25(f, divides) ?? [])
       const round = isPlainObject(old.lead.round) ? old.lead.round.decimals : undefined
-      return [{
-        key: old.key,
-        lead: old.lead.column,
-        terms: [...factors(old.numerator, false), ...factors(old.denominator, true)],
-        decimals: typeof round === 'number' ? round : 2,
-      }]
+      return [
+        {
+          key: old.key,
+          lead: old.lead.column,
+          terms: [...factors(old.numerator, false), ...factors(old.denominator, true)],
+          decimals: typeof round === 'number' ? round : 2,
+        },
+      ]
     })
   }
 }
@@ -259,7 +275,14 @@ function liftTo33(tree: unknown): void {
 }
 
 const TEXT_SWITCHES_34 = [
-  'oneLine', 'bottom', 'emptyDash', 'redBelowZero', 'figureFormat', 'sumRule', 'withoutChoice', 'withoutHint',
+  'oneLine',
+  'bottom',
+  'emptyDash',
+  'redBelowZero',
+  'figureFormat',
+  'sumRule',
+  'withoutChoice',
+  'withoutHint',
 ]
 
 function liftTo34(tree: unknown): void {
@@ -327,16 +350,10 @@ function fieldNames37(sources: readonly unknown[], ownSource: unknown): FieldNam
   }
 }
 
-function linesOf37(
-  fields: unknown,
-  labels: unknown,
-  nameOf: FieldNames37,
-  sum: boolean,
-): Record<string, unknown>[] {
+function linesOf37(fields: unknown, labels: unknown, nameOf: FieldNames37, sum: boolean): Record<string, unknown>[] {
   const typed = typeof labels === 'string' && labels !== '' ? labels.split(' · ').map((l) => l.trim()) : []
-  const codes = typeof fields === 'string'
-    ? fields.split(fields.includes(' · ') ? ' · ' : ' ').filter((f) => f.trim() !== '')
-    : []
+  const codes =
+    typeof fields === 'string' ? fields.split(fields.includes(' · ') ? ' · ' : ' ').filter((f) => f.trim() !== '') : []
   return codes.map((field, i) => ({
     label: typed[i] || nameOf(field),
     field,

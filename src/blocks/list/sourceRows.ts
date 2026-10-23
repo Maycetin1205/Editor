@@ -2,14 +2,7 @@ import { contractOf } from '../../core/block/registry'
 import { inOpenPopup } from '../../core/data/steps/popupStep'
 import { maskState } from '../../runtime/maskState'
 import { relocateSelection, giverIdOf, traitOf, rowsToSelection } from '../../runtime/selection'
-import {
-  readDataPreamble,
-  makeDataLink,
-  identityOf,
-  recordOf,
-  rowKeys,
-  sourceIdOf,
-} from '../../runtime/source'
+import { readDataPreamble, makeDataLink, identityOf, recordOf, rowKeys, sourceIdOf } from '../../runtime/source'
 import { rowValues, type Calculation } from '../../core/data/calculation'
 import { columnWithKey, type Column } from '../parts/column'
 
@@ -72,19 +65,22 @@ function fillRows(el: RowsElement, delivery: boolean): void {
 
   const rows = rowsToSelection(el, preamble.rows)
 
-  relocateSelection(giverIdOf(el), rows, (r) => r, (r) => rowsTraitOf(el, r))
+  relocateSelection(
+    giverIdOf(el),
+    rows,
+    (r) => r,
+    (r) => rowsTraitOf(el, r),
+  )
 
   const read = preamble.read
 
   el.rawRows = rows
-  el.dataRows = rows.map((row) => rowComputed(
-    columns,
-    calculations,
-    (slot) => {
+  el.dataRows = rows.map((row) =>
+    rowComputed(columns, calculations, (slot) => {
       const field = columns[slot]?.field ?? ''
       return field === '' ? '' : read(row, field)
-    },
-  ))
+    }),
+  )
 }
 
 const link = makeDataLink<RowsElement>({ hydrate: fillRows })

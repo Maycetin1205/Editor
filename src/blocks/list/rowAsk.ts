@@ -88,9 +88,10 @@ export class RowAsk {
   readonly asked = (e: Event): void => {
     const detail = (e as CustomEvent<RowConfirm>).detail
     if (this.asking !== null) return
-    const rawIndex = detail.record === ''
-      ? this.chosen()
-      : this.el.rawRows.findIndex((row) => rowsIndexOf(this.el, row) === detail.record)
+    const rawIndex =
+      detail.record === ''
+        ? this.chosen()
+        : this.el.rawRows.findIndex((row) => rowsIndexOf(this.el, row) === detail.record)
     const row = rawIndex < 0 ? undefined : this.rowAt(rawIndex)
     if (row === undefined) return
     const body = row.closest('.body')
@@ -107,8 +108,12 @@ export class RowAsk {
     })
     this.el.requestUpdate()
     this.el.updateComplete
-      .then(() => this.el.shadowRoot?.querySelector<HTMLElement>('.row-ask > .ask-drop')?.focus({ preventScroll: true }))
-      .catch((error: unknown) => { warn('Rückfrage nicht gezeichnet', error) })
+      .then(() =>
+        this.el.shadowRoot?.querySelector<HTMLElement>('.row-ask > .ask-drop')?.focus({ preventScroll: true }),
+      )
+      .catch((error: unknown) => {
+        warn('Rückfrage nicht gezeichnet', error)
+      })
   }
 
   checkShown(): void {
@@ -146,11 +151,15 @@ export class RowAsk {
     const rawIndex = this.el.rawRows.findIndex((row) => rowsTraitOf(this.el, row) === asking.trait)
     const key = rawIndex < 0 ? '' : this.keyOf(rawIndex)
     this.el.requestUpdate()
-    this.el.updateComplete.then(() => {
-      const row = rowElement(this.el.shadowRoot, key)
-      if (!row) return
-      if (!yes || !(moveRowsFocus(row, 1) || moveRowsFocus(row, -1))) row.focus()
-    }).catch((error: unknown) => { warn('Liste nach der Rückfrage nicht gezeichnet', error) })
+    this.el.updateComplete
+      .then(() => {
+        const row = rowElement(this.el.shadowRoot, key)
+        if (!row) return
+        if (!yes || !(moveRowsFocus(row, 1) || moveRowsFocus(row, -1))) row.focus()
+      })
+      .catch((error: unknown) => {
+        warn('Liste nach der Rückfrage nicht gezeichnet', error)
+      })
   }
 
   private readonly askKey = (e: KeyboardEvent): void => {

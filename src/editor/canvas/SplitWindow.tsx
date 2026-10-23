@@ -39,7 +39,10 @@ const COLUMNS = [
   { name: '', width: 92 },
 ]
 
-const DIRECTIONS = [{ value: 'up', name: 'Aufsteigend' }, { value: 'down', name: 'Absteigend' }]
+const DIRECTIONS = [
+  { value: 'up', name: 'Aufsteigend' },
+  { value: 'down', name: 'Absteigend' },
+]
 
 export function OpenSplitWindow() {
   const ed = useEditor()
@@ -49,8 +52,7 @@ export function OpenSplitWindow() {
   const block = ed.tree[blockId]
   if (block === undefined || !carriesSplit(block)) return null
 
-  const helpers = declaredValue(block, extraSourcesProperty)
-    .flatMap((e) => library.filter((s) => s.id === e.sourceId))
+  const helpers = declaredValue(block, extraSourcesProperty).flatMap((e) => library.filter((s) => s.id === e.sourceId))
   const present = declaredValue(block, splitsProperty)[0]
   const close = (): void => ed.openSplit(null)
 
@@ -65,10 +67,14 @@ export function OpenSplitWindow() {
         ed.updateProperty(block.id, SPLITS_PROP, [next])
         close()
       }}
-      onRemove={present === undefined ? undefined : () => {
-        ed.updateProperty(block.id, SPLITS_PROP, [])
-        close()
-      }}
+      onRemove={
+        present === undefined
+          ? undefined
+          : () => {
+              ed.updateProperty(block.id, SPLITS_PROP, [])
+              close()
+            }
+      }
       onClose={close}
     />
   )
@@ -87,7 +93,15 @@ function wholeOrNone(text: string, max: number): number | undefined {
   return Number.isInteger(n) && n >= 0 && n <= max ? n : undefined
 }
 
-function SplitWindow({ title, split, helpers, columns, onApply, onRemove, onClose }: {
+function SplitWindow({
+  title,
+  split,
+  helpers,
+  columns,
+  onApply,
+  onRemove,
+  onClose,
+}: {
   title: string
   split: Split
   helpers: readonly DataSource[]
@@ -128,20 +142,26 @@ function SplitWindow({ title, split, helpers, columns, onApply, onRemove, onClos
       width={1040}
       height={620}
       level={50}
-      foot={(
+      foot={
         <>
           {onRemove !== undefined && (
-            <Button kind="risk" className="mr-auto" onClick={onRemove}>Verteilen entfernen</Button>
+            <Button kind="risk" className="mr-auto" onClick={onRemove}>
+              Verteilen entfernen
+            </Button>
           )}
           <Button onClick={onClose}>Abbrechen</Button>
-          <Button kind="primary" disabled={!ready} onClick={() => onApply(finished)}>Übernehmen</Button>
+          <Button kind="primary" disabled={!ready} onClick={() => onApply(finished)}>
+            Übernehmen
+          </Button>
         </>
-      )}
+      }
       onClose={onClose}
     >
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_340px]">
         <div className="flex min-h-0 flex-col border-r border-line-soft">
-          <Strip right={draft.columns.length === 1 ? '1 Spalte' : `${draft.columns.length} Spalten`}>Spalten der Liste</Strip>
+          <Strip right={draft.columns.length === 1 ? '1 Spalte' : `${draft.columns.length} Spalten`}>
+            Spalten der Liste
+          </Strip>
           <Grid columns={COLUMNS}>
             {draft.columns.map((column, at) => (
               <tr key={column.key}>
@@ -151,10 +171,14 @@ function SplitWindow({ title, split, helpers, columns, onApply, onRemove, onClos
                     aria-label={`Feld der Spalte ${at + 1}`}
                     options={fields}
                     value={column.field}
-                    onChoose={(field) => setColumn(at, {
-                      field,
-                      ...(column.title === '' || column.title === fieldName(column.field) ? { title: fieldName(field) } : {}),
-                    })}
+                    onChoose={(field) =>
+                      setColumn(at, {
+                        field,
+                        ...(column.title === '' || column.title === fieldName(column.field)
+                          ? { title: fieldName(field) }
+                          : {}),
+                      })
+                    }
                   />
                 </td>
                 <td className={TD}>
@@ -176,7 +200,9 @@ function SplitWindow({ title, split, helpers, columns, onApply, onRemove, onClos
                       const width = wholeOrNone(e.currentTarget.value, 999)
                       const next = { ...column }
                       delete next.width
-                      set({ columns: draft.columns.map((c, k) => (k === at ? (width ? { ...next, width } : next) : c)) })
+                      set({
+                        columns: draft.columns.map((c, k) => (k === at ? (width ? { ...next, width } : next) : c)),
+                      })
                     }}
                   />
                 </td>
@@ -191,19 +217,37 @@ function SplitWindow({ title, split, helpers, columns, onApply, onRemove, onClos
                       const soonDays = wholeOrNone(e.currentTarget.value, SOON_DAYS_MAX)
                       const next = { ...column }
                       delete next.soonDays
-                      set({ columns: draft.columns.map((c, k) => (k === at ? (soonDays === undefined ? next : { ...next, soonDays }) : c)) })
+                      set({
+                        columns: draft.columns.map((c, k) =>
+                          k === at ? (soonDays === undefined ? next : { ...next, soonDays }) : c,
+                        ),
+                      })
                     }}
                   />
                 </td>
                 <td className={cn(TD, 'px-[4px]')}>
                   <span className="flex items-center justify-end gap-[2px]">
-                    <Button onlyIcon aria-label="Nach oben" disabled={at === 0} onClick={() => set({ columns: moved(draft.columns, at, -1) })}>
+                    <Button
+                      onlyIcon
+                      aria-label="Nach oben"
+                      disabled={at === 0}
+                      onClick={() => set({ columns: moved(draft.columns, at, -1) })}
+                    >
                       <ChevronUp size={14} aria-hidden />
                     </Button>
-                    <Button onlyIcon aria-label="Nach unten" disabled={at === draft.columns.length - 1} onClick={() => set({ columns: moved(draft.columns, at, 1) })}>
+                    <Button
+                      onlyIcon
+                      aria-label="Nach unten"
+                      disabled={at === draft.columns.length - 1}
+                      onClick={() => set({ columns: moved(draft.columns, at, 1) })}
+                    >
                       <ChevronDown size={14} aria-hidden />
                     </Button>
-                    <Button onlyIcon aria-label="Spalte entfernen" onClick={() => set({ columns: draft.columns.filter((_, k) => k !== at) })}>
+                    <Button
+                      onlyIcon
+                      aria-label="Spalte entfernen"
+                      onClick={() => set({ columns: draft.columns.filter((_, k) => k !== at) })}
+                    >
                       <Trash2 size={14} aria-hidden />
                     </Button>
                   </span>
@@ -258,14 +302,18 @@ function SplitWindow({ title, split, helpers, columns, onApply, onRemove, onClos
             {Array.from({ length: sortLines }, (_, at) => {
               const sort = draft.sort[at]
               return [
-                <span key={`n${at}`} className={NAME}>{at === 0 ? 'Zuerst nach' : 'Dann nach'}</span>,
+                <span key={`n${at}`} className={NAME}>
+                  {at === 0 ? 'Zuerst nach' : 'Dann nach'}
+                </span>,
                 <Choice
                   key={`f${at}`}
                   aria-label={at === 0 ? 'Zuerst sortieren nach' : 'Dann sortieren nach'}
                   options={fields}
                   emptyText="Wie geliefert"
                   value={sort?.field ?? ''}
-                  onChoose={(field) => setSort(at, field === '' ? null : { field, ...(sort?.down ? { down: true } : {}) })}
+                  onChoose={(field) =>
+                    setSort(at, field === '' ? null : { field, ...(sort?.down ? { down: true } : {}) })
+                  }
                 />,
                 ...(sort === undefined
                   ? []
@@ -296,7 +344,9 @@ function SplitWindow({ title, split, helpers, columns, onApply, onRemove, onClos
             {Array.from({ length: hideLines }, (_, at) => {
               const hide = draft.hide[at]
               return [
-                <span key={`n${at}`} className={NAME}>Wenn Feld</span>,
+                <span key={`n${at}`} className={NAME}>
+                  Wenn Feld
+                </span>,
                 <Choice
                   key={`f${at}`}
                   aria-label="Ausblenden, wenn Feld"
@@ -311,7 +361,9 @@ function SplitWindow({ title, split, helpers, columns, onApply, onRemove, onClos
                   placeholder="gleich"
                   disabled={hide === undefined}
                   value={hide?.value ?? ''}
-                  onChange={(e) => { if (hide !== undefined) setHide(at, { field: hide.field, value: e.currentTarget.value }) }}
+                  onChange={(e) => {
+                    if (hide !== undefined) setHide(at, { field: hide.field, value: e.currentTarget.value })
+                  }}
                 />,
               ]
             })}

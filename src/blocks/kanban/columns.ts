@@ -43,15 +43,18 @@ const kanbanColumnProperties = {
     place: 'block',
     attribute: 'button',
   }),
-  buttonKind: segmentProperty([
-    { value: 'none', name: 'Aus' },
-    { value: 'next', name: 'Weiter' },
-    { value: 'action', name: 'Aktion' },
-  ], {
-    default: 'none',
-    label: 'Knopf',
-    attribute: 'buttonkind',
-  }),
+  buttonKind: segmentProperty(
+    [
+      { value: 'none', name: 'Aus' },
+      { value: 'next', name: 'Weiter' },
+      { value: 'action', name: 'Aktion' },
+    ],
+    {
+      default: 'none',
+      label: 'Knopf',
+      attribute: 'buttonkind',
+    },
+  ),
   byTime: booleanProperty({
     default: false,
     label: 'Nach Uhrzeit',
@@ -76,33 +79,39 @@ const kanbanColumnProperties = {
     label: 'Wenn leer',
     attribute: 'empty',
   }),
-  corner: segmentProperty([
-    { value: 'time', name: 'Zeit' },
-    { value: 'wait', name: 'Wartezeit' },
-    { value: 'amount', name: 'Betrag' },
-    { value: 'text', name: 'Text' },
-    { value: 'none', name: 'Aus' },
-  ], {
-    default: 'time',
-    label: 'Ecke der Karte',
-    attribute: 'corner',
-  }),
+  corner: segmentProperty(
+    [
+      { value: 'time', name: 'Zeit' },
+      { value: 'wait', name: 'Wartezeit' },
+      { value: 'amount', name: 'Betrag' },
+      { value: 'text', name: 'Text' },
+      { value: 'none', name: 'Aus' },
+    ],
+    {
+      default: 'time',
+      label: 'Ecke der Karte',
+      attribute: 'corner',
+    },
+  ),
   cornerText: textProperty({
     default: '',
     label: 'Text in der Ecke',
     attribute: 'cornertext',
     when: { key: 'corner', equals: 'text' },
   }),
-  foot: segmentProperty([
-    { value: 'none', name: 'Aus' },
-    { value: 'place', name: 'Platz' },
-    { value: 'note', name: 'Notiz' },
-    { value: 'text', name: 'Text' },
-  ], {
-    default: 'none',
-    label: 'Fuß der Karte',
-    attribute: 'foot',
-  }),
+  foot: segmentProperty(
+    [
+      { value: 'none', name: 'Aus' },
+      { value: 'place', name: 'Platz' },
+      { value: 'note', name: 'Notiz' },
+      { value: 'text', name: 'Text' },
+    ],
+    {
+      default: 'none',
+      label: 'Fuß der Karte',
+      attribute: 'foot',
+    },
+  ),
   footText: textProperty({
     default: '',
     label: 'Text im Fuß',

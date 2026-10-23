@@ -22,23 +22,29 @@ export const pictureProperties = {
     attribute: 'picture',
     when: TYPED,
   }),
-  fit: segmentProperty([
-    { value: 'contain', name: 'Einpassen' },
-    { value: 'cover', name: 'Füllen' },
-  ], {
-    default: 'contain',
-    label: 'Größe',
-    attribute: 'fit',
-  }),
-  align: segmentProperty([
-    { value: 'left', name: 'Links' },
-    { value: 'center', name: 'Mitte' },
-    { value: 'right', name: 'Rechts' },
-  ], {
-    default: 'center',
-    label: 'Ausrichtung',
-    attribute: 'align',
-  }),
+  fit: segmentProperty(
+    [
+      { value: 'contain', name: 'Einpassen' },
+      { value: 'cover', name: 'Füllen' },
+    ],
+    {
+      default: 'contain',
+      label: 'Größe',
+      attribute: 'fit',
+    },
+  ),
+  align: segmentProperty(
+    [
+      { value: 'left', name: 'Links' },
+      { value: 'center', name: 'Mitte' },
+      { value: 'right', name: 'Rechts' },
+    ],
+    {
+      default: 'center',
+      label: 'Ausrichtung',
+      attribute: 'align',
+    },
+  ),
   rounded: booleanProperty({
     default: false,
     label: 'Runde Ecken',
@@ -57,18 +63,21 @@ export const pictureProperties = {
   }),
   // The field holds the picture itself, or a number SoftEngine turns into
   // one when asked by a relation (see address.ts).
-  fetch: choiceProperty([
-    { value: 'field', name: 'Feld enthält das Bild' },
-    { value: '1911', name: 'Artikelbild (Relation 1911)' },
-    { value: '1912', name: 'Medienbild (Relation 1912)' },
-    { value: 'other', name: 'Andere Relation' },
-  ], {
-    default: 'field',
-    label: 'Bild holen',
-    place: 'source',
-    attribute: 'fetch',
-    when: BOUND,
-  }),
+  fetch: choiceProperty(
+    [
+      { value: 'field', name: 'Feld enthält das Bild' },
+      { value: '1911', name: 'Artikelbild (Relation 1911)' },
+      { value: '1912', name: 'Medienbild (Relation 1912)' },
+      { value: 'other', name: 'Andere Relation' },
+    ],
+    {
+      default: 'field',
+      label: 'Bild holen',
+      place: 'source',
+      attribute: 'fetch',
+      when: BOUND,
+    },
+  ),
   relationNr: textProperty({
     default: '',
     label: 'Relation',

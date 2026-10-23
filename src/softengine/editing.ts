@@ -19,25 +19,46 @@ function origin(evt: Event): unknown {
 }
 
 function towardsTyping(spot: unknown): boolean {
-  return typable(spot)
-    || (spot instanceof Element && spot.closest(`[${LEADS_TO_TYPING_ATTR}], [${TAKES_KEYS_ATTR}]`) !== null)
+  return (
+    typable(spot) ||
+    (spot instanceof Element && spot.closest(`[${LEADS_TO_TYPING_ATTR}], [${TAKES_KEYS_ATTR}]`) !== null)
+  )
 }
 
 export function announceEditing(): void {
   if (editing.installed) return
   editing.installed = true
-  const enter = (): void => { if (!editing.on && tell(ENTER)) editing.on = true }
-  const leave = (): void => { if (editing.on && tell(LEAVE)) editing.on = false }
-  window.addEventListener('pointerdown', (evt) => {
-    editing.byHover = false
-    if (towardsTyping(origin(evt))) enter(); else leave()
-  }, true)
-  window.addEventListener('focusin', (evt) => { if (typable(origin(evt))) enter() }, true)
-  window.addEventListener('pointerover', (evt) => {
-    if (editing.on || !towardsTyping(origin(evt))) return
-    enter()
-    editing.byHover = editing.on
-  }, true)
+  const enter = (): void => {
+    if (!editing.on && tell(ENTER)) editing.on = true
+  }
+  const leave = (): void => {
+    if (editing.on && tell(LEAVE)) editing.on = false
+  }
+  window.addEventListener(
+    'pointerdown',
+    (evt) => {
+      editing.byHover = false
+      if (towardsTyping(origin(evt))) enter()
+      else leave()
+    },
+    true,
+  )
+  window.addEventListener(
+    'focusin',
+    (evt) => {
+      if (typable(origin(evt))) enter()
+    },
+    true,
+  )
+  window.addEventListener(
+    'pointerover',
+    (evt) => {
+      if (editing.on || !towardsTyping(origin(evt))) return
+      enter()
+      editing.byHover = editing.on
+    },
+    true,
+  )
   document.documentElement.addEventListener('pointerleave', () => {
     if (!editing.byHover) return
     editing.byHover = false

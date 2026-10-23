@@ -20,7 +20,7 @@ const PAGE = 8
 const AMOUNT_DECIMALS = 3
 
 const read = (record: unknown, field: string): string =>
-  (field === '' ? '' : maskState.host.readField(record, field).trim())
+  field === '' ? '' : maskState.host.readField(record, field).trim()
 
 function startOfDay(moment: Date): number {
   return new Date(moment.getFullYear(), moment.getMonth(), moment.getDate()).getTime()
@@ -136,8 +136,8 @@ export class SplitState {
     this._total = total
     this.picks = new Map()
     for (const pick of before) {
-      const same = this._rows.find((row) => row === pick.record)
-        ?? this._rows.find((row) => this.sameRecord(row, pick.record))
+      const same =
+        this._rows.find((row) => row === pick.record) ?? this._rows.find((row) => this.sameRecord(row, pick.record))
       if (same !== undefined) this.picks.set(same, pick.amount)
     }
     const first = this._rows.findIndex((row) => this.picks.has(row))
@@ -266,8 +266,7 @@ export class SplitState {
     this.search = { text, at: now }
     const wanted = plainText(text)
     const columns = this.spec?.columns ?? []
-    const hit = this._rows.findIndex((row) =>
-      columns.some((c) => plainText(read(row, c.field)).startsWith(wanted)))
+    const hit = this._rows.findIndex((row) => columns.some((c) => plainText(read(row, c.field)).startsWith(wanted)))
     if (hit !== -1) this.setMark(hit)
   }
 
@@ -280,20 +279,36 @@ export class SplitState {
   private keyOutcome(e: Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'altKey' | 'metaKey'>, now: number): SplitKey {
     const last = this._rows.length - 1
     switch (e.key) {
-      case 'ArrowDown': this.setMark(Math.min(last, this._mark + 1)); return 'handled'
-      case 'ArrowUp': this.setMark(Math.max(0, this._mark - 1)); return 'handled'
-      case 'PageDown': this.setMark(Math.min(last, this._mark + PAGE)); return 'handled'
-      case 'PageUp': this.setMark(Math.max(0, this._mark - PAGE)); return 'handled'
-      case 'Home': this.setMark(0); return 'handled'
-      case 'End': this.setMark(last); return 'handled'
-      case ' ': this.toggle(this._mark); return 'handled'
+      case 'ArrowDown':
+        this.setMark(Math.min(last, this._mark + 1))
+        return 'handled'
+      case 'ArrowUp':
+        this.setMark(Math.max(0, this._mark - 1))
+        return 'handled'
+      case 'PageDown':
+        this.setMark(Math.min(last, this._mark + PAGE))
+        return 'handled'
+      case 'PageUp':
+        this.setMark(Math.max(0, this._mark - PAGE))
+        return 'handled'
+      case 'Home':
+        this.setMark(0)
+        return 'handled'
+      case 'End':
+        this.setMark(last)
+        return 'handled'
+      case ' ':
+        this.toggle(this._mark)
+        return 'handled'
       case 'Delete': {
         const row = this._rows[this._mark]
         if (row !== undefined) this.picks.delete(row)
         this._editing = false
         return 'handled'
       }
-      case 'Backspace': this.backspace(); return 'handled'
+      case 'Backspace':
+        this.backspace()
+        return 'handled'
       case 'Enter':
       case 'Tab':
         this._editing = false

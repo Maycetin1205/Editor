@@ -26,13 +26,15 @@ export function noteJob(job: JobView): void {
 
 function subscribe(listener: (job: JobView) => void): () => void {
   maskState.jobs.listeners.add(listener)
-  return () => { maskState.jobs.listeners.delete(listener) }
+  return () => {
+    maskState.jobs.listeners.delete(listener)
+  }
 }
 
 // For the developer tools inside SoftEngine: ffAuftraege() lists what the mask
 // asked of SoftEngine and how each question ended.
 export function exposeJobLog(): void {
-  (globalThis as { ffAuftraege?: () => JobView[] }).ffAuftraege = () => [...maskState.jobs.known.values()]
+  ;(globalThis as { ffAuftraege?: () => JobView[] }).ffAuftraege = () => [...maskState.jobs.known.values()]
 }
 
 export function printEndedJobs(): void {

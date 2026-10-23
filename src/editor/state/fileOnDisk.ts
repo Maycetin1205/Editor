@@ -38,21 +38,36 @@ export class FileOnDisk {
 
   private readonly backedUp = new Set<string>()
 
-  get attached(): boolean { return this.handle !== null }
+  get attached(): boolean {
+    return this.handle !== null
+  }
 
-  get path(): string | null { return this._path }
+  get path(): string | null {
+    return this._path
+  }
 
-  get name(): string { return this.handle?.name ?? '' }
+  get name(): string {
+    return this.handle?.name ?? ''
+  }
 
-  get locked(): boolean { return this._locked }
+  get locked(): boolean {
+    return this._locked
+  }
 
-  get place(): FilePlace { return { handle: this.handle, path: this._path, locked: this._locked } }
+  get place(): FilePlace {
+    return { handle: this.handle, path: this._path, locked: this._locked }
+  }
 
   backUpWith(backUp: BackUp): void {
     this.backUp = backUp
   }
 
-  remember(handle: FileSystemFileHandle, path: string | null = null, holds: string | null = null, created = false): void {
+  remember(
+    handle: FileSystemFileHandle,
+    path: string | null = null,
+    holds: string | null = null,
+    created = false,
+  ): void {
     this.handle = handle
     this._path = path
     this.written = holds
@@ -125,11 +140,7 @@ export class FileOnDisk {
   }
 }
 
-export async function writeFile(
-  file: FileOnDisk,
-  suggestedName: string,
-  text: string,
-): Promise<void> {
+export async function writeFile(file: FileOnDisk, suggestedName: string, text: string): Promise<void> {
   if (await file.writeAgain(text)) return
 
   const pick = savePicker()

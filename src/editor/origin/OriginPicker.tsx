@@ -20,13 +20,19 @@ function pickerGroups(reach: Reach): ListGroup[] {
   const origins = originsOf(reach)
   const formFields = origins.filter((o) => o.kind === 'formField')
   return [
-    ...origins.filter((o) => o.kind !== 'formField').map((o) => ({
-      key: o.key,
-      name: HEADINGS[o.kind],
-      ...(o.kind === 'row' ? {} : { badge: o.name }),
-      entries: o.entries,
-    })),
-    { key: 'formField', name: HEADINGS.formField, entries: formFields.flatMap((o) => o.entries.map((e) => ({ ...e, name: o.name }))) },
+    ...origins
+      .filter((o) => o.kind !== 'formField')
+      .map((o) => ({
+        key: o.key,
+        name: HEADINGS[o.kind],
+        ...(o.kind === 'row' ? {} : { badge: o.name }),
+        entries: o.entries,
+      })),
+    {
+      key: 'formField',
+      name: HEADINGS.formField,
+      entries: formFields.flatMap((o) => o.entries.map((e) => ({ ...e, name: o.name }))),
+    },
   ].filter((g) => g.entries.length > 0)
 }
 
@@ -34,16 +40,27 @@ function pickedText(o: ValueOrigin, reach: Reach): string {
   const value = valueName(o, reach)
   const from = originName(originKey(o), reach)
   switch (o.kind) {
-    case 'row': return `Spalte ${value}`
-    case 'chosenRow': return from !== '' ? `${value} · ${from}` : `Spalte ${value}`
-    case 'helper': return from !== '' ? `${from}: ${value}` : value
-    case 'document': return `Beleg: ${value}`
-    case 'formField': return `Feld ${value}`
-    default: return value
+    case 'row':
+      return `Spalte ${value}`
+    case 'chosenRow':
+      return from !== '' ? `${value} · ${from}` : `Spalte ${value}`
+    case 'helper':
+      return from !== '' ? `${from}: ${value}` : value
+    case 'document':
+      return `Beleg: ${value}`
+    case 'formField':
+      return `Feld ${value}`
+    default:
+      return value
   }
 }
 
-export function OriginPicker({ name, origin, reach, onChoose }: {
+export function OriginPicker({
+  name,
+  origin,
+  reach,
+  onChoose,
+}: {
   name: string
   origin: ValueOrigin | null
   reach: Reach

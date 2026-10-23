@@ -58,8 +58,7 @@ function readMoved(key: string, formerKey: string): string | null {
 function write(key: string, text: string): void {
   try {
     localStorage.setItem(key, text)
-  } catch {
-  }
+  } catch {}
 }
 
 class Slot {
@@ -89,10 +88,12 @@ const maskSlot = new Slot(STORAGE_KEY)
 const librarySlot = new Slot(LIBRARY_KEY, FORMER_LIBRARY_KEY)
 
 export function loadLibraryFromStorage(): StoredLibrary {
-  return librarySlot.read((raw) => {
-    const result = packLibraryFrom(raw)
-    return result.ok ? result.content : null
-  }) ?? { dataSources: [], relation: [] }
+  return (
+    librarySlot.read((raw) => {
+      const result = packLibraryFrom(raw)
+      return result.ok ? result.content : null
+    }) ?? { dataSources: [], relation: [] }
+  )
 }
 
 export function loadFromStorage(knownSources: readonly DataSource[] = []): StoredMask | null {
@@ -141,16 +142,18 @@ export function emptyMask(): StoredMask {
 
 export function persistMask(mask: StoredMask, sources: readonly DataSource[]): void {
   const kept = leftoverForFile(mask.tree, sources, mask.leftover)
-  maskSlot.write(JSON.stringify({
-    schemaVersion: CURRENT_SCHEMA_VERSION,
-    tree: treeForFile(mask.tree, mask.leftover),
-    selectedId: mask.selectedId,
-    activePageId: mask.activePageId,
-    file: mask.file,
-    savedAt: mask.savedAt,
-    ...(kept ? { leftover: kept } : {}),
-    ...(mask.locked ? { locked: true } : {}),
-  }))
+  maskSlot.write(
+    JSON.stringify({
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+      tree: treeForFile(mask.tree, mask.leftover),
+      selectedId: mask.selectedId,
+      activePageId: mask.activePageId,
+      file: mask.file,
+      savedAt: mask.savedAt,
+      ...(kept ? { leftover: kept } : {}),
+      ...(mask.locked ? { locked: true } : {}),
+    }),
+  )
 }
 
 export function loadOutlines(): boolean {

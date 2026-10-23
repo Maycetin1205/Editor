@@ -8,12 +8,7 @@ function headRows(headHeight: number, tick: number): number {
   return Math.max(1, Math.floor(headHeight / tick))
 }
 
-function fittingRows(
-  bodyHeight: number,
-  heads: number,
-  rowsHeight: number,
-  sub: number,
-): number {
+function fittingRows(bodyHeight: number, heads: number, rowsHeight: number, sub: number): number {
   return Math.max(1, Math.floor((bodyHeight - heads * rowsHeight) / (rowsHeight + sub)))
 }
 
@@ -21,12 +16,7 @@ export interface RowMetrics {
   fit: number
 }
 
-function rowMetrics(
-  bodyHeight: number,
-  headHeight: number,
-  tick: number,
-  sub: number,
-): RowMetrics {
+function rowMetrics(bodyHeight: number, headHeight: number, tick: number, sub: number): RowMetrics {
   return { fit: fittingRows(bodyHeight, headRows(headHeight, tick), tick, sub) }
 }
 
@@ -52,19 +42,11 @@ interface SplitQuestion {
   wantedPage: number
 }
 
-export function scrollSplit({
-  visible,
-  showsRows,
-}: SplitQuestion): Split {
+export function scrollSplit({ visible, showsRows }: SplitQuestion): Split {
   return { pages: 1, page: 0, rows: showsRows ? [...visible] : [] }
 }
 
-export function pagesSplit({
-  visible,
-  showsRows,
-  perPage,
-  wantedPage,
-}: SplitQuestion): Split {
+export function pagesSplit({ visible, showsRows, perPage, wantedPage }: SplitQuestion): Split {
   const pages = showsRows ? Math.max(1, Math.ceil(visible.length / perPage)) : 1
 
   const page = Math.min(Math.max(wantedPage, 0), pages - 1)

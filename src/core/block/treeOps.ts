@@ -1,17 +1,6 @@
-import {
-  ROOT_ID,
-  ROOT_TYPE,
-  type BlockNode,
-  type MaskTree,
-} from './tree'
+import { ROOT_ID, ROOT_TYPE, type BlockNode, type MaskTree } from './tree'
 import { blockType } from './registry'
-import {
-  readValues,
-  textProperty,
-  type Property,
-  type PropertyMap,
-  type PropertyValue,
-} from './property'
+import { readValues, textProperty, type Property, type PropertyMap, type PropertyValue } from './property'
 import { DOCUMENT_FRAME_PROP } from './documentFrame'
 import { EXPORT_TARGET_PROP } from './exportTarget'
 import { MASK_NAME_PROP } from './maskName'
@@ -31,10 +20,7 @@ export function emptyTree(): MaskTree {
   return { [ROOT_ID]: createRootNode() }
 }
 
-export function valuesClean(
-  type: string,
-  rawProps: Unread<BlockNode['values']>,
-): Record<string, PropertyValue> {
+export function valuesClean(type: string, rawProps: Unread<BlockNode['values']>): Record<string, PropertyValue> {
   const def = blockType(type)
   if (!def) return {}
   return readValues(def.properties, rawProps)

@@ -7,13 +7,7 @@ import type { EditorStore } from '../state/EditorStore'
 import type { DndState } from './dndState'
 import { cssZoomOf } from '../../blocks/base/cssZoom'
 import { cellFromPointer } from './gridDnd'
-import {
-  areaUnderPointer,
-  areaOf,
-  rowsCapacity,
-  rowInBox,
-  type AreasHit,
-} from './gridArea'
+import { areaUnderPointer, areaOf, rowsCapacity, rowInBox, type AreasHit } from './gridArea'
 
 const DRAG_THRESHOLD = 4
 

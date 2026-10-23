@@ -1,13 +1,6 @@
 import type { PendingKind } from '../../../core/block/capability'
 
-export type RowsStatus =
-  | 'booked'
-  | 'captured'
-  | 'changed'
-  | 'writes'
-
-  | 'written'
-  | 'error'
+export type RowsStatus = 'booked' | 'captured' | 'changed' | 'writes' | 'written' | 'error'
 
 export interface RowState {
   status: RowsStatus

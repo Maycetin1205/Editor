@@ -76,7 +76,8 @@ export function pictureFromVar(doc: Document, alias: string): string | undefined
   if (!data || typeof data !== 'object') return undefined
   for (const key of ['Var', 'VAR', 'var']) {
     const block = data[key]
-    if (block && typeof block === 'object' && alias in block) return firstText((block as Record<string, unknown>)[alias], 0)
+    if (block && typeof block === 'object' && alias in block)
+      return firstText((block as Record<string, unknown>)[alias], 0)
   }
   return undefined
 }
@@ -119,7 +120,12 @@ export function pictureAsk(fetch: string, otherNr: string, otherMore: string): P
   const known = PICTURE_RELATIONS[fetch]
   const nr = known ? fetch : fetch === 'other' ? otherNr.trim() : ''
   if (!/^\d+$/.test(nr)) return null
-  const more = known ? known.more : otherMore.split(/[;,]/).map((v) => v.trim()).filter((v) => v !== '')
+  const more = known
+    ? known.more
+    : otherMore
+        .split(/[;,]/)
+        .map((v) => v.trim())
+        .filter((v) => v !== '')
   return {
     relation: { id: `bild ${nr}`, verb: 'GET_RELATION', nr, parameter: ['WERT', ...more.map(() => '')] },
     more,

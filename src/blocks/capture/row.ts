@@ -56,79 +56,76 @@ interface CaptureAct {
   setMark: (listIndex: number) => void
 }
 
-export function captureRowTpl(
-  placement: CapturePlacement,
-  act: CaptureAct,
-): TemplateResult {
+export function captureRowTpl(placement: CapturePlacement, act: CaptureAct): TemplateResult {
   const under = placement.layout.under
   return html`<div class="row capture${under.size > 0 ? ' subline' : ''}" role="row" style=${styleMap(placement.cols)}>
     ${placement.columns.map((column, i) => captureCellTpl(placement, act, column, placement.slots[i]))}
-    ${under.size === 0 ? nothing : placement.slots.map((slot, i) => {
-      const sub = under.get(slot)
-      if (sub === undefined) return greyCellTpl(i, null)
-      const figure = figureAt(placement.layout, sub.slot)
-      if (placement.preview) return greyCellTpl(i, { column: sub.column, figure, content: '', typable: false }, sub.slot)
-      return greyCellTpl(i, {
-        column: sub.column,
-        figure,
-        content: captureInputTpl(placement, act, sub.column, sub.slot),
-        typable: true,
-        held: placement.held(sub.slot),
-      })
-    })}
+    ${
+      under.size === 0
+        ? nothing
+        : placement.slots.map((slot, i) => {
+            const sub = under.get(slot)
+            if (sub === undefined) return greyCellTpl(i, null)
+            const figure = figureAt(placement.layout, sub.slot)
+            if (placement.preview)
+              return greyCellTpl(i, { column: sub.column, figure, content: '', typable: false }, sub.slot)
+            return greyCellTpl(i, {
+              column: sub.column,
+              figure,
+              content: captureInputTpl(placement, act, sub.column, sub.slot),
+              typable: true,
+              held: placement.held(sub.slot),
+            })
+          })
+    }
   </div>`
 }
 
-function captureCellTpl(
-  placement: CapturePlacement,
-  act: CaptureAct,
-  column: Column,
-  slot: number,
-): TemplateResult {
+function captureCellTpl(placement: CapturePlacement, act: CaptureAct, column: Column, slot: number): TemplateResult {
   if (placement.preview) {
     return html`<div class=${column.hidden === true ? 'hidden' : nothing} role="cell" data-ff-place=${column.key}></div>`
   }
-  const classes = [
-    figureAt(placement.layout, slot) !== null ? 'right' : '',
-    placement.held(slot) ? 'held' : '',
-  ].filter((k) => k !== '').join(' ')
-  return html`<div class=${classes === '' ? nothing : classes} role="cell">${
-    captureInputTpl(placement, act, column, slot)
-  }</div>`
+  const classes = [figureAt(placement.layout, slot) !== null ? 'right' : '', placement.held(slot) ? 'held' : '']
+    .filter((k) => k !== '')
+    .join(' ')
+  return html`<div class=${classes === '' ? nothing : classes} role="cell">${captureInputTpl(
+    placement,
+    act,
+    column,
+    slot,
+  )}</div>`
 }
 
-function captureInputTpl(
-  placement: CapturePlacement,
-  act: CaptureAct,
-  column: Column,
-  slot: number,
-): TemplateResult {
+function captureInputTpl(placement: CapturePlacement, act: CaptureAct, column: Column, slot: number): TemplateResult {
   const free = cellTargetOf(column, placement.sourceId).kind === 'free'
   const list = !free && placement.typingColumn === slot
   const value = placement.value(slot)
 
-  return html`${inputSpotTpl({
-    value,
-    title: column.title,
-    placeholder: placement.placeholder(slot),
-    inputClass: cellsClass(placement.automatic(slot) ? 'automatic' : 'quiet'),
-    holderClass: 'cell-holder',
-    marksOnEntering: true,
-    keepsTyping: true,
-    slot,
-    suggestions: list ? placement.suggestions : [],
-    columns: list ? placement.windowColumns(slot) : [],
-    typed: placement.typed(slot),
-    mark: placement.mark,
-    listToTop: placement.listToTop,
-    ...(placement.split?.slot === slot ? { beside: placement.split.content } : {}),
-  }, {
-    typing: (text) => act.typing(slot, text),
-    key: (e) => act.key(slot, e),
-    leave: () => act.leave(slot),
-    chooseSuggestion: (i2) => act.chooseSuggestion(i2),
-    setMark: (i2) => act.setMark(i2),
-  })}`
+  return html`${inputSpotTpl(
+    {
+      value,
+      title: column.title,
+      placeholder: placement.placeholder(slot),
+      inputClass: cellsClass(placement.automatic(slot) ? 'automatic' : 'quiet'),
+      holderClass: 'cell-holder',
+      marksOnEntering: true,
+      keepsTyping: true,
+      slot,
+      suggestions: list ? placement.suggestions : [],
+      columns: list ? placement.windowColumns(slot) : [],
+      typed: placement.typed(slot),
+      mark: placement.mark,
+      listToTop: placement.listToTop,
+      ...(placement.split?.slot === slot ? { beside: placement.split.content } : {}),
+    },
+    {
+      typing: (text) => act.typing(slot, text),
+      key: (e) => act.key(slot, e),
+      leave: () => act.leave(slot),
+      chooseSuggestion: (i2) => act.chooseSuggestion(i2),
+      setMark: (i2) => act.setMark(i2),
+    },
+  )}`
 }
 
 type CellKind = 'free' | 'own' | 'linked'
@@ -156,10 +153,7 @@ export interface CaptureContext {
   split?: Split
 }
 
-export function cellTargetOf(
-  column: CaptureColumn | undefined,
-  tablesSourceId: string,
-): CellTarget {
+export function cellTargetOf(column: CaptureColumn | undefined, tablesSourceId: string): CellTarget {
   const fill = (column?.fillField ?? '').trim()
   const field = fill !== '' ? fill : (column?.field ?? '').trim()
   if (field === '') return { kind: 'free', sourceId: '', code: '' }
@@ -193,9 +187,7 @@ export function targetIn(context: CaptureContext, index: number): CellTarget {
 }
 
 export function neighbourSlot(shown: readonly number[], from: number, direction: 1 | -1): number {
-  const next = direction === 1
-    ? shown.find((slot) => slot > from)
-    : shown.findLast((slot) => slot < from)
+  const next = direction === 1 ? shown.find((slot) => slot > from) : shown.findLast((slot) => slot < from)
   return next ?? -1
 }
 
@@ -217,10 +209,7 @@ export function linkedSourcesIn(context: CaptureContext): string[] {
   return out
 }
 
-export function displayColumnIn(
-  context: CaptureContext,
-  index: number,
-): { title: string; code: string } | undefined {
+export function displayColumnIn(context: CaptureContext, index: number): { title: string; code: string } | undefined {
   const target = targetIn(context, index)
   if (target.sourceId === '' || target.code === '') return undefined
   for (let i = 0; i < context.columns.length; i++) {
@@ -248,10 +237,7 @@ export function sameSourceCodes(context: CaptureContext, index: number): string[
 }
 
 export function windowColumnsIn(context: CaptureContext, index: number): Column[] {
-  return windowColumnsOr(
-    context.columns[index]?.windowColumns,
-    () => automaticColumnsIn(context, index),
-  )
+  return windowColumnsOr(context.columns[index]?.windowColumns, () => automaticColumnsIn(context, index))
 }
 
 function automaticColumnsIn(context: CaptureContext, index: number): Column[] {
@@ -269,7 +255,7 @@ export function fittingRecords(
     .map((p) => ({ toField: p.toField, expected: keyValue(p) }))
     .filter((b): b is { toField: string; expected: string } => b.expected !== undefined)
   if (known.length === 0) return [...candidates]
-  return candidates.filter((record) => known.every(
-    (b) => b.expected !== '' && b.expected === maskState.host.readField(record, b.toField),
-  ))
+  return candidates.filter((record) =>
+    known.every((b) => b.expected !== '' && b.expected === maskState.host.readField(record, b.toField)),
+  )
 }

@@ -12,7 +12,11 @@ export function sourcesWithoutRelation(
 ): string[] {
   const held = new Set(relation.map((r) => r.id))
   return collectDataSources(tree, sources)
-    .filter((s) => deliveryAdapter(s.delivery.kind).relationIds(s.delivery).some((id) => !held.has(id)))
+    .filter((s) =>
+      deliveryAdapter(s.delivery.kind)
+        .relationIds(s.delivery)
+        .some((id) => !held.has(id)),
+    )
     .map((s) => s.name)
 }
 

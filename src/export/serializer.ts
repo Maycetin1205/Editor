@@ -5,9 +5,7 @@ function escapeNonAsciiHtml(s: string): string {
 }
 
 export function escapeHtmlText(s: string): string {
-  return escapeNonAsciiHtml(
-    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
-  )
+  return escapeNonAsciiHtml(s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'))
 }
 
 export function escapeHtmlAttr(s: string): string {
@@ -53,7 +51,13 @@ export function cssRules(css: string): { selectors: string[]; text: string }[] {
     if (css[i] === '{') depth++
     if (css[i] !== '}' || --depth !== 0) continue
     const text = css.slice(start, i + 1).trim()
-    rules.push({ selectors: text.slice(0, text.indexOf('{')).split(',').map((s) => s.trim()), text })
+    rules.push({
+      selectors: text
+        .slice(0, text.indexOf('{'))
+        .split(',')
+        .map((s) => s.trim()),
+      text,
+    })
     start = i + 1
   }
   return rules

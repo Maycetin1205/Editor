@@ -93,7 +93,9 @@ export class FormField extends BlockElement implements ValueCarrier {
     height: () => this.windowHeight,
     onlyHit: () => this.onlyHit,
     value: () => this.value,
-    setValue: (value) => { this.value = value },
+    setValue: (value) => {
+      this.value = value
+    },
     changed: () => this.dispatchEvent(new Event('change')),
   })
 
@@ -182,7 +184,10 @@ export class FormField extends BlockElement implements ValueCarrier {
     if (this.lookup) return this._lookup.render('ctrl', this.label)
     if (this.preview) return html`<span class="shown">${this.value}</span>`
     if (kind === 'select') {
-      const entries = this.options.split(',').map((o) => o.trim()).filter((o) => o !== '')
+      const entries = this.options
+        .split(',')
+        .map((o) => o.trim())
+        .filter((o) => o !== '')
       const foreignValue = this.value !== '' && !entries.includes(this.value)
       return html`<span class="shown">${this.value}</span><select
         class="ctrl"
@@ -237,14 +242,16 @@ export class FormField extends BlockElement implements ValueCarrier {
           @input=${(e: Event) => this.tick((e.target as HTMLInputElement).checked)}
           @change=${this.onChange}
         />`)}
-        ${this.showLabel
-          ? html`<span
+        ${
+          this.showLabel
+            ? html`<span
               class="text"
               data-ff-editable
               @click=${this.onTextClick}
               @dblclick=${(e: MouseEvent) => this.inlineEdit(e, 'label')}
             >${this.label}</span>`
-          : nothing}
+            : nothing
+        }
         ${noticeSignTpl(this.notice)}
       </div>
     </div>`
@@ -275,9 +282,13 @@ export class FormField extends BlockElement implements ValueCarrier {
       >
         ${this.controlTpl(kind)}
       </div>
-      ${noticed
-        ? html`<span class="sign">${notice}</span>`
-        : sign ? html`<span class="sign">${icon(sign)}</span>` : nothing}
+      ${
+        noticed
+          ? html`<span class="sign">${notice}</span>`
+          : sign
+            ? html`<span class="sign">${icon(sign)}</span>`
+            : nothing
+      }
     </div>`
   }
 

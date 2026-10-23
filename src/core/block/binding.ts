@@ -12,7 +12,7 @@ export function bindingWithSource(sourceId: string, code: string): string {
 
 export const BINDING_JOINERS = [' · ', ' '] as const
 
-export type BindingJoiner = typeof BINDING_JOINERS[number]
+export type BindingJoiner = (typeof BINDING_JOINERS)[number]
 
 export function bindingFields(value: string): string[] {
   return value.split(bindingJoiner(value)).filter((f) => f.trim() !== '')

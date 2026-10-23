@@ -27,10 +27,15 @@ interface TreeRead {
 }
 
 function wellFormed(node: unknown, id: string): node is BlockNode {
-  return isUnread<BlockNode>(node) && node.id === id && typeof node.type === 'string'
-    && isUnread<BlockNode['values']>(node.values) && Array.isArray(node.childIds)
-    && node.childIds.every((childId): childId is string => typeof childId === 'string')
-    && (node.parentId === null || typeof node.parentId === 'string')
+  return (
+    isUnread<BlockNode>(node) &&
+    node.id === id &&
+    typeof node.type === 'string' &&
+    isUnread<BlockNode['values']>(node.values) &&
+    Array.isArray(node.childIds) &&
+    node.childIds.every((childId): childId is string => typeof childId === 'string') &&
+    (node.parentId === null || typeof node.parentId === 'string')
+  )
 }
 
 function valuesLeft(
@@ -60,10 +65,7 @@ function chainsLeft(raw: unknown, kept: BlockNode['chains']): Record<string, unk
   return Object.keys(left).length > 0 ? left : null
 }
 
-export function checkTreeState(raw: {
-  tree?: unknown
-  selectedId?: unknown
-}): TreeRead | null {
+export function checkTreeState(raw: { tree?: unknown; selectedId?: unknown }): TreeRead | null {
   if (!isUnread<MaskTree>(raw.tree)) return null
   const source: Readonly<Record<string, unknown>> = raw.tree
   const read: MaskTree = Object.create(null) as MaskTree
@@ -88,20 +90,31 @@ export function checkTreeState(raw: {
       }
       continue
     }
-    const kept = id === ROOT_ID
-      ? Object.fromEntries(Object.entries(node.values).filter(([key, value]) =>
-          ROOT_KEYS.includes(key) && typeof value === 'string')) as Record<string, PropertyValue>
-      : valuesClean(node.type, node.values)
-    const valuesNotRead = valuesLeft(node.values, kept, id === ROOT_ID ? null : def?.properties ?? null)
+    const kept =
+      id === ROOT_ID
+        ? (Object.fromEntries(
+            Object.entries(node.values).filter(([key, value]) => ROOT_KEYS.includes(key) && typeof value === 'string'),
+          ) as Record<string, PropertyValue>)
+        : valuesClean(node.type, node.values)
+    const valuesNotRead = valuesLeft(node.values, kept, id === ROOT_ID ? null : (def?.properties ?? null))
     if (valuesNotRead) values[id] = valuesNotRead
-    const events = chainsClean(node.chains, (capability(def, 'events')?.list ?? []).map((event) => event.key))
+    const events = chainsClean(
+      node.chains,
+      (capability(def, 'events')?.list ?? []).map((event) => event.key),
+    )
     const chainsNotRead = chainsLeft(node.chains, events)
     if (chainsNotRead) {
       chains[id] = chainsNotRead
       for (const event of Object.keys(chainsNotRead)) missed.push({ kind: 'chain', id, type: node.type, event })
     }
-    read[id] = { id, type: node.type, parentId: node.parentId, values: kept,
-      childIds: [...node.childIds], ...(events ? { chains: events } : {}) }
+    read[id] = {
+      id,
+      type: node.type,
+      parentId: node.parentId,
+      values: kept,
+      childIds: [...node.childIds],
+      ...(events ? { chains: events } : {}),
+    }
   }
   if (!read[ROOT_ID]) return null
   const tree = treeFromRoot(read)
@@ -116,10 +129,9 @@ export function checkTreeState(raw: {
     const id = node.id
     if (node.parentId !== null && Object.hasOwn(nodes, node.parentId)) continue
     const parent = node.parentId === null ? undefined : tree[node.parentId]
-    const refused = parent !== undefined && read[parent.id]?.childIds.includes(id) && !mayContain(parent.type, node.type)
-    missed.push(refused
-      ? { kind: 'place', id, type: node.type, parentType: parent.type }
-      : { kind: 'lost', id })
+    const refused =
+      parent !== undefined && read[parent.id]?.childIds.includes(id) && !mayContain(parent.type, node.type)
+    missed.push(refused ? { kind: 'place', id, type: node.type, parentType: parent.type } : { kind: 'lost', id })
   }
 
   const places: Record<string, number> = {}
@@ -132,9 +144,8 @@ export function checkTreeState(raw: {
 
   return {
     tree,
-    selectedId: typeof raw.selectedId === 'string' && raw.selectedId !== ROOT_ID && tree[raw.selectedId]
-      ? raw.selectedId
-      : null,
+    selectedId:
+      typeof raw.selectedId === 'string' && raw.selectedId !== ROOT_ID && tree[raw.selectedId] ? raw.selectedId : null,
     leftover: { nodes, places, values, chains },
     missed: missed.filter((m) => m.kind !== 'chain' || !Object.hasOwn(nodes, m.id)),
   }

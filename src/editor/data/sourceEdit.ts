@@ -1,12 +1,5 @@
 import { SOURCES_DIVIDER } from '../../core/block/blockType'
-import {
-  aliasOf,
-  choiceOf,
-  keyDisplay,
-  LENGTH_MAX,
-  type DataField,
-  type DataSource,
-} from '../../core/data/dataSources'
+import { aliasOf, choiceOf, keyDisplay, LENGTH_MAX, type DataField, type DataSource } from '../../core/data/dataSources'
 import { sourcePreset, type PresetId } from '../../core/data/presets/presets'
 import { EMPTY_CHOICE, descriptorFor, type SourceChoice } from '../../core/data/presets/sourcePreset'
 import { POSITIONS_RELATION, relationSyntaxAsText, type RelationTemplate } from '../../core/data/relations'
@@ -82,7 +75,10 @@ const without = (s: DataSource): SourceData => {
   return rest
 }
 
-export function withEntry(s: DataSource, change: { name?: string; table?: string; fields?: readonly DataField[] }): SourceData | null {
+export function withEntry(
+  s: DataSource,
+  change: { name?: string; table?: string; fields?: readonly DataField[] },
+): SourceData | null {
   const kind = change.table === undefined ? { preset: s.preset, tableId: s.tableId } : tableKind(change.table, s)
   if (!kind) return null
   const fields = change.fields ?? s.fields
@@ -94,19 +90,27 @@ export function withEntry(s: DataSource, change: { name?: string; table?: string
   return { ...without(s), name, ...kind, ...described(kind.preset, choice, fields, s.write), fields }
 }
 
-export function withSettings(s: DataSource, change: {
-  choice?: Partial<SourceChoice>
-  fieldPrefix?: string
-  fields?: readonly DataField[]
-}): SourceData {
+export function withSettings(
+  s: DataSource,
+  change: {
+    choice?: Partial<SourceChoice>
+    fieldPrefix?: string
+    fields?: readonly DataField[]
+  },
+): SourceData {
   return withKind(s, s.preset, s.tableId, change)
 }
 
-function withKind(s: DataSource, preset: PresetId, tableId: string, change: {
-  choice?: Partial<SourceChoice>
-  fieldPrefix?: string
-  fields?: readonly DataField[]
-}): SourceData {
+function withKind(
+  s: DataSource,
+  preset: PresetId,
+  tableId: string,
+  change: {
+    choice?: Partial<SourceChoice>
+    fieldPrefix?: string
+    fields?: readonly DataField[]
+  },
+): SourceData {
   const fields = change.fields ?? s.fields
   const prefix = change.fieldPrefix ?? s.fieldPrefix ?? ''
   const { fieldPrefix: _prefix, ...rest } = without(s)
@@ -123,7 +127,7 @@ function withKind(s: DataSource, preset: PresetId, tableId: string, change: {
 
 export function withPreset(s: DataSource, preset: PresetId): SourceData {
   const p = sourcePreset(preset)
-  const tableId = p.tableId !== '' ? p.tableId : (p.keyLabel !== '' ? p.key(keyDisplay(s.tableId)) || s.tableId : '')
+  const tableId = p.tableId !== '' ? p.tableId : p.keyLabel !== '' ? p.key(keyDisplay(s.tableId)) || s.tableId : ''
   const headerKey = preset === 'documentItem' ? POSITIONS_UNDER : choiceOf(s).headerKey
   return withKind(s, preset, tableId, { choice: { headerKey, openRecord: false, load: null } })
 }

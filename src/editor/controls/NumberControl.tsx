@@ -73,9 +73,5 @@ function NumberField({
 
 export function NumberControl({ label, ...rest }: NumberControlProps) {
   if (!label) return <NumberField {...rest} />
-  return (
-    <Row label={label}>
-      {(id) => <NumberField {...rest} id={id} />}
-    </Row>
-  )
+  return <Row label={label}>{(id) => <NumberField {...rest} id={id} />}</Row>
 }

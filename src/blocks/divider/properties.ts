@@ -6,14 +6,17 @@ export const dividerProperties = {
     label: 'Wort',
     attribute: 'word',
   }),
-  direction: choiceProperty([
-    { value: 'horizontal', name: 'Waagerecht' },
-    { value: 'vertical', name: 'Senkrecht' },
-  ], {
-    default: 'horizontal',
-    label: 'Richtung',
-    attribute: 'direction',
-  }),
+  direction: choiceProperty(
+    [
+      { value: 'horizontal', name: 'Waagerecht' },
+      { value: 'vertical', name: 'Senkrecht' },
+    ],
+    {
+      default: 'horizontal',
+      label: 'Richtung',
+      attribute: 'direction',
+    },
+  ),
   thickness: numberProperty({
     default: 1,
     min: 1,

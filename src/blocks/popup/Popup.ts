@@ -38,13 +38,13 @@ export class Popup extends BlockElement {
   protected override updated(changed: PropertyValues<this>): void {
     super.updated(changed)
     if (changed.get('open') === true && !this.open) {
-      for (const el of Array.from(this.querySelectorAll(`[${BLOCK_ID_ATTR}]`))) contractOf(el, 'holdsSent')?.writtenArrived()
+      for (const el of Array.from(this.querySelectorAll(`[${BLOCK_ID_ATTR}]`)))
+        contractOf(el, 'holdsSent')?.writtenArrived()
     }
     if (!changed.has('open') || !this.open) return
     void this.updateComplete.then(() => {
       if (!this.open || !this.isConnected) return
-      const target = firstFocusSpot(this)
-        ?? (this.shadowRoot ? firstFocusSpot(this.shadowRoot) : null)
+      const target = firstFocusSpot(this) ?? (this.shadowRoot ? firstFocusSpot(this.shadowRoot) : null)
       target?.focus()
     })
   }

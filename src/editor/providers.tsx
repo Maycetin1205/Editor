@@ -31,9 +31,7 @@ export function Providers({ children }: ProvidersProps) {
 
   return (
     <EditorProvider editor={editor}>
-      <ErrorBoundary>
-        {children}
-      </ErrorBoundary>
+      <ErrorBoundary>{children}</ErrorBoundary>
     </EditorProvider>
   )
 }

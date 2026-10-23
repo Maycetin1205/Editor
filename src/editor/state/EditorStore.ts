@@ -28,17 +28,18 @@ import { newBlockOnCell, cellMoveIn, slotGrownPushing, slotResize } from '../../
 import { selectionOnPage, selectionTarget } from '../../core/block/selection'
 import { deepClone } from '../../core/deepClone'
 import { EditorPersistence } from './editorStore/persistence'
+import { blockAdded, blockRemoved, eventsUpdated, inSubtree, propertyUpdated } from './editorStore/treeEdits'
 import {
-  blockAdded,
-  blockRemoved,
-  eventsUpdated,
-  inSubtree,
-  propertyUpdated,
-} from './editorStore/treeEdits'
-import { EditorView, type Deed, type OpenCalculation, type OpenLookup, type OpenStep, type SideTab } from './editorStore/viewState'
+  EditorView,
+  type Deed,
+  type OpenCalculation,
+  type OpenLookup,
+  type OpenStep,
+  type SideTab,
+} from './editorStore/viewState'
 import type { Column } from './maskStorage'
 
-export type {  OpenLookup,  } from './editorStore/viewState'
+export type { OpenLookup } from './editorStore/viewState'
 
 export class EditorStore extends Subject<EditorStore> {
   readonly dataSources: DataSourceStore
@@ -87,15 +88,21 @@ export class EditorStore extends Subject<EditorStore> {
     }
   }
 
-  get tree(): Readonly<MaskTree> { return this._tree }
+  get tree(): Readonly<MaskTree> {
+    return this._tree
+  }
 
-  get leftover(): Leftover { return this._leftover }
+  get leftover(): Leftover {
+    return this._leftover
+  }
 
   get rootId(): string {
     return activePagesRoot(this._tree, this._activePageId)
   }
 
-  get activePageId(): string { return this.rootId }
+  get activePageId(): string {
+    return this.rootId
+  }
 
   get pages(): PagesEntry[] {
     return pagesOfMask(this._tree)
@@ -113,15 +120,21 @@ export class EditorStore extends Subject<EditorStore> {
     this.notify(this)
   }
 
-  getNode(id: string): BlockNode | undefined { return this._tree[id] }
+  getNode(id: string): BlockNode | undefined {
+    return this._tree[id]
+  }
 
   childNodesOf(parentId: string): BlockNode[] {
     return childrenInFlow(this._tree, parentId)
   }
 
-  get blockCount(): number { return Object.keys(this._tree).length - 1 }
+  get blockCount(): number {
+    return Object.keys(this._tree).length - 1
+  }
 
-  get selectedId(): string | null { return this._selectedId }
+  get selectedId(): string | null {
+    return this._selectedId
+  }
   get selectedNode(): BlockNode | null {
     if (this._selectedId === null) return null
     const node = this._tree[this._selectedId]
@@ -152,9 +165,15 @@ export class EditorStore extends Subject<EditorStore> {
     return sourcesInReach(this._tree, id, this.dataSources.list)
   }
 
-  get version(): number { return this._version }
-  get canUndo(): boolean { return this._history.canUndo }
-  get canRedo(): boolean { return this._history.canRedo }
+  get version(): number {
+    return this._version
+  }
+  get canUndo(): boolean {
+    return this._history.canUndo
+  }
+  get canRedo(): boolean {
+    return this._history.canRedo
+  }
 
   override notify(data: EditorStore): void {
     this._version++
@@ -205,7 +224,10 @@ export class EditorStore extends Subject<EditorStore> {
   }
 
   openGesture(): GestureBracket {
-    return gestureBracket(() => this.beginTransaction(), () => this.endTransaction())
+    return gestureBracket(
+      () => this.beginTransaction(),
+      () => this.endTransaction(),
+    )
   }
 
   undo(): void {
@@ -237,12 +259,7 @@ export class EditorStore extends Subject<EditorStore> {
     this.notify(this)
   }
 
-  addBlock(
-    type: string,
-    parentId?: string,
-    index?: number,
-    rows: number | null = null,
-  ): BlockNode | null {
+  addBlock(type: string, parentId?: string, index?: number, rows: number | null = null): BlockNode | null {
     const next = blockAdded(this._tree, type, parentId ?? this.rootId, index, rows)
     if (!next) return null
     this.apply(next.tree, next.node.id)
@@ -252,7 +269,10 @@ export class EditorStore extends Subject<EditorStore> {
   addPage(type: string): BlockNode | null {
     const def = blockType(type)
     if (def?.page !== true) return null
-    const name = freePagesName(this.pages.map((p) => p.name), def.name)
+    const name = freePagesName(
+      this.pages.map((p) => p.name),
+      def.name,
+    )
     return this.transaction(() => {
       const node = this.addBlock(type, ROOT_ID)
       if (node) {
@@ -311,9 +331,10 @@ export class EditorStore extends Subject<EditorStore> {
   fitNodeHeight(id: string, rows: number, capacity: (areaId: string) => number | null): void {
     const node = this._tree[id]
     if (!node) return
-    const next = id === this._changedId
-      ? slotGrownPushing(this._tree, id, rows, capacity)
-      : slotResize(this._tree, id, { ...gridSlotRead(node.values), h: rows })
+    const next =
+      id === this._changedId
+        ? slotGrownPushing(this._tree, id, rows, capacity)
+        : slotResize(this._tree, id, { ...gridSlotRead(node.values), h: rows })
     if (!next) return
     this._tree = next
     this.notify(this)
@@ -360,7 +381,9 @@ export class EditorStore extends Subject<EditorStore> {
     this.notify(this)
   }
 
-  get maskLocked(): boolean { return this.maskOnDisk.locked }
+  get maskLocked(): boolean {
+    return this.maskOnDisk.locked
+  }
 
   unlockMask(): void {
     if (!this.maskOnDisk.locked) return
@@ -373,68 +396,126 @@ export class EditorStore extends Subject<EditorStore> {
     this._kept.plan()
   }
 
-  get viewVersion(): number { return this._viewVersion }
+  get viewVersion(): number {
+    return this._viewVersion
+  }
 
   private viewChanged(): void {
     this._viewVersion++
     this.view.notify(this)
   }
 
-  get stepWindow(): OpenStep | null { return this._shows.stepWindow }
+  get stepWindow(): OpenStep | null {
+    return this._shows.stepWindow
+  }
 
-  openStep(open: OpenStep | null): void { this._shows.openStep(open) }
+  openStep(open: OpenStep | null): void {
+    this._shows.openStep(open)
+  }
 
-  get calculationWindow(): OpenCalculation | null { return this._shows.calculationWindow }
+  get calculationWindow(): OpenCalculation | null {
+    return this._shows.calculationWindow
+  }
 
-  openCalculation(open: OpenCalculation | null): void { this._shows.openCalculation(open) }
+  openCalculation(open: OpenCalculation | null): void {
+    this._shows.openCalculation(open)
+  }
 
-  get splitWindow(): string | null { return this._shows.splitWindow }
+  get splitWindow(): string | null {
+    return this._shows.splitWindow
+  }
 
-  openSplit(blockId: string | null): void { this._shows.openSplit(blockId) }
+  openSplit(blockId: string | null): void {
+    this._shows.openSplit(blockId)
+  }
 
-  get lookupWindow(): OpenLookup | null { return this._shows.lookupWindow }
+  get lookupWindow(): OpenLookup | null {
+    return this._shows.lookupWindow
+  }
 
-  setLookupWindow(open: OpenLookup | null): void { this._shows.setLookupWindow(open) }
+  setLookupWindow(open: OpenLookup | null): void {
+    this._shows.setLookupWindow(open)
+  }
 
-  get followPickFor(): string | null { return this._shows.followPickFor }
+  get followPickFor(): string | null {
+    return this._shows.followPickFor
+  }
 
-  pickFollowFor(blockId: string | null): void { this._shows.pickFollowFor(blockId) }
+  pickFollowFor(blockId: string | null): void {
+    this._shows.pickFollowFor(blockId)
+  }
 
-  get dataWindow(): boolean { return this._shows.dataWindow }
+  get dataWindow(): boolean {
+    return this._shows.dataWindow
+  }
 
-  showData(open: boolean): void { this._shows.showData(open) }
+  showData(open: boolean): void {
+    this._shows.showData(open)
+  }
 
-  get outlines(): boolean { return this._shows.outlines }
+  get outlines(): boolean {
+    return this._shows.outlines
+  }
 
-  showOutlines(on: boolean): void { this._shows.showOutlines(on) }
+  showOutlines(on: boolean): void {
+    this._shows.showOutlines(on)
+  }
 
-  get sideTab(): SideTab { return this._shows.sideTab }
+  get sideTab(): SideTab {
+    return this._shows.sideTab
+  }
 
-  showSide(tab: SideTab): void { this._shows.showSide(tab) }
+  showSide(tab: SideTab): void {
+    this._shows.showSide(tab)
+  }
 
-  get saveWaits(): boolean { return this._shows.saveWaits }
+  get saveWaits(): boolean {
+    return this._shows.saveWaits
+  }
 
-  waitToSave(on: boolean): void { this._shows.waitToSave(on) }
+  waitToSave(on: boolean): void {
+    this._shows.waitToSave(on)
+  }
 
-  isShut(column: Column): boolean { return this._shows.isShut(column) }
+  isShut(column: Column): boolean {
+    return this._shows.isShut(column)
+  }
 
-  shutColumn(column: Column, shut: boolean): void { this._shows.shutColumn(column, shut) }
+  shutColumn(column: Column, shut: boolean): void {
+    this._shows.shutColumn(column, shut)
+  }
 
-  get notice(): NoticeText | null { return this._shows.notice }
+  get notice(): NoticeText | null {
+    return this._shows.notice
+  }
 
-  showNotice(notice: NoticeText | null): void { this._shows.showNotice(notice) }
+  showNotice(notice: NoticeText | null): void {
+    this._shows.showNotice(notice)
+  }
 
-  get done(): Deed | null { return this._shows.done }
+  get done(): Deed | null {
+    return this._shows.done
+  }
 
-  markDone(deed: Deed): void { this._shows.markDone(deed) }
+  markDone(deed: Deed): void {
+    this._shows.markDone(deed)
+  }
 
-  get maskOnDisk() { return this._kept.maskOnDisk }
+  get maskOnDisk() {
+    return this._kept.maskOnDisk
+  }
 
-  get libraryOnDisk() { return this._kept.libraryOnDisk }
+  get libraryOnDisk() {
+    return this._kept.libraryOnDisk
+  }
 
-  get maskFolder(): MaskFolder { return this._kept.folder }
+  get maskFolder(): MaskFolder {
+    return this._kept.folder
+  }
 
-  get keptAt(): number { return this._kept.keptAt }
+  get keptAt(): number {
+    return this._kept.keptAt
+  }
 
   saveNow(): void {
     this._kept.now()

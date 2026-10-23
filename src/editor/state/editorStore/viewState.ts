@@ -69,7 +69,9 @@ export class EditorView {
     this.changed = changed
   }
 
-  get dataWindow(): boolean { return this._dataWindow }
+  get dataWindow(): boolean {
+    return this._dataWindow
+  }
 
   showData(open: boolean): void {
     if (this._dataWindow === open) return
@@ -77,7 +79,9 @@ export class EditorView {
     this.changed()
   }
 
-  get sideTab(): SideTab { return this._sideTab }
+  get sideTab(): SideTab {
+    return this._sideTab
+  }
 
   showSide(tab: SideTab): void {
     if (tab !== 'masks') this._saveWaits = false
@@ -88,13 +92,17 @@ export class EditorView {
     this.changed()
   }
 
-  get saveWaits(): boolean { return this._saveWaits }
+  get saveWaits(): boolean {
+    return this._saveWaits
+  }
 
   waitToSave(on: boolean): void {
     this._saveWaits = on
   }
 
-  isShut(column: Column): boolean { return this._shut.has(column) }
+  isShut(column: Column): boolean {
+    return this._shut.has(column)
+  }
 
   shutColumn(column: Column, shut: boolean): void {
     if (this._shut.has(column) === shut) return
@@ -106,7 +114,9 @@ export class EditorView {
     this.changed()
   }
 
-  get notice(): NoticeText | null { return this._notice }
+  get notice(): NoticeText | null {
+    return this._notice
+  }
 
   showNotice(notice: NoticeText | null): void {
     if (this._notice === notice) return
@@ -114,7 +124,9 @@ export class EditorView {
     this.changed()
   }
 
-  get done(): Deed | null { return this._done }
+  get done(): Deed | null {
+    return this._done
+  }
 
   markDone(deed: Deed): void {
     if (this.doneTimer !== null) clearTimeout(this.doneTimer)
@@ -127,7 +139,9 @@ export class EditorView {
     }, DONE_MS)
   }
 
-  get outlines(): boolean { return this._outlines }
+  get outlines(): boolean {
+    return this._outlines
+  }
 
   showOutlines(on: boolean): void {
     if (this._outlines === on) return
@@ -136,7 +150,9 @@ export class EditorView {
     this.changed()
   }
 
-  get stepWindow(): OpenStep | null { return this._stepWindow }
+  get stepWindow(): OpenStep | null {
+    return this._stepWindow
+  }
 
   openStep(open: OpenStep | null): void {
     if (this._stepWindow === open) return
@@ -144,7 +160,9 @@ export class EditorView {
     this.changed()
   }
 
-  get calculationWindow(): OpenCalculation | null { return this._calculationWindow }
+  get calculationWindow(): OpenCalculation | null {
+    return this._calculationWindow
+  }
 
   openCalculation(open: OpenCalculation | null): void {
     if (this._calculationWindow === open) return
@@ -152,7 +170,9 @@ export class EditorView {
     this.changed()
   }
 
-  get splitWindow(): string | null { return this._splitWindow }
+  get splitWindow(): string | null {
+    return this._splitWindow
+  }
 
   openSplit(blockId: string | null): void {
     if (this._splitWindow === blockId) return
@@ -160,7 +180,9 @@ export class EditorView {
     this.changed()
   }
 
-  get lookupWindow(): OpenLookup | null { return this._lookupWindow }
+  get lookupWindow(): OpenLookup | null {
+    return this._lookupWindow
+  }
 
   setLookupWindow(open: OpenLookup | null): void {
     if (this._lookupWindow === open) return
@@ -168,7 +190,9 @@ export class EditorView {
     this.changed()
   }
 
-  get followPickFor(): string | null { return this._followPickFor }
+  get followPickFor(): string | null {
+    return this._followPickFor
+  }
 
   pickFollowFor(blockId: string | null): void {
     if (this._followPickFor === blockId) return

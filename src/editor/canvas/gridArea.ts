@@ -40,16 +40,9 @@ function contains(el: HTMLElement, x: number, y: number): boolean {
   return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom
 }
 
-export function areaUnderPointer(
-  tree: MaskTree,
-  pageId: string,
-  x: number,
-  y: number,
-): AreasHit | null {
+export function areaUnderPointer(tree: MaskTree, pageId: string, x: number, y: number): AreasHit | null {
   const pageArea = areaOfPage(tree, pageId)
-  let hit: AreasHit | null = pageArea && contains(pageArea, x, y)
-    ? { parentId: pageId, area: pageArea }
-    : null
+  let hit: AreasHit | null = pageArea && contains(pageArea, x, y) ? { parentId: pageId, area: pageArea } : null
   const search = (id: string): void => {
     for (const childId of tree[id]?.childIds ?? []) {
       const child = tree[childId]
@@ -65,18 +58,12 @@ export function areaUnderPointer(
   return hit
 }
 
-export function rowsCapacity(
-  tree: MaskTree,
-  parentId: string,
-  area: HTMLElement,
-): number | null {
+export function rowsCapacity(tree: MaskTree, parentId: string, area: HTMLElement): number | null {
   const node = tree[parentId]
   if (!node || parentId === ROOT_ID || isPagesBlock(node)) return null
   if (blockType(node.type)?.gridArea !== true) return null
   const style = getComputedStyle(area)
-  const inside = area.clientHeight
-    - (parseFloat(style.paddingTop) || 0)
-    - (parseFloat(style.paddingBottom) || 0)
+  const inside = area.clientHeight - (parseFloat(style.paddingTop) || 0) - (parseFloat(style.paddingBottom) || 0)
   const gap = parseFloat(style.rowGap) || GRID.gapPx
   return Math.max(1, Math.floor((inside + gap) / (GRID.rowPx + gap)))
 }

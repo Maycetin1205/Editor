@@ -40,8 +40,7 @@ const ROW_CAPTURED = 'onRowCaptured'
 
 export interface Capture extends CaptureValues, SourceValue {}
 
-export class Capture extends BlockElement
-  implements CaptureCarrier, ChangeCarrier, SentRowsElement, RunReportElement {
+export class Capture extends BlockElement implements CaptureCarrier, ChangeCarrier, SentRowsElement, RunReportElement {
   static readonly type = 'capture'
   static readonly tag = 'ff-capture'
 
@@ -217,39 +216,42 @@ export class Capture extends BlockElement
       count: 1 + captured.length,
       render: ({ view, cols, layout, rulerTicks }) => {
         const correctionSlot = this._ledger.correctionSlot
-        return capturedRowsTpl({
-          slots: view.slots,
-          cols,
-          layout,
-          captured,
-          keyAt: (index) => this._ledger.capturedKeyAt(index),
-          capturedState: (index) => this._ledger.capturedStatus(index),
-          chosen: (index) => this._working.chosen(this._ledger.capturedKeyAt(index)),
-          correctionSlot,
-          capture: captureRowFor(
-            {
-              ledger: this._ledger,
-              block: this,
-              preview: this.preview,
-              sourceId: this.source,
-            },
-            view,
+        return capturedRowsTpl(
+          {
+            slots: view.slots,
             cols,
             layout,
-            correctionSlot === null && (rulerTicks ?? 1) <= 0,
-          ),
-        }, {
-          takeCapturedRow: (index) => {
-            this._ledger.removeCaptured(index)
-            this.backToTyping()
+            captured,
+            keyAt: (index) => this._ledger.capturedKeyAt(index),
+            capturedState: (index) => this._ledger.capturedStatus(index),
+            chosen: (index) => this._working.chosen(this._ledger.capturedKeyAt(index)),
+            correctionSlot,
+            capture: captureRowFor(
+              {
+                ledger: this._ledger,
+                block: this,
+                preview: this.preview,
+                sourceId: this.source,
+              },
+              view,
+              cols,
+              layout,
+              correctionSlot === null && (rulerTicks ?? 1) <= 0,
+            ),
           },
-          bringBackCapturedRow: (index) => this._ledger.bringBackCaptured(index),
-          chooseCapturedRow: (index) => {
-            this._working.toggleCaptured(this._ledger.capturedKeyAt(index), this.listColumns(), captured[index] ?? [])
-            this.requestUpdate()
-            this.backToTyping()
+          {
+            takeCapturedRow: (index) => {
+              this._ledger.removeCaptured(index)
+              this.backToTyping()
+            },
+            bringBackCapturedRow: (index) => this._ledger.bringBackCaptured(index),
+            chooseCapturedRow: (index) => {
+              this._working.toggleCaptured(this._ledger.capturedKeyAt(index), this.listColumns(), captured[index] ?? [])
+              this.requestUpdate()
+              this.backToTyping()
+            },
           },
-        })
+        )
       },
     }
   }
@@ -306,11 +308,9 @@ defineBlock(Capture, {
   category: 'input',
   properties: captureProperties,
   capabilities: [
-    ...listCapabilities(
-      CAPTURE_COLUMNS_BINDING,
-      { kind: 'source', helpers: 'apart' },
-      [{ key: ROW_CAPTURED, name: 'Zeile erfasst' }],
-    ),
+    ...listCapabilities(CAPTURE_COLUMNS_BINDING, { kind: 'source', helpers: 'apart' }, [
+      { key: ROW_CAPTURED, name: 'Zeile erfasst' },
+    ]),
     { kind: 'capture' },
     { kind: 'change', key: 'editable' },
     { kind: 'holdsSent' },

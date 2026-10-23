@@ -2,14 +2,7 @@ import { type CSSResultGroup, type TemplateResult } from 'lit'
 import { property } from 'lit/decorators.js'
 import type { Calculation } from '../../core/data/calculation'
 import { BlockElement, defineBlock } from '../base/BlockElement'
-import {
-  LIST_GRID,
-  listCapabilities,
-  RecordList,
-  tableStyle,
-  type HandedRow,
-  type RowsFrom,
-} from '../list'
+import { LIST_GRID, listCapabilities, RecordList, tableStyle, type HandedRow, type RowsFrom } from '../list'
 import { COLUMNS_BINDING, type Column } from '../parts/column'
 import { tableProperties, type TableValues } from './properties'
 

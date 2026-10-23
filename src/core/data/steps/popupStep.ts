@@ -20,9 +20,7 @@ export function applyPopupStep(root: ParentNode, name: string, open: boolean): v
 
   const popupType = blockType('popup')
   const all = popupType === undefined ? [] : Array.from(root.querySelectorAll(popupType.tag))
-  const hit = all.filter(
-    (el) => (el.getAttribute('name') ?? popupType?.properties.name?.default) === name,
-  )
+  const hit = all.filter((el) => (el.getAttribute('name') ?? popupType?.properties.name?.default) === name)
   if (hit.length !== 1) return
   const target = hit[0]
   if (!open) {
@@ -35,9 +33,6 @@ export function applyPopupStep(root: ParentNode, name: string, open: boolean): v
   target.setAttribute('open', '')
 }
 
-export function popupIdMoved(
-  popupId: string,
-  newId: (oldId: string) => string | undefined,
-): string | undefined {
+export function popupIdMoved(popupId: string, newId: (oldId: string) => string | undefined): string | undefined {
   return popupId === '' ? undefined : newId(popupId)
 }

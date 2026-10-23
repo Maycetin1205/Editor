@@ -12,10 +12,7 @@ function conditionRead(raw: unknown): { onlyIf?: StepCondition } {
   return { onlyIf: { sourceId, rows: raw.rows } }
 }
 
-export function chainsClean(
-  raw: unknown,
-  allowedEvents: readonly string[],
-): ActionChains | undefined {
+export function chainsClean(raw: unknown, allowedEvents: readonly string[]): ActionChains | undefined {
   if (!isUnread<ActionChains>(raw)) return undefined
   const out: ActionChains = {}
   for (const key of allowedEvents) {
@@ -26,10 +23,13 @@ export function chainsClean(
     let broken = false
     for (const entry of chain) {
       const id = isUnread<Step>(entry) && typeof entry.id === 'string' ? entry.id : ''
-      const step = isUnread<Step>(entry) && typeof entry.kind === 'string' && isStepKind(entry.kind)
-        && typeof entry.resultName === 'string'
-        ? stepAdapter(entry.kind).read(entry, { id, resultName: entry.resultName })
-        : null
+      const step =
+        isUnread<Step>(entry) &&
+        typeof entry.kind === 'string' &&
+        isStepKind(entry.kind) &&
+        typeof entry.resultName === 'string'
+          ? stepAdapter(entry.kind).read(entry, { id, resultName: entry.resultName })
+          : null
       if (!step || id === '' || seenIds.has(id)) {
         broken = true
         break
@@ -92,10 +92,13 @@ export function chainsRead(raw: string | null): Record<string, RuntimeStep[]> {
     const steps: RuntimeStep[] = []
     let broken = false
     for (const entry of chain) {
-      const step = isUnread<RuntimeStep>(entry) && typeof entry.kind === 'string' && isStepKind(entry.kind)
-        && typeof entry.resultName === 'string'
-        ? stepAdapter(entry.kind).readExported(entry, entry.resultName)
-        : null
+      const step =
+        isUnread<RuntimeStep>(entry) &&
+        typeof entry.kind === 'string' &&
+        isStepKind(entry.kind) &&
+        typeof entry.resultName === 'string'
+          ? stepAdapter(entry.kind).readExported(entry, entry.resultName)
+          : null
       if (!step) {
         broken = true
         break
@@ -154,10 +157,7 @@ export function sectionsOf(steps: readonly (Step | RuntimeStep)[]): Section[] {
   return out
 }
 
-function stepsBefore(
-  chain: readonly Step[],
-  stepId: string | undefined,
-): readonly Step[] {
+function stepsBefore(chain: readonly Step[], stepId: string | undefined): readonly Step[] {
   const own = stepId === undefined ? -1 : chain.findIndex((s) => s.id === stepId)
   return own < 0 ? chain : chain.slice(0, own)
 }
@@ -187,11 +187,11 @@ export function resultStepsBefore(
     const bindings = adapter.bindings(s)
     const addsRows = bindings.some((b) => COLUMN_PARAM_SOURCES[b.source] === 'captured')
     if (rel.verb !== 'GET_RELATION' && !addsRows) continue
-    const sourceId = bindings
-      .find((b) => b.source === 'dataField' && (b.sourceId ?? '') !== '')
-      ?.sourceId
+    const sourceId = bindings.find((b) => b.source === 'dataField' && (b.sourceId ?? '') !== '')?.sourceId
     out.push({
-      id: s.id, nr: i + 1, name: rel.name,
+      id: s.id,
+      nr: i + 1,
+      name: rel.name,
       ...(sourceId === undefined ? {} : { sourceId }),
     })
   }

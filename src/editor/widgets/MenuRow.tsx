@@ -2,22 +2,14 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { cn } from '@/editor/widgets/cn'
 import { LINE_CHOSEN, LINE_HOVER } from './lineLook'
 
-interface MenuRowProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
+interface MenuRowProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   icon?: ReactNode
 
   active?: boolean
   children: ReactNode
 }
 
-export function MenuRow({
-  icon,
-  active = false,
-  className,
-  children,
-  type = 'button',
-  ...rest
-}: MenuRowProps) {
+export function MenuRow({ icon, active = false, className, children, type = 'button', ...rest }: MenuRowProps) {
   return (
     <button
       type={type}

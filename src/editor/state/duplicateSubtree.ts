@@ -1,11 +1,7 @@
 import { ROOT_ID, type BlockNode, type MaskTree } from '../../core/block/tree'
 import { declaredValue } from '../../core/block/registry'
 import { stepAdapter, type Step, type ActionChains } from '../../core/data/steps/steps'
-import {
-  SELECTION_FOLLOW_PROP,
-  followsSelectionProperty,
-  type SelectionFollow,
-} from '../../core/data/selectionFollow'
+import { SELECTION_FOLLOW_PROP, followsSelectionProperty, type SelectionFollow } from '../../core/data/selectionFollow'
 import { deepClone } from '../../core/deepClone'
 import { freePagesName, isPagesBlock, pagesOfMask } from '../../core/block/pages'
 import { freePositionForCopy } from '../../core/block/gridArea'
@@ -14,17 +10,13 @@ type NewIdFor = (oldId: string) => string | undefined
 
 function writeBlockReferencesTo(node: BlockNode, newIdFor: NewIdFor): BlockNode {
   const follows = rewrittenFollows(declaredValue(node, followsSelectionProperty), newIdFor)
-  const events = node.chains === undefined
-    ? undefined
-    : rewrittenEvents(node.chains, newIdFor)
+  const events = node.chains === undefined ? undefined : rewrittenEvents(node.chains, newIdFor)
 
   const newEvents = events !== undefined && events !== node.chains
   if (follows === null && !newEvents) return node
   return {
     ...node,
-    ...(follows !== null
-      ? { values: { ...node.values, [SELECTION_FOLLOW_PROP]: follows } }
-      : {}),
+    ...(follows !== null ? { values: { ...node.values, [SELECTION_FOLLOW_PROP]: follows } } : {}),
     ...(newEvents ? { chains: events } : {}),
   }
 }
@@ -54,10 +46,7 @@ function rewrittenStep(step: Step, newIdFor: NewIdFor): Step {
   return stepAdapter(step.kind).withBlockIds(step, newIdFor)
 }
 
-function rewrittenEvents(
-  events: ActionChains,
-  newIdFor: NewIdFor,
-): ActionChains {
+function rewrittenEvents(events: ActionChains, newIdFor: NewIdFor): ActionChains {
   let changed = false
   const next: ActionChains = {}
   for (const [key, chain] of Object.entries(events)) {
@@ -68,10 +57,7 @@ function rewrittenEvents(
   return changed ? next : events
 }
 
-function cloneSubtree(
-  tree: MaskTree,
-  id: string,
-): { nodes: MaskTree; copyId: string } {
+function cloneSubtree(tree: MaskTree, id: string): { nodes: MaskTree; copyId: string } {
   const nodes: MaskTree = {}
   const newIds = new Map<string, string>()
   const copy = (sourceId: string, parentId: string | null): string => {
@@ -101,7 +87,10 @@ function withFreePagesNames(tree: MaskTree, id: string, copy: BlockNode): BlockN
   const pages = pagesOfMask(tree)
   const base = pages.find((s) => s.id === id)?.name
   if (base === undefined) return copy
-  const name = freePagesName(pages.map((s) => s.name), base)
+  const name = freePagesName(
+    pages.map((s) => s.name),
+    base,
+  )
   return { ...copy, values: { ...copy.values, name } }
 }
 

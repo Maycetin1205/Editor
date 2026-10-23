@@ -130,8 +130,12 @@ export function withEntryValue<E, K extends keyof E>(entry: E, key: K, value: E[
 }
 
 export function entryValues<E>(b: ListBinding<E>, entry: E): Record<string, unknown> {
-  return Object.fromEntries(Object.keys(b.entryProperties ?? {})
-    .map((key) => [key, entry !== null && typeof entry === 'object' ? Reflect.get(entry, key) : undefined]))
+  return Object.fromEntries(
+    Object.keys(b.entryProperties ?? {}).map((key) => [
+      key,
+      entry !== null && typeof entry === 'object' ? Reflect.get(entry, key) : undefined,
+    ]),
+  )
 }
 
 export function entriesWithValue<E>(
@@ -155,14 +159,12 @@ export function flagOn<E>(flag: EntrySwitch<E>, entry: E): boolean {
 
 export function flagFor<E>(b: ListBinding<E>, entry: E): readonly EntrySwitch<E>[] {
   const fromForeignSource = splitBinding(b.fieldOf(entry)).sourceId !== ''
-  return (b.entryFlag ?? [])
-    .filter((s) => !(s.onlyOwnSource === true && fromForeignSource) && s.shown?.(entry) !== false)
+  return (b.entryFlag ?? []).filter(
+    (s) => !(s.onlyOwnSource === true && fromForeignSource) && s.shown?.(entry) !== false,
+  )
 }
 
-export function fieldChoicesRead<E>(
-  b: ListBinding<E>,
-  entry: E,
-): { choice: EntryFieldChoice<E>; value: string }[] {
+export function fieldChoicesRead<E>(b: ListBinding<E>, entry: E): { choice: EntryFieldChoice<E>; value: string }[] {
   return (b.entryFieldChoice ?? []).map((choice) => ({ choice, value: choice.valueOf(entry) }))
 }
 
@@ -201,7 +203,9 @@ function switchExported<E>(b: ListBinding<E>, flag: EntrySwitch<E>, entry: E): b
 }
 
 export function listForExport<E>(entries: readonly E[], b: ListBinding<E>): E[] {
-  return entries.map((entry) => (b.entryFlag ?? [])
-    .filter((flag) => !switchExported(b, flag, entry))
-    .reduce((out, flag) => flag.withValue(out, undefined), b.withoutEditorMarks(entry)))
+  return entries.map((entry) =>
+    (b.entryFlag ?? [])
+      .filter((flag) => !switchExported(b, flag, entry))
+      .reduce((out, flag) => flag.withValue(out, undefined), b.withoutEditorMarks(entry)),
+  )
 }

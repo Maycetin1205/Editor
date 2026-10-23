@@ -57,9 +57,7 @@ export function readMaskFields(raw: string): MaskImport | null {
     }
     const code = hit[2] ?? ''
     prefixes.add(hit[1] ?? '')
-    const description = typeof entry.Beschreibung === 'string'
-      ? entry.Beschreibung.trim()
-      : ''
+    const description = typeof entry.Beschreibung === 'string' ? entry.Beschreibung.trim() : ''
     const length = lengthFrom(entry.Len)
     if (entry.Status === 'A') onlyDisplay++
     fields.push({
@@ -70,6 +68,6 @@ export function readMaskFields(raw: string): MaskImport | null {
   }
   if (fields.length === 0) return null
 
-  const prefix = prefixes.size === 1 ? [...prefixes][0] ?? '' : ''
+  const prefix = prefixes.size === 1 ? ([...prefixes][0] ?? '') : ''
   return { prefix, fields, onlyDisplay, skipped }
 }

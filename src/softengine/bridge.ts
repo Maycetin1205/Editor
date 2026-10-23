@@ -75,10 +75,12 @@ function deepestActive(): Element | null {
 
 export function typable(el: unknown): boolean {
   if (!(el instanceof HTMLElement)) return false
-  return el.isContentEditable
-    || el instanceof HTMLInputElement
-    || el instanceof HTMLTextAreaElement
-    || el instanceof HTMLSelectElement
+  return (
+    el.isContentEditable ||
+    el instanceof HTMLInputElement ||
+    el instanceof HTMLTextAreaElement ||
+    el instanceof HTMLSelectElement
+  )
 }
 
 function focusOnUs(): boolean {
@@ -111,21 +113,29 @@ function afterRunStop(): void {
 
 export function onSeData(cb: (delivery: boolean) => void): () => void {
   bridge.listeners.add(cb)
-  return () => { bridge.listeners.delete(cb) }
+  return () => {
+    bridge.listeners.delete(cb)
+  }
 }
 
 export function onSeAnswer(cb: (raw: unknown) => void): () => void {
   bridge.answerListeners.add(cb)
-  return () => { bridge.answerListeners.delete(cb) }
+  return () => {
+    bridge.answerListeners.delete(cb)
+  }
 }
 
 export function onSeArrival(cb: () => void): () => void {
   bridge.arrivalListeners.add(cb)
-  return () => { bridge.arrivalListeners.delete(cb) }
+  return () => {
+    bridge.arrivalListeners.delete(cb)
+  }
 }
 
 function arrived(): void {
-  bridge.arrivalListeners.forEach((cb) => { hostCall(cb) })
+  bridge.arrivalListeners.forEach((cb) => {
+    hostCall(cb)
+  })
 }
 
 export function writeGoesOut(): void {
@@ -135,7 +145,11 @@ export function writeGoesOut(): void {
 function spread(delivery: boolean): void {
   let complete = true
   bridge.listeners.forEach((cb) => {
-    try { cb(delivery) } catch { complete = false }
+    try {
+      cb(delivery)
+    } catch {
+      complete = false
+    }
   })
   if (complete && bridge.openSignature !== null) bridge.lastSignature = bridge.openSignature
   bridge.openSignature = null
@@ -160,8 +174,7 @@ export function reportTrigger(): void {
 
 export function freshDataRequest(): void {
   const g = seWindow()
-  const requested = typeof g.ReloadInputJSON === 'function'
-    && hostCall(() => g.ReloadInputJSON())
+  const requested = typeof g.ReloadInputJSON === 'function' && hostCall(() => g.ReloadInputJSON())
   if (!requested) refreshDataBase()
   ring(false)
 }
@@ -215,13 +228,22 @@ function registerSe(tries = 0): void {
   const g = seWindow()
   if (typeof g.basisHTML_REGISTER === 'function') {
     try {
-      g.basisHTML_REGISTER((data: unknown) => { seConsume(data) }, document.title, '1.0')
+      g.basisHTML_REGISTER(
+        (data: unknown) => {
+          seConsume(data)
+        },
+        document.title,
+        '1.0',
+      )
       return
     } catch {
       if (tries >= 400) return
     }
   }
-  if (tries < 400) setTimeout(() => { registerSe(tries + 1) }, 25)
+  if (tries < 400)
+    setTimeout(() => {
+      registerSe(tries + 1)
+    }, 25)
 }
 
 function buildFocusBridge(): void {
@@ -236,17 +258,28 @@ export function startSe(): void {
 
   g.enableCustomFind = false
 
-  g.Erstellen = () => { refreshDataBase(); arrived(); ring(dataAreNew()) }
+  g.Erstellen = () => {
+    refreshDataBase()
+    arrived()
+    ring(dataAreNew())
+  }
   g.initData = g.Erstellen
-  g.ReloadData = () => { arrived(); ring(dataAreNew()) }
+  g.ReloadData = () => {
+    arrived()
+    ring(dataAreNew())
+  }
   buildFocusBridge()
   registerSe()
 
-  window.addEventListener('message', (evt) => {
-    if (typeof seWindow().basisHTML_REGISTER === 'function') return
-    const payload = messagesContent(evt.data)
-    if (payload !== undefined) seConsume(payload)
-  }, true)
+  window.addEventListener(
+    'message',
+    (evt) => {
+      if (typeof seWindow().basisHTML_REGISTER === 'function') return
+      const payload = messagesContent(evt.data)
+      if (payload !== undefined) seConsume(payload)
+    },
+    true,
+  )
   let tries = 0
   const poll = setInterval(() => {
     tries += 1

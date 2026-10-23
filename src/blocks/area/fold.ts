@@ -13,10 +13,12 @@ export interface FoldHost extends HTMLElement {
 
 const PITCH = GRID.rowPx + GRID.gapPx
 
-const isFoldHost = (el: Element): el is FoldHost =>
-  typeof (el as Partial<FoldHost>).foldCut === 'function'
+const isFoldHost = (el: Element): el is FoldHost => typeof (el as Partial<FoldHost>).foldCut === 'function'
 
-interface Rows { y: number; h: number }
+interface Rows {
+  y: number
+  h: number
+}
 
 const placed = new WeakMap<HTMLElement, Rows>()
 
@@ -40,10 +42,10 @@ let moving = false
 
 function slide(el: HTMLElement, rows: number): void {
   if (!moving || rows === 0 || typeof el.animate !== 'function') return
-  el.animate(
-    [{ transform: `translateY(${rows * PITCH}px)` }, { transform: 'none' }],
-    { duration: 180, easing: 'cubic-bezier(.2, 0, 0, 1)' },
-  )
+  el.animate([{ transform: `translateY(${rows * PITCH}px)` }, { transform: 'none' }], {
+    duration: 180,
+    easing: 'cubic-bezier(.2, 0, 0, 1)',
+  })
 }
 
 // Lays out the grid of container anew and says how many of its rows closed.
@@ -111,9 +113,17 @@ function declaredTracks(sheet: HTMLElement): readonly string[] | null {
   let found: string[] | null = null
   for (const styles of Array.from(sheet.ownerDocument.styleSheets)) {
     let rules: CSSRuleList
-    try { rules = styles.cssRules } catch { continue }
+    try {
+      rules = styles.cssRules
+    } catch {
+      continue
+    }
     for (const rule of Array.from(rules)) {
-      if (rule instanceof CSSStyleRule && rule.selectorText === `.${MASK_ROOT_CLASS}` && rule.style.gridTemplateRows !== '') {
+      if (
+        rule instanceof CSSStyleRule &&
+        rule.selectorText === `.${MASK_ROOT_CLASS}` &&
+        rule.style.gridTemplateRows !== ''
+      ) {
         found = tracksRead(rule.style.gridTemplateRows)
       }
     }

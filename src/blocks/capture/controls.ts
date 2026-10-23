@@ -100,7 +100,10 @@ function placeholders(
   }
 }
 
-function splitFor(placement: CaptureRowPlacement, view: ColumnView): { slot: number; content: TemplateResult } | undefined {
+function splitFor(
+  placement: CaptureRowPlacement,
+  view: ColumnView,
+): { slot: number; content: TemplateResult } | undefined {
   const ledger = placement.ledger
   if (placement.preview || !ledger.split.open) return undefined
   const anchor = ledger.splitAnchor()
@@ -126,29 +129,32 @@ export function captureRowFor(
 ): TemplateResult {
   const ledger = placement.ledger
   const cells = ledger.rowView()
-  return captureRowTpl({
-    columns: view.columns,
-    slots: view.slots,
-    layout,
-    sourceId: placement.sourceId,
-    cols,
-    preview: placement.preview,
-    value: (i) => cells[i]?.value ?? '',
-    automatic: (i) => cells[i]?.automatic === true,
-    held: (i) => cells[i]?.held === true,
-    typingColumn: ledger.typingColumn,
-    suggestions: ledger.suggestions,
-    mark: ledger.mark,
-    typed: (i) => ledger.typedAt(i),
-    windowColumns: (i) => ledger.windowColumnsAt(i),
-    placeholder: placement.preview ? () => '' : placeholders(placement.block, view, ledger.waitingSources()),
-    listToTop,
-    split: splitFor(placement, view),
-  }, {
-    typing: (i, text) => ledger.type(i, text),
-    key: (i, e) => key(placement, i, e),
-    leave: (i) => ledger.leave(i),
-    chooseSuggestion: (listIndex) => ledger.adoptSuggestion(ledger.typingColumn, listIndex),
-    setMark: (listIndex) => ledger.setMark(listIndex),
-  })
+  return captureRowTpl(
+    {
+      columns: view.columns,
+      slots: view.slots,
+      layout,
+      sourceId: placement.sourceId,
+      cols,
+      preview: placement.preview,
+      value: (i) => cells[i]?.value ?? '',
+      automatic: (i) => cells[i]?.automatic === true,
+      held: (i) => cells[i]?.held === true,
+      typingColumn: ledger.typingColumn,
+      suggestions: ledger.suggestions,
+      mark: ledger.mark,
+      typed: (i) => ledger.typedAt(i),
+      windowColumns: (i) => ledger.windowColumnsAt(i),
+      placeholder: placement.preview ? () => '' : placeholders(placement.block, view, ledger.waitingSources()),
+      listToTop,
+      split: splitFor(placement, view),
+    },
+    {
+      typing: (i, text) => ledger.type(i, text),
+      key: (i, e) => key(placement, i, e),
+      leave: (i) => ledger.leave(i),
+      chooseSuggestion: (listIndex) => ledger.adoptSuggestion(ledger.typingColumn, listIndex),
+      setMark: (listIndex) => ledger.setMark(listIndex),
+    },
+  )
 }

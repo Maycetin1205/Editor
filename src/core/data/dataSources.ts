@@ -7,13 +7,7 @@ import { EMPTY_CHOICE, type SourceChoice } from './presets/sourcePreset'
 import { POS_LEN, keyDisplay } from './sourceInput'
 import { isWriteKind, recordFieldOf, writeAdapter, type Write } from './writes/writes'
 
-export {
-  fieldPrefixFromInput,
-  
-  keyDisplay,
-  
-  
-} from './sourceInput'
+export { fieldPrefixFromInput, keyDisplay } from './sourceInput'
 
 export const LENGTH_MAX = 200
 
@@ -129,19 +123,21 @@ export function choiceOf(source: DataSource): SourceChoice {
     headerKey: order.kind === 'sefileloop' ? order.headerKey : '',
     area: order.kind === 'mask' ? order.area : '',
     openRecord: delivery.kind === 'push' && delivery.path === 'Var',
-    load: delivery.kind === 'relationRows'
-      ? {
-          relationId: delivery.relationId,
-          documentKindField: delivery.documentKindField,
-          documentNumberField: delivery.documentNumberField,
-          yearField: delivery.yearField,
-          archiveField: delivery.archiveField,
-          endFields: delivery.endFields,
-        }
-      : null,
-    getValue: delivery.kind === 'relationValue'
-      ? { relationId: delivery.relationId, parameter: delivery.parameter }
-      : EMPTY_CHOICE.getValue,
+    load:
+      delivery.kind === 'relationRows'
+        ? {
+            relationId: delivery.relationId,
+            documentKindField: delivery.documentKindField,
+            documentNumberField: delivery.documentNumberField,
+            yearField: delivery.yearField,
+            archiveField: delivery.archiveField,
+            endFields: delivery.endFields,
+          }
+        : null,
+    getValue:
+      delivery.kind === 'relationValue'
+        ? { relationId: delivery.relationId, parameter: delivery.parameter }
+        : EMPTY_CHOICE.getValue,
     recordField: recordFieldOf(write),
     restriction: delivery.kind === 'message' && delivery.restriction ? delivery.restriction : EMPTY_CHOICE.restriction,
   }
@@ -170,10 +166,10 @@ function fieldsRead(raw: unknown): DataField[] {
     if (f.code.includes(SOURCES_DIVIDER)) continue
     if (typeof f.name !== 'string' || f.name === '') continue
 
-    const length = typeof f.length === 'number' && Number.isFinite(f.length)
-      && f.length >= 1
-      ? Math.min(LENGTH_MAX, Math.round(f.length))
-      : undefined
+    const length =
+      typeof f.length === 'number' && Number.isFinite(f.length) && f.length >= 1
+        ? Math.min(LENGTH_MAX, Math.round(f.length))
+        : undefined
     fields.push({
       code: f.code,
       name: f.name,
@@ -185,10 +181,7 @@ function fieldsRead(raw: unknown): DataField[] {
 
 // setAside hears of every entry that is not taken as it stands: without
 // readAs it was left out, with readAs it was taken in that guessed form.
-export function checkDataSources(
-  raw: unknown,
-  setAside?: (raw: unknown, readAs?: DataSource) => void,
-): DataSource[] {
+export function checkDataSources(raw: unknown, setAside?: (raw: unknown, readAs?: DataSource) => void): DataSource[] {
   if (!Array.isArray(raw)) return []
   const acc: DataSource[] = []
   const seen = new Set<string>()
@@ -224,8 +217,8 @@ function sourceRead(e: unknown): { read: DataSource; guessed: boolean } | null {
     guessed = true
   }
   if (!order || !delivery) return null
-  if ((orderAdapter(order.kind).needsTable || deliveryAdapter(delivery.kind).needsTable)
-    && tableId.trim() === '') return null
+  if ((orderAdapter(order.kind).needsTable || deliveryAdapter(delivery.kind).needsTable) && tableId.trim() === '')
+    return null
   const write = writeRead(e.write)
   if (write === null && e.write !== undefined) guessed = true
 
@@ -238,9 +231,7 @@ function sourceRead(e: unknown): { read: DataSource; guessed: boolean } | null {
       order,
       delivery,
       write: write ?? { kind: 'none' },
-      ...(typeof e.fieldPrefix === 'string' && e.fieldPrefix !== ''
-        ? { fieldPrefix: e.fieldPrefix }
-        : {}),
+      ...(typeof e.fieldPrefix === 'string' && e.fieldPrefix !== '' ? { fieldPrefix: e.fieldPrefix } : {}),
       fields: fieldsRead(e.fields),
     },
     guessed,

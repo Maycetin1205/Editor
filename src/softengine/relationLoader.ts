@@ -1,10 +1,5 @@
 import type { RuntimeLoadRelation } from '../core/data/deliveries/relationRows'
-import {
-  positionParams,
-  type PositionFetch,
-  type RelationAnswer,
-  type RuntimeRelation,
-} from '../core/data/relations'
+import { positionParams, type PositionFetch, type RelationAnswer, type RuntimeRelation } from '../core/data/relations'
 import { reportTrigger, seWindow } from './bridge'
 import { fieldRead } from './data'
 import { fetchedRowsFor, setFetchedRows } from './fetchedRows'
@@ -34,11 +29,9 @@ async function question(
   pos: string,
   len: string,
 ): Promise<RelationAnswer> {
-  return relationRun(
-    template,
-    positionParams(positions.slots, { ...key, positionNumber: position, pos, len }),
-    { recordAnswer: true },
-  )
+  return relationRun(template, positionParams(positions.slots, { ...key, positionNumber: position, pos, len }), {
+    recordAnswer: true,
+  })
 }
 
 export async function loadRowsPerRelation(

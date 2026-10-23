@@ -111,9 +111,9 @@ export class Text extends BlockElement {
   private wordsOf(): string | TemplateResult {
     if (!this.preview || (!this.woven && !this.patternTyped)) return this.text
     if (this.patternTyped) return patternForEditing(this.editedPattern(), (field) => this.fieldName(field))
-    return html`${patternPieces(this.pattern).map((p) => (p.field === undefined
-      ? p.text
-      : html`<span class="slot">${this.fieldName(p.field)}</span>`))}`
+    return html`${patternPieces(this.pattern).map((p) =>
+      p.field === undefined ? p.text : html`<span class="slot">${this.fieldName(p.field)}</span>`,
+    )}`
   }
 
   private fieldNames(): Map<string, string> {
@@ -190,7 +190,10 @@ export class Text extends BlockElement {
   // ones no longer named leave the text; without a field it is plain words.
   private adoptPattern(typed: string): void {
     const fields = bindingFields(this.textField)
-    const pattern = patternFromEditing(typed, fields.map((field) => ({ field, name: this.fieldName(field) })))
+    const pattern = patternFromEditing(
+      typed,
+      fields.map((field) => ({ field, name: this.fieldName(field) })),
+    )
     if (!hasSlots(pattern)) {
       sendPropChange(this, 'textField', '')
       sendPropChange(this, 'text', typed)
@@ -199,7 +202,14 @@ export class Text extends BlockElement {
     }
     const named = slotFields(pattern)
     if (fields.some((field) => !named.includes(field))) {
-      sendPropChange(this, 'textField', joinedBinding(fields.filter((field) => named.includes(field)), bindingJoiner(this.textField)))
+      sendPropChange(
+        this,
+        'textField',
+        joinedBinding(
+          fields.filter((field) => named.includes(field)),
+          bindingJoiner(this.textField),
+        ),
+      )
     }
     sendPropChange(this, 'pattern', pattern)
   }
@@ -216,11 +226,15 @@ export class Text extends BlockElement {
       this.labelTyped = false
       return
     }
-    startRename(label, (text, original) => {
-      if (text !== original) sendPropChange(this, 'label', text)
-    }, () => {
-      this.labelTyped = false
-    })
+    startRename(
+      label,
+      (text, original) => {
+        if (text !== original) sendPropChange(this, 'label', text)
+      },
+      () => {
+        this.labelTyped = false
+      },
+    )
   }
 
   private renamePattern(): void {
@@ -229,11 +243,15 @@ export class Text extends BlockElement {
       this.patternTyped = false
       return
     }
-    startRename(words, (text, original) => {
-      if (text !== original) this.adoptPattern(text)
-    }, () => {
-      this.patternTyped = false
-    })
+    startRename(
+      words,
+      (text, original) => {
+        if (text !== original) this.adoptPattern(text)
+      },
+      () => {
+        this.patternTyped = false
+      },
+    )
   }
 
   private readonly recount = (): void => {
@@ -296,7 +314,9 @@ defineBlock(Text, {
   capabilities: [
     { kind: 'source', after: 'text' },
     { kind: 'followsSelection' },
-    bindable<typeof textProperties>([{ prop: 'text', name: 'Text', several: true, nameProp: 'label', weaveProp: 'pattern' }]),
+    bindable<typeof textProperties>([
+      { prop: 'text', name: 'Text', several: true, nameProp: 'label', weaveProp: 'pattern' },
+    ]),
     { kind: 'compute', prop: CALCULATIONS_PROP },
     { kind: 'events', list: [{ key: CLICK, name: 'Klick' }] },
   ],

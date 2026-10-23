@@ -1,11 +1,4 @@
-import {
-  rulerTicks,
-  WITHOUT_MEASUREMENT,
-  scrollSplit,
-  pagesSplit,
-  ROWS_HEIGHT,
-  type RowMetrics,
-} from './pageSize'
+import { rulerTicks, WITHOUT_MEASUREMENT, scrollSplit, pagesSplit, ROWS_HEIGHT, type RowMetrics } from './pageSize'
 import { sortIndices, totalText } from './sorting'
 import { columnsTemplate, type Column, type ColumnsGrid, type Figure } from '../parts/column'
 import { rowFits } from '../parts/cellSearch'
@@ -60,10 +53,7 @@ interface TableRenderModel {
   totals: readonly { title: string; text: string }[]
 }
 
-function totalsOf(
-  question: ViewQuestion,
-  visible: readonly number[],
-): { title: string; text: string }[] {
+function totalsOf(question: ViewQuestion, visible: readonly number[]): { title: string; text: string }[] {
   const out: { title: string; text: string }[] = []
   question.columns.forEach((column, i) => {
     if (column.total !== true) return
@@ -104,9 +94,7 @@ export function tableRenderModel(question: ViewQuestion): TableRenderModel {
   const allVisible = visibleIndices(question)
 
   const taken = question.takenRows
-  const measuredFit = question.measured === null
-    ? null
-    : Math.max(1, question.measured.fit - taken)
+  const measuredFit = question.measured === null ? null : Math.max(1, question.measured.fit - taken)
   const perPage = measuredFit ?? Math.max(1, WITHOUT_MEASUREMENT - taken)
 
   const free = question.measured === null ? null : Math.max(0, question.measured.fit - taken)
@@ -116,9 +104,7 @@ export function tableRenderModel(question: ViewQuestion): TableRenderModel {
     perPage,
     wantedPage: question.wantedPage,
   }
-  const { pages, page, rows } = question.paging
-    ? pagesSplit(splitQuestion)
-    : scrollSplit(splitQuestion)
+  const { pages, page, rows } = question.paging ? pagesSplit(splitQuestion) : scrollSplit(splitQuestion)
   return {
     cols,
     tick,
@@ -135,10 +121,7 @@ export function tableRenderModel(question: ViewQuestion): TableRenderModel {
   }
 }
 
-function fittingIndices(
-  rows: readonly (readonly string[])[],
-  searchText: string,
-): number[] {
+function fittingIndices(rows: readonly (readonly string[])[], searchText: string): number[] {
   const out: number[] = []
   rows.forEach((z, i) => {
     if (rowFits(z, searchText)) out.push(i)

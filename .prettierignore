@@ -1,0 +1,6 @@
+node_modules/
+dist/
+src/export/generated/
+package-lock.json
+*.md
+*.css

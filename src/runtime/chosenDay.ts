@@ -50,5 +50,7 @@ export function setChosenDay(value: unknown): void {
 export function onChosenDay(cb: () => void): () => void {
   const listeners = maskState.chosenDay.listeners
   listeners.add(cb)
-  return () => { listeners.delete(cb) }
+  return () => {
+    listeners.delete(cb)
+  }
 }

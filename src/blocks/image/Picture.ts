@@ -83,14 +83,20 @@ export class Picture extends BlockElement {
       cover: this.fit === 'cover',
       rounded: this.rounded,
     }
-    return html`<div class=${classMap(frame)} data-ff-spot="picture" @click=${this.reportSpot}>${url !== '' && url !== this.failed
-      ? html`<img
+    return html`<div class=${classMap(frame)} data-ff-spot="picture" @click=${this.reportSpot}>${
+      url !== '' && url !== this.failed
+        ? html`<img
           src=${url}
           alt=${this.description}
           title=${this.description === '' ? nothing : this.description}
-          @error=${() => { this.failed = url }}
+          @error=${() => {
+            this.failed = url
+          }}
         >`
-      : this.preview ? this.editorEmptyTpl(url) : this.maskEmptyTpl(url)}</div>`
+        : this.preview
+          ? this.editorEmptyTpl(url)
+          : this.maskEmptyTpl(url)
+    }</div>`
   }
 
   // In the mask: in small, calm words why no picture shows.
@@ -156,9 +162,11 @@ export class Picture extends BlockElement {
     }
     this.fieldValue = ''
     this.standing = 'waiting'
-    void maskState.host.runRelation(ask.relation, [key, ...ask.more], { origin: this.origin, selibGet: true }).then((answer) => {
-      if (generation === this.generation) this.take(answer.failed === true ? '' : answer.value, 'noPicture')
-    })
+    void maskState.host
+      .runRelation(ask.relation, [key, ...ask.more], { origin: this.origin, selibGet: true })
+      .then((answer) => {
+        if (generation === this.generation) this.take(answer.failed === true ? '' : answer.value, 'noPicture')
+      })
   }
 
   override connectedCallback(): void {

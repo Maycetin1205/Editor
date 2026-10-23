@@ -34,7 +34,8 @@ interface ListProps {
   onChoose: (value: string) => void
 }
 
-const ROW = 'flex w-full items-baseline gap-[8px] rounded-[var(--radius-small)] px-[9px] py-[6px] text-left text-ui font-semibold transition-colors'
+const ROW =
+  'flex w-full items-baseline gap-[8px] rounded-[var(--radius-small)] px-[9px] py-[6px] text-left text-ui font-semibold transition-colors'
 
 function fits(text: string, search: string): boolean {
   return text.toLowerCase().includes(search)
@@ -124,69 +125,63 @@ export function List({
         </div>
       )}
 
-      <div ref={rowsRef} onKeyDown={onRowsKey} className={cn('flex flex-col', fill && 'min-h-0 flex-1 overflow-y-auto')}>
-      {emptyText !== undefined && wanted === '' && (
-        <button
-          type="button"
-          onClick={() => onChoose('')}
-          className={cn(ROW, 'text-muted hover:text-ink', LINE_HOVER, value === '' && LINE_CHOSEN)}
-        >
-          <span className="w-[12px] shrink-0 text-accent">{value === '' && <Check size={12} />}</span>
-          <span className={cn(text, 'flex-1')}>{emptyText}</span>
-        </button>
-      )}
+      <div
+        ref={rowsRef}
+        onKeyDown={onRowsKey}
+        className={cn('flex flex-col', fill && 'min-h-0 flex-1 overflow-y-auto')}
+      >
+        {emptyText !== undefined && wanted === '' && (
+          <button
+            type="button"
+            onClick={() => onChoose('')}
+            className={cn(ROW, 'text-muted hover:text-ink', LINE_HOVER, value === '' && LINE_CHOSEN)}
+          >
+            <span className="w-[12px] shrink-0 text-accent">{value === '' && <Check size={12} />}</span>
+            <span className={cn(text, 'flex-1')}>{emptyText}</span>
+          </button>
+        )}
 
-      {filtered.map((g) => (
-        <div key={g.key} className="flex flex-col">
-          {g.name !== undefined && g.name !== '' && (
-            <p className="flex items-baseline gap-[8px] px-[9px] pb-[2px] pt-[8px] text-dense font-semibold text-muted">
-              <span className={text}>{g.name}</span>
-              {g.badge !== undefined && g.badge !== '' && (
-                <Badge className="font-normal">{g.badge}</Badge>
-              )}
-            </p>
-          )}
-          {g.entries.map((e) => {
-            const chosen = values ? values.includes(e.value) : e.value === value
-            return (
-              <button
-                key={`${g.key}::${e.value}`}
-                type="button"
-                disabled={e.disabled}
-                onClick={() => onChoose(e.value)}
-                className={cn(
-                  ROW,
-                  e.disabled
-                    ? 'cursor-not-allowed text-muted opacity-[.45]'
-                    : cn('text-ink', LINE_HOVER),
-                  chosen && LINE_CHOSEN,
-                )}
-              >
-                <span className="w-[12px] shrink-0 text-accent">
-                  {chosen && <Check size={12} />}
-                </span>
-                {wrap
-                  ? (
-                      <span className="min-w-0 flex-1">
-                        {e.name}
-                        {e.badge !== undefined && e.badge !== '' && (
-                          <span className="block break-all font-mono text-dense text-muted">{e.badge}</span>
-                        )}
-                      </span>
-                    )
-                  : (
-                      <>
-                        <span className="min-w-0 flex-1 truncate">{e.name}</span>
-                        {e.badge !== undefined && e.badge !== '' && (
-                          <Badge className="max-w-[50%]">{e.badge}</Badge>
-                        )}
-                      </>
-                    )}
-              </button>
-            )
-          })}
-        </div>
-      ))}
+        {filtered.map((g) => (
+          <div key={g.key} className="flex flex-col">
+            {g.name !== undefined && g.name !== '' && (
+              <p className="flex items-baseline gap-[8px] px-[9px] pb-[2px] pt-[8px] text-dense font-semibold text-muted">
+                <span className={text}>{g.name}</span>
+                {g.badge !== undefined && g.badge !== '' && <Badge className="font-normal">{g.badge}</Badge>}
+              </p>
+            )}
+            {g.entries.map((e) => {
+              const chosen = values ? values.includes(e.value) : e.value === value
+              return (
+                <button
+                  key={`${g.key}::${e.value}`}
+                  type="button"
+                  disabled={e.disabled}
+                  onClick={() => onChoose(e.value)}
+                  className={cn(
+                    ROW,
+                    e.disabled ? 'cursor-not-allowed text-muted opacity-[.45]' : cn('text-ink', LINE_HOVER),
+                    chosen && LINE_CHOSEN,
+                  )}
+                >
+                  <span className="w-[12px] shrink-0 text-accent">{chosen && <Check size={12} />}</span>
+                  {wrap ? (
+                    <span className="min-w-0 flex-1">
+                      {e.name}
+                      {e.badge !== undefined && e.badge !== '' && (
+                        <span className="block break-all font-mono text-dense text-muted">{e.badge}</span>
+                      )}
+                    </span>
+                  ) : (
+                    <>
+                      <span className="min-w-0 flex-1 truncate">{e.name}</span>
+                      {e.badge !== undefined && e.badge !== '' && <Badge className="max-w-[50%]">{e.badge}</Badge>}
+                    </>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        ))}
       </div>
     </div>
   )

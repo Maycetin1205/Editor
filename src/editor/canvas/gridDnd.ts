@@ -8,11 +8,7 @@ import { columnsOf, slotTaken } from '../../core/block/gridArea'
 import { rowsCapacity, rowInBox } from './gridArea'
 import { cssZoomOf } from '../../blocks/base/cssZoom'
 
-export function cellFromPointer(
-  gridEl: HTMLElement,
-  clientX: number,
-  clientY: number,
-): { x: number; y: number } {
+export function cellFromPointer(gridEl: HTMLElement, clientX: number, clientY: number): { x: number; y: number } {
   const style = getComputedStyle(gridEl)
   const rect = gridEl.getBoundingClientRect()
   const padL = parseFloat(style.paddingLeft) || 0

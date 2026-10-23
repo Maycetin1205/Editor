@@ -45,9 +45,11 @@ export function SymbolChoice({
         onClick={() => setOpen(!open)}
         className={OPENER}
       >
-        {chosen?.icon === undefined
-          ? <span className="text-muted">{label}</span>
-          : <Outline path={chosen.icon} size={16} />}
+        {chosen?.icon === undefined ? (
+          <span className="text-muted">{label}</span>
+        ) : (
+          <Outline path={chosen.icon} size={16} />
+        )}
         <ChevronDown size={13} aria-hidden className="text-muted" />
       </button>
       {open && (

@@ -72,8 +72,7 @@ interface RawField {
 
 const codeOf = (f: RawField) => `${f.pos}_${f.len}`
 
-const RECORD_ROW =
-  /IDB(ID\d{4})_(\d+)_(\d+),(\d*),(\d+),(\d+),([^,\r\n]+),([A-Z]{1,4}\d?)/g
+const RECORD_ROW = /IDB(ID\d{4})_(\d+)_(\d+),(\d*),(\d+),(\d+),([^,\r\n]+),([A-Z]{1,4}\d?)/g
 
 function harvestRecord(text: string): Map<string, Map<string, RawField>> {
   const tables = new Map<string, Map<string, RawField>>()
@@ -94,8 +93,7 @@ function harvestRecord(text: string): Map<string, Map<string, RawField>> {
 
 const POS_RECORD = /3,POS,(ID\d{4}), {5,9}(\d{1,4}) {50,64}\1/g
 
-const FIELD_IN_POS_RECORD =
-  / {100,}(\S[^\r\n]{0,49}?) {2,}(?:(\d{1,4}) +)?(\d{1,4})([A-Z]{1,4}\d?)(?=[ \r\n])/
+const FIELD_IN_POS_RECORD = / {100,}(\S[^\r\n]{0,49}?) {2,}(?:(\d{1,4}) +)?(\d{1,4})([A-Z]{1,4}\d?)(?=[ \r\n])/
 
 const FLAGS_AFTER = /[NJ]{2}/
 
@@ -190,9 +188,7 @@ function parseDtk(text: string): DtkTable[] {
   const out: DtkTable[] = []
   for (const id of [...ids].sort()) {
     const expectedCount = expected.get(id) ?? 0
-    const fields = addTogether(a.get(id), b.get(id), expectedCount).sort(
-      (x, y) => x.pos - y.pos || x.len - y.len,
-    )
+    const fields = addTogether(a.get(id), b.get(id), expectedCount).sort((x, y) => x.pos - y.pos || x.len - y.len)
 
     if (fields.length === 0 && expectedCount === 0) continue
     out.push({

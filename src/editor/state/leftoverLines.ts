@@ -28,9 +28,10 @@ export function leftoverLines(tree: MaskTree, sources: readonly DataSource[], le
   for (const [id, keys] of Object.entries(valuesKept(tree, left))) {
     lines.push({
       name: nameOfType(tree[id]?.type ?? ''),
-      detail: keys.length === 1
-        ? 'eine Einstellung ließ sich nicht ganz lesen'
-        : `${keys.length} Einstellungen ließen sich nicht ganz lesen`,
+      detail:
+        keys.length === 1
+          ? 'eine Einstellung ließ sich nicht ganz lesen'
+          : `${keys.length} Einstellungen ließen sich nicht ganz lesen`,
     })
   }
 

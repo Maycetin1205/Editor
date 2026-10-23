@@ -12,9 +12,7 @@ interface UnitPair {
 
 export type TermOrigin = Extract<ValueOrigin, { kind: 'row' | 'helper' | 'fixed' | 'chosenRow' | 'sum' }>
 
-export type Term =
-  | (TermOrigin & { divides: boolean })
-  | UnitsTerm
+export type Term = (TermOrigin & { divides: boolean }) | UnitsTerm
 
 export interface UnitsTerm {
   kind: 'units'
@@ -124,11 +122,14 @@ export function rowValues(
     switch (origin.kind) {
       case 'row': {
         const slot = slotOf(origin.value)
-        return slot === -1 ? '' : values.get(slot) ?? cell(slot)
+        return slot === -1 ? '' : (values.get(slot) ?? cell(slot))
       }
-      case 'helper': return helper(origin.sourceId, origin.value)
-      case 'fixed': return origin.value
-      default: return ''
+      case 'helper':
+        return helper(origin.sourceId, origin.value)
+      case 'fixed':
+        return origin.value
+      default:
+        return ''
     }
   }
   for (let round = 0; round < calculations.length; round++) {
@@ -156,10 +157,7 @@ export function leadDecimals(calculations: readonly Calculation[], column: strin
   return column === '' ? undefined : calculations.find((b) => b.lead === column)?.decimals
 }
 
-export function columnSlots(
-  calculations: readonly Calculation[],
-  slotOf: (column: string) => number,
-): Set<number> {
+export function columnSlots(calculations: readonly Calculation[], slotOf: (column: string) => number): Set<number> {
   const out = new Set<number>()
   for (const b of calculations) {
     for (const column of columnsOf(b)) {
@@ -171,9 +169,9 @@ export function columnSlots(
 }
 
 function originsOf(b: Calculation): TermOrigin[] {
-  return b.terms.flatMap((t) => (t.kind === 'units'
-    ? [t.first, t.second].filter((o): o is TermOrigin => o !== undefined)
-    : [t]))
+  return b.terms.flatMap((t) =>
+    t.kind === 'units' ? [t.first, t.second].filter((o): o is TermOrigin => o !== undefined) : [t],
+  )
 }
 
 export function fieldBindingsOf(calculations: readonly Calculation[]): string[] {
@@ -193,9 +191,7 @@ export function toldFrom(b: Calculation, column: string): Calculation | null {
   const at = b.terms.findIndex((t) => t.kind === 'row' && t.value === column)
   if (at === -1) return null
   const own = b.terms[at]
-  const rest = b.terms
-    .filter((_, i) => i !== at)
-    .map((t) => (own.divides ? t : { ...t, divides: !t.divides }))
+  const rest = b.terms.filter((_, i) => i !== at).map((t) => (own.divides ? t : { ...t, divides: !t.divides }))
   const terms: Term[] = [{ kind: 'row', value: b.lead, divides: own.divides }, ...rest]
   return { ...b, lead: column, terms: [...terms.filter((t) => !t.divides), ...terms.filter((t) => t.divides)] }
 }
@@ -255,9 +251,7 @@ function termFrom(raw: unknown): Term | undefined {
 }
 
 function decimalsFrom(raw: unknown): number {
-  return typeof raw === 'number' && Number.isInteger(raw) && raw >= 0 && raw <= DECIMALS_MAX
-    ? raw
-    : DECIMALS_DEFAULT
+  return typeof raw === 'number' && Number.isInteger(raw) && raw >= 0 && raw <= DECIMALS_MAX ? raw : DECIMALS_DEFAULT
 }
 
 function calculationsFrom(raw: unknown): Calculation[] {
@@ -271,13 +265,15 @@ function calculationsFrom(raw: unknown): Calculation[] {
         })
       : []
     const key = text(entry.key)
-    return [{
-      key: key === '' ? `c${i + 1}` : key,
-      lead: text(entry.lead),
-      terms,
-      decimals: decimalsFrom(entry.decimals),
-      ...(entry.adds === true ? { adds: true } : {}),
-    }]
+    return [
+      {
+        key: key === '' ? `c${i + 1}` : key,
+        lead: text(entry.lead),
+        terms,
+        decimals: decimalsFrom(entry.decimals),
+        ...(entry.adds === true ? { adds: true } : {}),
+      },
+    ]
   })
 }
 
@@ -290,9 +286,13 @@ function calculationsForExport(calculations: readonly Calculation[]): unknown[] 
     }))
 }
 
-export const calculationsProperty: Property<Calculation[]> = listProperty<Calculation[]>(calculationsFrom, {
-  default: [],
-  label: 'Berechnungen',
-  place: 'none',
-  attribute: 'calculations',
-}, calculationsForExport)
+export const calculationsProperty: Property<Calculation[]> = listProperty<Calculation[]>(
+  calculationsFrom,
+  {
+    default: [],
+    label: 'Berechnungen',
+    place: 'none',
+    attribute: 'calculations',
+  },
+  calculationsForExport,
+)

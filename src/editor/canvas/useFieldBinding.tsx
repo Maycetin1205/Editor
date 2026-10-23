@@ -77,12 +77,11 @@ export function useFieldBinding({
   const closeListPicker = useCallback(() => setListPicker(null), [])
   if (!selected && listPicker !== null) setListPicker(null)
 
-  const sourceFromProp = listBinding?.sourceProp === undefined
-    ? undefined
-    : library.find((s) => s.id === String(block.values[listBinding.sourceProp ?? ''] ?? ''))
-  const listPickerHasFields = listBinding?.sourceProp !== undefined
-    ? sourceFromProp !== undefined
-    : hasOffer
+  const sourceFromProp =
+    listBinding?.sourceProp === undefined
+      ? undefined
+      : library.find((s) => s.id === String(block.values[listBinding.sourceProp ?? ''] ?? ''))
+  const listPickerHasFields = listBinding?.sourceProp !== undefined ? sourceFromProp !== undefined : hasOffer
 
   useEffect(() => {
     const el = containerRef.current
@@ -116,16 +115,16 @@ export function useFieldBinding({
   }, [containerRef, listBinding])
 
   const entriesNow = listBinding ? listBinding.entries(block.values[listBinding.prop]) : []
-  const pickAt = listPicker === null
-    ? -1
-    : listPicker.key === undefined
-      ? listPicker.index
-      : entriesNow.findIndex((e) => listBinding?.keyOf?.(e) === listPicker.key)
+  const pickAt =
+    listPicker === null
+      ? -1
+      : listPicker.key === undefined
+        ? listPicker.index
+        : entriesNow.findIndex((e) => listBinding?.keyOf?.(e) === listPicker.key)
   if (listPicker !== null && entriesNow[pickAt] === undefined) setListPicker(null)
   const pick = listPicker === null || pickAt === -1 ? null : { ...listPicker, index: pickAt }
 
-  const ownWindow = searchWindow?.entriesProp !== undefined
-    && searchWindow.entriesProp === listBinding?.prop
+  const ownWindow = searchWindow?.entriesProp !== undefined && searchWindow.entriesProp === listBinding?.prop
 
   const groups = pickerGroups(sources)
 
@@ -174,5 +173,10 @@ export function useFieldBinding({
   return { onClick, onDoubleClick, pickers, openEntry, openSpot: columnOpen ? pick : null }
 }
 
-const samePick = (a: ListPick, b: ListPick): boolean => a.index === b.index && a.inner === b.inner
-  && a.key === b.key && a.below === b.below && a.top === b.top && a.left === b.left
+const samePick = (a: ListPick, b: ListPick): boolean =>
+  a.index === b.index &&
+  a.inner === b.inner &&
+  a.key === b.key &&
+  a.below === b.below &&
+  a.top === b.top &&
+  a.left === b.left

@@ -9,7 +9,7 @@ interface KeptTarget {
 }
 
 async function keptTargets(): Promise<KeptTarget[]> {
-  return await keptHandle<KeptTarget[]>(KEPT_KEY) ?? []
+  return (await keptHandle<KeptTarget[]>(KEPT_KEY)) ?? []
 }
 
 async function keptFolder(name: string): Promise<FileSystemDirectoryHandle | null> {
@@ -17,7 +17,7 @@ async function keptFolder(name: string): Promise<FileSystemDirectoryHandle | nul
 }
 
 export async function knowsExportTarget(name: string): Promise<boolean> {
-  return await keptFolder(name) !== null
+  return (await keptFolder(name)) !== null
 }
 
 export async function pickExportTarget(now: string): Promise<string | null> {
@@ -35,16 +35,14 @@ export async function pickExportTarget(now: string): Promise<string | null> {
   return name
 }
 
-type ExportFolder =
-  | { ok: true; folder: FileSystemDirectoryHandle }
-  | { ok: false; why: string }
+type ExportFolder = { ok: true; folder: FileSystemDirectoryHandle } | { ok: false; why: string }
 
 export async function exportFolder(name: string): Promise<ExportFolder> {
   const folder = await keptFolder(name)
   if (folder === null) {
     return { ok: false, why: 'ist auf diesem Rechner noch nicht gewählt; das geht in den Eigenschaften der Maske.' }
   }
-  if (await accessOf(folder) === 'ask' && !(await askAccess(folder))) {
+  if ((await accessOf(folder)) === 'ask' && !(await askAccess(folder))) {
     return { ok: false, why: 'darf der Editor nicht beschreiben; der Browser hat es nicht erlaubt.' }
   }
   return { ok: true, folder }

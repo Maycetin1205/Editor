@@ -13,11 +13,15 @@ export function Inspector() {
   const ed = useEditor()
   const view = useView()
   const [folded, setFolded] = useState<ReadonlySet<string>>(() => new Set())
-  const toggle = useCallback((name: string) => setFolded((before) => {
-    const next = new Set(before)
-    if (!next.delete(name)) next.add(name)
-    return next
-  }), [])
+  const toggle = useCallback(
+    (name: string) =>
+      setFolded((before) => {
+        const next = new Set(before)
+        if (!next.delete(name)) next.add(name)
+        return next
+      }),
+    [],
+  )
   const folds = useMemo<Folds>(() => ({ folded: (name) => folded.has(name), toggle }), [folded, toggle])
 
   if (view.isShut('right')) {
@@ -39,17 +43,17 @@ export function Inspector() {
         <FoldButton side="right" onFold={() => view.shutColumn('right', true)} />
       </div>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        {block === null
-          ? <MaskProperties />
-          : (
-              <BlockProperties
-                key={block.id}
-                block={block}
-                def={blockType(block.type)}
-                folds={folds}
-                onRemove={() => ed.removeBlock(block.id)}
-              />
-            )}
+        {block === null ? (
+          <MaskProperties />
+        ) : (
+          <BlockProperties
+            key={block.id}
+            block={block}
+            def={blockType(block.type)}
+            folds={folds}
+            onRemove={() => ed.removeBlock(block.id)}
+          />
+        )}
         <div className="flex-1 border-t border-line" />
       </div>
     </aside>

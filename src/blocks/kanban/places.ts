@@ -22,7 +22,12 @@ const same = (a: string, b: string): boolean => a.trim().toLowerCase() === b.tri
 
 // Where a row stands on the board; null when its value has no column or
 // place and such values are left out.
-export function spotOf(columns: readonly KanbanColumn[], field: string, row: unknown, hideOthers: boolean): Spot | null {
+export function spotOf(
+  columns: readonly KanbanColumn[],
+  field: string,
+  row: unknown,
+  hideOthers: boolean,
+): Spot | null {
   const value = field === '' ? '' : maskState.host.readField(row, field)
   if (value.trim() !== '') {
     for (const [c, column] of columns.entries()) {
@@ -31,5 +36,11 @@ export function spotOf(columns: readonly KanbanColumn[], field: string, row: unk
     }
     if (hideOthers) return null
   }
-  return { column: Math.max(0, columns.findIndex((c) => c.catchAll)), place: 0 }
+  return {
+    column: Math.max(
+      0,
+      columns.findIndex((c) => c.catchAll),
+    ),
+    place: 0,
+  }
 }

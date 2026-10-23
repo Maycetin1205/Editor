@@ -54,13 +54,19 @@ function withSlot(pattern: string, field: string): string {
 }
 
 function withoutSlot(pattern: string, field: string): string {
-  return tidy(patternPieces(pattern)
-    .map((p) => (p.field === undefined ? p.text : p.field === field ? '' : slot(p.field, p.form)))
-    .join(''))
+  return tidy(
+    patternPieces(pattern)
+      .map((p) => (p.field === undefined ? p.text : p.field === field ? '' : slot(p.field, p.form)))
+      .join(''),
+  )
 }
 
 function plainOf(pattern: string): string {
-  return tidy(patternPieces(pattern).map((p) => p.text).join(''))
+  return tidy(
+    patternPieces(pattern)
+      .map((p) => p.text)
+      .join(''),
+  )
 }
 
 interface Woven {
@@ -83,7 +89,13 @@ export function weave(pattern: string, words: string, binding: string, field: st
   if (slotFields(pattern).includes(field)) {
     const next = withoutSlot(pattern, field)
     if (!hasSlots(next)) return { pattern: '', binding: '', text: next }
-    return { pattern: next, binding: joinedBinding(fields.filter((f) => f !== field), joiner) }
+    return {
+      pattern: next,
+      binding: joinedBinding(
+        fields.filter((f) => f !== field),
+        joiner,
+      ),
+    }
   }
   return {
     pattern: withSlot(pattern, field),

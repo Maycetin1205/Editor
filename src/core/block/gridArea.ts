@@ -15,8 +15,7 @@ import { isPagesBlock, childrenInFlow, pageOf } from './pages'
 import { subtreeIds } from './treeOps'
 
 export function isGridArea(node: BlockNode): boolean {
-  return node.id === ROOT_ID || isPagesBlock(node)
-    || blockType(node.type)?.gridArea === true
+  return node.id === ROOT_ID || isPagesBlock(node) || blockType(node.type)?.gridArea === true
 }
 
 const isInnerArea = (node: BlockNode | undefined): node is BlockNode =>
@@ -47,14 +46,15 @@ function keptInside(tree: MaskTree, areaId: string, columns: number): MaskTree {
   return next
 }
 
-const growsOnPage = (node: BlockNode): boolean =>
-  node.parentId === ROOT_ID && gridMetricsOf(blockType(node.type)).grows
+const growsOnPage = (node: BlockNode): boolean => node.parentId === ROOT_ID && gridMetricsOf(blockType(node.type)).grows
 
 export function pageRowsTemplate(tree: MaskTree): string | null {
-  return growRowsTemplate(childrenInFlow(tree, ROOT_ID).map((n) => ({
-    slot: gridSlotRead(n.values),
-    grows: growsOnPage(n),
-  })))
+  return growRowsTemplate(
+    childrenInFlow(tree, ROOT_ID).map((n) => ({
+      slot: gridSlotRead(n.values),
+      grows: growsOnPage(n),
+    })),
+  )
 }
 
 export function slotTaken(tree: MaskTree, parentId: string, slot: GridSlot, exceptId: string | null): boolean {
@@ -66,10 +66,7 @@ export function slotTaken(tree: MaskTree, parentId: string, slot: GridSlot, exce
 }
 
 export function freeRowOn(tree: MaskTree, parentId: string): number {
-  return nextFreeRow(
-    childrenInFlow(tree, parentId)
-      .map((n) => gridSlotRead(n.values)),
-  )
+  return nextFreeRow(childrenInFlow(tree, parentId).map((n) => gridSlotRead(n.values)))
 }
 
 export function usedColumnsOn(tree: MaskTree, parentId: string): number {
@@ -109,7 +106,13 @@ export function freePositionForCopy(
     if (!slot) return null
     return {
       ...copy,
-      values: { ...copy.values, gridX: slot.x, gridY: slot.y, gridW: Math.min(pos.w, columnsOf(tree, parentId)), gridH: pos.h },
+      values: {
+        ...copy.values,
+        gridX: slot.x,
+        gridY: slot.y,
+        gridW: Math.min(pos.w, columnsOf(tree, parentId)),
+        gridH: pos.h,
+      },
     }
   }
   const y = freeRowOn(tree, parentId)
@@ -120,13 +123,7 @@ export function freePositionForCopy(
   }
 }
 
-export function cellMoveIn(
-  tree: MaskTree,
-  id: string,
-  parentId: string,
-  x: number,
-  y: number,
-): MaskTree | null {
+export function cellMoveIn(tree: MaskTree, id: string, parentId: string, x: number, y: number): MaskTree | null {
   const node = tree[id]
   const parent = tree[parentId]
   if (!node || !parent || id === ROOT_ID) return null
@@ -164,11 +161,7 @@ export function cellMoveIn(
   return keptInside(next, id, w)
 }
 
-export function slotResize(
-  tree: MaskTree,
-  id: string,
-  slot: GridSlot,
-): MaskTree | null {
+export function slotResize(tree: MaskTree, id: string, slot: GridSlot): MaskTree | null {
   const node = tree[id]
   if (!node || !node.parentId) return null
   const parent = tree[node.parentId]
@@ -181,10 +174,14 @@ export function slotResize(
   const h = Math.max(1, slot.h)
   if (x === cur.x && y === cur.y && w === cur.w && h === cur.h) return null
   if (slotTaken(tree, node.parentId, { x, y, w, h }, id)) return null
-  return keptInside({
-    ...tree,
-    [id]: { ...node, values: { ...node.values, gridX: x, gridY: y, gridW: w, gridH: h } },
-  }, id, w)
+  return keptInside(
+    {
+      ...tree,
+      [id]: { ...node, values: { ...node.values, gridX: x, gridY: y, gridW: w, gridH: h } },
+    },
+    id,
+    w,
+  )
 }
 
 export function slotGrownPushing(
@@ -212,11 +209,7 @@ export function slotGrownPushing(
   return areaFitted(next, node.parentId, capacity)
 }
 
-function areaFitted(
-  tree: MaskTree,
-  areaId: string,
-  capacity: (areaId: string) => number | null,
-): MaskTree {
+function areaFitted(tree: MaskTree, areaId: string, capacity: (areaId: string) => number | null): MaskTree {
   const area = tree[areaId]
   const holds = area ? capacity(areaId) : null
   if (!area || holds === null) return tree

@@ -24,11 +24,12 @@ function keyPairFrom(raw: unknown): KeyPair | null {
   const pair: Unread<KeyPair> = raw
   if (typeof pair.fromField !== 'string' || typeof pair.toField !== 'string') return null
   const text = (v: unknown): string => (typeof v === 'string' ? v : '')
-  const outside: Partial<KeyPair> = pair.from === 'document' && text(pair.fromSourceId) !== ''
-    ? { from: 'document', fromSourceId: text(pair.fromSourceId) }
-    : pair.from === 'formField'
-      ? { from: 'formField', ...(text(pair.fromProp) !== '' ? { fromProp: text(pair.fromProp) } : {}) }
-      : {}
+  const outside: Partial<KeyPair> =
+    pair.from === 'document' && text(pair.fromSourceId) !== ''
+      ? { from: 'document', fromSourceId: text(pair.fromSourceId) }
+      : pair.from === 'formField'
+        ? { from: 'formField', ...(text(pair.fromProp) !== '' ? { fromProp: text(pair.fromProp) } : {}) }
+        : {}
   return {
     fromField: pair.fromField,
     toField: pair.toField,

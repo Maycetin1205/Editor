@@ -9,32 +9,30 @@ import { figureAt, greyCellTpl, type GreyPart, type RowLayout } from '../parts/c
 import { WITHOUT_DECORATION, type RowDecoration } from '../list'
 import type { CaptureLedger, RowState } from './ledger'
 
-function typingCellTpl(
-  ledger: CaptureLedger,
-  rawIndex: number,
-  slot: number,
-  column: Column,
-): TemplateResult {
-  return inputSpotTpl({
-    value: ledger.cellValue(rawIndex, slot),
-    title: column.title,
-    placeholder: '',
-    inputClass: cellsClass(ledger.isChanged(rawIndex, slot) ? 'changed' : 'quiet'),
-    holderClass: 'cell-holder',
-    marksOnEntering: true,
-    keepsTyping: true,
-    slot,
-    suggestions: [],
-    columns: [],
-    typed: '',
-    mark: 0,
-  }, {
-    typing: (text) => ledger.typeCell(rawIndex, slot, text),
-    key: (e) => ledger.keyCell(rawIndex, slot, e),
-    leave: (text) => ledger.leaveCell(rawIndex, slot, text),
-    chooseSuggestion: () => {},
-    setMark: () => {},
-  })
+function typingCellTpl(ledger: CaptureLedger, rawIndex: number, slot: number, column: Column): TemplateResult {
+  return inputSpotTpl(
+    {
+      value: ledger.cellValue(rawIndex, slot),
+      title: column.title,
+      placeholder: '',
+      inputClass: cellsClass(ledger.isChanged(rawIndex, slot) ? 'changed' : 'quiet'),
+      holderClass: 'cell-holder',
+      marksOnEntering: true,
+      keepsTyping: true,
+      slot,
+      suggestions: [],
+      columns: [],
+      typed: '',
+      mark: 0,
+    },
+    {
+      typing: (text) => ledger.typeCell(rawIndex, slot, text),
+      key: (e) => ledger.keyCell(rawIndex, slot, e),
+      leave: (text) => ledger.leaveCell(rawIndex, slot, text),
+      chooseSuggestion: () => {},
+      setMark: () => {},
+    },
+  )
 }
 
 interface CapturedPlacement {
@@ -68,7 +66,7 @@ interface CapturedAct {
 function greyParts(layout: RowLayout, slots: readonly number[], values: readonly string[]): (GreyPart | null)[] | null {
   const parts = slots.map((slot): GreyPart | null => {
     const sub = layout.under.get(slot)
-    const value = sub === undefined ? '' : values[sub.slot] ?? ''
+    const value = sub === undefined ? '' : (values[sub.slot] ?? '')
     if (sub === undefined || value === '') return null
     const figure = figureAt(layout, sub.slot)
     return { column: sub.column, figure, content: shownValue(figure, value), typable: false }
@@ -136,9 +134,8 @@ export function captureDecoration(placement: DecorationPlacement): (rawIndex: nu
     return {
       ...WITHOUT_DECORATION,
       status: state.status === 'booked' ? '' : state.status,
-      cell: (slot, column) => (placement.typable && columnEditable(column)
-        ? typingCellTpl(placement.ledger, rawIndex, slot, column)
-        : null),
+      cell: (slot, column) =>
+        placement.typable && columnEditable(column) ? typingCellTpl(placement.ledger, rawIndex, slot, column) : null,
     }
   }
 }

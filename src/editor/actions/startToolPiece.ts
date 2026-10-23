@@ -2,8 +2,13 @@ import type { StartToolStep } from '../../core/data/steps/startTool'
 import { StartToolBody } from './StartToolBody'
 import type { StepPiece, StepTabPiece } from './stepPiece'
 
-const emptyTool = (id: string): StartToolStep =>
-  ({ id, kind: 'START_TOOL', resultName: '', toolNumber: '', parameter: [] })
+const emptyTool = (id: string): StartToolStep => ({
+  id,
+  kind: 'START_TOOL',
+  resultName: '',
+  toolNumber: '',
+  parameter: [],
+})
 
 export const startToolPiece: StepPiece<'START_TOOL'> = {
   words(step) {

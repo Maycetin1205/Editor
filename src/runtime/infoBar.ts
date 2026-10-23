@@ -3,12 +3,13 @@ import { elementName } from '../core/block/ownText'
 
 const BAR_CLASS = 'ff-infobar'
 
-const MARKUP = '<svg class="ff-infobar-sign" viewBox="0 0 16 16" aria-hidden="true">'
-  + '<circle cx="8" cy="8" r="8"></circle><path d="M8 4.5v4"></path>'
-  + '<circle class="ff-infobar-dot" cx="8" cy="11.25" r="1"></circle></svg>'
-  + '<span class="ff-infobar-text"><span class="ff-infobar-name"></span><span class="ff-infobar-sentence"></span></span>'
-  + '<button class="ff-infobar-close" type="button" title="Schließen" aria-label="Schließen">'
-  + '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"></path></svg></button>'
+const MARKUP =
+  '<svg class="ff-infobar-sign" viewBox="0 0 16 16" aria-hidden="true">' +
+  '<circle cx="8" cy="8" r="8"></circle><path d="M8 4.5v4"></path>' +
+  '<circle class="ff-infobar-dot" cx="8" cy="11.25" r="1"></circle></svg>' +
+  '<span class="ff-infobar-text"><span class="ff-infobar-name"></span><span class="ff-infobar-sentence"></span></span>' +
+  '<button class="ff-infobar-close" type="button" title="Schließen" aria-label="Schließen">' +
+  '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"></path></svg></button>'
 
 const CONNECTION_NAME = 'SoftEngine'
 const CONNECTION_SENTENCE = 'antwortet nicht. Sobald wieder eine Antwort kommt, macht die Maske weiter.'

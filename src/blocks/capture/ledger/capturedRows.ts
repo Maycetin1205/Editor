@@ -90,11 +90,7 @@ export class CapturedRows {
 
   statusAt(index: number): RowState {
     const row = this.rows[index]
-    return this.status(
-      'captured',
-      row?.key ?? '',
-      row?.written === undefined ? 'captured' : 'written',
-    )
+    return this.status('captured', row?.key ?? '', row?.written === undefined ? 'captured' : 'written')
   }
 
   captureRow(): boolean {

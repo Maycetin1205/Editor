@@ -9,11 +9,19 @@ const hold = (e: { stopPropagation: () => void }): void => e.stopPropagation()
 const EDGE = 8
 
 function fromHelper(e: Event): boolean {
-  return e.composedPath().some((t) => t instanceof HTMLElement
-    && (t.getAttribute('role') === 'dialog' || t.dataset.ffEditorHelper !== undefined))
+  return e
+    .composedPath()
+    .some(
+      (t) =>
+        t instanceof HTMLElement && (t.getAttribute('role') === 'dialog' || t.dataset.ffEditorHelper !== undefined),
+    )
 }
 
-export function BarFrame({ at, onClose, children }: {
+export function BarFrame({
+  at,
+  onClose,
+  children,
+}: {
   at: { top: number; left: number }
   onClose: () => void
   children: ReactNode
@@ -44,7 +52,10 @@ export function BarFrame({ at, onClose, children }: {
       onPointerDown={hold}
       onClick={hold}
       onDoubleClick={hold}
-      onDragStart={(e) => { e.preventDefault(); e.stopPropagation() }}
+      onDragStart={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+      }}
     >
       <LabelsShown.Provider value={false}>{children}</LabelsShown.Provider>
     </div>,

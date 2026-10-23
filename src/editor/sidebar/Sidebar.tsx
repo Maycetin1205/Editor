@@ -38,9 +38,7 @@ export function Sidebar() {
           <FoldButton side="left" onFold={() => view.shutColumn('left', true)} />
         </span>
       </nav>
-      <div className="flex min-h-0 flex-1 flex-col">
-        {view.sideTab === 'blocks' ? <BlockPalette /> : <MasksTab />}
-      </div>
+      <div className="flex min-h-0 flex-1 flex-col">{view.sideTab === 'blocks' ? <BlockPalette /> : <MasksTab />}</div>
     </aside>
   )
 }

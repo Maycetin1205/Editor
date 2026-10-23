@@ -30,7 +30,10 @@ export function SelectionFollowSection({ block, onPick }: SelectionFollowSection
 
   const reach: Reach = {
     givers: giver ? [giverGroup(giver, library)] : [],
-    ...outsideReach(library, formFieldsOf(ed.tree, library).filter((f) => f.blockId !== block.id)),
+    ...outsideReach(
+      library,
+      formFieldsOf(ed.tree, library).filter((f) => f.blockId !== block.id),
+    ),
   }
 
   const originOf = (pair: KeyPair): ValueOrigin | null =>
@@ -42,19 +45,18 @@ export function SelectionFollowSection({ block, onPick }: SelectionFollowSection
   }
 
   function set(next: SelectionFollow[]): void {
-    ed.updateProperty(block.id, SELECTION_FOLLOW_PROP, next.map((f) =>
-      f.pairs.length > 0 && f.pairs.every((p) => p.from !== undefined) ? { ...f, giverId: '' } : f))
+    ed.updateProperty(
+      block.id,
+      SELECTION_FOLLOW_PROP,
+      next.map((f) => (f.pairs.length > 0 && f.pairs.every((p) => p.from !== undefined) ? { ...f, giverId: '' } : f)),
+    )
   }
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex min-h-control items-center gap-1.5">
-        <span className="shrink-0 text-dense font-semibold text-muted">
-          Folgt
-        </span>
-        <span className="min-w-0 flex-1 truncate font-semibold text-ink">
-          {followedName(follow, ed.tree, library)}
-        </span>
+        <span className="shrink-0 text-dense font-semibold text-muted">Folgt</span>
+        <span className="min-w-0 flex-1 truncate font-semibold text-ink">{followedName(follow, ed.tree, library)}</span>
         <Button onlyIcon aria-label="Anderes wählen" title="Anderes wählen" onClick={onPick}>
           <Link2 size={13} />
         </Button>

@@ -1,19 +1,8 @@
 import type { Unread } from '../unread'
 
-type ReadResult<V> =
-  | { ok: true; value: V }
-  | { ok: false }
+type ReadResult<V> = { ok: true; value: V } | { ok: false }
 
-type ControlKind =
-  | 'text'
-  | 'number'
-  | 'boolean'
-  | 'choice'
-  | 'ladder'
-  | 'segment'
-  | 'field'
-  | 'source'
-  | 'structured'
+type ControlKind = 'text' | 'number' | 'boolean' | 'choice' | 'ladder' | 'segment' | 'field' | 'source' | 'structured'
 
 export interface ChoiceOption {
   value: string
@@ -136,23 +125,17 @@ function make<V>(type: PropertyType<V>, init: Init<V>, extra: Partial<Property<V
 
 const textType = (control: ControlKind, options?: readonly ChoiceOption[]): PropertyType<string> => ({
   control,
-  read: (raw) => (typeof raw === 'string'
-    ? { ok: true, value: raw }
-    : { ok: false }),
+  read: (raw) => (typeof raw === 'string' ? { ok: true, value: raw } : { ok: false }),
   toAttribute: (value) => value,
   fromAttribute: (raw, fallback) => (raw === null ? fallback : raw),
   ...(options ? { options } : {}),
 })
 
 export function textProperty(init: Init<string> & { maxLength?: number }): Property<string> {
-  return make(textType('text'), init,
-    init.maxLength === undefined ? {} : { maxLength: init.maxLength })
+  return make(textType('text'), init, init.maxLength === undefined ? {} : { maxLength: init.maxLength })
 }
 
-export function choiceProperty(
-  options: readonly ChoiceOption[],
-  init: Init<string>,
-): Property<string> {
+export function choiceProperty(options: readonly ChoiceOption[], init: Init<string>): Property<string> {
   return make(textType('choice', options), init)
 }
 
@@ -166,18 +149,13 @@ export function ladderProperty(
   }
   const type: PropertyType<string> = {
     ...textType('ladder', options),
-    read: (raw) => (typeof raw === 'string' && whole(raw)
-      ? { ok: true, value: raw }
-      : { ok: false }),
+    read: (raw) => (typeof raw === 'string' && whole(raw) ? { ok: true, value: raw } : { ok: false }),
     fromAttribute: (raw, fallback) => (raw !== null && whole(raw) ? raw : fallback),
   }
   return make(type, init, { min: init.min, max: init.max })
 }
 
-export function segmentProperty(
-  options: readonly ChoiceOption[],
-  init: Init<string>,
-): Property<string> {
+export function segmentProperty(options: readonly ChoiceOption[], init: Init<string>): Property<string> {
   return make(textType('segment', options), init)
 }
 
@@ -189,14 +167,10 @@ export function sourceProperty(init: Init<string>): Property<string> {
   return make(textType('source'), init)
 }
 
-export function numberProperty(
-  init: Init<number> & { min?: number; max?: number; unit?: string },
-): Property<number> {
+export function numberProperty(init: Init<number> & { min?: number; max?: number; unit?: string }): Property<number> {
   const type: PropertyType<number> = {
     control: 'number',
-    read: (raw) => (typeof raw === 'number' && Number.isFinite(raw)
-      ? { ok: true, value: raw }
-      : { ok: false }),
+    read: (raw) => (typeof raw === 'number' && Number.isFinite(raw) ? { ok: true, value: raw } : { ok: false }),
     toAttribute: (value) => String(value),
     fromAttribute: (raw, fallback) => {
       if (raw === null) return fallback
@@ -214,19 +188,14 @@ export function numberProperty(
 export function booleanProperty(init: Init<boolean>): Property<boolean> {
   const type: PropertyType<boolean> = {
     control: 'boolean',
-    read: (raw) => (typeof raw === 'boolean'
-      ? { ok: true, value: raw }
-      : { ok: false }),
+    read: (raw) => (typeof raw === 'boolean' ? { ok: true, value: raw } : { ok: false }),
     toAttribute: (value) => (value ? 'true' : 'false'),
     fromAttribute: (raw, fallback) => (raw === null ? fallback : raw === 'true'),
   }
   return make(type, init)
 }
 
-function structuredProperty<V>(
-  type: Omit<PropertyType<V>, 'control'>,
-  init: Init<V>,
-): Property<V> {
+function structuredProperty<V>(type: Omit<PropertyType<V>, 'control'>, init: Init<V>): Property<V> {
   return make({ ...type, control: 'structured' }, init)
 }
 
@@ -236,19 +205,24 @@ export function listProperty<V>(
   forExport: (value: V) => unknown = (value) => value,
 ): Property<V> {
   const parsed = (raw: string): unknown => {
-    try { return JSON.parse(raw) } catch { return undefined }
+    try {
+      return JSON.parse(raw)
+    } catch {
+      return undefined
+    }
   }
-  return structuredProperty<V>({
-    read: (raw) => (raw === undefined || Array.isArray(raw)
-      ? { ok: true, value: readList(raw) }
-      : { ok: false }),
-    toAttribute: (value) => JSON.stringify(forExport(value)),
-    fromAttribute: (raw, fallback) => {
-      if (raw === null) return fallback
-      const value = parsed(raw)
-      return value === undefined ? fallback : readList(value)
+  return structuredProperty<V>(
+    {
+      read: (raw) => (raw === undefined || Array.isArray(raw) ? { ok: true, value: readList(raw) } : { ok: false }),
+      toAttribute: (value) => JSON.stringify(forExport(value)),
+      fromAttribute: (raw, fallback) => {
+        if (raw === null) return fallback
+        const value = parsed(raw)
+        return value === undefined ? fallback : readList(value)
+      },
     },
-  }, init)
+    init,
+  )
 }
 
 export function defaultsOf(properties: PropertyMap): Record<string, PropertyValue> {

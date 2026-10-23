@@ -166,10 +166,12 @@ export class ViewChoices {
   }
 
   afterRender(): void {
-    if (this._tickMeasured !== ROWS_HEIGHT
-      || this._subMeasured !== this.subHeight()
-      || this._bodyMeasured !== bodyHeight(this.el)
-      || this._headMeasured !== headHeight(this.el)) {
+    if (
+      this._tickMeasured !== ROWS_HEIGHT ||
+      this._subMeasured !== this.subHeight() ||
+      this._bodyMeasured !== bodyHeight(this.el) ||
+      this._headMeasured !== headHeight(this.el)
+    ) {
       this.measureBody()
     }
     if (!this._restoreFocus) return

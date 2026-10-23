@@ -47,7 +47,7 @@ export function PickerControl({
 
   const hit = groups.flatMap((g) => g.entries).find((e) => e.value === value)
 
-  const shown = hit?.name ?? (value === '' ? emptyText ?? '' : '')
+  const shown = hit?.name ?? (value === '' ? (emptyText ?? '') : '')
 
   const button = (id?: string) => (
     <Button
@@ -62,13 +62,7 @@ export function PickerControl({
       }}
       className={cn(INPUT_EDGE, 'flex h-control items-center gap-2 px-2 text-left focus-visible:ring-0', className)}
     >
-      <span
-        className={cn(
-          'min-w-0 flex-1 truncate',
-          value === '' && 'text-muted',
-          hit !== undefined && 'font-medium',
-        )}
-      >
+      <span className={cn('min-w-0 flex-1 truncate', value === '' && 'text-muted', hit !== undefined && 'font-medium')}>
         {shown}
       </span>
       <ChevronDown size={13} aria-hidden className="shrink-0 text-muted" />
@@ -77,17 +71,10 @@ export function PickerControl({
 
   return (
     <>
-      {label === undefined
-        ? button()
-        : <Row label={label}>{(id) => button(id)}</Row>}
+      {label === undefined ? button() : <Row label={label}>{(id) => button(id)}</Row>}
 
       {open && (
-        <Popover
-          name={name}
-          anchor={buttonRef}
-          width={wrap ? width : undefined}
-          onClose={() => setOpen(false)}
-        >
+        <Popover name={name} anchor={buttonRef} width={wrap ? width : undefined} onClose={() => setOpen(false)}>
           <List
             searchable
             groups={groups}

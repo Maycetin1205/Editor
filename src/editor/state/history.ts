@@ -22,8 +22,12 @@ export class History {
 
   private _txDepth = 0
 
-  get canUndo(): boolean { return this._past.length > 0 }
-  get canRedo(): boolean { return this._future.length > 0 }
+  get canUndo(): boolean {
+    return this._past.length > 0
+  }
+  get canRedo(): boolean {
+    return this._future.length > 0
+  }
 
   record(makeSnapshot: () => EditorSnapshot): void {
     if (this._txDepth > 0) return

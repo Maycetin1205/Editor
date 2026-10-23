@@ -1,14 +1,9 @@
-import {
-  RELATION_VERBS,
-  checkPositionFetch,
-  type RelationVerb,
-  type RuntimeRelation,
-} from '../core/data/relations'
+import { RELATION_VERBS, checkPositionFetch, type RelationVerb, type RuntimeRelation } from '../core/data/relations'
 import { seWindow } from './bridge'
 import { isObject } from './data'
 
 export { fieldFromAnswer, resultList } from './relations/answer'
-export { cancelJobs,  queryRun, relationRun, watchConnection, watchQueue } from './relations/hostQueue'
+export { cancelJobs, queryRun, relationRun, watchConnection, watchQueue } from './relations/hostQueue'
 export { parameterResolve } from './relations/parameters'
 
 export function runtimeRelation(id: string): RuntimeRelation | undefined {

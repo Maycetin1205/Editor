@@ -30,8 +30,7 @@ interface DndState {
 function sameTarget(a: DropTarget | null, b: DropTarget | null): boolean {
   if (a === b) return true
   if (!a || !b) return false
-  return a.parentId === b.parentId
-    && a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h && a.free === b.free
+  return a.parentId === b.parentId && a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h && a.free === b.free
 }
 
 const DndContext = createContext<DndState | null>(null)
@@ -42,11 +41,7 @@ function useDnd(): DndState {
   return dnd
 }
 
-function commitDrop(
-  e: DragEvent,
-  ed: ReturnType<typeof useEditor>,
-  dnd: DndState,
-): void {
+function commitDrop(e: DragEvent, ed: ReturnType<typeof useEditor>, dnd: DndState): void {
   const target = dnd.dropTarget
   if (target && target.free) {
     if (dnd.dragId !== null) {

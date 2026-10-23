@@ -35,11 +35,16 @@ function groupsOf(entries: readonly MaskEntry[], folderName: string): Group[] {
 }
 
 const DATE = new Intl.DateTimeFormat('de-DE', {
-  day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
 })
 
-const LINE = 'flex h-[30px] w-full shrink-0 items-center gap-[8px] pl-[37px] pr-[16px] text-left text-ui font-semibold transition-colors'
-  + ' focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent'
+const LINE =
+  'flex h-[30px] w-full shrink-0 items-center gap-[8px] pl-[37px] pr-[16px] text-left text-ui font-semibold transition-colors' +
+  ' focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent'
 
 export function MasksTab() {
   const ed = useEditor()
@@ -55,9 +60,14 @@ export function MasksTab() {
   const tell = (title: string, error: unknown) => ed.showNotice({ title, lead: `${reasonOf(error)}.` })
 
   const open = async (entry: MaskEntry) => {
-    if (entry.template && ed.blockCount > 0 && !window.confirm(
-      `Neue Maske aus der Vorlage „${entry.name}“ anfangen? „${maskNameOf(ed.tree)}“ verschwindet von der Leinwand; „Rückgängig“ holt sie zurück.`,
-    )) return
+    if (
+      entry.template &&
+      ed.blockCount > 0 &&
+      !window.confirm(
+        `Neue Maske aus der Vorlage „${entry.name}“ anfangen? „${maskNameOf(ed.tree)}“ verschwindet von der Leinwand; „Rückgängig“ holt sie zurück.`,
+      )
+    )
+      return
     const why = entry.template ? await newMaskFrom(ed, entry) : await openMaskFile(ed, entry)
     if (why !== null) ed.showNotice({ title: 'Maske nicht geladen', lead: `„${entry.path}“ ${why}` })
   }
@@ -79,9 +89,13 @@ export function MasksTab() {
   }
 
   const newMask = () => {
-    if (ed.blockCount === 0 || window.confirm(
-      `Neue Maske anfangen? „${maskNameOf(ed.tree)}“ verschwindet von der Leinwand; „Rückgängig“ holt sie zurück.`,
-    )) ed.newMask()
+    if (
+      ed.blockCount === 0 ||
+      window.confirm(
+        `Neue Maske anfangen? „${maskNameOf(ed.tree)}“ verschwindet von der Leinwand; „Rückgängig“ holt sie zurück.`,
+      )
+    )
+      ed.newMask()
   }
 
   const current = ed.maskOnDisk.attached ? ed.maskOnDisk.path : null
@@ -94,11 +108,23 @@ export function MasksTab() {
         </Button>
         <span className="flex-1" />
         {canPick && folder.state !== 'none' && (
-          <Button kind="command" onlyIcon aria-label="Ordner wählen" title="Anderen Ordner der Masken wählen" onClick={() => void pickFolder()}>
+          <Button
+            kind="command"
+            onlyIcon
+            aria-label="Ordner wählen"
+            title="Anderen Ordner der Masken wählen"
+            onClick={() => void pickFolder()}
+          >
             <FolderOpen size={15} />
           </Button>
         )}
-        <Button kind="command" onlyIcon aria-label="Datei laden" title="Eine einzelne Maske laden, die nicht im Ordner liegt" onClick={() => fileRef.current?.click()}>
+        <Button
+          kind="command"
+          onlyIcon
+          aria-label="Datei laden"
+          title="Eine einzelne Maske laden, die nicht im Ordner liegt"
+          onClick={() => fileRef.current?.click()}
+        >
           <FileUp size={15} />
         </Button>
         <input
@@ -124,27 +150,41 @@ export function MasksTab() {
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pb-[12px]">
         {!canPick ? (
           <Empty>
-            Dieser Browser kann keinen Ordner öffnen; Edge und Chrome können es. Eine einzelne Maske
-            lädt das Zeichen „Datei laden“ oben.
+            Dieser Browser kann keinen Ordner öffnen; Edge und Chrome können es. Eine einzelne Maske lädt das Zeichen
+            „Datei laden“ oben.
           </Empty>
         ) : folder.state === 'none' ? (
-          <Empty action={<Button kind="primary" onClick={() => void pickFolder()}><FolderOpen size={14} /> Ordner wählen</Button>}>
+          <Empty
+            action={
+              <Button kind="primary" onClick={() => void pickFolder()}>
+                <FolderOpen size={14} /> Ordner wählen
+              </Button>
+            }
+          >
             <span className="block">
-              Die Masken liegen als Dateien in einem Ordner, etwa „masken“. Einmal gewählt, zeigt der
-              Editor hier alle Masken darin, auch in Unterordnern, und „Speichern“ legt neue dort ab.
+              Die Masken liegen als Dateien in einem Ordner, etwa „masken“. Einmal gewählt, zeigt der Editor hier alle
+              Masken darin, auch in Unterordnern, und „Speichern“ legt neue dort ab.
             </span>
             <span className="mt-[8px] block">
-              Ein ganzes Laufwerk, den Benutzerordner, Windows und die Programme gibt der Browser nicht
-              frei, weil dort Systemdateien liegen. Ein Unterordner darin, wie „masken“, geht.
+              Ein ganzes Laufwerk, den Benutzerordner, Windows und die Programme gibt der Browser nicht frei, weil dort
+              Systemdateien liegen. Ein Unterordner darin, wie „masken“, geht.
             </span>
           </Empty>
         ) : folder.state === 'ask' ? (
-          <Empty action={<Button kind="primary" onClick={() => void grant()}><FolderOpen size={14} /> Ordner freigeben</Button>}>
-            Nach dem Neustart fragt der Browser noch einmal, ob der Editor den Ordner „{folder.name}“
-            lesen und schreiben darf.
+          <Empty
+            action={
+              <Button kind="primary" onClick={() => void grant()}>
+                <FolderOpen size={14} /> Ordner freigeben
+              </Button>
+            }
+          >
+            Nach dem Neustart fragt der Browser noch einmal, ob der Editor den Ordner „{folder.name}“ lesen und
+            schreiben darf.
           </Empty>
         ) : folder.failure !== null ? (
-          <Empty>Der Ordner „{folder.name}“ ließ sich nicht lesen: {folder.failure}.</Empty>
+          <Empty>
+            Der Ordner „{folder.name}“ ließ sich nicht lesen: {folder.failure}.
+          </Empty>
         ) : (
           <>
             {folder.entries.every((e) => e.template) && (
@@ -164,10 +204,15 @@ export function MasksTab() {
                     type="button"
                     title={`${e.path}, geändert ${DATE.format(e.modified)}${e.template ? '. Klick öffnet eine Kopie ohne Namen' : ''}`}
                     onClick={() => void open(e)}
-                    className={cn(LINE, e.path === current ? cn(LINE_CHOSEN, 'font-bold text-accent-ink') : cn(LINE_HOVER, 'text-ink'))}
+                    className={cn(
+                      LINE,
+                      e.path === current ? cn(LINE_CHOSEN, 'font-bold text-accent-ink') : cn(LINE_HOVER, 'text-ink'),
+                    )}
                   >
                     <span className="min-w-0 flex-1 truncate">{e.name}</span>
-                    {e.frame !== '' && <span className="shrink-0 text-dense font-normal tabular-nums text-muted">{e.frame}</span>}
+                    {e.frame !== '' && (
+                      <span className="shrink-0 text-dense font-normal tabular-nums text-muted">{e.frame}</span>
+                    )}
                   </button>
                 ))}
                 {g.template && (
@@ -176,7 +221,11 @@ export function MasksTab() {
                     disabled={ed.blockCount === 0}
                     title="Legt eine Kopie der offenen Maske in den Ordner „Vorlagen“"
                     onClick={() => void saveAsTemplate(ed)}
-                    className={cn(LINE, LINE_HOVER, 'pl-[35px] text-dense font-normal text-muted hover:text-ink disabled:opacity-[.45]')}
+                    className={cn(
+                      LINE,
+                      LINE_HOVER,
+                      'pl-[35px] text-dense font-normal text-muted hover:text-ink disabled:opacity-[.45]',
+                    )}
                   >
                     <DoneLabel
                       done={view.done === 'template'}

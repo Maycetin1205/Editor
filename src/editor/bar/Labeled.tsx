@@ -3,11 +3,7 @@ import { Tile } from '@/editor/widgets/Tile'
 import { TickBox } from '@/editor/widgets/TickBox'
 import { LabelsShown } from './labelsShown'
 
-export function Labeled({ label, detail = '', children }: {
-  label: string
-  detail?: string
-  children: ReactNode
-}) {
+export function Labeled({ label, detail = '', children }: { label: string; detail?: string; children: ReactNode }) {
   if (!useContext(LabelsShown)) return <>{children}</>
   return (
     <span className="grid min-h-[36px] w-full min-w-0 grid-cols-[132px_minmax(0,1fr)] items-center gap-x-[12px] py-[2px]">
@@ -23,7 +19,10 @@ export function Labeled({ label, detail = '', children }: {
 export function Switch({ label, on, onToggle }: { label: string; on: boolean; onToggle: (on: boolean) => void }) {
   if (!useContext(LabelsShown)) return <Tile label={label} on={on} onToggle={onToggle} />
   return (
-    <label data-switch className="flex h-[24px] shrink-0 cursor-pointer items-center gap-[8px] text-ui font-semibold text-ink">
+    <label
+      data-switch
+      className="flex h-[24px] shrink-0 cursor-pointer items-center gap-[8px] text-ui font-semibold text-ink"
+    >
       <input
         type="checkbox"
         className="peer sr-only"

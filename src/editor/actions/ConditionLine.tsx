@@ -7,7 +7,11 @@ import { PickerControl } from '../controls/PickerControl'
 
 const ALWAYS = ''
 
-export function ConditionLine({ condition, sources, onChange }: {
+export function ConditionLine({
+  condition,
+  sources,
+  onChange,
+}: {
   condition: StepCondition | undefined
   sources: readonly DataSource[]
   onChange: (condition: StepCondition | undefined) => void
@@ -29,7 +33,10 @@ export function ConditionLine({ condition, sources, onChange }: {
       {condition !== undefined && (
         <Segment
           name="Zeilen"
-          options={[{ value: 'rows', name: 'Zeilen hat' }, { value: 'none', name: 'keine Zeilen hat' }]}
+          options={[
+            { value: 'rows', name: 'Zeilen hat' },
+            { value: 'none', name: 'keine Zeilen hat' },
+          ]}
           value={condition.rows ? 'rows' : 'none'}
           onChoose={(v) => onChange({ ...condition, rows: v === 'rows' })}
         />

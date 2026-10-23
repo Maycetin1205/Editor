@@ -2,14 +2,17 @@ import { choiceProperty, type Condition, type ValuesOf } from '../../core/block/
 import { avatarBinding, spotBinding } from '../parts/card'
 
 export const dataListProperties = {
-  pick: choiceProperty([
-    { value: 'one', name: 'Eine Zeile' },
-    { value: 'none', name: 'Keine' },
-  ], {
-    default: 'one',
-    label: 'Auswahl',
-    attribute: 'pick',
-  }),
+  pick: choiceProperty(
+    [
+      { value: 'one', name: 'Eine Zeile' },
+      { value: 'none', name: 'Keine' },
+    ],
+    {
+      default: 'one',
+      label: 'Auswahl',
+      attribute: 'pick',
+    },
+  ),
   headingField: spotBinding('Titel', 'headingfield'),
   sublineField: spotBinding('Unterzeile', 'sublinefield'),
   asideField: spotBinding('Rechts', 'asidefield'),

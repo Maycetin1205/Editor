@@ -4,13 +4,7 @@ import type { BlockNode } from '../../core/block/tree'
 import { bindingProp, capability, type BindableSpot } from '../../core/block/capability'
 import { gridMetricsOf, rowsForHeight } from '../../core/block/grid'
 import { blockType } from '../../core/block/registry'
-import {
-  BlockElement,
-  PROP_CHANGE,
-  SPOT_CLICK,
-  type PropChange,
-  type SpotClick,
-} from '../../blocks/base/BlockElement'
+import { BlockElement, PROP_CHANGE, SPOT_CLICK, type PropChange, type SpotClick } from '../../blocks/base/BlockElement'
 import { HEIGHT_REPORTED, type HeightReported } from '../../blocks/base/heightReport'
 import { boundNames } from '../../core/data/boundField'
 import type { SourceInReach } from '../../core/data/extraSources'
@@ -32,15 +26,7 @@ interface LitElementArgs {
   grid: boolean
 }
 
-export function useLitElement({
-  editor,
-  blockRef,
-  block,
-  selected,
-  bindableSpots,
-  sources,
-  grid,
-}: LitElementArgs) {
+export function useLitElement({ editor, blockRef, block, selected, bindableSpots, sources, grid }: LitElementArgs) {
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   const elementRef = useRef<HTMLElement | null>(null)
@@ -130,9 +116,8 @@ export function useLitElement({
     el.toggleAttribute('fills', !!grid)
   }, [element, block.type, block.values, selected, bindableSpots, sources, grid])
 
-  const spotClickOf = (click: Event): SpotClick | null => (
+  const spotClickOf = (click: Event): SpotClick | null =>
     spotClick.current?.click === click ? spotClick.current : null
-  )
 
   return { containerRef, elementRef, element, spotClickOf }
 }

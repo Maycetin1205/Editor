@@ -10,8 +10,14 @@ const VERB_SHORT: Record<RelationTemplate['verb'], string> = {
   PUTADD_RELATION: 'PUTADD',
 }
 
-const emptyRelation = (id: string): RelationStep =>
-  ({ id, kind: 'RELATION', resultName: '', relationId: '', parameter: [], extraParameter: [] })
+const emptyRelation = (id: string): RelationStep => ({
+  id,
+  kind: 'RELATION',
+  resultName: '',
+  relationId: '',
+  parameter: [],
+  extraParameter: [],
+})
 
 const templateOf = (step: RelationStep, context: StepContext): RelationTemplate | undefined =>
   context.relations.find((r) => r.id === step.relationId)

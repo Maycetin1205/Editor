@@ -17,7 +17,10 @@ const LOOSE_DESIGN_VALUES = [
   ['color', /\b(?:rgba?|hsla?|oklch)\((?!\s*var\()/],
   ['radius', /radius\s*:[^;{}]*\dpx|(?<![\w-])rounded(?:-[a-z]+)?-\[(?!var\()/],
   ['font size', /font-size\s*:[^;{}]*\d(?:px|rem)|(?<![\w-])text-\[\d/],
-  ['shadow', /box-shadow\s*:(?!\s*(?:none|var\(--[\w-]+\))\s*(?:!important\s*)?(?:[;}]|$))|(?<![\w-])shadow-\[(?!var\()/],
+  [
+    'shadow',
+    /box-shadow\s*:(?!\s*(?:none|var\(--[\w-]+\))\s*(?:!important\s*)?(?:[;}]|$))|(?<![\w-])shadow-\[(?!var\()/,
+  ],
   ['font', /font-family\s*:(?!\s*(?:inherit|var\(--[\w-]+\))\s*(?:!important\s*)?(?:[;}]|$))/],
 ]
 
@@ -59,18 +62,21 @@ export default defineConfig([
   {
     files: ['src/core/**/*.{ts,tsx}'],
     rules: {
-      'no-restricted-imports': ['error', {
-        patterns: [
-          {
-            group: ['lit', 'lit/*', 'react', 'react/*', 'react-dom', 'react-dom/*'],
-            message: 'src/core must stay framework free.',
-          },
-          {
-            regex: '^(?:(?:\\.\\./)+|@/)(?:blocks|design|editor|export|runtime|softengine)(?:/|$)',
-            message: 'src/core must not import an outer application layer.',
-          },
-        ],
-      }],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['lit', 'lit/*', 'react', 'react/*', 'react-dom', 'react-dom/*'],
+              message: 'src/core must stay framework free.',
+            },
+            {
+              regex: '^(?:(?:\\.\\./)+|@/)(?:blocks|design|editor|export|runtime|softengine)(?:/|$)',
+              message: 'src/core must not import an outer application layer.',
+            },
+          ],
+        },
+      ],
     },
   },
   // Only src/softengine knows the host globals. A block asks the mask host in
@@ -84,18 +90,21 @@ export default defineConfig([
       // values in before anything reads them.
       '@typescript-eslint/no-empty-object-type': ['error', { allowInterfaces: 'with-single-extends' }],
       '@typescript-eslint/no-unsafe-declaration-merging': 'off',
-      'no-restricted-imports': ['error', {
-        patterns: [
-          {
-            regex: '^(?:(?:\\.\\./)+|@/)softengine(?:/|$)',
-            message: 'Blocks reach SoftEngine only through the mask host.',
-          },
-          {
-            regex: '^(?:(?:\\.\\./)+|@/)(?:editor|export)(?:/|$)',
-            message: 'Blocks must not import the editor or the export.',
-          },
-        ],
-      }],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: '^(?:(?:\\.\\./)+|@/)softengine(?:/|$)',
+              message: 'Blocks reach SoftEngine only through the mask host.',
+            },
+            {
+              regex: '^(?:(?:\\.\\./)+|@/)(?:editor|export)(?:/|$)',
+              message: 'Blocks must not import the editor or the export.',
+            },
+          ],
+        },
+      ],
     },
   },
   // The runtime of the mask knows blocks only through the registry and their
@@ -104,36 +113,42 @@ export default defineConfig([
     files: ['src/runtime/**/*.{ts,tsx}'],
     ignores: ['src/runtime/softEngineHost.ts'],
     rules: {
-      'no-restricted-imports': ['error', {
-        patterns: [
-          {
-            regex: '^(?:(?:\\.\\./)+|@/)softengine(?:/|$)',
-            message: 'The runtime reaches SoftEngine only through softEngineHost.',
-          },
-          {
-            regex: '^(?:(?:\\.\\./)+|@/)(?:blocks|editor|export)(?:/|$)',
-            message: 'src/runtime must not import a block, the editor or the export.',
-          },
-        ],
-      }],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: '^(?:(?:\\.\\./)+|@/)softengine(?:/|$)',
+              message: 'The runtime reaches SoftEngine only through softEngineHost.',
+            },
+            {
+              regex: '^(?:(?:\\.\\./)+|@/)(?:blocks|editor|export)(?:/|$)',
+              message: 'src/runtime must not import a block, the editor or the export.',
+            },
+          ],
+        },
+      ],
     },
   },
   {
     files: ['src/runtime/softEngineHost.ts'],
     rules: {
-      'no-restricted-imports': ['error', {
-        patterns: [
-          {
-            group: ['**/softengine/bridge'],
-            importNames: ['hostCall'],
-            message: 'The host passes on what src/softengine offers, it calls no host function itself.',
-          },
-          {
-            regex: '^(?:(?:\\.\\./)+|@/)(?:blocks|editor|export)(?:/|$)',
-            message: 'src/runtime must not import a block, the editor or the export.',
-          },
-        ],
-      }],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/softengine/bridge'],
+              importNames: ['hostCall'],
+              message: 'The host passes on what src/softengine offers, it calls no host function itself.',
+            },
+            {
+              regex: '^(?:(?:\\.\\./)+|@/)(?:blocks|editor|export)(?:/|$)',
+              message: 'src/runtime must not import a block, the editor or the export.',
+            },
+          ],
+        },
+      ],
     },
   },
   // What the mask shows takes its colors, radii, font sizes, shadows and fonts
@@ -148,22 +163,33 @@ export default defineConfig([
       'src/editor/**/*.{ts,tsx}',
     ],
     rules: {
-      'no-restricted-syntax': ['error', ...LOOSE_DESIGN_VALUES.flatMap(([what, pattern]) => [
-        { selector: `Literal[value=${pattern}]`, message: `Take the ${what} from a token in src/design.` },
-        { selector: `TemplateElement[value.raw=${pattern}]`, message: `Take the ${what} from a token in src/design.` },
-      ])],
+      'no-restricted-syntax': [
+        'error',
+        ...LOOSE_DESIGN_VALUES.flatMap(([what, pattern]) => [
+          { selector: `Literal[value=${pattern}]`, message: `Take the ${what} from a token in src/design.` },
+          {
+            selector: `TemplateElement[value.raw=${pattern}]`,
+            message: `Take the ${what} from a token in src/design.`,
+          },
+        ]),
+      ],
     },
   },
   // The door itself reaches back into nothing that uses it.
   {
     files: ['src/softengine/**/*.{ts,tsx}'],
     rules: {
-      'no-restricted-imports': ['error', {
-        patterns: [{
-          regex: '^(?:(?:\\.\\./)+|@/)(?:blocks|editor|export|runtime)(?:/|$)',
-          message: 'src/softengine must not import a block, the runtime, the editor or the export.',
-        }],
-      }],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: '^(?:(?:\\.\\./)+|@/)(?:blocks|editor|export|runtime)(?:/|$)',
+              message: 'src/softengine must not import a block, the runtime, the editor or the export.',
+            },
+          ],
+        },
+      ],
     },
   },
 ])

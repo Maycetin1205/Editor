@@ -2,19 +2,10 @@ import { ROOT_ID, type BlockNode, type MaskTree } from '../core/block/tree'
 import { bindingProp, capability, applies } from '../core/block/capability'
 import { blockType } from '../core/block/registry'
 import { propertyVisible } from '../core/block/property'
-import {
-  bindableSpotsOf,
-  isSelectionGiver,
-  carriesChanges,
-} from '../core/block/treeQuery'
+import { bindableSpotsOf, isSelectionGiver, carriesChanges } from '../core/block/treeQuery'
 import { BLOCK_ID_ATTR } from '../core/data/actions'
 import { chainsForExport } from '../core/data/steps/chains'
-import {
-  orderedFields,
-  withUniqueNames,
-  recordNumberOf,
-  type DataSource,
-} from '../core/data/dataSources'
+import { orderedFields, withUniqueNames, recordNumberOf, type DataSource } from '../core/data/dataSources'
 import { deliveryAdapter } from '../core/data/deliveries/deliveries'
 import type { RelationTemplate } from '../core/data/relations'
 import { frameNumberOf } from '../core/block/documentFrame'
@@ -23,11 +14,7 @@ import { pageRowsTemplate } from '../core/block/gridArea'
 import { MASK_ROOT_CLASS } from '../core/block/frameFit'
 import { gridAreaCss } from '../core/block/grid'
 import tokensCssRaw from '../design/mask.css?raw'
-import {
-  usedFieldsPerSource,
-  collectDataSources,
-  getKeyPerGiver,
-} from './usedSources'
+import { usedFieldsPerSource, collectDataSources, getKeyPerGiver } from './usedSources'
 import { collectRelation } from './usedRelations'
 import { buildSevariablen } from './sevariablen'
 import { PICTURE_ALIAS_ATTR, pictureAlias, pictureRelations } from './pictureRelations'
@@ -56,8 +43,7 @@ function columnsIndexFor(tree: MaskTree): (blockId: string, key: string) => stri
     const binding = target ? capability(blockType(target.type), 'list')?.binding : undefined
     const keyOf = binding?.keyOf
     if (!target || !binding || keyOf === undefined) return '-1'
-    return String(binding.entries(target.values[binding.prop])
-      .findIndex((entry) => keyOf(entry) === key))
+    return String(binding.entries(target.values[binding.prop]).findIndex((entry) => keyOf(entry) === key))
   }
 }
 
@@ -108,13 +94,19 @@ function nodeToHtml(
     })
     .join('')
 
-  const actions = chainsForExport(node.chains, (capability(def, 'events')?.list ?? []).map((e) => e.key), popupName, columnsIndex)
+  const actions = chainsForExport(
+    node.chains,
+    (capability(def, 'events')?.list ?? []).map((e) => e.key),
+    popupName,
+    columnsIndex,
+  )
   const actionsAttr = actions ? htmlAttr('data-ff-actions', actions) : ''
 
-  const addressable = (capability(def, 'actionValue')?.spots.length ?? 0) > 0
-    || applies(capability(def, 'capture'), node.values)
-    || carriesChanges(node)
-    || isSelectionGiver(node)
+  const addressable =
+    (capability(def, 'actionValue')?.spots.length ?? 0) > 0 ||
+    applies(capability(def, 'capture'), node.values) ||
+    carriesChanges(node) ||
+    isSelectionGiver(node)
   const keyAttr = addressable ? htmlAttr(BLOCK_ID_ATTR, node.id) : ''
 
   const fillsAttr = def.page !== true ? ' fills' : ''
@@ -134,9 +126,7 @@ function nodeToHtml(
     .map((c) => nodeToHtml(tree, c, depth + 1, popupName, columnsIndex, sources))
     .filter((html) => html !== '')
     .join('\n')
-  return children === ''
-    ? `${open}</${def.tag}>`
-    : `${open}\n${children}\n${pad}</${def.tag}>`
+  return children === '' ? `${open}</${def.tag}>` : `${open}\n${children}\n${pad}</${def.tag}>`
 }
 
 function typesInMask(tree: MaskTree): Set<string> {
@@ -155,8 +145,7 @@ function typesInMask(tree: MaskTree): Set<string> {
 function maskCssFor(types: ReadonlySet<string>): string {
   const tags = new Set([...types].map((type) => blockType(type)?.tag))
   return cssRules(stripCssComments(tokensCssRaw))
-    .filter(({ selectors }) => !selectors.every((s) => /^ff-[a-z-]+$/.test(s))
-      || selectors.some((s) => tags.has(s)))
+    .filter(({ selectors }) => !selectors.every((s) => /^ff-[a-z-]+$/.test(s)) || selectors.some((s) => tags.has(s)))
     .map(({ text }) => text)
     .join('\n\n')
 }
@@ -164,8 +153,10 @@ function maskCssFor(types: ReadonlySet<string>): string {
 function originComment(title: string, frame: string): string {
   const inFrame = frame === '' ? '' : `, Rahmen ${frame}`
   const name = escapeHtmlText(title).replace(/-(?=-)/g, '- ')
-  return `<!-- Erzeugt vom Aufbau-Editor aus der Maske "${name}"${inFrame}.`
-    + ' Aendern im Editor und neu exportieren, nicht in dieser Datei. -->'
+  return (
+    `<!-- Erzeugt vom Aufbau-Editor aus der Maske "${name}"${inFrame}.` +
+    ' Aendern im Editor und neu exportieren, nicht in dieser Datei. -->'
+  )
 }
 
 export function exportMask(
@@ -201,30 +192,43 @@ export function exportMask(
 
   const runtimeJs = guardScriptContent(escapeNonAsciiJs(runtimeFor(types)))
 
-  const sourcesJs = guardJsonScript(escapeNonAsciiJs(
-    'window.FF_DATA_SOURCES = ' + JSON.stringify(used.map((s) => ({
-      id: s.id,
-      name: s.name,
-      tableId: s.tableId,
-      recordField: recordNumberOf(s),
-      ...deliveryAdapter(s.delivery.kind).export(s.delivery, s, {
-        usedFields: usedFields.get(s.id),
-        orderedFields: (source) => orderedFields(source, usedFields.get(source.id), getKey.get(source.id) ?? [], false),
-        relations: relation,
-      }),
-    }))) + ';',
-  ))
+  const sourcesJs = guardJsonScript(
+    escapeNonAsciiJs(
+      'window.FF_DATA_SOURCES = ' +
+        JSON.stringify(
+          used.map((s) => ({
+            id: s.id,
+            name: s.name,
+            tableId: s.tableId,
+            recordField: recordNumberOf(s),
+            ...deliveryAdapter(s.delivery.kind).export(s.delivery, s, {
+              usedFields: usedFields.get(s.id),
+              orderedFields: (source) =>
+                orderedFields(source, usedFields.get(source.id), getKey.get(source.id) ?? [], false),
+              relations: relation,
+            }),
+          })),
+        ) +
+        ';',
+    ),
+  )
 
-  const relationJs = guardJsonScript(escapeNonAsciiJs(
-    'window.FF_RELATIONS = ' + JSON.stringify(usedRelation.map((r) => ({
-      id: r.id,
-      verb: r.verb,
-      nr: r.nr,
-      parameter: r.parameter,
-      extraParameterAllowed: r.extraParameterAllowed === true,
-      ...(r.positions ? { positions: r.positions } : {}),
-    }))) + ';',
-  ))
+  const relationJs = guardJsonScript(
+    escapeNonAsciiJs(
+      'window.FF_RELATIONS = ' +
+        JSON.stringify(
+          usedRelation.map((r) => ({
+            id: r.id,
+            verb: r.verb,
+            nr: r.nr,
+            parameter: r.parameter,
+            extraParameterAllowed: r.extraParameterAllowed === true,
+            ...(r.positions ? { positions: r.positions } : {}),
+          })),
+        ) +
+        ';',
+    ),
+  )
 
   const rows = pageRowsTemplate(tree)
 
@@ -240,16 +244,16 @@ export function exportMask(
     '<style>',
     tokensCss,
     '',
-    '/* The sheet is paper to the window\'s edges; its grid as on the editor canvas. */',
+    "/* The sheet is paper to the window's edges; its grid as on the editor canvas. */",
     'html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--se-bg); }',
 
-    `.${MASK_ROOT_CLASS} { box-sizing: border-box; width: 100%; height: 100%; overflow: auto;`
-      + ` background: var(--se-bg);`
-      + ` font-family: var(--se-font); font-size: var(--se-fs); line-height: var(--se-lh); color: var(--se-ink);`
-      + ` font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; caret-color: var(--se-accent);`
-      + ` scrollbar-width: thin; scrollbar-color: var(--se-scrollbar) transparent;`
-      + ` ${gridAreaCss()};${rows ? ` grid-template-rows: ${rows};` : ''}`
-      + ` padding: var(--se-sheet-top) var(--se-sheet-x) var(--se-sheet-bottom); }`,
+    `.${MASK_ROOT_CLASS} { box-sizing: border-box; width: 100%; height: 100%; overflow: auto;` +
+      ` background: var(--se-bg);` +
+      ` font-family: var(--se-font); font-size: var(--se-fs); line-height: var(--se-lh); color: var(--se-ink);` +
+      ` font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; caret-color: var(--se-accent);` +
+      ` scrollbar-width: thin; scrollbar-color: var(--se-scrollbar) transparent;` +
+      ` ${gridAreaCss()};${rows ? ` grid-template-rows: ${rows};` : ''}` +
+      ` padding: var(--se-sheet-top) var(--se-sheet-x) var(--se-sheet-bottom); }`,
     `.${MASK_ROOT_CLASS} * { font-family: inherit; font-size: inherit; }`,
     `.${MASK_ROOT_CLASS} ::selection { background: var(--se-selection-ground); color: var(--se-ink); }`,
     '</style>',

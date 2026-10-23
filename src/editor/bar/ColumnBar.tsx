@@ -55,8 +55,19 @@ interface ColumnBarProps {
 }
 
 export function ColumnBar({
-  block, name, at, fields, groups, sourcesChoice, nameOf,
-  switches, actions, entries = [], removeLabel, onRemove, onClose,
+  block,
+  name,
+  at,
+  fields,
+  groups,
+  sourcesChoice,
+  nameOf,
+  switches,
+  actions,
+  entries = [],
+  removeLabel,
+  onRemove,
+  onClose,
 }: ColumnBarProps) {
   const ed = useEditor()
   const library = useDataSources().list
@@ -64,22 +75,31 @@ export function ColumnBar({
 
   useEffect(() => {
     const beside = (e: PointerEvent): void => {
-      const inside = e.composedPath().some((t) => t instanceof HTMLElement
-        && (t.getAttribute('role') === 'dialog' || t.dataset.ffEditorHelper !== undefined))
+      const inside = e
+        .composedPath()
+        .some(
+          (t) =>
+            t instanceof HTMLElement && (t.getAttribute('role') === 'dialog' || t.dataset.ffEditorHelper !== undefined),
+        )
       if (!inside) onClose()
     }
     document.addEventListener('pointerdown', beside, true)
     return () => document.removeEventListener('pointerdown', beside, true)
   }, [onClose])
 
-  const session = useMemo(() => ({
-    onBeginEditing: () => ed.beginTransaction(),
-    onEndEditing: () => ed.endTransaction(),
-  }), [ed])
+  const session = useMemo(
+    () => ({
+      onBeginEditing: () => ed.beginTransaction(),
+      onEndEditing: () => ed.endTransaction(),
+    }),
+    [ed],
+  )
   const sourceInReach = ed.dataSourceFor(block.id)
-  const own = entries.flatMap(({ properties, access }, group) => properties
-    .filter(([, property]) => controlShown(property, block, sourceInReach, library))
-    .map(([key, property]) => ({ key: `${group}:${key}`, propertyKey: key, property, access })))
+  const own = entries.flatMap(({ properties, access }, group) =>
+    properties
+      .filter(([, property]) => controlShown(property, block, sourceInReach, library))
+      .map(([key, property]) => ({ key: `${group}:${key}`, propertyKey: key, property, access })),
+  )
   const parts = 1 + fields.length + own.length + switches.length + actions.length + (onRemove ? 1 : 0)
   const fieldsFrom = fields.filter((field) => field.onlyForeignSources === true)
   const fieldsTo = fields.filter((field) => field.onlyForeignSources !== true)
@@ -97,7 +117,9 @@ export function ColumnBar({
           entry={access}
         />
       ))}
-      {switches.map((s) => <Switch key={s.key} label={s.label} on={s.on} onToggle={s.onToggle} />)}
+      {switches.map((s) => (
+        <Switch key={s.key} label={s.label} on={s.on} onToggle={s.onToggle} />
+      ))}
     </>
   )
 
@@ -119,21 +141,19 @@ export function ColumnBar({
         <ArrowRight size={13} aria-hidden className="shrink-0 text-muted" />
       )}
       {fieldsTo.map((field) => (
-        <FieldChoice
-          key={field.key}
-          field={field}
-          groups={groups}
-          sourcesChoice={sourcesChoice}
-          nameOf={nameOf}
-        />
+        <FieldChoice key={field.key} field={field} groups={groups} sourcesChoice={sourcesChoice} nameOf={nameOf} />
       ))}
-      {parts > BAR_PARTS
-        ? (
-            <BarWindow label="Anzeige">
-              {() => <div className="flex flex-wrap items-center gap-x-[14px] gap-y-[4px] [&>:not([data-switch])]:basis-full">{shows}</div>}
-            </BarWindow>
-          )
-        : shows}
+      {parts > BAR_PARTS ? (
+        <BarWindow label="Anzeige">
+          {() => (
+            <div className="flex flex-wrap items-center gap-x-[14px] gap-y-[4px] [&>:not([data-switch])]:basis-full">
+              {shows}
+            </div>
+          )}
+        </BarWindow>
+      ) : (
+        shows
+      )}
       {actions.map((a) => (
         <Button key={a.label} onlyIcon aria-label={a.label} title={a.label} onClick={a.onOpen}>
           {createElement(a.icon, { size: 15 })}
@@ -152,7 +172,12 @@ export function ColumnBar({
   )
 }
 
-function FieldChoice({ field, groups, sourcesChoice, nameOf }: {
+function FieldChoice({
+  field,
+  groups,
+  sourcesChoice,
+  nameOf,
+}: {
   field: PickerField
   groups: readonly PickerGroup[]
   sourcesChoice?: SourcesChoice
@@ -175,9 +200,11 @@ function FieldChoice({ field, groups, sourcesChoice, nameOf }: {
         }}
         className={OPENER}
       >
-        {field.current !== ''
-          ? <span className="max-w-[220px] truncate">{nameOf(field.current)}</span>
-          : <span className="text-muted">{field.label}</span>}
+        {field.current !== '' ? (
+          <span className="max-w-[220px] truncate">{nameOf(field.current)}</span>
+        ) : (
+          <span className="text-muted">{field.label}</span>
+        )}
         <ChevronDown size={13} aria-hidden className="text-muted" />
       </button>
       {at !== null && (

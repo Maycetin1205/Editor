@@ -261,8 +261,7 @@ export class CaptureRow {
     const held = order.find((slot) => this.held.has(slot))
     if (held !== undefined) return held
     const view = this.rowView()
-    const open = order
-      .find((slot) => view[slot]?.automatic !== true && (view[slot]?.value ?? '') === '')
+    const open = order.find((slot) => view[slot]?.automatic !== true && (view[slot]?.value ?? '') === '')
     return open ?? this.firstCell
   }
 
@@ -369,7 +368,9 @@ export class CaptureRow {
     if (typed === '') return []
     const codes = sameSourceCodes(context, index)
     const texts = (e: Entry): string[] => [
-      e.display, e.value, ...codes.map((code) => maskState.host.readField(e.record, code)),
+      e.display,
+      e.value,
+      ...codes.map((code) => maskState.host.readField(e.record, code)),
     ]
     const entries = this.entriesIn(context, index)
     const hit = typed.trim() === '' ? entries : entries.filter((e) => rowFits(texts(e), typed))
@@ -414,12 +415,7 @@ export class CaptureRow {
     }
   }
 
-  private keyValue(
-    context: CaptureContext,
-    partnerId: string,
-    field: string,
-    except: string,
-  ): string | undefined {
+  private keyValue(context: CaptureContext, partnerId: string, field: string, except: string): string | undefined {
     if (partnerId !== '' && partnerId !== context.sourceId) {
       const record = this.chosen.get(partnerId)
       return record === undefined ? '' : maskState.host.readField(record, field)
@@ -442,22 +438,13 @@ export class CaptureRow {
     return undefined
   }
 
-  private pairValue(
-    context: CaptureContext,
-    partnerId: string,
-    pair: KeyPair,
-    except: string,
-  ): string | undefined {
+  private pairValue(context: CaptureContext, partnerId: string, pair: KeyPair, except: string): string | undefined {
     return outsideValue(pair, this.host.block) ?? this.keyValue(context, partnerId, pair.fromField, except)
   }
 
   private possible(context: CaptureContext, sourceId: string, rows: readonly unknown[]): unknown[] {
     const partnerId = context.partnerOf(sourceId)
-    return fittingRecords(
-      context.pairsTo(sourceId),
-      (pair) => this.pairValue(context, partnerId, pair, sourceId),
-      rows,
-    )
+    return fittingRecords(context.pairsTo(sourceId), (pair) => this.pairValue(context, partnerId, pair, sourceId), rows)
   }
 
   private syncChosen(context: CaptureContext): void {
@@ -472,7 +459,9 @@ export class CaptureRow {
         if (record !== undefined) {
           const fits = pairs.every((p) => {
             const expected = this.pairValue(context, partnerId, p, sourceId)
-            return expected === undefined || (expected !== '' && expected === maskState.host.readField(record, p.toField))
+            return (
+              expected === undefined || (expected !== '' && expected === maskState.host.readField(record, p.toField))
+            )
           })
           if (!fits) {
             this.choose(context, sourceId, undefined)
@@ -507,10 +496,7 @@ export class CaptureRow {
   }
 
   private yieldToComputed(context: CaptureContext): void {
-    const slots = columnSlots(
-      context.calculations,
-      (key) => columnWithKey(context.columns, key),
-    )
+    const slots = columnSlots(context.calculations, (key) => columnWithKey(context.columns, key))
     for (const index of slots) {
       const value = this.typed.get(index)
       if (value === undefined || value === '') continue

@@ -2,7 +2,11 @@ import { fieldRead, isObject, rowsFromQueryAnswer, type JsonObject } from '../da
 
 function parsed(value: unknown): unknown {
   if (typeof value !== 'string') return value
-  try { return JSON.parse(value) as unknown } catch { return undefined }
+  try {
+    return JSON.parse(value) as unknown
+  } catch {
+    return undefined
+  }
 }
 
 function answerObject(raw: unknown): JsonObject | undefined {
@@ -20,8 +24,19 @@ function scalar(value: unknown): string | undefined {
 }
 
 const NESTED_KEYS = [
-  'RESULT', 'result', 'PINDEX', 'pindex', 'INDEX', 'index',
-  '0_10', 'KEY', 'key', 'ID', 'id', 'VALUE', 'value',
+  'RESULT',
+  'result',
+  'PINDEX',
+  'pindex',
+  'INDEX',
+  'index',
+  '0_10',
+  'KEY',
+  'key',
+  'ID',
+  'id',
+  'VALUE',
+  'value',
 ] as const
 
 function firstScalar(value: unknown, depth: number): string | undefined {

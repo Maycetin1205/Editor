@@ -49,8 +49,11 @@ export class Area extends BlockElement implements FoldHost {
     if (!this.folded) {
       void this.updateComplete.then(() => {
         const body = this.renderRoot.querySelector('.body')
-        if (body instanceof HTMLElement && typeof body.animate === 'function'
-          && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches !== true) {
+        if (
+          body instanceof HTMLElement &&
+          typeof body.animate === 'function' &&
+          window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches !== true
+        ) {
           body.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: 'ease-out' })
         }
       })
@@ -63,18 +66,23 @@ export class Area extends BlockElement implements FoldHost {
     const shut = this.folds && this.folded
     const live = this.folds
     return html`<div class="frame appearance-${this.appearance}${shut ? ' shut' : ''}">
-      ${headed
-        ? html`<div
+      ${
+        headed
+          ? html`<div
             class="head"
             role=${live ? 'button' : nothing}
             tabindex=${live ? 0 : nothing}
             aria-expanded=${live ? String(!shut) : nothing}
             @click=${live ? () => this.toggle() : nothing}
-            @keydown=${live ? (e: KeyboardEvent) => {
-              if (e.key !== 'Enter' && e.key !== ' ') return
-              e.preventDefault()
-              this.toggle()
-            } : nothing}
+            @keydown=${
+              live
+                ? (e: KeyboardEvent) => {
+                    if (e.key !== 'Enter' && e.key !== ' ') return
+                    e.preventDefault()
+                    this.toggle()
+                  }
+                : nothing
+            }
           >
             ${foldable ? html`<span class="caret">${icon('caretDown')}</span>` : nothing}
             <span
@@ -82,11 +90,14 @@ export class Area extends BlockElement implements FoldHost {
               data-ff-editable
               @dblclick=${(e: MouseEvent) => this.inlineEdit(e, 'heading')}
             >${this.heading}</span>
-            ${foldable && this.preview && this.startFolded
-              ? html`<span class="start-note">startet eingeklappt</span>`
-              : nothing}
+            ${
+              foldable && this.preview && this.startFolded
+                ? html`<span class="start-note">startet eingeklappt</span>`
+                : nothing
+            }
           </div>`
-        : nothing}
+          : nothing
+      }
       <div class="body" ?hidden=${shut}><slot></slot></div>
     </div>`
   }

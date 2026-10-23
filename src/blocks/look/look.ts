@@ -64,8 +64,10 @@ export function emphasisProperty(init: LookInit = {}): Property<string> {
 }
 
 export function sizeProperty(init: LookInit = {}): Property<string> {
-  return choiceProperty(SIZES.map(({ value, name }) => ({ value, name })),
-    { default: 'normal', label: 'Größe', attribute: 'size', ...init })
+  return choiceProperty(
+    SIZES.map(({ value, name }) => ({ value, name })),
+    { default: 'normal', label: 'Größe', attribute: 'size', ...init },
+  )
 }
 
 export function lookClass(look: { tone: string; emphasis: string; size: string }): string {
@@ -73,11 +75,14 @@ export function lookClass(look: { tone: string; emphasis: string; size: string }
 }
 
 export const lookStyle = css`
-  ${unsafeCSS(TONES
-    .map((f) => `.tone-${f.value} {`
-      + ` --tone-strong: var(${f.strong}); --tone-ink: var(${f.ink}); --tone-tint: var(${f.tint});`
-      + ` --tone-shell: var(${f.shell}); --tone-line: var(${f.line}); --tone-soft: var(${f.soft}); }`)
-    .join('\n  '))}
+  ${unsafeCSS(
+    TONES.map(
+      (f) =>
+        `.tone-${f.value} {` +
+        ` --tone-strong: var(${f.strong}); --tone-ink: var(${f.ink}); --tone-tint: var(${f.tint});` +
+        ` --tone-shell: var(${f.shell}); --tone-line: var(${f.line}); --tone-soft: var(${f.soft}); }`,
+    ).join('\n  '),
+  )}
   ${unsafeCSS(SIZES.map((s) => `.size-${s.value} { --look-fs: var(${s.font}); }`).join('\n  '))}
 
   .emphasis-solid {

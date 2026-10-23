@@ -4,12 +4,7 @@ import { bindingFields } from '../core/block/binding'
 import { bindingProp, capability, hasCapability } from '../core/block/capability'
 import { blockType, declaredValue } from '../core/block/registry'
 import { propertyVisible } from '../core/block/property'
-import {
-  selectionSourceIdOf,
-  bindableSpotsOf,
-  maySelectionFollows,
-  carriesOwnSource,
-} from '../core/block/treeQuery'
+import { selectionSourceIdOf, bindableSpotsOf, maySelectionFollows, carriesOwnSource } from '../core/block/treeQuery'
 import { SOURCE_PROPERTY } from '../core/block/sourceProperty'
 import { followsSelectionProperty, followUsable } from '../core/data/selectionFollow'
 import { calculationsProperty, fieldBindingsOf } from '../core/data/calculation'
@@ -17,12 +12,7 @@ import { splitsProperty } from '../core/data/split'
 import type { DataSource } from '../core/data/dataSources'
 import { deliveryAdapter } from '../core/data/deliveries/deliveries'
 import { alwaysOrdered } from '../core/data/positions'
-import {
-  sourceUsable,
-  completePairs,
-  extraSourcesProperty,
-  type SourceInReach,
-} from '../core/data/extraSources'
+import { sourceUsable, completePairs, extraSourcesProperty, type SourceInReach } from '../core/data/extraSources'
 import { sourceIdsUsedBy, sourcesInReach } from '../core/block/sourcesInReach'
 import { stepAdapter } from '../core/data/steps/steps'
 
@@ -36,10 +26,7 @@ function fieldsReadBy(source: DataSource): { sourceId: string; code: string }[] 
   return out
 }
 
-export function collectDataSources(
-  tree: MaskTree,
-  sources: readonly DataSource[],
-): DataSource[] {
+export function collectDataSources(tree: MaskTree, sources: readonly DataSource[]): DataSource[] {
   const seen = new Set<string>()
   const acc: DataSource[] = []
   const add = (id: string): void => {
@@ -62,10 +49,7 @@ export function collectDataSources(
   return acc
 }
 
-export function usedFieldsPerSource(
-  tree: MaskTree,
-  sources: readonly DataSource[],
-): Map<string, ReadonlySet<string>> {
+export function usedFieldsPerSource(tree: MaskTree, sources: readonly DataSource[]): Map<string, ReadonlySet<string>> {
   const fields = new Map<string, Set<string>>()
 
   const remember = (sourceId: string, code: unknown): void => {
@@ -80,16 +64,12 @@ export function usedFieldsPerSource(
     const def = blockType(node.type)
 
     let reach: SourceInReach[] | undefined
-    const inReach = (): SourceInReach[] => (
-      reach ??= sourcesInReach(tree, node.id, sources)
-    )
+    const inReach = (): SourceInReach[] => (reach ??= sourcesInReach(tree, node.id, sources))
 
     const rememberBinding = (value: unknown): void => {
       if (typeof value !== 'string' || value === '') return
       const { sourceId, code } = splitBinding(value)
-      const target = sourceId === ''
-        ? inReach()[0]
-        : inReach().find((q) => q.source.id === sourceId)
+      const target = sourceId === '' ? inReach()[0] : inReach().find((q) => q.source.id === sourceId)
       if (target) remember(target.source.id, code)
     }
 
@@ -100,9 +80,7 @@ export function usedFieldsPerSource(
 
     const b = capability(def, 'list')?.binding
     if (b) {
-      const ownSource = b.sourceProp === undefined
-        ? undefined
-        : String(node.values[b.sourceProp] ?? '')
+      const ownSource = b.sourceProp === undefined ? undefined : String(node.values[b.sourceProp] ?? '')
       const rememberEntryField = (value: unknown): void => {
         if (ownSource === undefined) rememberBinding(value)
         else remember(ownSource, value)
@@ -200,10 +178,7 @@ export function usedFieldsPerSource(
   return fields
 }
 
-export function getKeyPerGiver(
-  tree: MaskTree,
-  sources: readonly DataSource[],
-): Map<string, string[]> {
+export function getKeyPerGiver(tree: MaskTree, sources: readonly DataSource[]): Map<string, string[]> {
   const perGiver = new Map<string, string[]>()
   const remember = (giverId: string, codes: readonly string[]): void => {
     if (giverId === '') return

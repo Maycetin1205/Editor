@@ -13,7 +13,11 @@ import { SourcesTab } from './SourcesTab'
 
 type Tab = 'sources' | 'relations'
 
-function FilePick({ accept, pickRef, onFile }: {
+function FilePick({
+  accept,
+  pickRef,
+  onFile,
+}: {
   accept: string
   pickRef: RefObject<HTMLInputElement | null>
   onFile: (file: File) => void
@@ -72,10 +76,14 @@ export function DataWindow({ onClose }: { onClose: () => void }) {
         setImporting(null)
         setTab(key)
       }}
-      buttons={(
+      buttons={
         <>
           <FilePick accept=".dtk" pickRef={dtkRef} onFile={(file) => void dtkChosen(file)} />
-          <FilePick accept=".json,application/json" pickRef={libraryRef} onFile={(file) => void loadLibraryFromFile(ed, file)} />
+          <FilePick
+            accept=".json,application/json"
+            pickRef={libraryRef}
+            onFile={(file) => void loadLibraryFromFile(ed, file)}
+          />
           <Button onClick={() => dtkRef.current?.click()}>
             <FileUp size={14} /> Import
           </Button>
@@ -86,12 +94,16 @@ export function DataWindow({ onClose }: { onClose: () => void }) {
             <FolderOpen size={14} /> Bibliothek laden
           </Button>
         </>
-      )}
+      }
       onClose={onClose}
     >
-      {importing
-        ? <DtkImport fileName={importing.fileName} tables={importing.tables} onClose={() => setImporting(null)} />
-        : tab === 'sources' ? <SourcesTab /> : <RelationsTab />}
+      {importing ? (
+        <DtkImport fileName={importing.fileName} tables={importing.tables} onClose={() => setImporting(null)} />
+      ) : tab === 'sources' ? (
+        <SourcesTab />
+      ) : (
+        <RelationsTab />
+      )}
     </Window>
   )
 }

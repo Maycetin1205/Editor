@@ -10,14 +10,7 @@ interface TabsProps {
   children: ReactNode
 }
 
-export function Tabs({
-  active = false,
-  onClick,
-  onDoubleClick,
-  title,
-  className,
-  children,
-}: TabsProps) {
+export function Tabs({ active = false, onClick, onDoubleClick, title, className, children }: TabsProps) {
   return (
     <button
       type="button"

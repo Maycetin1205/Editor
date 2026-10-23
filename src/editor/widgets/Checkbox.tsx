@@ -15,19 +15,9 @@ interface CheckboxProps {
 export function Checkbox({ checked, disabled = false, onChange, className, children }: CheckboxProps) {
   return (
     <label
-      className={cn(
-        'flex items-center gap-[10px] text-ui',
-        disabled ? 'opacity-[.45]' : 'cursor-pointer',
-        className,
-      )}
+      className={cn('flex items-center gap-[10px] text-ui', disabled ? 'opacity-[.45]' : 'cursor-pointer', className)}
     >
-      <input
-        type="checkbox"
-        className="peer sr-only"
-        checked={checked}
-        disabled={disabled}
-        onChange={onChange}
-      />
+      <input type="checkbox" className="peer sr-only" checked={checked} disabled={disabled} onChange={onChange} />
       <TickBox
         on={checked}
         className="peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent"

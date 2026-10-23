@@ -10,13 +10,7 @@ import { DELIVERY_KINDS, deliveryAdapter } from '../core/data/deliveries/deliver
 import { extraSourcesOf } from './foreignSources'
 import { warn } from './log'
 import { loadEnded, loadStarted } from './notice'
-import {
-  onSelectionList,
-  selectionFor,
-  selectionGiverOf,
-  selectionNumber,
-  traitOf,
-} from './selection'
+import { onSelectionList, selectionFor, selectionGiverOf, selectionNumber, traitOf } from './selection'
 import { maskState } from './maskState'
 
 function defsWithRecordChoice(): Map<string, BlockType> {
@@ -37,7 +31,7 @@ function sourcesAttrFor(el: Element, def: BlockType): string {
     const value = declared?.type.fromAttribute(el.getAttribute(declared.attribute), declared.default)
     active = propertyVisible(choice.when, { [name]: value as PropertyValue })
   }
-  const prop = active ? choice.sourceProp ?? SOURCE_PROP : SOURCE_PROP
+  const prop = active ? (choice.sourceProp ?? SOURCE_PROP) : SOURCE_PROP
   return def.properties[prop]?.attribute ?? ''
 }
 
@@ -116,15 +110,18 @@ function checkFetchingSources(byControls: boolean): void {
 
 function showingSource(sourceId: string): HTMLElement[] {
   if (typeof document === 'undefined') return []
-  return Array.from(document.querySelectorAll<HTMLElement>(`[${BLOCK_ID_ATTR}]`)).filter((el) =>
-    readDeclared(el, SOURCE_PROPERTY) === sourceId
-    || extraSourcesOf(el).some((extra) => extra.sourceId === sourceId))
+  return Array.from(document.querySelectorAll<HTMLElement>(`[${BLOCK_ID_ATTR}]`)).filter(
+    (el) =>
+      readDeclared(el, SOURCE_PROPERTY) === sourceId || extraSourcesOf(el).some((extra) => extra.sourceId === sourceId),
+  )
 }
 
 function load(source: RuntimeSource, giverRow: unknown): void {
   const showing = showingSource(source.id)
   showing.forEach(loadStarted)
-  const ended = (): void => { showing.forEach(loadEnded) }
+  const ended = (): void => {
+    showing.forEach(loadEnded)
+  }
   const running = maskState.host.fetchRows(source, giverRow, selectionFor).then(ended, (error: unknown) => {
     warn(`Quelle "${source.name}" nicht geladen`, error)
     ended()
