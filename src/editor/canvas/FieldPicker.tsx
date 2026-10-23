@@ -84,7 +84,7 @@ function displayOf(value: string, groups: readonly PickerGroup[]): Display {
   return { name: fields.map((f) => f.name).join(bindingJoiner(value)), key, empty: false }
 }
 
-export interface SeveralFields {
+interface SeveralFields {
   joiner: BindingJoiner
   onJoiner: (joiner: BindingJoiner) => void
 }

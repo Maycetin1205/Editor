@@ -52,7 +52,7 @@ const PLACES = {
 
 type Read = (row: unknown, code: string) => string
 
-export interface PositionsLook {
+interface PositionsLook {
   sources(): readonly RuntimeSource[]
   source(id: string): RuntimeSource | undefined
   rows(source: RuntimeSource): unknown[]
@@ -160,7 +160,7 @@ export function positionIdentity(tableId: string, row: unknown, read: Read): str
   return own.ident !== '' ? own.ident : own.number
 }
 
-export interface KnownPositions {
+interface KnownPositions {
   idents: ReadonlySet<string>
   numbers: ReadonlySet<string>
 }

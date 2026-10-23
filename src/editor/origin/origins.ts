@@ -2,7 +2,7 @@ import { ACTION_PLACEHOLDER } from '../../core/data/actions'
 import type { OriginKind, ValueOrigin } from '../../core/data/valueOrigin'
 import { fieldEntries, type Reach, type ReachEntry } from './reach'
 
-export interface Origin {
+interface Origin {
   key: string
   kind: OriginKind
   name: string

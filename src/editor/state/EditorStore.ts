@@ -38,7 +38,7 @@ import {
 import { EditorView, type Deed, type OpenCalculation, type OpenLookup, type OpenStep, type SideTab } from './editorStore/viewState'
 import type { Column } from './maskStorage'
 
-export type { OpenCalculation, OpenLookup, OpenStep } from './editorStore/viewState'
+export type {  OpenLookup,  } from './editorStore/viewState'
 
 export class EditorStore extends Subject<EditorStore> {
   readonly dataSources: DataSourceStore

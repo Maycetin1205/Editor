@@ -9,9 +9,9 @@ export interface SplitPick {
   amount: string
 }
 
-export type SplitTone = 'soon' | 'past' | undefined
+type SplitTone = 'soon' | 'past' | undefined
 
-export type SplitKey = 'done' | 'back' | 'blocked' | 'handled' | 'nothing'
+type SplitKey = 'done' | 'back' | 'blocked' | 'handled' | 'nothing'
 
 const SEARCH_PAUSE_MS = 900
 

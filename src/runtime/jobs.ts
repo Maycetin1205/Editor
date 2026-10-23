@@ -24,13 +24,9 @@ export function noteJob(job: JobView): void {
   })
 }
 
-export function subscribe(listener: (job: JobView) => void): () => void {
+function subscribe(listener: (job: JobView) => void): () => void {
   maskState.jobs.listeners.add(listener)
   return () => { maskState.jobs.listeners.delete(listener) }
-}
-
-export function jobsOf(origin: string): JobView[] {
-  return [...maskState.jobs.known.values()].filter((job) => job.origin === origin)
 }
 
 // For the developer tools inside SoftEngine: ffAuftraege() lists what the mask

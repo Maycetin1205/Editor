@@ -68,7 +68,7 @@ export function figureOf(column: Column, calculations: readonly Calculation[]): 
     : null
 }
 
-export const AMOUNT_DECIMALS = 2
+const AMOUNT_DECIMALS = 2
 
 export function shownValue(figure: Figure | null, value: string): string {
   return figure === null ? value : shownFigure(value, figure.decimals)

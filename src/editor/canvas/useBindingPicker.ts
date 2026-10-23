@@ -10,7 +10,7 @@ import type { EditorStore } from '../state/EditorStore'
 
 const DOUBLE_CLICK_WAIT = 300
 
-export function bindingCode(props: Readonly<Record<string, PropertyValue>>, spot: BindableSpot): string {
+function bindingCode(props: Readonly<Record<string, PropertyValue>>, spot: BindableSpot): string {
   const code = props[bindingProp(spot.prop)]
   return typeof code === 'string' ? code : ''
 }

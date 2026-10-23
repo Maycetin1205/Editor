@@ -53,7 +53,7 @@ function asLine(raw: unknown, index: number): ValueLine {
   }
 }
 
-export function coerceLines(v: unknown): ValueLine[] {
+function coerceLines(v: unknown): ValueLine[] {
   const lines = Array.isArray(v) ? v.map(asLine) : []
   const taken = new Set<string>()
   const own = lines.map((line) => {

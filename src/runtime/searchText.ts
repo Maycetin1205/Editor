@@ -5,7 +5,7 @@ import { maskState } from './maskState'
 
 const plain = (text: string): string => text.trim().toLowerCase()
 
-export function searchText(): string {
+function searchText(): string {
   return maskState.search.text
 }
 

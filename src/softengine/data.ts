@@ -72,7 +72,7 @@ const NAMED: Readonly<Record<string, string>> = {
   auml: 'ä', ouml: 'ö', uuml: 'ü', Auml: 'Ä', Ouml: 'Ö', Uuml: 'Ü', szlig: 'ß', euro: '€',
 }
 
-export function decodeEntities(s: string): string {
+function decodeEntities(s: string): string {
   if (!s.includes('&')) return s
   return s.replace(ENTITY, (whole, body: string) => {
     if (body.startsWith('#x') || body.startsWith('#X')) return String.fromCodePoint(Number.parseInt(body.slice(2), 16))

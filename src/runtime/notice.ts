@@ -14,7 +14,7 @@ import { closeFailure, showFailure } from './infoBar'
 export type NoticeState = 'ruhig' | 'lädt' | 'schreibt' | 'gespeichert' | 'gesendet' | 'Fehler'
 
 export const NOTICE_ATTR = 'data-ff-notice'
-export const NOTICE_REASON_ATTR = 'data-ff-notice-reason'
+const NOTICE_REASON_ATTR = 'data-ff-notice-reason'
 
 const SHOWN: readonly NoticeState[] = ['lädt', 'schreibt', 'gespeichert', 'gesendet', 'Fehler']
 
@@ -28,7 +28,7 @@ const NOT_CONFIRMED = 'Gesendet, aber von SoftEngine nicht bestätigt'
 
 const SENT_ONLY = 'Gesendet. SoftEngine meldet nicht zurück, ob es gespeichert hat.'
 
-export function reasonSentence(reason: JobReason | undefined): string {
+function reasonSentence(reason: JobReason | undefined): string {
   if (reason === undefined) return 'Aktion gescheitert'
   if (reason === NO_ANSWER) return `SoftEngine hat nicht geantwortet (${ANSWER_WAIT_MS / 1000} s)`
   if (reason === NO_CONFIRMATION) return NOT_CONFIRMED

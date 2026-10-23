@@ -4,7 +4,7 @@ import type { PropertyMap, PropertyValue } from './property'
 
 export {
   entriesWithValue,
-  entryPathFrom,
+  
   entryValues,
   fieldChoicesRead,
   innerOf,
@@ -12,7 +12,7 @@ export {
   flagOn,
   flagFor,
   withInner,
-  type EntryPath,
+  
   type ListBinding,
 } from './listBinding'
 

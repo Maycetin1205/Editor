@@ -92,7 +92,7 @@ export function giverGroup(node: BlockNode, sources: readonly DataSource[]): Rea
 const rowsGroup = (node: BlockNode, sources: readonly DataSource[]): ReachGroup =>
   ({ id: node.id, name: blockName(node, sources), entries: columnEntries(node) })
 
-export const SPLIT_AMOUNT_NAME = 'Verteilte Menge'
+const SPLIT_AMOUNT_NAME = 'Verteilte Menge'
 
 function splitGroups(tree: MaskTree, sources: readonly DataSource[]): ReachGroup[] {
   return captureCarrierInTree(tree).flatMap((node) => {

@@ -6,7 +6,7 @@ import { bindingFields, bindingJoiner, joinedBinding, splitBinding } from './bin
 
 export type SlotForm = '' | 'number' | 'amount' | 'date'
 
-export interface PatternPiece {
+interface PatternPiece {
   text: string
   field?: string
   form?: SlotForm
@@ -59,11 +59,11 @@ function withoutSlot(pattern: string, field: string): string {
     .join(''))
 }
 
-export function plainOf(pattern: string): string {
+function plainOf(pattern: string): string {
   return tidy(patternPieces(pattern).map((p) => p.text).join(''))
 }
 
-export interface Woven {
+interface Woven {
   pattern: string
   binding: string
   text?: string
@@ -91,7 +91,7 @@ export function weave(pattern: string, words: string, binding: string, field: st
   }
 }
 
-export interface NamedField {
+interface NamedField {
   field: string
   name: string
 }

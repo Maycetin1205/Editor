@@ -110,7 +110,7 @@ export const PICTURE_RELATIONS: Readonly<Record<string, { name: string; more: re
   1912: { name: 'Medienbild', more: ['J'] },
 }
 
-export interface PictureAsk {
+interface PictureAsk {
   relation: RuntimeRelation
   more: readonly string[]
 }

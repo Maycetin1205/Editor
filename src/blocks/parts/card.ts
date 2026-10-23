@@ -41,19 +41,19 @@ export const avatarStyle = css`
   }
 `
 
-export function animalAvatarTpl(animal: Animal): TemplateResult {
+function animalAvatarTpl(animal: Animal): TemplateResult {
   return html`<span
     class="avatar"
     style="--animal:var(--se-animal-${animal});--animal-soft:var(--se-animal-${animal}-soft)"
   >${animalOutline(animal)}</span>`
 }
 
-export function letterAvatarTpl(text: string): TemplateResult {
+function letterAvatarTpl(text: string): TemplateResult {
   const first = Array.from(text.trim())[0] ?? ''
   return html`<span class="avatar letter" aria-hidden="true">${first.toUpperCase()}</span>`
 }
 
-export function avatarTpl(value: string): TemplateResult | typeof nothing {
+function avatarTpl(value: string): TemplateResult | typeof nothing {
   if (value.trim() === '') return nothing
   const animal = animalOf(value)
   return animal === undefined ? letterAvatarTpl(value) : animalAvatarTpl(animal)

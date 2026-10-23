@@ -6,7 +6,7 @@ import { maskState } from '../../runtime/maskState'
 import { alignSuggestionsFrom } from '../lookup/suggestionList'
 import { splitColumnText, splitTone, type SplitState } from './ledger/split'
 
-export interface SplitAct {
+interface SplitAct {
   key: (e: KeyboardEvent) => void
   toggle: (index: number) => void
   mark: (index: number) => void

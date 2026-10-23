@@ -59,11 +59,6 @@ export function idOf(raw: unknown): string {
   return isPlain(raw) && typeof raw.id === 'string' ? raw.id : ''
 }
 
-export function leftoverEmpty(left: Leftover): boolean {
-  return Object.keys(left.nodes).length === 0 && Object.keys(left.values).length === 0
-    && Object.keys(left.chains).length === 0 && left.dataSources.length === 0 && left.relation.length === 0
-}
-
 // The tree as it goes into the file: values this editor could not read stand
 // again where they stood, unless the block was changed there since.
 export function treeForFile(tree: MaskTree, left: Leftover): MaskTree {

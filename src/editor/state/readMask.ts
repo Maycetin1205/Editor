@@ -8,7 +8,7 @@ import { checkTreeState, type Missed } from './checkTreeState'
 import { chainKey, idOf, withLeftover, type Known, type Leftover, type SourceLeft } from './leftover'
 import { liftState } from './maskSchema'
 
-export interface MaskRead {
+interface MaskRead {
   tree: MaskTree
   selectedId: string | null
   activePageId: unknown
@@ -18,7 +18,7 @@ export interface MaskRead {
   lines: NoticeLine[]
 }
 
-export type MaskReadResult =
+type MaskReadResult =
   | { ok: true; read: MaskRead }
   | { ok: false; why: 'lift' | 'root' }
 

@@ -11,7 +11,7 @@ export interface Names {
   leadName?: string
 }
 
-export const FIXED = 'Feste Zahl'
+const FIXED = 'Feste Zahl'
 export const UNITS = 'Faktor aus zwei Einheiten'
 
 export const columnTitle = (names: Names, key: string): string =>

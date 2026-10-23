@@ -36,7 +36,7 @@ export interface Helpers {
   picks: readonly SplitPick[]
 }
 
-export type SplitOpening = 'none' | 'open' | 'waits'
+type SplitOpening = 'none' | 'open' | 'waits'
 
 export interface LookupSpot {
   spot: string

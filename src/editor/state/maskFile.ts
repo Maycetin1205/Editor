@@ -27,7 +27,7 @@ export interface MaskContent {
   leftover: Leftover
 }
 
-export interface ReadNote {
+interface ReadNote {
   newer: string | null
   lines: readonly NoticeLine[]
 }
@@ -87,7 +87,7 @@ function treeWithout(tree: MaskTree, names: readonly string[]): MaskTree {
   return { ...tree, [ROOT_ID]: { ...root, values } }
 }
 
-export async function saveMask(editor: EditorStore): Promise<void> {
+async function saveMask(editor: EditorStore): Promise<void> {
   const disk = editor.maskOnDisk
   if (disk.attached && disk.locked) {
     editor.showNotice({

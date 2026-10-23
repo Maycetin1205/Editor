@@ -47,14 +47,14 @@ const PAUSE_CHECK_MS = 1_000
 const FIRST_READ_MS = 150
 const READ_AGAIN_MS = 500
 
-export interface QueryKeys {
+interface QueryKeys {
   documentKind: string
   address: string
 }
 
 const ALL_RECORDS: QueryKeys = { documentKind: '', address: '' }
 
-export interface QueryAnswer {
+interface QueryAnswer {
   rows?: unknown[]
   reason?: JobReason
 }
@@ -112,7 +112,7 @@ function isRecordAnswer(raw: unknown): boolean {
   return rowsFromQueryAnswer(raw) === undefined && extractRecordAnswer(raw) !== undefined
 }
 
-export class HostQueue {
+class HostQueue {
   private readonly waiting: Job[] = []
 
   private current: Job | null = null
@@ -589,13 +589,6 @@ export class HostQueue {
 }
 
 const line = new HostQueue()
-
-const generations = { last: 0 }
-
-export function newGeneration(): number {
-  generations.last += 1
-  return generations.last
-}
 
 export function relationRun(
   template: RuntimeRelation,

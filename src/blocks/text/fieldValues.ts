@@ -17,7 +17,7 @@ function compactDay(value: string): Date | null {
   return day.getMonth() === Number(m[2]) - 1 && day.getDate() === Number(m[3]) ? day : null
 }
 
-export function formed(value: string, form: SlotForm | undefined): string {
+function formed(value: string, form: SlotForm | undefined): string {
   const t = value.trim()
   if (t === '' || !form) return value
   if (form === 'date') {

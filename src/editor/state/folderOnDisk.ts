@@ -67,7 +67,7 @@ export async function writeText(file: FileSystemFileHandle, text: string): Promi
   await open.close()
 }
 
-export async function fileIn(folder: FileSystemDirectoryHandle, name: string): Promise<FileSystemFileHandle | null> {
+async function fileIn(folder: FileSystemDirectoryHandle, name: string): Promise<FileSystemFileHandle | null> {
   try {
     return await folder.getFileHandle(name)
   } catch {

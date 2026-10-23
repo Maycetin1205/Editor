@@ -4,7 +4,7 @@ import { isUnread } from '../unread'
 
 export const BLOCK_ID_ATTR = 'data-ff-block-id'
 
-export const PARAMETER_SOURCES = [
+const PARAMETER_SOURCES = [
   'fixed',
   'context',
   'dataField',

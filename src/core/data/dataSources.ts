@@ -9,10 +9,10 @@ import { isWriteKind, recordFieldOf, writeAdapter, type Write } from './writes/w
 
 export {
   fieldPrefixFromInput,
-  fieldCode,
+  
   keyDisplay,
-  headerKeyFromInput,
-  columnsNameFromInput,
+  
+  
 } from './sourceInput'
 
 export const LENGTH_MAX = 200

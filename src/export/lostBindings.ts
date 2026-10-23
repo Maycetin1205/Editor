@@ -7,7 +7,7 @@ import { bindableSpotsOf } from '../core/block/treeQuery'
 import { boundField, sourceInReachOf } from '../core/data/boundField'
 import type { DataSource } from '../core/data/dataSources'
 
-export interface LostBinding {
+interface LostBinding {
   blockName: string
   code: string
   sourceName: string

@@ -21,7 +21,7 @@ import {
   placePicked,
 } from './placeOrigins'
 
-export interface Filled {
+interface Filled {
   parameter: readonly Parameter[]
   extraParameter: readonly Parameter[]
 }

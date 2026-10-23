@@ -19,7 +19,7 @@ export type Missed =
   | { kind: 'lost'; id: string }
   | { kind: 'chain'; id: string; type: string; event: string }
 
-export interface TreeRead {
+interface TreeRead {
   tree: MaskTree
   selectedId: string | null
   leftover: Pick<Leftover, 'nodes' | 'places' | 'values' | 'chains'>

@@ -7,7 +7,7 @@ export interface Until {
   late: boolean
 }
 
-export function minuteOf(text: string): number | null {
+function minuteOf(text: string): number | null {
   const time = /(?<!\d)(\d{1,2}):(\d{2})(?!\d)/.exec(text)
   if (!time) return null
   const hour = Number(time[1])
@@ -15,11 +15,11 @@ export function minuteOf(text: string): number | null {
   return hour < 24 && minute < 60 ? hour * 60 + minute : null
 }
 
-export const minuteNow = (now: Date): number => now.getHours() * 60 + now.getMinutes()
+const minuteNow = (now: Date): number => now.getHours() * 60 + now.getMinutes()
 
-export const isToday = (now: Date): boolean => chosenDay() === dayOf(now)
+const isToday = (now: Date): boolean => chosenDay() === dayOf(now)
 
-export const clockOf = (now: Date): string =>
+const clockOf = (now: Date): string =>
   now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 
 // How long a card has waited since a time of today, as "14 Min.".
@@ -32,7 +32,7 @@ export function waitOf(since: string, now: Date): string | null {
   return `${Math.floor(span / 60)} Std.${rest > 0 ? ` ${rest} Min.` : ''}`
 }
 
-export function untilOf(minute: number, now: number): Until | null {
+function untilOf(minute: number, now: number): Until | null {
   const away = minute - now
   if (away === 0) return { text: 'jetzt', late: false }
   const span = Math.abs(away)

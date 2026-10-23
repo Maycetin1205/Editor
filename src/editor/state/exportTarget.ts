@@ -35,7 +35,7 @@ export async function pickExportTarget(now: string): Promise<string | null> {
   return name
 }
 
-export type ExportFolder =
+type ExportFolder =
   | { ok: true; folder: FileSystemDirectoryHandle }
   | { ok: false; why: string }
 

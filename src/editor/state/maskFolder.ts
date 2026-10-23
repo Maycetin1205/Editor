@@ -14,7 +14,7 @@ import {
 import { keepHandle, keptHandle } from './handleStore'
 import { Subject } from './Subject'
 
-export const MASK_SUFFIX = '.aufbau-maske.json'
+const MASK_SUFFIX = '.aufbau-maske.json'
 
 export const TEMPLATE_FOLDER = 'Vorlagen'
 
@@ -35,7 +35,7 @@ export interface MaskEntry {
   file: FileSystemFileHandle
 }
 
-export type FolderState = 'none' | 'ask' | 'open'
+type FolderState = 'none' | 'ask' | 'open'
 
 export class MaskFolder extends Subject<MaskFolder> {
   private handle: FileSystemDirectoryHandle | null = null

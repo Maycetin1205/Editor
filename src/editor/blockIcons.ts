@@ -45,19 +45,3 @@ export const BLOCK_ICONS: Record<string, Icon> = {
   [Text.type]: Type,
   [ValueList.type]: List,
 }
-
-export const BLOCK_HINTS: Record<string, string> = {
-  [Area.type]: 'Fläche für andere Bausteine',
-  [Button.type]: 'Startet eine Aktion',
-  [Capture.type]: 'Positionen tippen wie in SoftEngine',
-  [DataList.type]: 'Zeilen mit Titel und Unterzeile',
-  [DatePicker.type]: 'Ein Tag zur Wahl',
-  [Divider.type]: 'Eine Linie zwischen zwei Gruppen, mit Wort oder ohne',
-  [FormField.type]: 'Tippen, wählen oder ankreuzen',
-  [Picture.type]: 'Logo, Artikelbild oder ein Bild aus einem Feld',
-  [Kanban.type]: 'Karten in Spalten, etwa Termine',
-  [Popup.type]: 'Ein Fenster über der Maske',
-  [Table.type]: 'Zeilen einer Quelle unter einem Kopf',
-  [Text.type]: 'Titel, Beschriftung oder Wörter mit Feldwerten',
-  [ValueList.type]: 'Werte untereinander, auf Wunsch mit Summe',
-}

@@ -64,7 +64,7 @@ export interface SheetZoom {
   choose: (choice: ZoomChoice, at?: { clientX: number; clientY: number }) => void
 }
 
-export interface SheetZoomPlaces {
+interface SheetZoomPlaces {
   canvas: RefObject<HTMLDivElement | null>
   sheet: RefObject<HTMLDivElement | null>
 }

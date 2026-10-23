@@ -25,5 +25,3 @@ export const ROW_SPOTS = [
   { prop: 'subline', name: 'Unterzeile', several: true },
   { prop: 'aside', name: 'Rechts', several: true },
 ] as const
-
-export type RowSpot = (typeof ROW_SPOTS)[number]['prop']
