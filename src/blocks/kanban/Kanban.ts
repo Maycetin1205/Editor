@@ -169,8 +169,8 @@ export class Kanban extends BlockElement {
     }
   }
 
-  // A choice of the places of the next column, as the room for a patient
-  // who waits.
+  // A choice of the places of the next column: the card moves there without
+  // being dragged.
   private pick(spot: Spot, card: CardData | null): TemplateResult | typeof nothing {
     const next = this.columns[spot.column + 1]
     if (!this.columns[spot.column]?.placePick || !next) return nothing
@@ -235,7 +235,7 @@ export class Kanban extends BlockElement {
                   </div>`
                   : nothing
               }
-              ${shows('heading2') ? spotTpl('heading2', 'owner') : nothing}
+              ${shows('heading2') ? spotTpl('heading2', 'heading2') : nothing}
             </div>
             ${corner}
           </div>`
@@ -323,14 +323,18 @@ export class Kanban extends BlockElement {
     </div>`
   }
 
-  // One pill a column above the board: its cards, or for rooms how many
-  // are taken.
+  // One pill a column above the board: its cards, or for places shown taken
+  // or free, how many are taken.
   private summaryTpl(): TemplateResult {
     return html`<div class="summary">${this.columns.map((column, i) => {
-      const rooms = column.occupancy && column.places.length > 1
+      const byOccupancy = column.occupancy && column.places.length > 1
       const taken = column.places.filter((_, p) => this.taken({ column: i, place: p })).length
       const shown =
-        this.preview && !rooms ? '' : rooms ? `${taken} / ${column.places.length}` : this.board.allIn(i).length
+        this.preview && !byOccupancy
+          ? ''
+          : byOccupancy
+            ? `${taken} / ${column.places.length}`
+            : this.board.allIn(i).length
       return html`<span class="pill tone-${toneValue(column.tone)}">
         <span class="dot"></span>
         <span class="pill-name">${column.heading}</span>

@@ -105,7 +105,7 @@ export const kanbanStyle = css`
     text-overflow: ellipsis;
   }
 
-  /* .card .hd .cnt: the count in the second ink. */
+  /* The count in the second ink. */
   .count {
     color: var(--se-ink-2);
     font-size: var(--se-fs-lg);
@@ -154,10 +154,10 @@ export const kanbanStyle = css`
     scrollbar-width: thin;
   }
 
-  /* A place of a column with more than one: a room on the column, white,
+  /* A place of a column with more than one: a white field on the column,
      its name small above the cards. The places share the height of the
      column: each keeps its cards and takes an equal part of what is left, so
-     an empty room is a room, not a strip. */
+     an empty place keeps its share instead of shrinking to a strip. */
   .place {
     display: flex;
     flex-direction: column;
@@ -188,7 +188,7 @@ export const kanbanStyle = css`
     font-variant-numeric: tabular-nums;
   }
 
-  /* Who works in a room, beside its name. */
+  /* The addition of a place, beside its name. */
   .place-sub {
     min-width: 0;
     color: var(--se-faint);
@@ -199,7 +199,7 @@ export const kanbanStyle = css`
     text-overflow: ellipsis;
   }
 
-  /* A room taken or free: the dot in the tone or grey, the word in a chip. */
+  /* A place taken or free: the dot in the tone or grey, the word in a chip. */
   .place .dot { width: 7px; height: 7px; }
   .place.free .dot { background: var(--se-line-strong); }
   .state {
@@ -289,7 +289,7 @@ export const kanbanStyle = css`
   }
 
   .name,
-  .owner {
+  .heading2 {
     display: block;
     min-width: 0;
     white-space: nowrap;
@@ -308,7 +308,7 @@ export const kanbanStyle = css`
     font-weight: 600;
     white-space: nowrap;
   }
-  .owner {
+  .heading2 {
     color: var(--se-ink-2);
     font-size: var(--se-fs-sm);
     font-weight: 600;
@@ -452,11 +452,11 @@ export const kanbanStyle = css`
     background: var(--se-danger);
   }
 
-  /* The button under the card, a second button (Chat 5e): the grey ground
-     of the day button Heute without a line, the first ink half bold; a step
-     darker under the pointer. The lighter --se-panel-2 would vanish on a
-     card under the pointer. Neither the tone of a column nor the accent:
-     only the main button is blue. */
+  /* The button under the card, a second button: the grey ground of the day
+     button Heute without a line, the first ink half bold; a step darker under
+     the pointer. The lighter --se-panel-2 would vanish on a card under the
+     pointer. Neither the tone of a column nor the accent: only the main
+     button is blue. */
   .advance {
     box-sizing: border-box;
     width: 100%;
