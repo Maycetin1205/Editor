@@ -10,7 +10,7 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - Ein Baustein, der nicht mehr in den gewählten Bereich passt, landet auf der Seite; passt er auch dort nicht, sagt es eine Meldung. Vorher verschwand er.
 - Die Suche findet „Müller“ mit „muller“ in jeder Liste, auch im Kanban.
 - Kanban: der Kartenavatar zeigt den Anfangsbuchstaben; die Tierarten-Symbole der Kleintierpraxis sind weg. „Wartet seit“ heißt „Seit“.
-- Alte Masken: die Knopffarbe „accent“ aus Stufe 27/28 und die Textfarbe „petrol“ aus Stufe 28 werden als „Akzent“ gelesen; vorher zeigte der Inspektor eine leere Auswahl.
+- Masken unter Stufe 39 öffnen nicht mehr. Sie werden mit „kommt aus einer zu alten Fassung des Editors (Stufe …)“ abgelehnt, als Datei und aus dem Browser-Speicher. Die Hebungen der Stufen 20 bis 38 sind gestrichen. Liegt eine solche Maske im Browser, sagt der Editor das beim Start, lässt sie unverändert liegen und bietet sie zum Herunterladen an.
 - Ziehen auf der Fläche: Escape bricht das Verschieben eines Bausteins ab, der Baustein bleibt, wo er war; vorher hob Escape nur die Auswahl auf und der Baustein wurde trotzdem abgelegt. Beim Größenändern behält Escape die erreichte Größe.
 - Ziehen hebt die Auswahl nicht mehr auf.
 - Ziehen auf der Fläche bei offenem Fenster (Daten, Berechnung, Popover): Escape bricht zuerst das Ziehen ab, das Fenster bleibt offen. Vorher schloss Escape das Fenster und der Baustein wurde beim Loslassen trotzdem abgelegt.
@@ -35,12 +35,12 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - `EditorStore`: Ansicht (`EditorView`) und Dateien (`EditorFiles`) sind eigene Teile; `useView()` liefert die Ansicht.
 - Export als Befehl (`editor/commands/exportMask.ts`).
 - SoftEngine: `hostQueue.ts` in Reihe, Fragen, Schreiben, Auftrag; `fields.ts` neben `data.ts`.
-- Hebungen in `editor/state/lifts/`.
+- `editor/state/lifts/` ist weg; `maskSchema.ts` liest nur die laufende Stufe (`currentState`).
 - Bausteine: Kanban ohne Praxis-Reste, Stil je Teil, Karte und Platz als Module. Tabellenmotor in Modell, Zeichnen und Bedienung geteilt, Klassennamen in `TABLE_PART`. Erfassung ohne Fassade, Tippzeile in `capture/row`, Aufteilung in `capture/split`, Tasten über `keys.ts`.
 - Editor-Fläche: ein Zieh-Helfer (`canvas/pointerDrag.ts`) für Verschieben, Rastergröße, Fenstergröße und Spaltenköpfe; `ff-list-bind` durch einen Rückruf ersetzt; große Fenster-Dateien geteilt.
 - eslint-Warnungen zu Größe: 63 → 16.
 - Zustände im Code auf Englisch (`quiet`, `loading`, `writing`, `saved`, `sent`, `failed`).
-- Tests (vitest) an den Nähten: Export-Markup, Escaping, Maskendatei mit Hebung, Aktionsketten, SoftEngine-Datenlesen. `npm test`, in `npm run check` und auf GitHub.
+- Tests (vitest) an den Nähten: Export-Markup, Escaping, Maskendatei mit Leftover und Abweisung fremder Stufen, Aktionsketten, SoftEngine-Datenlesen. `npm test`, in `npm run check` und auf GitHub.
 - Rauchprobe im Browser: `npm run smoke` (braucht Playwright).
 - Tabellenmotor: ein Wechsel der Zeilenquelle (`rowsFrom`) löscht die gemerkte Sortierung des Bedieners nicht mehr, sondern liest sie gegen die neuen Spalten neu. Heute schaltet kein Baustein nach dem ersten Zeichnen um; der Fehler war still.
 - Editor-Fläche: `commitDrop`, `draggedSize` und `pageDrop` kennen nur noch das Ablegen aus der Palette; die Zweige für einen verschobenen Baustein (`dnd.dragId !== null`) waren tot, weil Verschieben über Zeigerereignisse läuft.

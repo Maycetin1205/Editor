@@ -67,7 +67,7 @@ Ein neuer Baustein braucht: Ordner unter `src/blocks`, `properties.ts`, die Klas
 - `state/editorStore/viewState.ts` (`EditorView`): was neben der Maske offen ist (Fenster, Spalten, Meldungen). Meldet sich selbst; `useView()` liefert es.
 - `state/editorStore/files.ts` (`EditorFiles`): Maske und Bibliothek auf der Platte, der Masken-Ordner, das Wiederfinden nach einem Neustart.
 - `state/editorStore/persistence.ts`: Speichern im Browser und auf die Platte, entprellt.
-- `state/maskFile.ts`, `libraryFile.ts`: Dateiformate mit Hebung alter Stände (`maskSchema.ts`, `lifts/`) und dem Leftover (was dieser Editor nicht lesen kann, bleibt in der Datei).
+- `state/maskFile.ts`, `libraryFile.ts`: Dateiformate mit dem Leftover (was dieser Editor nicht lesen kann, bleibt in der Datei). Masken liest der Editor nur in der Stufe `CURRENT_SCHEMA_VERSION` (`maskSchema.ts`); die Bibliothek hebt alte Stände (`librarySchema.ts`).
 - `commands/`: Abläufe, die mehr als den Zustand brauchen (Export).
 - Die Oberfläche: `shell` (Rahmen, Werkzeugleiste), `sidebar` (Palette, Masken), `canvas` (Fläche, Ziehen, Fenster), `inspector` (Eigenschaften), `data` (Datenfenster), `actions` (Aktionsketten), `widgets` (Bedienelemente).
 

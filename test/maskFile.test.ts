@@ -7,7 +7,7 @@ import { ROOT_ID, ROOT_TYPE, type MaskTree } from '../src/core/block/tree'
 import { MASK_NAME_PROP } from '../src/core/block/maskName'
 import { checkDataSources } from '../src/core/data/dataSources'
 import { packMask, packMaskFrom } from '../src/editor/state/maskFile'
-import { CURRENT_SCHEMA_VERSION, liftState } from '../src/editor/state/maskSchema'
+import { CURRENT_SCHEMA_VERSION, currentState } from '../src/editor/state/maskSchema'
 import { readMask } from '../src/editor/state/readMask'
 
 function treeWithEveryBlock(): MaskTree {
@@ -103,70 +103,23 @@ describe('mask file', () => {
   })
 })
 
-describe('liftState', () => {
-  it('turns old button looks and text colors into tones the inspector knows', () => {
-    const file = {
-      schemaVersion: 27,
-      tree: {
-        root: { id: 'root', type: 'root', values: {}, parentId: null, childIds: ['b', 't'] },
-        b: { id: 'b', type: 'button', values: { variant: 'primary' }, parentId: 'root', childIds: [] },
-        t: { id: 't', type: 'text', values: { color: 'petrol' }, parentId: 'root', childIds: [] },
-      },
-    }
-    const lifted = liftState(file)!
-    const tree = lifted.tree as Record<string, { values: Record<string, unknown> }>
-    expect(tree.b.values).toMatchObject({ tone: 'info', emphasis: 'solid' })
-    expect(tree.b.values).not.toHaveProperty('variant')
-    expect(tree.t.values.tone).toBe('info')
-    const result = readMask(lifted)
-    expect(result.ok && result.read.tree.b.values.tone).toBe('info')
-  })
-
-  it('folds the columns of an old board into the board and keeps their button', () => {
-    const file = {
-      schemaVersion: 22,
-      tree: {
-        root: { id: 'root', type: 'root', values: {}, parentId: null, childIds: ['k'] },
-        k: { id: 'k', type: 'kanban', values: {}, parentId: 'root', childIds: ['c1', 'c2'] },
-        c1: {
-          id: 'c1',
-          type: 'kanban-column',
-          values: { heading: 'Offen', value: 'O', button: 'Weiter', tone: 'info' },
-          parentId: 'k',
-          childIds: [],
-        },
-        c2: { id: 'c2', type: 'kanban-column', values: { heading: 'Fertig', value: 'F' }, parentId: 'k', childIds: [] },
-      },
-    }
-    const result = readMask(liftState(file)!)
-    expect(result.ok).toBe(true)
-    if (!result.ok) return
-    expect(Object.keys(result.read.tree).sort()).toEqual(['k', 'root'])
-    expect(result.read.lines).toEqual([])
-    const columns = result.read.tree.k.values.columns as { heading: string; button: string; buttonKind: string }[]
-    expect(columns.map((c) => [c.heading, c.button, c.buttonKind])).toEqual([
-      ['Offen', 'Weiter', 'next'],
-      ['Fertig', '', 'none'],
-    ])
-  })
-
-  it('returns the current schema unchanged', () => {
+describe('currentState', () => {
+  it('returns a copy of the current stage and nothing for any other', () => {
     const file = JSON.parse(packMask(treeWithEveryBlock(), [], [])) as Record<string, unknown>
-    const lifted = liftState(file)
-    expect(lifted).toEqual(file)
-    expect(liftState({ schemaVersion: 'x' })).toBeNull()
-    expect(liftState({ schemaVersion: 19, tree: {} })).toBeNull()
+    const read = currentState(file)
+    expect(read).toEqual(file)
+    expect(read).not.toBe(file)
+    expect(currentState({ schemaVersion: 'x' })).toBeNull()
+    for (const step of [19, 20, 27, 38]) expect(currentState({ ...file, schemaVersion: step })).toBeNull()
   })
 
-  it('reads a document at the oldest liftable version without dropping its blocks', () => {
-    const tree = treeWithEveryBlock()
-    const file = JSON.parse(packMask(tree, [], [])) as Record<string, unknown> & { tree: MaskTree }
-    file.schemaVersion = 20
-    const result = readMask(file)
-    expect(result.ok).toBe(true)
-    if (!result.ok) return
-    const before = Object.keys(tree).sort()
-    const after = Object.keys(result.read.tree).sort()
-    expect(after).toEqual(before)
+  it('refuses a mask below the current stage as too old and names its stage', () => {
+    const file = JSON.parse(packMask(treeWithEveryBlock(), [], [])) as Record<string, unknown>
+    for (const step of [20, 38]) {
+      const result = packMaskFrom(JSON.stringify({ ...file, schemaVersion: step }))
+      expect(result).toMatchObject({ ok: false, why: expect.stringContaining('zu alten Fassung') })
+      expect(result).toMatchObject({ why: expect.stringContaining(`Stufe ${step}`) })
+    }
+    expect(readMask({ ...file, schemaVersion: 38 })).toEqual({ ok: false, why: 'stage' })
   })
 })

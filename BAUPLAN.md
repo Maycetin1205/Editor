@@ -18,7 +18,7 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 | `kanbanStyle.ts` (484), `Kanban.ts` (419) | Stil je Teil, Karte und Platz als Module |
 | `hostQueue.ts` (669) | Reihe, Fragen (`getJob.ts`), Schreiben (`putJob.ts`), Auftrag (`job.ts`) |
 | `data.ts` (338) | Felder in `fields.ts` |
-| `maskSchema.ts` (433) | Hebungen in `lifts/` |
+| `maskSchema.ts` (433) | Hebungen in `lifts/`, danach gestrichen (siehe unten) |
 | Deutsche Zustände im Code (`'ruhig'`, `'lädt'`) | englische Bezeichner, deutsche Wörter nur für den Nutzer |
 | Tagebuch-Kommentare mit Datum | raus, bis auf drei in Dateien, die gerade umgebaut werden |
 | Erfundene Namen `Deed`, `kept` | `Finished`, `persistence` |
@@ -32,6 +32,7 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 | React sprach über das DOM-Ereignis `ff-list-bind` mit React | ein Rückruf `onPick` |
 | `SplitWindow.tsx` (378), `ColumnControls.tsx` (363), `Places.tsx` (357), `Grid.tsx` (350), `SourceSettings.tsx` (316) | je in Rahmen, Liste, Zeile, Einstellungen geteilt; größte Datei 246 Zeilen |
 | Hörer und Stilobjekte, die bei jedem Zeichnen neu entstanden | behoben in ColumnPlus, BlockHost, Canvas, useView |
+| Hebungen alter Masken (Stufe 20 bis 38, nur gegen synthetische Dokumente geprüft) | gestrichen; eine Maske unter 39 wird mit „zu alte Fassung“ abgelehnt |
 | Verdacht auf Fehler (12 Fälle aus dem Umbau) | je ein Commit: Kanban (Meldung nach Aushängen, Ankunftsmeldung erst nach bestätigtem Schreiben, Jetzt-Linie vor Karten ohne Uhrzeit); Tabelle (Sortierung bleibt beim Wechsel der Zeilenquelle, tote `rawIndex === null`-Zweige raus); Erfassung (Auswahl folgt der korrigierten Zeile, geleerte Korrektur fragt vor dem Löschen, Einfügen nur an eine sichtbare Erfassung, Doppelklick beim Laden wird nachgeholt); Fläche (Fenstergriff hebt die Auswahl nicht auf, tote `dragId`-Zweige raus, Escape beim Ziehen geht vor offenen Fenstern) |
 
 ## Offen
@@ -40,7 +41,7 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 2. **Feine Abos im Editor**: `useEditor()` zeichnet jeden Abonnenten bei jeder Änderung neu. Ein `useEditorSelect(selector)` auf `useSyncExternalStore`, zuerst für die Fläche.
 3. **Größenbremse scharf schalten**: `max-lines` 300 und `max-lines-per-function` 80 von Warnung auf Fehler, sobald die laufenden Umbauten drin sind. Für React-Komponenten ist 80 Zeilen zu knapp; Vorschlag 120 für `.tsx`.
 4. **Erfassung und Kanban**: beide bleiben (Belegpositionen sind Kern, das Brett ist allgemein brauchbar). Beide brauchen nach dem Umbau eine zweite Lesung auf Verständlichkeit.
-5. **Hebungen alter Masken**: Stufe 20 bis 38 sind nur gegen synthetische Dokumente geprüft; es gibt keine echte alte Maske im Projekt. Eine echte Maske jeder noch im Umlauf befindlichen Stufe gehört als Beispiel ins Projekt, oder die Hebungen unter 39 werden gestrichen, wenn es solche Masken nicht mehr gibt.
+5. **Hebungen alter Masken**: erledigt, siehe oben.
 6. **SoftEngine-Anschluss**: gegen eine Installation geprüft (laut Betreiber); die offenen Fragen in `docs/SOFTENGINE-SCHNITTSTELLE.md` bleiben dokumentiert.
 7. **Verdacht auf Fehler**: erledigt, siehe oben.
 8. **Escape beim Größenändern** behält die erreichte Größe statt zurückzusetzen. Ein echtes Zurücksetzen braucht ein `GestureBracket.cancel()` in `editor/state/history.ts`, das auf den Stand beim Öffnen zurückrollt, ohne einen Rückgängig-Schritt zu hinterlassen.

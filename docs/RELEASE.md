@@ -12,10 +12,10 @@
 Die Nummer steht in `package.json` (`version`) und wandert in jede gespeicherte Maske (`editorVersion`). Ein älterer Editor öffnet eine Maske mit höherer `editorVersion` nur zum Ansehen. Darum:
 
 - Erste Stelle hoch, wenn sich das Maskenformat so ändert, dass ein älterer Editor die Datei nicht mehr lesen soll.
-- Zweite Stelle hoch bei neuen Bausteinen oder Eigenschaften (neue `schemaVersion` in `src/editor/state/maskSchema.ts`, Hebung dazu, Test dazu).
+- Zweite Stelle hoch bei neuen Bausteinen oder Eigenschaften. Eine neue `schemaVersion` in `src/editor/state/maskSchema.ts` braucht es nur, wenn sich die Form gespeicherter Werte ändert; ein neuer Baustein oder eine neue Eigenschaft mit Standardwert kommt ohne aus.
 - Dritte Stelle für Korrekturen.
 
-Jede neue `schemaVersion` braucht eine `liftTo`-Funktion und einen Test in `test/maskFile.test.ts`, der ein Dokument der Vorstufe hebt und prüft, dass nichts verloren geht.
+Jede neue `schemaVersion` braucht eine Hebung von der Vorstufe in `maskSchema.ts` und einen Test in `test/maskFile.test.ts`, der ein Dokument der Vorstufe hebt und prüft, dass nichts verloren geht. Stufen unter 39 werden nicht gehoben; die Hebungen dafür sind gestrichen.
 
 ## Bauen und ausliefern
 

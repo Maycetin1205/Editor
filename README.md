@@ -36,7 +36,7 @@ Nur die Tests:
 npm test
 ```
 
-Die Tests liegen in `test/` und prüfen die Nähte, an denen ein Fehler teuer wird: das Markup des Exports (Abbild in `test/__snapshots__`), das Escaping feindlicher Eingaben, die Maskendatei mit Hebung alter Stände, die Aktionsketten und das Lesen der SoftEngine-Daten. Ändert sich das Export-Markup absichtlich, wird das Abbild mit `npx vitest run -u` erneuert und der Unterschied im Commit erklärt.
+Die Tests liegen in `test/` und prüfen die Nähte, an denen ein Fehler teuer wird: das Markup des Exports (Abbild in `test/__snapshots__`), das Escaping feindlicher Eingaben, die Maskendatei mit Leftover und Abweisung fremder Stufen, die Aktionsketten und das Lesen der SoftEngine-Daten. Ändert sich das Export-Markup absichtlich, wird das Abbild mit `npx vitest run -u` erneuert und der Unterschied im Commit erklärt.
 
 ## Bauen
 
@@ -66,13 +66,13 @@ Die Importregeln zwischen den Schichten stehen in `eslint.config.js` und werden 
 
 ## Masken und Dateien
 
-- Eine Maske ist eine JSON-Datei (`kind: "aufbau-editor-maske"`, `schemaVersion`). Alte Stände ab Stufe 20 werden beim Öffnen gehoben (`src/editor/state/maskSchema.ts`). Was der Editor nicht lesen kann, bleibt in der Datei erhalten (`leftover`).
+- Eine Maske ist eine JSON-Datei (`kind: "aufbau-editor-maske"`, `schemaVersion`). Der Editor liest nur die Stufe 39 (`src/editor/state/maskSchema.ts`); eine ältere Maske lehnt er mit „zu alte Fassung“ ab, eine neuere mit dem Hinweis, den Editor zu erneuern. Was der Editor in einer Maske der Stufe 39 nicht lesen kann, bleibt in der Datei erhalten (`leftover`).
 - Die Bibliothek mit Datenquellen und Relationen ist eine eigene JSON-Datei (`kind: "aufbau-editor-bibliothek"`).
 - Der Export schreibt `index.basis.source.html` und `index.basis.SEvariablen.json`, bei gesetztem Rahmen mit dem Rahmen im Namen.
 
 ## Bekannte Grenzen
 
 - Der SoftEngine-Anschluss ist gegen keine laufende Installation geprüft. Die offenen Punkte stehen in `docs/SOFTENGINE-SCHNITTSTELLE.md`.
-- Es gibt keine Fixtures echter alter Masken (Stufe < 39). Die Hebungen sind nur gegen synthetische Dokumente getestet.
+- Masken unter Stufe 39 öffnen nicht. Die Hebungen dafür sind gestrichen (26.10.2026), weil keine solche Maske mehr im Umlauf ist.
 - Ordner und Dateien gehen nur in Chrome und Edge. Firefox und Safari laden herunter.
 - Der Editor ist auf eine Maske je Browser-Profil ausgelegt. Zwei Tabs mit verschiedenen Masken überschreiben sich im Browser-Speicher gegenseitig.

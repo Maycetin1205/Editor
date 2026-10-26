@@ -38,14 +38,15 @@ export class EditorPersistence {
     this.maskOnDisk.backUpWith((path, text) => this.folder.saveBackup(path, text))
   }
 
-  static load(): { library: StoredLibrary; mask: StoredMask } {
+  static load(): { library: StoredLibrary; mask: StoredMask; refusedStage: unknown } {
     const stored = loadLibraryFromStorage()
-    const mask = loadFromStorage(stored.dataSources) ?? emptyMask()
+    const fromStorage = loadFromStorage()
+    const mask = fromStorage.mask ?? emptyMask()
     const library =
       mask.dataSources && mask.dataSources.length > 0
         ? { ...stored, dataSources: missingOn(stored.dataSources, mask.dataSources) }
         : stored
-    return { library, mask }
+    return { library, mask, refusedStage: fromStorage.stage }
   }
 
   started(mask: StoredMask, library: StoredLibrary): void {

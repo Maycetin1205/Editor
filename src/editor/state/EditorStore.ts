@@ -7,7 +7,7 @@ import { type SourceInReach } from '../../core/data/extraSources'
 import { DataSourceStore } from './DataSourceStore'
 import { firstSourceInReach, sourcesInReach } from '../../core/block/sourcesInReach'
 import { gestureBracket, History, type EditorSnapshot, type GestureBracket } from './history'
-import { packMask, type MaskContent, type MaskFileAt } from './maskFile'
+import { packMask, storedMaskRefused, type MaskContent, type MaskFileAt } from './maskFile'
 import { NO_LEFTOVER, type Leftover } from './leftover'
 import { missingOn } from './libraryFile'
 import { RelationStore } from './RelationStore'
@@ -55,7 +55,7 @@ export class EditorStore extends Subject<EditorStore> {
 
   constructor() {
     super()
-    const { library, mask } = EditorPersistence.load()
+    const { library, mask, refusedStage } = EditorPersistence.load()
     this.dataSources = new DataSourceStore(library.dataSources)
     this.relation = new RelationStore(library.relation)
     this._tree = mask.tree
@@ -64,6 +64,7 @@ export class EditorStore extends Subject<EditorStore> {
     this._selectedId = this.selectionOnActivePage(mask.selectedId)
     this.persistence.started(mask, library)
     this._hydrated = true
+    if (refusedStage !== null) this.view.showNotice(storedMaskRefused(refusedStage))
 
     for (const store of [this.dataSources, this.relation]) {
       store.observeBeforeChange(() => {
