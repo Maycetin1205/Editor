@@ -13,6 +13,7 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - Alte Masken: die Knopffarbe „accent“ aus Stufe 27/28 und die Textfarbe „petrol“ aus Stufe 28 werden als „Akzent“ gelesen; vorher zeigte der Inspektor eine leere Auswahl.
 - Ziehen auf der Fläche: Escape bricht das Verschieben eines Bausteins ab, der Baustein bleibt, wo er war; vorher hob Escape nur die Auswahl auf und der Baustein wurde trotzdem abgelegt. Beim Größenändern behält Escape die erreichte Größe.
 - Ziehen hebt die Auswahl nicht mehr auf.
+- Ziehen auf der Fläche bei offenem Fenster (Daten, Berechnung, Popover): Escape bricht zuerst das Ziehen ab, das Fenster bleibt offen. Vorher schloss Escape das Fenster und der Baustein wurde beim Loslassen trotzdem abgelegt.
 - Popup-Seite und Nachschlagefenster: Ziehen oder Klicken an einem Griff hebt die Auswahl nicht mehr auf. Vorher lief der Klick nach dem Loslassen bis zur Fläche und die Griffe verschwanden.
 - Kanban: ein Titel mit „$&“ landet als Text in der Meldung, nicht als Muster.
 - Erfassung, Verteilen: bei absteigender Sortierung stehen leere Werte hinten, nicht vorn.

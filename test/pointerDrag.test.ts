@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { startPointerDrag, type PointerDrag } from '../src/editor/canvas/pointerDrag'
+import { onEscape } from '../src/editor/widgets/useCloseOnEscape'
 
 function fire(on: EventTarget, type: string, extra: Record<string, unknown> = {}): Event {
   const ev = Object.assign(new Event(type, { cancelable: true }), { pointerId: 1, clientX: 0, ...extra })
@@ -87,6 +88,22 @@ describe('startPointerDrag', () => {
     expect(kept).toHaveBeenCalled()
     expect(key.defaultPrevented).toBe(false)
     expect(click.defaultPrevented).toBe(true)
+  })
+})
+
+describe('startPointerDrag and open windows', () => {
+  it('takes Escape before an open window while the pointer is held', () => {
+    const closed = vi.fn()
+    const away = onEscape(closed)
+    const drag = steps()
+    startPointerDrag({ pointerId: 1, currentTarget: null }, drag, window)
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    expect(drag.cancel).toHaveBeenCalledOnce()
+    expect(closed).not.toHaveBeenCalled()
+    fire(window, 'pointerup')
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    expect(closed).toHaveBeenCalledOnce()
+    away()
   })
 })
 

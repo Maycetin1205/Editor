@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
+import { holdEscape } from '../widgets/useCloseOnEscape'
 
 // The steps of one drag, from the press to the release. Each step is
 // optional; the helper below calls them, the caller only says what they do.
@@ -56,6 +57,7 @@ export function startPointerDrag(press: Press, drag: PointerDrag, on: EventTarge
   const id = press.pointerId
   const holder = capturing(press.currentTarget)
   let phase: Phase = 'waiting'
+  const letEscape = holdEscape()
 
   const release = (): void => {
     try {
@@ -75,6 +77,7 @@ export function startPointerDrag(press: Press, drag: PointerDrag, on: EventTarge
   }
   const finish = (): void => {
     phase = 'over'
+    letEscape()
     release()
     on.removeEventListener('pointermove', onMove)
     on.removeEventListener('pointerup', onUp)
@@ -109,7 +112,8 @@ export function startPointerDrag(press: Press, drag: PointerDrag, on: EventTarge
     cancel()
   }
   // Escape belongs to the drag while the pointer is held, so it does not
-  // also deselect the block. The release that follows only ends the hold.
+  // also deselect the block or close an open window first (holdEscape). The
+  // release that follows only ends the hold.
   function onKey(ev: Event): void {
     if ((ev as KeyboardEvent).key !== 'Escape') return
     ev.stopPropagation()
