@@ -12,7 +12,10 @@ import { Board, boardRegister, boardUnregister, type CardData } from './board'
 import { cardsByClock, SAMPLE_HOUR_LINE, SAMPLE_UNTIL, waitOf, type Until } from './clock'
 import { KANBAN_COLUMNS_BINDING, type KanbanColumn, type KanbanPlace } from './columns'
 import type { Spot } from './places'
-import { kanbanStyle } from './kanbanStyle'
+import { boardStyle } from './style/board'
+import { columnStyle } from './style/column'
+import { placeStyle } from './style/place'
+import { cardStyle } from './style/card'
 import { CARD_SPOTS, kanbanProperties, type CardSpot, type KanbanValues } from './properties'
 
 const CLOCK_TICK = 30_000
@@ -44,7 +47,17 @@ export class Kanban extends BlockElement {
   static readonly type = 'kanban'
   static readonly tag = 'ff-kanban'
 
-  static override styles: CSSResultGroup = [BlockElement.styles, lookStyle, avatarStyle, cardSpotStyle, kanbanStyle]
+  // The order counts: a place refines what a column sets (.dot, .head-text).
+  static override styles: CSSResultGroup = [
+    BlockElement.styles,
+    lookStyle,
+    avatarStyle,
+    cardSpotStyle,
+    boardStyle,
+    columnStyle,
+    placeStyle,
+    cardStyle,
+  ]
 
   static override busyLine = true
 
