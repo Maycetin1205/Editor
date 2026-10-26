@@ -1,6 +1,8 @@
-import { createContext, useCallback, useContext, useMemo, useState, type DragEvent } from 'react'
+import { createContext, useContext, useState, type DragEvent } from 'react'
 import { blockType } from '../../core/block/registry'
+import { Subject } from '../state/Subject'
 import type { useEditor } from '../state/useEditor'
+import { useStoreSelect } from '../state/useStoreSelect'
 import { isNewBlockDrag, NEW_BLOCK_MIME } from './dnd'
 
 interface DropTarget {
@@ -17,22 +19,63 @@ interface DragOffset {
   dy: number
 }
 
-// What the canvas shows while something is dragged: the block carried by
-// the pointer and its offset, and the ghost of where a drop would land.
-interface DndState {
-  dragId: string | null
-  dropTarget: DropTarget | null
-  dragOffset: DragOffset | null
-  setDragId: (id: string | null) => void
-  setDropTarget: (t: DropTarget | null) => void
-  setDragOffset: (o: DragOffset | null) => void
-  reset: () => void
-}
-
 function sameTarget(a: DropTarget | null, b: DropTarget | null): boolean {
   if (a === b) return true
   if (!a || !b) return false
   return a.parentId === b.parentId && a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h && a.free === b.free
+}
+
+// What the canvas shows while something is dragged: the block carried by
+// the pointer and its offset, and the ghost of where a drop would land. A
+// store of its own, held by the canvas: a move draws only what reads the
+// part that moved (useDndSelect), not the whole canvas.
+class DndState {
+  private _dragId: string | null = null
+  private _dropTarget: DropTarget | null = null
+  private _dragOffset: DragOffset | null = null
+  private readonly subject = new Subject()
+
+  get dragId(): string | null {
+    return this._dragId
+  }
+
+  get dropTarget(): DropTarget | null {
+    return this._dropTarget
+  }
+
+  get dragOffset(): DragOffset | null {
+    return this._dragOffset
+  }
+
+  subscribe(listener: () => void): () => void {
+    return this.subject.subscribe(listener)
+  }
+
+  setDragId(id: string | null): void {
+    if (id === this._dragId) return
+    this._dragId = id
+    this.subject.notify()
+  }
+
+  // The same place again keeps the ghost as it is.
+  setDropTarget(target: DropTarget | null): void {
+    if (sameTarget(this._dropTarget, target)) return
+    this._dropTarget = target
+    this.subject.notify()
+  }
+
+  setDragOffset(offset: DragOffset | null): void {
+    this._dragOffset = offset
+    this.subject.notify()
+  }
+
+  reset(): void {
+    if (this._dragId === null && this._dropTarget === null && this._dragOffset === null) return
+    this._dragId = null
+    this._dropTarget = null
+    this._dragOffset = null
+    this.subject.notify()
+  }
 }
 
 const DndContext = createContext<DndState | null>(null)
@@ -43,37 +86,16 @@ function useDnd(): DndState {
   return dnd
 }
 
-// The state behind DndContext, held by the canvas.
+// The store behind DndContext, held by the canvas.
 function useDndState(): DndState {
-  const [dragId, setDragId] = useState<string | null>(null)
-  const [dropTarget, rememberDropTarget] = useState<DropTarget | null>(null)
-  const [dragOffset, setDragOffset] = useState<DragOffset | null>(null)
-
-  // The same place again keeps the ghost as it is.
-  const setDropTarget = useCallback((target: DropTarget | null) => {
-    rememberDropTarget((before) => (sameTarget(before, target) ? before : target))
-  }, [])
-
-  return useMemo<DndState>(
-    () => ({
-      dragId,
-      dropTarget,
-      dragOffset,
-      setDragId,
-      setDropTarget,
-      setDragOffset,
-      reset: () => {
-        setDragId(null)
-        setDropTarget(null)
-        setDragOffset(null)
-      },
-    }),
-    [dragId, dropTarget, dragOffset, setDropTarget],
-  )
+  return useState(() => new DndState())[0]
 }
 
-// A new block from the palette lands. Moving a block on the canvas runs on
-// pointer events (positionDrag.ts) and never reaches a drop.
+// A part of the drag state; the component draws again only when it changes.
+function useDndSelect<T>(select: (dnd: DndState) => T): T {
+  return useStoreSelect(useDnd(), select)
+}
+
 function commitDrop(e: DragEvent, ed: ReturnType<typeof useEditor>, dnd: DndState): void {
   const target = dnd.dropTarget
   if (target && target.free && isNewBlockDrag(e.dataTransfer)) {
@@ -84,4 +106,4 @@ function commitDrop(e: DragEvent, ed: ReturnType<typeof useEditor>, dnd: DndStat
 }
 
 export type { DndState, DropTarget }
-export { commitDrop, DndContext, useDnd, useDndState }
+export { commitDrop, DndContext, useDnd, useDndSelect, useDndState }

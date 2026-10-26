@@ -6,6 +6,7 @@ import { useEditorInstance } from '../state/EditorContext'
 import { useEditorSelect } from '../state/useEditorSelect'
 import { NodeList } from './NodeList'
 import { DndContext, useDnd, useDndState } from './dndState'
+import { useStoreSelect } from '../state/useStoreSelect'
 import { pageDrop } from './gridDnd'
 import { Paper } from './Paper'
 import { PopupPage } from './PopupPage'
@@ -44,6 +45,7 @@ export function Canvas() {
   const activePageId = useEditorSelect((e) => e.activePageId)
   const { canvas, sheet, ...sheetZoom } = useSheetZoom(mainPage, selectedId)
   const dnd = useDndState()
+  const noGhost = useStoreSelect(dnd, (d) => d.dropTarget === null)
 
   return (
     <DndContext.Provider value={dnd}>
@@ -62,7 +64,7 @@ export function Canvas() {
             <RootArea sheet={sheet} mainPage={mainPage} zoom={sheetZoom.zoom} />
           </SheetRoom>
 
-          {mainPage && empty && dnd.dropTarget === null && <EmptyCanvas />}
+          {mainPage && empty && noGhost && <EmptyCanvas />}
           {!mainPage && <PopupPage popupId={activePageId} />}
         </div>
         {mainPage && <ZoomBar {...sheetZoom} />}

@@ -32,6 +32,7 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 | React sprach über das DOM-Ereignis `ff-list-bind` mit React | ein Rückruf `onPick` |
 | `SplitWindow.tsx` (378), `ColumnControls.tsx` (363), `Places.tsx` (357), `Grid.tsx` (350), `SourceSettings.tsx` (316) | je in Rahmen, Liste, Zeile, Einstellungen geteilt; größte Datei 246 Zeilen |
 | Hörer und Stilobjekte, die bei jedem Zeichnen neu entstanden | behoben in ColumnPlus, BlockHost, Canvas, useView |
+| Beim Ziehen zeichnete die ganze Fläche bei jeder Zeigerbewegung (gemessen: 51 Komponenten je Bewegung, darunter alle 12 Bausteine) | Zieh-Zustand als eigener Speicher (`DndState`, `useDndSelect`), Baustein und Platz getrennt (`CanvasNode`, `CanvasBlock`); 2,5 Komponenten je Bewegung, Skriptzeit 62 statt rund 220 ms auf 40 Bewegungen |
 | Feine Abos für die Fläche (`useEditorSelect` mit Vergleich) | Ändern einer Eigenschaft zeichnete alle Bausteine der Fläche neu (12 von 12), jetzt nur den geänderten; je Änderung 54 statt 101 Komponenten |
 | Escape beim Größenändern behielt die erreichte Größe | `GestureBracket.cancel()` rollt über `History.abandon()` auf den Stand beim Öffnen zurück, ohne Rückgängig-Schritt, Wiederholen bleibt; gilt für Baustein, Popup-Seite und Nachschlagefenster |
 | Hebungen alter Masken (Stufe 20 bis 38, nur gegen synthetische Dokumente geprüft) | gestrichen; eine Maske unter 39 wird mit „zu alte Fassung“ abgelehnt |
@@ -47,7 +48,7 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 6. **SoftEngine-Anschluss**: gegen eine Installation geprüft (laut Betreiber); die offenen Fragen in `docs/SOFTENGINE-SCHNITTSTELLE.md` bleiben dokumentiert.
 7. **Verdacht auf Fehler**: erledigt, siehe oben.
 8. **Escape beim Größenändern**: erledigt, siehe oben.
-9. **Beim Ziehen eines Bausteins zeichnet die ganze Fläche** bei jeder Zeigerbewegung neu, weil der Zieh-Zustand im Canvas-Kontext liegt. Erst messen, dann mit Selektoren (`useEditorSelect`) und gemerkten Knoten beheben.
+9. **Beim Ziehen zeichnete die ganze Fläche**: erledigt, siehe oben.
 
 ## Danach
 

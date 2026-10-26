@@ -9,7 +9,7 @@ import type { EditorStore } from '../state/EditorStore'
 import { useEditorSelect } from '../state/useEditorSelect'
 import { sameFields, sameItems } from '../state/useStoreSelect'
 import { BlockHost } from './BlockHost'
-import { useDnd } from './dndState'
+import { useDnd, useDndSelect } from './dndState'
 import { positionDrag } from './positionDrag'
 import { usePointerDrag } from './pointerDrag'
 
@@ -35,11 +35,9 @@ function GridGhost({ slot, free }: { slot: GridSlot; free: boolean }) {
 // The blocks of one area. It draws again when its blocks change, not on
 // every change of the mask; each block draws on its own (CanvasNode).
 export const NodeList = memo(function NodeList({ parentId }: { parentId: string }) {
-  const dnd = useDnd()
-
   const nodes = useEditorSelect((e) => e.childNodesOf(parentId), sameItems)
 
-  const ghost = dnd.dropTarget !== null && dnd.dropTarget.parentId === parentId ? dnd.dropTarget : null
+  const ghost = useDndSelect((d) => (d.dropTarget !== null && d.dropTarget.parentId === parentId ? d.dropTarget : null))
 
   return (
     <>
@@ -75,13 +73,14 @@ function nodeLook(e: EditorStore, id: string): NodeLook {
   return { selected, carrier: sourcesCarrier(e.tree, id), version: selected ? e.version : 0 }
 }
 
+// The place of a block on the canvas: it follows the pointer while carried,
+// and only then draws again on a move.
 const CanvasNode = memo(function CanvasNode({ node, parentId }: { node: BlockNode; parentId: string }) {
   const ed = useEditorInstance()
   const dnd = useDnd()
   const drag = usePointerDrag()
   const look = useEditorSelect((e) => nodeLook(e, node.id), sameFields)
-  const isContainer = blockType(node.type)?.takesChildren ?? false
-  const carried = dnd.dragId === node.id ? dnd.dragOffset : null
+  const carried = useDndSelect((d) => (d.dragId === node.id ? d.dragOffset : null))
 
   return (
     <div
@@ -104,9 +103,17 @@ const CanvasNode = memo(function CanvasNode({ node, parentId }: { node: BlockNod
           : {}),
       }}
     >
-      <BlockHost block={node} selected={look.selected} onSelect={() => ed.chooseHit(node.id)} grid>
-        {isContainer && <NodeList parentId={node.id} />}
-      </BlockHost>
+      <CanvasBlock node={node} look={look} />
     </div>
+  )
+})
+
+const CanvasBlock = memo(function CanvasBlock({ node, look }: { node: BlockNode; look: NodeLook }) {
+  const ed = useEditorInstance()
+  const isContainer = blockType(node.type)?.takesChildren ?? false
+  return (
+    <BlockHost block={node} selected={look.selected} onSelect={() => ed.chooseHit(node.id)} grid>
+      {isContainer && <NodeList parentId={node.id} />}
+    </BlockHost>
   )
 })
