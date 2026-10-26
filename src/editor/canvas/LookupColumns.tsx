@@ -16,7 +16,7 @@ import type { OpenLookup } from '../state/editorStore/viewState'
 import { windowFrameInEditor, windowStateOf, type WindowState } from './lookupWindowState'
 import { widthFromLength } from './fieldWidth'
 import { FieldPicker, type PickerGroup } from './FieldPicker'
-import { axesOf, dragSize } from './dragSize'
+import { axesOf, sizeDrag } from './sizeDrag'
 import { Grip } from './Grip'
 import { GRIPS } from './useBlockResize'
 import { useHeadsPlaced } from './useHeadsPlaced'
@@ -181,7 +181,7 @@ function Heads({ open }: { open: OpenLookup }) {
               <Grip
                 key={edge}
                 edge={edge}
-                onStart={(e) => dragSize(ed, e, edge, box, (axis, value) => state.setMetrics(axis, value))}
+                onDrag={(e) => sizeDrag(ed, e, edge, box, (axis, value) => state.setMetrics(axis, value))}
                 onReset={() =>
                   ed.transaction(() => {
                     for (const axis of axesOf(edge)) state.setMetrics(axis, undefined)

@@ -84,7 +84,7 @@ export function BlockHost({ block, selected, onSelect, grid = false, children }:
     onSelect,
   })
 
-  const { startGridResize, resetGridSize } = useBlockResize(editor, blockRef, rootRef)
+  const { gridResize, resetGridSize } = useBlockResize(editor, blockRef, rootRef)
 
   const gridSpec = gridMetricsOf(def)
 
@@ -160,7 +160,7 @@ export function BlockHost({ block, selected, onSelect, grid = false, children }:
         GRIPS.filter(
           (edge) => !(gridSpec.heightFixed || gridSpec.heightFromContent) || edge === 'e' || edge === 'w',
         ).map((edge) => (
-          <Grip key={edge} edge={edge} onStart={(e) => startGridResize(e, edge)} onReset={() => resetGridSize(edge)} />
+          <Grip key={edge} edge={edge} onDrag={(e) => gridResize(e, edge)} onReset={() => resetGridSize(edge)} />
         ))}
     </div>
   )

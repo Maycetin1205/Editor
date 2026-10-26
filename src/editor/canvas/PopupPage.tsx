@@ -8,7 +8,7 @@ import { isNewBlockDrag } from './dnd'
 import { commitDrop, useDnd } from './dndState'
 import { gridTarget } from './gridDnd'
 import { areaUnderPointer } from './gridArea'
-import { axesOf, dragSize, type Axis } from './dragSize'
+import { axesOf, sizeDrag, type Axis } from './sizeDrag'
 import { Grip } from './Grip'
 import { GRIPS } from './useBlockResize'
 
@@ -92,8 +92,8 @@ export function PopupPage({ popupId }: { popupId: string }) {
             <Grip
               key={edge}
               edge={edge}
-              onStart={(e) =>
-                dragSize(ed, e, edge, { width: visibleWidth, height: visibleHeight }, (axis, value) =>
+              onDrag={(e) =>
+                sizeDrag(ed, e, edge, { width: visibleWidth, height: visibleHeight }, (axis, value) =>
                   ed.updateProperty(node.id, POPUP_SIZE[axis], value),
                 )
               }
