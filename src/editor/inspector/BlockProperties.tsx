@@ -115,7 +115,7 @@ export function BlockProperties({ block, def, folds, onRemove }: BlockProperties
         searchWindow={windowShown ? searchWindow : undefined}
         helpers={helpers === 'apart' && declaredValue(block, SOURCE_PROPERTY) === '' ? undefined : helpers}
         follows={follows}
-        waiting={ed.followPickFor === block.id}
+        waiting={ed.view.followPickFor === block.id}
         events={(capability(def, 'events')?.list ?? []).filter((ev) => !ev.entry)}
         folds={folds}
       />

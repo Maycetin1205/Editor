@@ -32,7 +32,7 @@ export function EntryActions({ block }: { block: BlockNode }) {
             type="button"
             onClick={() => {
               const key = claimEntryKey(ed, block.id, entry.index)
-              if (key !== null) ed.openStep({ blockId: block.id, eventKey: key, stepId: null, tab: NEW_STEP_TAB })
+              if (key !== null) ed.view.openStep({ blockId: block.id, eventKey: key, stepId: null, tab: NEW_STEP_TAB })
             }}
             className={cn(
               'group flex h-[30px] w-full items-center gap-[8px] border-b border-line-soft px-[8px] text-left last:border-b-0',

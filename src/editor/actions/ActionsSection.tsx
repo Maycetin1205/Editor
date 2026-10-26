@@ -58,7 +58,7 @@ export function EventChain({ block, ev, context }: { block: BlockNode; ev: Event
             context={context}
             open={opened?.blockId === block.id && opened.stepId === step.id}
             onOpen={() =>
-              ed.openStep({
+              ed.view.openStep({
                 blockId: block.id,
                 eventKey: ev.key,
                 stepId: step.id,
@@ -79,7 +79,7 @@ export function EventChain({ block, ev, context }: { block: BlockNode; ev: Event
         ))}
         <button
           type="button"
-          onClick={() => ed.openStep({ blockId: block.id, eventKey: ev.key, stepId: null, tab: NEW_STEP_TAB })}
+          onClick={() => ed.view.openStep({ blockId: block.id, eventKey: ev.key, stepId: null, tab: NEW_STEP_TAB })}
           className={cn(
             'flex h-[30px] w-full items-center gap-[8px] px-[8px] text-left text-muted hover:text-ink',
             LINE_HOVER,
@@ -114,10 +114,10 @@ export function OpenStepWindow() {
           opened.eventKey,
           chain.some((s) => s.id === next.id) ? chain.map((s) => (s.id === next.id ? next : s)) : [...chain, next],
         )
-        ed.openStep(null)
+        ed.view.openStep(null)
       }}
       onClose={() => {
-        ed.openStep(null)
+        ed.view.openStep(null)
         releaseEmptyEntryKeys(ed, opened.blockId)
       }}
     />

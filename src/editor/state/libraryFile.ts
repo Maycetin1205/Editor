@@ -12,7 +12,7 @@ interface LibraryList<T> {
 
 // What saving and loading the library need from the editor.
 export interface LibraryEditor {
-  readonly libraryOnDisk: FileOnDisk
+  readonly files: { readonly libraryOnDisk: FileOnDisk }
   readonly dataSources: LibraryList<DataSource>
   readonly relation: LibraryList<RelationTemplate>
   transaction<T>(run: () => T): T
@@ -46,7 +46,7 @@ export function packLibrary(content: LibraryContent): string {
 export function saveLibraryAsFile(editor: LibraryEditor): void {
   const today = new Date().toISOString().slice(0, 10)
   void writeFile(
-    editor.libraryOnDisk,
+    editor.files.libraryOnDisk,
     `aufbau-bibliothek-${today}.json`,
     packLibrary({
       dataSources: [...editor.dataSources.list],

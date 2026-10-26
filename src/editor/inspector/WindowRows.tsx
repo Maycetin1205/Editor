@@ -18,7 +18,7 @@ export function SplitRow({ block }: { block: BlockNode }) {
     <Labeled label="Verteilen">
       <Button
         aria-label={`Verteilen: ${words}`}
-        onClick={() => ed.openSplit(block.id)}
+        onClick={() => ed.view.openSplit(block.id)}
         className={cn(INPUT_EDGE, 'flex h-control w-full items-center gap-2 px-2 text-left focus-visible:ring-0')}
       >
         <span className={cn('min-w-0 flex-1 truncate', words === 'Keins' ? 'text-muted' : 'font-medium')}>{words}</span>
@@ -35,7 +35,7 @@ export function CalculationRow({ block }: { block: BlockNode }) {
     <Labeled label="Berechnung">
       <Button
         aria-label={`Berechnung: ${words}`}
-        onClick={() => ed.openCalculation({ blockId: block.id, column: '' })}
+        onClick={() => ed.view.openCalculation({ blockId: block.id, column: '' })}
         className={cn(INPUT_EDGE, 'flex h-control w-full items-center gap-2 px-2 text-left focus-visible:ring-0')}
       >
         <span className={cn('min-w-0 flex-1 truncate', terms === 0 ? 'text-muted' : 'font-medium')}>{words}</span>

@@ -7,7 +7,7 @@ import { collectDataSources } from '../../export/usedSources'
 import { collectRelation } from '../../export/usedRelations'
 import { writeFile, type FileOnDisk } from './fileOnDisk'
 import { canPickFolder, reasonOf } from './folderOnDisk'
-import type { Deed, SideTab } from './editorStore/viewState'
+import type { EditorView } from './editorStore/viewState'
 import { EDITOR_VERSION, newerEditor } from './editorVersion'
 import { leftoverForFile, NO_LEFTOVER, treeForFile, type Leftover } from './leftover'
 import { LIBRARY_FILE_KIND } from './libraryFile'
@@ -50,18 +50,16 @@ export interface MaskEditor {
   readonly leftover: Leftover
   readonly dataSources: { readonly list: readonly DataSource[] }
   readonly relation: { readonly list: readonly RelationTemplate[] }
-  readonly maskOnDisk: FileOnDisk
-  readonly maskFolder: MaskFolder
-  readonly saveWaits: boolean
-  showNotice(notice: NoticeText | null): void
+  readonly view: Pick<EditorView, 'showNotice' | 'showSide' | 'waitToSave' | 'saveWaits' | 'markDone'>
+  readonly files: {
+    readonly maskOnDisk: FileOnDisk
+    readonly maskFolder: MaskFolder
+    folderReady(): Promise<boolean>
+    pickMaskFolder(): Promise<void>
+    keepIn(at: Omit<MaskFileAt, 'modified'>, holds: string | null, created?: boolean): void
+  }
   replaceMask(content: MaskContent, from?: MaskFileAt | null, locked?: boolean): void
   unlockMask(): void
-  keepIn(at: Omit<MaskFileAt, 'modified'>, holds: string | null, created?: boolean): void
-  showSide(tab: SideTab): void
-  waitToSave(on: boolean): void
-  markDone(deed: Deed): void
-  folderReady(): Promise<boolean>
-  pickMaskFolder(): Promise<void>
 }
 
 export function packMask(
@@ -106,9 +104,9 @@ function treeWithout(tree: MaskTree, names: readonly string[]): MaskTree {
 }
 
 async function saveMask(editor: MaskEditor): Promise<void> {
-  const disk = editor.maskOnDisk
+  const disk = editor.files.maskOnDisk
   if (disk.attached && disk.locked) {
-    editor.showNotice({
+    editor.view.showNotice({
       title: 'Nur zum Ansehen geöffnet',
       lead:
         `„${disk.name}“ ist zum Schutz nur zum Ansehen geöffnet. „Trotzdem speichern“ schreibt die Maske ab jetzt ` +
@@ -128,9 +126,9 @@ async function saveMask(editor: MaskEditor): Promise<void> {
     return
   }
   try {
-    if (!disk.attached && !(await editor.folderReady())) return
+    if (!disk.attached && !(await editor.files.folderReady())) return
   } catch (error) {
-    editor.showNotice({
+    editor.view.showNotice({
       title: 'Nicht gespeichert',
       lead: `Der Ordner der Masken ließ sich nicht öffnen: ${reasonOf(error)}.`,
     })
@@ -141,50 +139,50 @@ async function saveMask(editor: MaskEditor): Promise<void> {
     if (disk.attached) {
       await disk.write(text)
     } else {
-      editor.keepIn(await editor.maskFolder.saveNew(maskNameOf(editor.tree), text), text, true)
+      editor.files.keepIn(await editor.files.maskFolder.saveNew(maskNameOf(editor.tree), text), text, true)
     }
   } catch (error) {
-    editor.showNotice({
+    editor.view.showNotice({
       title: 'Nicht gespeichert',
       lead:
         (disk.attached
           ? `„${disk.name}“ ließ sich nicht schreiben: ${reasonOf(error)}.`
-          : `Im Ordner „${editor.maskFolder.name}“ ließ sich keine Datei anlegen: ${reasonOf(error)}.`) +
+          : `Im Ordner „${editor.files.maskFolder.name}“ ließ sich keine Datei anlegen: ${reasonOf(error)}.`) +
         ' Die Maske bleibt im Browser; „Speichern“ versucht es noch einmal.',
     })
     return
   }
-  editor.markDone('saved')
+  editor.view.markDone('saved')
 }
 
 export async function saveOrAsk(editor: MaskEditor): Promise<void> {
-  if (!editor.maskOnDisk.attached && canPickFolder() && editor.maskFolder.state === 'none') {
-    editor.showSide('masks')
-    editor.waitToSave(true)
+  if (!editor.files.maskOnDisk.attached && canPickFolder() && editor.files.maskFolder.state === 'none') {
+    editor.view.showSide('masks')
+    editor.view.waitToSave(true)
     return
   }
   await saveMask(editor)
 }
 
 export async function chooseMaskFolder(editor: MaskEditor): Promise<void> {
-  await editor.pickMaskFolder()
-  if (!editor.saveWaits) return
-  editor.waitToSave(false)
+  await editor.files.pickMaskFolder()
+  if (!editor.view.saveWaits) return
+  editor.view.waitToSave(false)
   await saveMask(editor)
 }
 
 export async function saveAsTemplate(editor: MaskEditor): Promise<void> {
   try {
-    if (!(await editor.folderReady())) return
-    await editor.maskFolder.saveTemplate(
+    if (!(await editor.files.folderReady())) return
+    await editor.files.maskFolder.saveTemplate(
       maskNameOf(editor.tree),
       packed(editor, treeWithout(editor.tree, [EXPORT_TARGET_PROP])),
     )
   } catch (error) {
-    editor.showNotice({ title: 'Nicht als Vorlage gesichert', lead: `${reasonOf(error)}.` })
+    editor.view.showNotice({ title: 'Nicht als Vorlage gesichert', lead: `${reasonOf(error)}.` })
     return
   }
-  editor.markDone('template')
+  editor.view.markDone('template')
 }
 
 async function readEntry(entry: MaskEntry): Promise<EntryRead> {
@@ -232,7 +230,7 @@ export function readNotice(editor: MaskEditor, name: string, note: ReadNote, loc
 
 function tellRead(editor: MaskEditor, name: string, note: ReadNote, locked: boolean): void {
   const notice = readNotice(editor, name, note, locked)
-  if (notice !== null) editor.showNotice(notice)
+  if (notice !== null) editor.view.showNotice(notice)
 }
 
 export async function openMaskFile(editor: MaskEditor, entry: MaskEntry): Promise<string | null> {

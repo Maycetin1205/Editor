@@ -3,7 +3,7 @@ import { useEditorInstance } from './EditorContext'
 import type { MaskFolder } from './maskFolder'
 
 export function useMaskFolder(): MaskFolder {
-  const folder = useEditorInstance().maskFolder
+  const folder = useEditorInstance().files.maskFolder
   const subscribe = useCallback((cb: () => void) => folder.subscribe(cb), [folder])
   const stateOf = useCallback(() => folder.version, [folder])
   useSyncExternalStore(subscribe, stateOf)

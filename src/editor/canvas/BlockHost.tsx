@@ -102,7 +102,7 @@ export function BlockHost({ block, selected, onSelect, grid = false, children }:
           const node = editor.getNode(follower)
           const next = node ? followByClick(node, block, library) : null
           if (next) editor.updateProperty(follower, SELECTION_FOLLOW_PROP, next)
-          editor.pickFollowFor(null)
+          editor.view.pickFollowFor(null)
           return
         }
         if (

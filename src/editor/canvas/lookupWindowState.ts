@@ -191,7 +191,7 @@ export function openLookupInEditor(
   if (frame === null) return false
   wireWidths(frame, ed, blockId, window, slot)
   closesOnClickBeside(frame)
-  ed.setLookupWindow({ blockId, window, slot })
+  ed.view.setLookupWindow({ blockId, window, slot })
   return true
 }
 

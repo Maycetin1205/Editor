@@ -54,7 +54,7 @@ export function OpenSplitWindow() {
 
   const helpers = declaredValue(block, extraSourcesProperty).flatMap((e) => library.filter((s) => s.id === e.sourceId))
   const present = declaredValue(block, splitsProperty)[0]
-  const close = (): void => ed.openSplit(null)
+  const close = (): void => ed.view.openSplit(null)
 
   return (
     <SplitWindow

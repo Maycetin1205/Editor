@@ -11,12 +11,12 @@ export function Providers({ children }: ProvidersProps) {
   const [editor] = useState(() => new EditorStore())
 
   useEffect(() => {
-    void editor.reopenFolder()
+    void editor.files.reopenFolder()
   }, [editor])
 
   useEffect(() => {
     const rescue = (): void => {
-      editor.saveNow()
+      editor.files.saveNow()
     }
     const onHidden = (): void => {
       if (document.visibilityState === 'hidden') rescue()

@@ -12,7 +12,7 @@ import { fieldOf, sourcesKey } from '../../core/data/dataSources'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
 import { useView } from '../state/useView'
-import type { OpenLookup } from '../state/EditorStore'
+import type { OpenLookup } from '../state/editorStore/viewState'
 import { windowFrameInEditor, windowStateOf, type WindowState } from './lookupWindowState'
 import { widthFromLength } from './fieldWidth'
 import { FieldPicker, type PickerGroup } from './FieldPicker'
@@ -84,7 +84,7 @@ function Heads({ open }: { open: OpenLookup }) {
 
   useEffect(() => {
     const check = (): void => {
-      if (windowFrameInEditor() === null) ed.setLookupWindow(null)
+      if (windowFrameInEditor() === null) ed.view.setLookupWindow(null)
     }
     const mo = new MutationObserver(check)
     mo.observe(document.body, { childList: true })

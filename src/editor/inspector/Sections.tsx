@@ -152,7 +152,7 @@ export function Sections({
           folds={folds}
         >
           {follow !== undefined && !waiting ? (
-            <SelectionFollowSection block={block} onPick={() => ed.pickFollowFor(block.id)} />
+            <SelectionFollowSection block={block} onPick={() => ed.view.pickFollowFor(block.id)} />
           ) : (
             <FollowPick block={block} />
           )}

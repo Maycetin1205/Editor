@@ -57,7 +57,7 @@ export function MasksTab() {
     void folder.list()
   }, [folder])
 
-  const tell = (title: string, error: unknown) => ed.showNotice({ title, lead: `${reasonOf(error)}.` })
+  const tell = (title: string, error: unknown) => ed.view.showNotice({ title, lead: `${reasonOf(error)}.` })
 
   const open = async (entry: MaskEntry) => {
     if (
@@ -69,7 +69,7 @@ export function MasksTab() {
     )
       return
     const why = entry.template ? await newMaskFrom(ed, entry) : await openMaskFile(ed, entry)
-    if (why !== null) ed.showNotice({ title: 'Maske nicht geladen', lead: `„${entry.path}“ ${why}` })
+    if (why !== null) ed.view.showNotice({ title: 'Maske nicht geladen', lead: `„${entry.path}“ ${why}` })
   }
 
   const pickFolder = async () => {
@@ -82,7 +82,7 @@ export function MasksTab() {
 
   const grant = async () => {
     try {
-      await ed.folderReady()
+      await ed.files.folderReady()
     } catch (error) {
       tell('Ordner nicht freigegeben', error)
     }
@@ -98,7 +98,7 @@ export function MasksTab() {
       ed.newMask()
   }
 
-  const current = ed.maskOnDisk.attached ? ed.maskOnDisk.path : null
+  const current = ed.files.maskOnDisk.attached ? ed.files.maskOnDisk.path : null
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -137,7 +137,7 @@ export function MasksTab() {
             try {
               if (file) {
                 void loadMaskFromFile(ed, file).then((why) => {
-                  if (why !== null) ed.showNotice({ title: 'Maske nicht geladen', lead: `„${file.name}“ ${why}` })
+                  if (why !== null) ed.view.showNotice({ title: 'Maske nicht geladen', lead: `„${file.name}“ ${why}` })
                 })
               }
             } finally {

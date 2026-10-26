@@ -43,7 +43,7 @@ export function Toolbar() {
   const handleExport = async (withoutAside = false) => {
     const orphans = sourcesWithoutRelation(ed.tree, ed.relation.list, ed.dataSources.list)
     if (orphans.length > 0) {
-      ed.showNotice({
+      ed.view.showNotice({
         title: 'Export abgebrochen',
         lead:
           (orphans.length === 1
@@ -58,7 +58,7 @@ export function Toolbar() {
     // would go out without it, and could replace an export that had it.
     const aside = withoutAside ? [] : leftoverLines(ed.tree, ed.dataSources.list, ed.leftover)
     if (aside.length > 0) {
-      ed.showNotice({
+      ed.view.showNotice({
         title: 'Export ohne einige Teile',
         lead:
           'Noch nichts exportiert. Diese Teile der Maske kann dieser Editor nicht lesen. In der Datei der Maske ' +
@@ -75,7 +75,7 @@ export function Toolbar() {
       const { exportMask } = await import('../../export/exportMask')
       exported = exportMask(ed.tree, maskNameOf(ed.tree), ed.dataSources.list, ed.relation.list)
     } catch (error) {
-      ed.showNotice({
+      ed.view.showNotice({
         title: 'Export abgebrochen',
         lead: 'Nichts exportiert. Beim Bauen der Maske ging etwas schief:',
         lines: [{ name: error instanceof Error ? error.message : String(error) }],
@@ -85,7 +85,7 @@ export function Toolbar() {
     const { html, sevariablen } = exported
     const failed = failedChecks(validateMaskHtml(html))
     if (failed.length > 0) {
-      ed.showNotice({
+      ed.view.showNotice({
         title: 'Export abgebrochen',
         lead:
           failed.length === 1
@@ -124,7 +124,7 @@ export function Toolbar() {
       detail: l.sourceName === '' ? `Feld ${l.code}, ohne Quelle` : `Feld ${l.code} fehlt in „${l.sourceName}“`,
     }))
     if (why !== null) {
-      ed.showNotice({
+      ed.view.showNotice({
         title: 'Heruntergeladen statt in den Zielordner',
         lead: `Der Zielordner „${target}“ ${why} Die Maske ist darum heruntergeladen.${gaps}`,
         lines,
@@ -132,14 +132,14 @@ export function Toolbar() {
       return
     }
     if (lost.length > 0) {
-      ed.showNotice({
+      ed.view.showNotice({
         title: 'Exportiert, mit Lücken',
         lead: (written ? `Die Maske liegt im Ordner „${target}“.` : 'Die Maske ist heruntergeladen.') + gaps,
         lines,
       })
       return
     }
-    ed.markDone('exported')
+    ed.view.markDone('exported')
   }
 
   return (
@@ -181,7 +181,7 @@ export function Toolbar() {
           aria-pressed={dataOpen}
           className={cn(NARROW, dataOpen && PRESSED)}
           title="Quellen und Relationen der Daten"
-          onClick={() => ed.showData(!dataOpen)}
+          onClick={() => ed.view.showData(!dataOpen)}
         >
           <Database size={14} /> <span className={LABEL}>Daten</span>
         </Button>
@@ -190,7 +190,7 @@ export function Toolbar() {
           aria-pressed={outlines}
           className={cn(NARROW, outlines && PRESSED)}
           title="Umriss um jeden Baustein, nur im Editor"
-          onClick={() => ed.showOutlines(!outlines)}
+          onClick={() => ed.view.showOutlines(!outlines)}
         >
           <SquareDashed size={14} /> <span className={LABEL}>Umrisse</span>
         </Button>
@@ -210,7 +210,7 @@ export function Toolbar() {
         </Button>
       </nav>
 
-      {view.notice && <Notice notice={view.notice} onClose={() => ed.showNotice(null)} />}
+      {view.notice && <Notice notice={view.notice} onClose={() => ed.view.showNotice(null)} />}
     </header>
   )
 }
@@ -224,7 +224,7 @@ function MaskWho() {
       title="Name, Rahmen und Zielordner der Maske stehen in den Eigenschaften"
       onClick={() => {
         ed.selectBlock(null)
-        ed.shutColumn('right', false)
+        ed.view.shutColumn('right', false)
       }}
       className="ml-[4px] flex min-w-0 items-baseline gap-[10px] rounded px-[12px] py-[5px] text-left transition-colors hover:bg-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
     >
@@ -242,17 +242,17 @@ function MaskWho() {
 // until the guard is lifted.
 function OnlyToSee() {
   const ed = useEditor()
-  if (!ed.maskOnDisk.attached || !ed.maskLocked) return null
+  if (!ed.files.maskOnDisk.attached || !ed.maskLocked) return null
   const aside = leftoverLines(ed.tree, ed.dataSources.list, ed.leftover)
   return (
     <button
       type="button"
       title="Änderungen kommen nicht in die Datei der Maske"
       onClick={() =>
-        ed.showNotice({
+        ed.view.showNotice({
           title: 'Nur zum Ansehen',
           lead:
-            `„${ed.maskOnDisk.name}“ ist zum Schutz nur zum Ansehen geöffnet: Änderungen hier kommen nicht in die Datei. ` +
+            `„${ed.files.maskOnDisk.name}“ ist zum Schutz nur zum Ansehen geöffnet: Änderungen hier kommen nicht in die Datei. ` +
             (aside.length > 0
               ? 'Diese Teile kann dieser Editor nicht lesen; in der Datei bleiben sie in jedem Fall erhalten:'
               : 'Die Datei stammt aus einer neueren Fassung des Editors.'),
@@ -276,16 +276,16 @@ function SaveState() {
     return () => clearInterval(timer)
   }, [])
 
-  if (ed.maskOnDisk.attached && !ed.maskLocked && view.done !== 'saved') {
+  if (ed.files.maskOnDisk.attached && !ed.maskLocked && view.done !== 'saved') {
     return (
       <Button
         kind="command"
         className={cn('font-normal', NARROW)}
-        title={`In „${ed.maskOnDisk.name}“ gespeichert. Speichern: Strg+S`}
+        title={`In „${ed.files.maskOnDisk.name}“ gespeichert. Speichern: Strg+S`}
         onClick={() => void saveOrAsk(ed)}
       >
         <Check size={14} /> <span className={LABEL}>Gespeichert</span>
-        {ed.keptAt > 0 && <span className={cn('tabular-nums', LABEL)}>{TIME.format(ed.keptAt)}</span>}
+        {ed.files.keptAt > 0 && <span className={cn('tabular-nums', LABEL)}>{TIME.format(ed.files.keptAt)}</span>}
       </Button>
     )
   }

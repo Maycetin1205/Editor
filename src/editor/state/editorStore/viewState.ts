@@ -1,6 +1,7 @@
 import type { LookupWindow } from '../../../core/block/capability'
 import type { StepTab } from '../../actions/stepPiece'
 import type { NoticeText } from '../../widgets/Notice'
+import { Subject } from '../Subject'
 import {
   loadOutlines,
   loadShutColumns,
@@ -36,8 +37,12 @@ export interface OpenLookup {
   slot: number
 }
 
+// What the editor shows beside the mask: open windows, panels, notices. It
+// changes without touching the mask and tells its own listeners.
 export class EditorView {
-  private readonly changed: () => void
+  private readonly subject = new Subject<void>()
+
+  private _version = 0
 
   private _stepWindow: OpenStep | null = null
 
@@ -65,8 +70,17 @@ export class EditorView {
 
   private _outlines = loadOutlines()
 
-  constructor(changed: () => void) {
-    this.changed = changed
+  subscribe(listener: () => void): () => void {
+    return this.subject.subscribe(listener)
+  }
+
+  get version(): number {
+    return this._version
+  }
+
+  private changed(): void {
+    this._version++
+    this.subject.notify()
   }
 
   get dataWindow(): boolean {

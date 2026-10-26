@@ -111,14 +111,14 @@ export function SourceList({ block, part = 'all' }: SourceListProps) {
         ]}
         value={value}
         emptyText="Keine"
-        onChoose={(v) => (v === NEW_SOURCE ? ed.startNewSource() : onValue(v))}
+        onChoose={(v) => (v === NEW_SOURCE ? ed.view.startNewSource() : onValue(v))}
       />
     </Labeled>
   )
 
   if (library.length === 0) {
     return (
-      <Button className="self-start" onClick={() => ed.startNewSource()}>
+      <Button className="self-start" onClick={() => ed.view.startNewSource()}>
         <Plus size={14} /> Neue Datenquelle
       </Button>
     )

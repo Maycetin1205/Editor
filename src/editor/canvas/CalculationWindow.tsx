@@ -61,7 +61,7 @@ export function OpenCalculationWindow() {
     return told === null ? [] : [told]
   })[0]
   const own = present ?? newCalculation(all, open.column)
-  const close = (): void => ed.openCalculation(null)
+  const close = (): void => ed.view.openCalculation(null)
 
   return (
     <CalculationWindow

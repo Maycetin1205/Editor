@@ -255,7 +255,7 @@ export function ListEntryBar({
                 label: 'Berechnung',
                 icon: Calculator,
                 onOpen: () => {
-                  editor.openCalculation({ blockId: block.id, column })
+                  editor.view.openCalculation({ blockId: block.id, column })
                   onClose()
                 },
               },
