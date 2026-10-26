@@ -5,7 +5,7 @@ export interface VarOrder {
   kind: 'var'
 }
 
-export const varOrder: OrderAdapter<'var'> = {
+export const varOrder: OrderAdapter<VarOrder> = {
   kind: 'var',
   read: () => ({ kind: 'var' }),
   needsTable: true,

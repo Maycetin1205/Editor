@@ -1,37 +1,32 @@
 import type { Parameter } from '../actions'
-import type { DataSource } from '../dataSources'
 import type { RelationTemplate } from '../relations'
-import type { Delivery, DeliveryKind, RuntimeDelivery } from './deliveries'
-import type { RuntimeQuery } from './message'
-import type { RuntimeLoadRelation } from './relationRows'
-import type { RuntimeGetValue } from './relationValue'
+import type { SourceFacts } from '../sourceFacts'
 import type { Unread } from '../../unread'
 
-type DeliveryOf<K extends DeliveryKind> = Delivery & { kind: K }
-export type RuntimeDeliveryOf<K extends DeliveryKind> = RuntimeDelivery & { kind: K }
-
-interface ExportContext {
+export interface ExportContext {
   usedFields: ReadonlySet<string> | undefined
-  orderedFields: (source: DataSource) => string
+  orderedFields: (source: SourceFacts) => string
   relations: readonly RelationTemplate[]
 }
 
+// The entry of a source in FF_DATA_SOURCES, as far as the deliveries fill it.
+// Each delivery reads its own part back with readExported, hence unknown.
 export interface RuntimeEntry {
   openRecord?: true
   fields?: readonly string[]
-  loadRelation?: RuntimeLoadRelation
-  getValue?: RuntimeGetValue
-  query?: RuntimeQuery
+  loadRelation?: unknown
+  getValue?: unknown
+  query?: unknown
 }
 
-export interface DeliveryAdapter<K extends DeliveryKind> {
-  kind: K
-  read(raw: Unread<DeliveryOf<K>>): DeliveryOf<K> | null
+export interface DeliveryAdapter<D extends { kind: string }, R extends { kind: string }> {
+  kind: D['kind']
+  read(raw: Unread<D>): D | null
   needsTable: boolean
   fetchOn: 'never' | 'delivery' | 'selection'
-  export(delivery: DeliveryOf<K>, source: DataSource, context: ExportContext): RuntimeEntry
-  readExported(entry: Unread<RuntimeEntry>): RuntimeDeliveryOf<K> | null
-  relationIds(delivery: DeliveryOf<K>): readonly string[]
-  bindings(delivery: DeliveryOf<K>): readonly Parameter[]
-  giverFields(delivery: DeliveryOf<K>): readonly string[]
+  export(delivery: D, source: SourceFacts, context: ExportContext): RuntimeEntry
+  readExported(entry: Unread<RuntimeEntry>): R | null
+  relationIds(delivery: D): readonly string[]
+  bindings(delivery: D): readonly Parameter[]
+  giverFields(delivery: D): readonly string[]
 }

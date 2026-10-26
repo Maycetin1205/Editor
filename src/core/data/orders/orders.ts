@@ -10,7 +10,7 @@ export type Order = NoOrder | SefileloopOrder | VarOrder | ErpApiCallOrder | Dat
 
 export type OrderKind = Order['kind']
 
-const ORDER_ADAPTERS: { [K in OrderKind]: OrderAdapter<K> } = {
+const ORDER_ADAPTERS: { [K in OrderKind]: OrderAdapter<Order & { kind: K }> } = {
   none: noOrder,
   sefileloop,
   var: varOrder,
@@ -21,7 +21,7 @@ const ORDER_ADAPTERS: { [K in OrderKind]: OrderAdapter<K> } = {
 
 export const ORDER_KINDS: readonly OrderKind[] = Object.values(ORDER_ADAPTERS).map((a) => a.kind)
 
-export function orderAdapter(kind: OrderKind): OrderAdapter<OrderKind> {
+export function orderAdapter(kind: OrderKind): OrderAdapter<Order> {
   return ORDER_ADAPTERS[kind]
 }
 

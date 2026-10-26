@@ -5,28 +5,17 @@ import { isOrderKind, orderAdapter, type Order } from './orders/orders'
 import { isPresetId, sourcePreset, type PresetId } from './presets/presets'
 import { EMPTY_CHOICE, type SourceChoice } from './presets/sourcePreset'
 import { POS_LEN, keyDisplay } from './sourceInput'
+import type { DataField, SourceFacts } from './sourceFacts'
 import { isWriteKind, recordFieldOf, writeAdapter, type Write } from './writes/writes'
 
 export { fieldPrefixFromInput, keyDisplay } from './sourceInput'
 
 export const LENGTH_MAX = 200
 
-export interface DataField {
-  code: string
+export type { DataField, SourceFacts } from './sourceFacts'
 
-  name: string
-
-  length?: number
-}
-
-export interface DataSource {
-  id: string
-
-  name: string
-
+export interface DataSource extends SourceFacts {
   preset: PresetId
-
-  tableId: string
 
   order: Order
 
@@ -38,8 +27,6 @@ export interface DataSource {
 
   // The tab of the data window the user put the source in; unset, the table decides.
   folder?: string
-
-  fields: readonly DataField[]
 }
 
 export interface RuntimeSource {

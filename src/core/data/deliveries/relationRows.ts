@@ -58,7 +58,7 @@ export function checkLoadRelation(raw: unknown): LoadRelation | null {
   return { relationId, documentKindField, documentNumberField, yearField, archiveField, endFields }
 }
 
-export const relationRows: DeliveryAdapter<'relationRows'> = {
+export const relationRows: DeliveryAdapter<RelationRowsDelivery, RuntimeRelationRowsDelivery> = {
   kind: 'relationRows',
   read(raw) {
     const load = checkLoadRelation(raw)

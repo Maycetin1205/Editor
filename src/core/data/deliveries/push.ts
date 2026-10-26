@@ -19,7 +19,7 @@ function isPushPath(value: unknown): value is PushPath {
   return typeof value === 'string' && (PUSH_PATHS as readonly string[]).includes(value)
 }
 
-export const push: DeliveryAdapter<'push'> = {
+export const push: DeliveryAdapter<PushDelivery, RuntimePushDelivery> = {
   kind: 'push',
   read: (raw) => (isPushPath(raw.path) ? { kind: 'push', path: raw.path } : null),
   needsTable: false,

@@ -10,16 +10,16 @@ export interface SefileloopOrder {
 
 const HEADER_KEY = /^([A-Za-z][A-Za-z0-9]*)_(\d+_\d+)$/
 
-function headerKeyOf(source: OrderedSource<'sefileloop'>): string {
+function headerKeyOf(source: OrderedSource<SefileloopOrder>): string {
   return source.order.underHeader ? source.order.headerKey.trim() : ''
 }
 
-function varOfHeaderKey(source: OrderedSource<'sefileloop'>): VarEntry[] {
+function varOfHeaderKey(source: OrderedSource<SefileloopOrder>): VarEntry[] {
   const parts = HEADER_KEY.exec(headerKeyOf(source))
   return parts ? [{ ID: parts[1], FELDER: parts[2] }] : []
 }
 
-export const sefileloop: OrderAdapter<'sefileloop'> = {
+export const sefileloop: OrderAdapter<SefileloopOrder> = {
   kind: 'sefileloop',
   read(raw) {
     const underHeader = raw.underHeader === true

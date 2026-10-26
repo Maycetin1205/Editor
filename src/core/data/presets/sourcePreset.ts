@@ -4,7 +4,6 @@ import { WITHOUT_RESTRICTION, type QueryRestriction } from '../deliveries/messag
 import type { LoadRelation } from '../deliveries/relationRows'
 import type { GetValue } from '../deliveries/relationValue'
 import type { Write } from '../writes/writes'
-import type { PresetId } from './presets'
 
 export interface SourceChoice {
   headerKey: string
@@ -35,7 +34,7 @@ interface SourceDescriptor extends OrderAndDelivery {
   write: Write
 }
 
-export interface SourcePreset<P extends PresetId> {
+export interface SourcePreset<P extends string> {
   id: P
   name: string
   keyLabel: string
@@ -49,7 +48,7 @@ export interface SourcePreset<P extends PresetId> {
   writes: boolean
 }
 
-export function descriptorFor<P extends PresetId>(preset: SourcePreset<P>, choice: SourceChoice): SourceDescriptor {
+export function descriptorFor<P extends string>(preset: SourcePreset<P>, choice: SourceChoice): SourceDescriptor {
   const recordField = choice.recordField.trim()
   const write: Write = preset.writes && recordField !== '' ? { kind: 'putRelation', recordField } : { kind: 'none' }
   if (preset.fetches && choice.load) {

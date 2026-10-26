@@ -203,8 +203,12 @@ export function exportMask(
             recordField: recordNumberOf(s),
             ...deliveryAdapter(s.delivery.kind).export(s.delivery, s, {
               usedFields: usedFields.get(s.id),
-              orderedFields: (source) =>
-                orderedFields(source, usedFields.get(source.id), getKey.get(source.id) ?? [], false),
+              orderedFields: (facts) => {
+                const source = used.find((u) => u.id === facts.id)
+                return source === undefined
+                  ? ''
+                  : orderedFields(source, usedFields.get(source.id), getKey.get(source.id) ?? [], false)
+              },
               relations: relation,
             }),
           })),

@@ -12,7 +12,9 @@ export type RuntimeDelivery =
 
 export type DeliveryKind = Delivery['kind']
 
-const DELIVERY_ADAPTERS: { [K in DeliveryKind]: DeliveryAdapter<K> } = {
+export type RuntimeDeliveryOf<K extends DeliveryKind> = RuntimeDelivery & { kind: K }
+
+const DELIVERY_ADAPTERS: { [K in DeliveryKind]: DeliveryAdapter<Delivery & { kind: K }, RuntimeDeliveryOf<K>> } = {
   relationRows,
   relationValue,
   message,
@@ -21,7 +23,7 @@ const DELIVERY_ADAPTERS: { [K in DeliveryKind]: DeliveryAdapter<K> } = {
 
 export const DELIVERY_KINDS: readonly DeliveryKind[] = Object.values(DELIVERY_ADAPTERS).map((a) => a.kind)
 
-export function deliveryAdapter(kind: DeliveryKind): DeliveryAdapter<DeliveryKind> {
+export function deliveryAdapter(kind: DeliveryKind): DeliveryAdapter<Delivery, RuntimeDelivery> {
   return DELIVERY_ADAPTERS[kind]
 }
 

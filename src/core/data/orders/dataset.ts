@@ -4,7 +4,7 @@ export interface DatasetOrder {
   kind: 'dataset'
 }
 
-export const dataset: OrderAdapter<'dataset'> = {
+export const dataset: OrderAdapter<DatasetOrder> = {
   kind: 'dataset',
   read: () => ({ kind: 'dataset' }),
   needsTable: true,

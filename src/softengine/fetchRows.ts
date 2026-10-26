@@ -1,6 +1,5 @@
 import type { RuntimeSource } from '../core/data/dataSources'
-import type { DeliveryKind } from '../core/data/deliveries/deliveries'
-import type { RuntimeDeliveryOf } from '../core/data/deliveries/deliveryAdapter'
+import type { DeliveryKind, RuntimeDeliveryOf } from '../core/data/deliveries/deliveries'
 import { fetchQuerySource } from './queryLoader'
 import { loadRowsPerRelation } from './relationLoader'
 import { fetchValueSource } from './valueLoader'
