@@ -6,6 +6,7 @@ import type { ColumnView } from '../parts/column'
 import type { RowLayout } from '../parts/cell'
 import type { CaptureColumn } from './column'
 import type { CaptureLedger } from './ledger'
+import { keyIntent } from './keys'
 import { captureProperties } from './properties'
 import { captureRowTpl } from './row'
 import { splitListTpl } from './splitList'
@@ -52,29 +53,31 @@ function enter(placement: CaptureRowPlacement, index: number): void {
 
 function key(placement: CaptureRowPlacement, index: number, e: KeyboardEvent): void {
   const ledger = placement.ledger
-  if (e.key === 'F5') e.preventDefault()
+  const intent = keyIntent(e)
+  if (intent === 'lookup') e.preventDefault()
 
-  if (e.key === 'Tab' && e.shiftKey) {
+  if (intent === 'backTab') {
     const previous = ledger.neighbour(index, -1)
     if (previous === -1) return
     e.preventDefault()
     ledger.focusCell(previous)
     return
   }
+  // The suggestion list speaks the key names of the lookup, where Alt+Down is F5.
   let action = ledger.decideKey(index, keyOf(e))
   if (action === 'clear' && ledger.correctionSlot !== null) action = 'giveUp'
   if (action === 'nothing') {
-    if (e.key === 'Enter') e.preventDefault()
+    if (intent === 'enter') e.preventDefault()
     return
   }
   let keep = true
   if (action === 'adopt') {
     ledger.adoptSuggestion(index, ledger.mark)
-    if (e.key === 'Tab') keep = ledger.jumpFrom(index)
+    if (intent === 'tab') keep = ledger.jumpFrom(index)
     else enter(placement, index)
   } else if (action === 'window') openWindow(placement, index)
   else if (action === 'further') {
-    if (e.key === 'Enter') enter(placement, index)
+    if (intent === 'enter') enter(placement, index)
     else keep = ledger.jumpFrom(index)
   } else if (action === 'down') keep = ledger.down(index)
   else if (action === 'up') keep = ledger.up(index)

@@ -3,6 +3,7 @@ import type { Split, SplitColumn } from '../../../core/data/split'
 import { readDate } from '../../../runtime/chosenDay'
 import { maskHost } from '../../../runtime/host'
 import { plainText } from '../../parts/cellSearch'
+import { keyIntent, type KeyPress } from '../keys'
 
 export interface SplitPick {
   record: unknown
@@ -270,64 +271,62 @@ export class SplitState {
     if (hit !== -1) this.setMark(hit)
   }
 
-  key(e: Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'altKey' | 'metaKey'>, now: number = Date.now()): SplitKey {
+  key(e: KeyPress, now: number = Date.now()): SplitKey {
     const outcome = this.keyOutcome(e, now)
     this._blocked = outcome === 'blocked'
     return outcome
   }
 
-  private keyOutcome(e: Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'altKey' | 'metaKey'>, now: number): SplitKey {
+  private keyOutcome(e: KeyPress, now: number): SplitKey {
     const last = this._rows.length - 1
-    switch (e.key) {
-      case 'ArrowDown':
+    switch (keyIntent(e)) {
+      case 'down':
         this.setMark(Math.min(last, this._mark + 1))
         return 'handled'
-      case 'ArrowUp':
+      case 'up':
         this.setMark(Math.max(0, this._mark - 1))
         return 'handled'
-      case 'PageDown':
+      case 'pageDown':
         this.setMark(Math.min(last, this._mark + PAGE))
         return 'handled'
-      case 'PageUp':
+      case 'pageUp':
         this.setMark(Math.max(0, this._mark - PAGE))
         return 'handled'
-      case 'Home':
+      case 'home':
         this.setMark(0)
         return 'handled'
-      case 'End':
+      case 'end':
         this.setMark(last)
         return 'handled'
-      case ' ':
+      case 'space':
         this.toggle(this._mark)
         return 'handled'
-      case 'Delete': {
+      case 'delete': {
         const row = this._rows[this._mark]
         if (row !== undefined) this.picks.delete(row)
         this._editing = false
         return 'handled'
       }
-      case 'Backspace':
+      case 'backspace':
         this.backspace()
         return 'handled'
-      case 'Enter':
-      case 'Tab':
+      case 'enter':
+      case 'tab':
+      case 'backTab':
         this._editing = false
         return this.ready ? 'done' : 'blocked'
-      case 'Escape':
+      case 'escape':
         if (this._editing) {
           this._editing = false
           return 'handled'
         }
         return 'back'
+      case 'char':
+        if (/[0-9,]/.test(e.key)) this.typeChar(e.key)
+        else this.seek(e.key, now)
+        return 'handled'
       default:
-        break
+        return 'nothing'
     }
-    if (e.ctrlKey || e.altKey || e.metaKey || e.key.length !== 1) return 'nothing'
-    if (/[0-9,]/.test(e.key)) {
-      this.typeChar(e.key)
-      return 'handled'
-    }
-    this.seek(e.key, now)
-    return 'handled'
   }
 }

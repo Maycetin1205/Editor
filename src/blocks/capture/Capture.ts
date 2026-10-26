@@ -29,6 +29,7 @@ import { enterCell, cellsInputStyle, cellsFields } from './cells'
 import { captureRowFor } from './controls'
 import { capturedRowsTpl, captureDecoration } from './body'
 import { CAPTURE_COLUMNS_BINDING, greyLine, type CaptureColumn } from './column'
+import { keyIntent } from './keys'
 import { CaptureLedger } from './ledger'
 import { captureStyle } from './captureStyle'
 import { splitStyle } from './splitList'
@@ -257,7 +258,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
   }
 
   private readonly maskKey = (e: KeyboardEvent): void => {
-    if (this.preview || e.key !== 'Insert') return
+    if (this.preview || keyIntent(e) !== 'insert') return
     const all = Array.from(this.ownerDocument.querySelectorAll<Capture>(Capture.tag))
     const path = e.composedPath()
     const responsible = all.find((t) => path.includes(t)) ?? all[0]

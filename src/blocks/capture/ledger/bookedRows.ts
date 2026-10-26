@@ -6,10 +6,20 @@ import { stripeOf, type RowLayout } from '../../parts/cell'
 import { rowsIndexOf } from '../../list'
 import { cellsFields, enterCell } from '../cells'
 import type { CaptureColumn } from '../column'
+import { keyIntent, type KeyIntent } from '../keys'
 import type { RowState, RowsStatus } from './outbound'
 import { cellIn, dropCell, dropRecord, hasRecordIn, recordsIn, setCell, type Cells } from './recordCells'
 
 const BOOKED_ROWS = '.body > .row:not(.capture)'
+
+// How many booked rows a key moves the cursor.
+const STEPS: ReadonlyMap<KeyIntent, number> = new Map([
+  ['enter', 1],
+  ['down', 1],
+  ['up', -1],
+  ['pageDown', 10],
+  ['pageUp', -10],
+])
 
 interface BookedRowsHost {
   block: HTMLElement
@@ -163,12 +173,13 @@ export class BookedRows {
 
   keyCell(rawIndex: number, columnsIndex: number, e: KeyboardEvent): void {
     const field = e.target as HTMLInputElement
+    const intent = keyIntent(e)
 
-    if (e.key === 'F5') {
+    if (intent === 'lookup') {
       e.preventDefault()
       return
     }
-    if (e.key === 'Escape') {
+    if (intent === 'escape') {
       e.preventDefault()
       e.stopPropagation()
       if (dropCell(this.changes, this.recordOf(rawIndex), columnsIndex)) {
@@ -176,29 +187,22 @@ export class BookedRows {
       }
       return
     }
-    const steps: Record<string, number> = {
-      Enter: 1,
-      ArrowDown: 1,
-      ArrowUp: -1,
-      PageDown: 10,
-      PageUp: -10,
-    }
-    const step = steps[e.key]
+    const step = STEPS.get(intent)
     if (step === undefined) return
     e.preventDefault()
     e.stopPropagation()
-    const arrow = e.key === 'ArrowDown' || e.key === 'ArrowUp'
-    this.cellNeighbour(arrow ? stripeOf(this.host.layout(), columnsIndex) : [columnsIndex], field, step, e.key)
+    const arrow = intent === 'down' || intent === 'up'
+    this.cellNeighbour(arrow ? stripeOf(this.host.layout(), columnsIndex) : [columnsIndex], field, step, intent)
   }
 
-  private cellNeighbour(slots: readonly number[], of: HTMLInputElement, step: number, key: string): void {
+  private cellNeighbour(slots: readonly number[], of: HTMLInputElement, step: number, intent: KeyIntent): void {
     const fields = cellsFields(this.host.block.shadowRoot, BOOKED_ROWS, slots)
     const now = fields.indexOf(of)
     if (now < 0) return
     let target = now + step
     if (target > fields.length - 1) {
-      if (key === 'Enter' || key === 'ArrowDown') {
-        this.host.focusCell(key === 'Enter' ? this.host.firstCell() : slots[0])
+      if (intent === 'enter' || intent === 'down') {
+        this.host.focusCell(intent === 'enter' ? this.host.firstCell() : slots[0])
         return
       }
       target = fields.length - 1
