@@ -69,7 +69,7 @@ export function BlockHost({ block, selected, onSelect, grid = false, children }:
     grid,
   })
 
-  const { onClick, onDoubleClick, pickers, openEntry, openSpot } = useFieldBinding({
+  const { onClick, onDoubleClick, pickers, openEntry, openSpot, pickList } = useFieldBinding({
     editor,
     blockRef,
     block,
@@ -78,7 +78,6 @@ export function BlockHost({ block, selected, onSelect, grid = false, children }:
     listBinding: list,
     searchWindow,
     sources,
-    containerRef,
     element,
     spotClickOf,
     onSelect,
@@ -151,8 +150,8 @@ export function BlockHost({ block, selected, onSelect, grid = false, children }:
           binding={list}
           element={element}
           host={rootRef}
-          container={containerRef}
           onSelect={onSelect}
+          onPick={pickList}
         />
       )}
       {selected &&

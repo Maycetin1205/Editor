@@ -23,9 +23,9 @@ interface ColumnControlsProps {
   element: HTMLElement | null
 
   host: RefObject<HTMLElement | null>
-
-  container: RefObject<HTMLElement | null>
   onSelect?: () => void
+  // Opens the bar of a list entry at the given place.
+  onPick: (pick: ListPick) => void
 }
 
 const DRAG_THRESHOLD = 5
@@ -100,20 +100,18 @@ function ColumnPlus({ frame, x, y, down, label, onAdd }: ColumnPlusProps) {
   )
 }
 
-function bindRequest(prop: string, key: string | undefined, s: HeadPlace, frame: HTMLElement): CustomEvent {
+// Where the bar of a list entry opens: under its head, kept inside the window.
+function listPickAt(s: HeadPlace, key: string | undefined, frame: HTMLElement): ListPick {
   const reference = frame.getBoundingClientRect()
   const zoom = cssZoomOf(frame)
-  return new CustomEvent('ff-list-bind', {
-    detail: {
-      prop,
-      key,
-      index: s.path.index,
-      inner: s.path.inner,
-      below: s.below,
-      top: reference.top + (s.top + s.height) * zoom + 4,
-      left: reference.left + s.left * zoom,
-    },
-  })
+  return {
+    index: s.path.index,
+    ...(s.path.inner === undefined ? {} : { inner: s.path.inner }),
+    ...(key === undefined ? {} : { key }),
+    below: s.below,
+    top: Math.max(8, reference.top + (s.top + s.height) * zoom + 4),
+    left: Math.max(8, reference.left + s.left * zoom),
+  }
 }
 
 export function ColumnControls({
@@ -124,8 +122,8 @@ export function ColumnControls({
   binding,
   element,
   host,
-  container,
   onSelect,
+  onPick,
 }: ColumnControlsProps) {
   const editor = useEditorInstance()
 
@@ -142,8 +140,8 @@ export function ColumnControls({
   const openPicker = (index: number): void => {
     onSelect?.()
     const s = spots[index]
-    if (!container.current || !host.current || !s) return
-    container.current.dispatchEvent(bindRequest(binding.prop, keyAt(s.path.index), s, host.current))
+    if (!host.current || !s) return
+    onPick(listPickAt(s, keyAt(s.path.index), host.current))
   }
 
   const anchor =
@@ -155,10 +153,8 @@ export function ColumnControls({
         )
   const anchorKey = anchor === undefined ? undefined : keyAt(anchor.path.index)
   useLayoutEffect(() => {
-    if (anchor && container.current && host.current) {
-      container.current.dispatchEvent(bindRequest(binding.prop, anchorKey, anchor, host.current))
-    }
-  }, [anchor, anchorKey, binding.prop, container, host])
+    if (anchor && host.current) onPick(listPickAt(anchor, anchorKey, host.current))
+  }, [anchor, anchorKey, host, onPick])
 
   useLayoutEffect(() => {
     if (opening.current === null) return

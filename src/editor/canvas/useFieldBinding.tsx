@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode, type RefObject } from 'react'
+import { useCallback, useState, type ReactNode, type RefObject } from 'react'
 import type { MouseEvent as ReactMouseEvent } from 'react'
 import type { BlockNode } from '../../core/block/tree'
 import { type ListBinding } from '../../core/block/blockType'
@@ -25,8 +25,6 @@ interface FieldBindingArgs {
 
   sources: readonly SourceInReach[]
 
-  containerRef: RefObject<HTMLDivElement | null>
-
   element: HTMLElement | null
 
   spotClickOf: (click: Event) => SpotClick | null
@@ -43,7 +41,6 @@ export function useFieldBinding({
   listBinding,
   searchWindow,
   sources,
-  containerRef,
   element,
   spotClickOf,
   onSelect,
@@ -55,6 +52,8 @@ export function useFieldBinding({
   openEntry: number | null
 
   openSpot: ListPick | null
+
+  pickList: (pick: ListPick) => void
 } {
   const library = useDataSources().list
 
@@ -83,36 +82,11 @@ export function useFieldBinding({
       : library.find((s) => s.id === String(block.values[listBinding.sourceProp ?? ''] ?? ''))
   const listPickerHasFields = listBinding?.sourceProp !== undefined ? sourceFromProp !== undefined : hasOffer
 
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el || !listBinding) return
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail as {
-        prop?: string
-        key?: string
-        index?: number
-        inner?: number
-        below?: boolean
-        top?: number
-        left?: number
-      }
-
-      if (detail?.prop !== listBinding.prop || typeof detail.index !== 'number') return
-      const index = detail.index
-
-      const next: ListPick = {
-        index,
-        ...(typeof detail.inner === 'number' ? { inner: detail.inner } : {}),
-        ...(typeof detail.key === 'string' ? { key: detail.key } : {}),
-        below: detail.below === true,
-        top: Math.max(8, detail.top ?? 0),
-        left: Math.max(8, detail.left ?? 0),
-      }
-      setListPicker((before) => (before !== null && samePick(before, next) ? before : next))
-    }
-    el.addEventListener('ff-list-bind', handler)
-    return () => el.removeEventListener('ff-list-bind', handler)
-  }, [containerRef, listBinding])
+  // ColumnControls opens the bar of a list entry; the same place keeps the
+  // same pick, so the bar does not render again.
+  const pickList = useCallback((next: ListPick) => {
+    setListPicker((before) => (before !== null && samePick(before, next) ? before : next))
+  }, [])
 
   const entriesNow = listBinding ? listBinding.entries(block.values[listBinding.prop]) : []
   const pickAt =
@@ -170,7 +144,7 @@ export function useFieldBinding({
 
   const openEntry = columnOpen && pick.inner === undefined ? pick.index : null
 
-  return { onClick, onDoubleClick, pickers, openEntry, openSpot: columnOpen ? pick : null }
+  return { onClick, onDoubleClick, pickers, openEntry, openSpot: columnOpen ? pick : null, pickList }
 }
 
 const samePick = (a: ListPick, b: ListPick): boolean =>
