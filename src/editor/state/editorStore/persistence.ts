@@ -28,9 +28,9 @@ export class EditorPersistence {
 
   readonly folder = new MaskFolder()
 
-  private keptText: string | null = null
+  private savedText: string | null = null
 
-  private _keptAt = 0
+  private _savedAt = 0
 
   constructor(state: () => EditorSnapshot) {
     this.state = state
@@ -51,17 +51,17 @@ export class EditorPersistence {
   started(mask: StoredMask, library: StoredLibrary): void {
     this.maskOnDisk.expect(mask.file)
     this.maskOnDisk.lock(mask.locked)
-    this.keptText = packMask(mask.tree, library.dataSources, library.relation, mask.leftover)
-    this._keptAt = mask.savedAt
+    this.savedText = packMask(mask.tree, library.dataSources, library.relation, mask.leftover)
+    this._savedAt = mask.savedAt
   }
 
   restarted(text: string | null, at: number): void {
-    this.keptText = text
-    this._keptAt = at
+    this.savedText = text
+    this._savedAt = at
   }
 
-  get keptAt(): number {
-    return this._keptAt
+  get savedAt(): number {
+    return this._savedAt
   }
 
   plan(): void {
@@ -76,9 +76,9 @@ export class EditorPersistence {
     const state = this.state()
     const leftover = state.leftover ?? NO_LEFTOVER
     const text = packMask(state.tree, state.dataSources, state.relation, leftover)
-    if (text !== this.keptText) {
-      this.keptText = text
-      this._keptAt = Date.now()
+    if (text !== this.savedText) {
+      this.savedText = text
+      this._savedAt = Date.now()
     }
     persistMask(
       {
@@ -86,7 +86,7 @@ export class EditorPersistence {
         selectedId: state.selectedId,
         activePageId: state.activePageId ?? ROOT_ID,
         file: this.maskOnDisk.path,
-        savedAt: this._keptAt,
+        savedAt: this._savedAt,
         leftover,
         locked: this.maskOnDisk.locked,
       },

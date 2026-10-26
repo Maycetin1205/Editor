@@ -46,9 +46,9 @@ export class EditorStore extends Subject<EditorStore> {
 
   readonly view = new EditorView()
 
-  private readonly _kept = new EditorPersistence(() => this.snapshot())
+  private readonly persistence = new EditorPersistence(() => this.snapshot())
 
-  readonly files: EditorFiles = new EditorFiles(this, this._kept)
+  readonly files: EditorFiles = new EditorFiles(this, this.persistence)
   private _hydrated = false
 
   private _restoring = false
@@ -62,7 +62,7 @@ export class EditorStore extends Subject<EditorStore> {
     this._leftover = mask.leftover
     this._activePageId = mask.activePageId
     this._selectedId = this.selectionOnActivePage(mask.selectedId)
-    this._kept.started(mask, library)
+    this.persistence.started(mask, library)
     this._hydrated = true
 
     for (const store of [this.dataSources, this.relation]) {
@@ -167,7 +167,7 @@ export class EditorStore extends Subject<EditorStore> {
     try {
       super.notify(data)
     } finally {
-      if (this._hydrated) this._kept.plan()
+      if (this._hydrated) this.persistence.plan()
     }
   }
 
@@ -338,7 +338,7 @@ export class EditorStore extends Subject<EditorStore> {
     if (!this.files.maskOnDisk.attached && JSON.stringify(this._tree) === JSON.stringify(emptyTree())) return
     this.pushHistory()
     this.files.maskOnDisk.forget()
-    this._kept.restarted(null, 0)
+    this.persistence.restarted(null, 0)
     this._tree = emptyTree()
     this._leftover = NO_LEFTOVER
     this._selectedId = null
@@ -358,12 +358,12 @@ export class EditorStore extends Subject<EditorStore> {
     this._selectedId = null
     this._activePageId = ROOT_ID
     if (from === null) {
-      this._kept.restarted(null, 0)
+      this.persistence.restarted(null, 0)
     } else {
       const text = packMask(this._tree, this.dataSources.list, this.relation.list, this._leftover)
       this.files.maskOnDisk.remember(from.file, from.path, text)
       this.files.maskOnDisk.lock(locked)
-      this._kept.restarted(text, from.modified)
+      this.persistence.restarted(text, from.modified)
     }
     this.notify(this)
   }

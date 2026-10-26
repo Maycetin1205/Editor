@@ -8,65 +8,65 @@ import type { EditorPersistence } from './persistence'
 export class EditorFiles {
   private readonly editor: MaskEditor
 
-  private readonly kept: EditorPersistence
+  private readonly persistence: EditorPersistence
 
   private _reopening: Promise<void> | null = null
 
-  constructor(editor: MaskEditor, kept: EditorPersistence) {
+  constructor(editor: MaskEditor, persistence: EditorPersistence) {
     this.editor = editor
-    this.kept = kept
+    this.persistence = persistence
   }
 
   keepIn(at: Omit<MaskFileAt, 'modified'>, holds: string | null, created = false): void {
-    this.kept.maskOnDisk.remember(at.file, at.path, holds, created)
-    this.kept.plan()
+    this.persistence.maskOnDisk.remember(at.file, at.path, holds, created)
+    this.persistence.plan()
   }
 
   get maskOnDisk() {
-    return this.kept.maskOnDisk
+    return this.persistence.maskOnDisk
   }
 
   get libraryOnDisk() {
-    return this.kept.libraryOnDisk
+    return this.persistence.libraryOnDisk
   }
 
   get maskFolder(): MaskFolder {
-    return this.kept.folder
+    return this.persistence.folder
   }
 
-  get keptAt(): number {
-    return this.kept.keptAt
+  get savedAt(): number {
+    return this.persistence.savedAt
   }
 
   saveNow(): void {
-    this.kept.now()
+    this.persistence.now()
   }
 
   reopenFolder(): Promise<void> {
     this._reopening ??= (async () => {
-      await this.kept.folder.restore()
+      await this.persistence.folder.restore()
       await this.rejoin()
     })()
     return this._reopening
   }
 
   async folderReady(): Promise<boolean> {
-    if (!(await this.kept.folder.ready())) return false
+    if (!(await this.persistence.folder.ready())) return false
     await this.rejoin()
     return true
   }
 
   async pickMaskFolder(): Promise<void> {
-    const picked = await this.kept.folder.pick()
-    if (picked === 'switched' && !this.kept.maskOnDisk.attached) this.kept.maskOnDisk.forget()
+    const picked = await this.persistence.folder.pick()
+    if (picked === 'switched' && !this.persistence.maskOnDisk.attached) this.persistence.maskOnDisk.forget()
     if (picked !== 'closed') await this.rejoin()
   }
 
   private async rejoin(): Promise<void> {
-    const disk = this.kept.maskOnDisk
+    const disk = this.persistence.maskOnDisk
     const path = disk.path
-    if (path === null || disk.attached || this.kept.folder.state !== 'open') return
-    const file = await this.kept.folder.fileAt(path)
+    if (path === null || disk.attached || this.persistence.folder.state !== 'open') return
+    const file = await this.persistence.folder.fileAt(path)
     let data: { text: string; modified: number } | null = null
     if (file !== null) {
       try {
@@ -88,7 +88,7 @@ export class EditorFiles {
       disk.remember(file, path, data.text)
       return
     }
-    const read = data.modified > this.kept.keptAt ? packMaskFrom(data.text) : null
+    const read = data.modified > this.persistence.savedAt ? packMaskFrom(data.text) : null
     if (read?.ok) {
       const locked = mustGuard(read.note)
       this.editor.replaceMask(read.content, { file, path, modified: data.modified }, locked)

@@ -15,7 +15,8 @@ import {
 
 export type { SideTab } from '../maskStorage'
 
-export type Deed = 'saved' | 'exported' | 'template'
+// What the toolbar just finished, shown for a moment as a tick.
+export type Finished = 'saved' | 'exported' | 'template'
 
 const DONE_MS = 1600
 
@@ -64,7 +65,7 @@ export class EditorView {
 
   private _notice: NoticeText | null = null
 
-  private _done: Deed | null = null
+  private _done: Finished | null = null
 
   private doneTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -149,13 +150,13 @@ export class EditorView {
     this.changed()
   }
 
-  get done(): Deed | null {
+  get done(): Finished | null {
     return this._done
   }
 
-  markDone(deed: Deed): void {
+  markDone(finished: Finished): void {
     if (this.doneTimer !== null) clearTimeout(this.doneTimer)
-    this._done = deed
+    this._done = finished
     this.changed()
     this.doneTimer = setTimeout(() => {
       this.doneTimer = null

@@ -171,7 +171,7 @@ function SaveState() {
         onClick={() => void saveOrAsk(ed)}
       >
         <Check size={14} /> <span className={LABEL}>Gespeichert</span>
-        {ed.files.keptAt > 0 && <span className={cn('tabular-nums', LABEL)}>{TIME.format(ed.files.keptAt)}</span>}
+        {ed.files.savedAt > 0 && <span className={cn('tabular-nums', LABEL)}>{TIME.format(ed.files.savedAt)}</span>}
       </Button>
     )
   }
