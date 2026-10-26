@@ -11,7 +11,7 @@ import { useView } from '../state/useView'
 import { conditionWords } from './conditionWords'
 import { releaseEmptyEntryKeys } from './entryEvents'
 import type { EditorStore } from '../state/EditorStore'
-import { NEW_STEP_TAB, stepPiece, type StepContext } from './stepPiece'
+import { NEW_STEP_TAB, stepSummary, type StepContext } from './stepRegistry'
 import { StepWindow } from './StepWindow'
 import { useStepContext } from './useStepContext'
 
@@ -62,7 +62,7 @@ export function EventChain({ block, ev, context }: { block: BlockNode; ev: Event
                 blockId: block.id,
                 eventKey: ev.key,
                 stepId: step.id,
-                tab: stepPiece(step.kind).tab(step, context),
+                tab: stepSummary(step.kind).tab(step, context),
               })
             }
             onUp={
@@ -173,7 +173,7 @@ function StepLine({
   )
   const number = <span className="w-[16px] shrink-0 text-right font-mono text-dense opacity-70">{nr}</span>
 
-  const { words, short, known } = stepPiece(step.kind).words(step, context)
+  const { words, short, known } = stepSummary(step.kind).words(step, context)
   const condition = conditionWords(step.onlyIf, context.reach.sources ?? [])
   return (
     <Clickable open={open} onClick={onOpen}>

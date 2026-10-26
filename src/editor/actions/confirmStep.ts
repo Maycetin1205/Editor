@@ -1,12 +1,12 @@
 import { ConfirmBody } from './ConfirmBody'
-import type { StepPiece, StepTabPiece } from './piece'
+import type { StepSummary, StepTabDef } from './stepTypes'
 
-export const confirmPiece: StepPiece<'CONFIRM'> = {
+export const confirmSummary: StepSummary<'CONFIRM'> = {
   words: () => ({ words: 'Rückfrage: Löschen oder Abbrechen', short: '', known: true }),
   tab: () => 'ASK',
 }
 
-export const confirmTab: StepTabPiece = {
+export const confirmTab: StepTabDef = {
   key: 'ASK',
   name: 'Rückfrage',
   start: (id, step) => (step?.kind === 'CONFIRM' ? step : { id, kind: 'CONFIRM', resultName: '' }),

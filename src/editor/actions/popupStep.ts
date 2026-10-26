@@ -1,7 +1,7 @@
 import type { PopupCloseStep } from '../../core/data/steps/popupClose'
 import type { PopupOpenStep } from '../../core/data/steps/popupOpen'
 import { PopupBody } from './PopupBody'
-import type { StepContext, StepPiece, StepTabPiece, StepWords } from './piece'
+import type { StepContext, StepSummary, StepTabDef, StepWords } from './stepTypes'
 
 type PopupStep = PopupOpenStep | PopupCloseStep
 
@@ -11,11 +11,11 @@ function popupWords(step: PopupStep, context: StepContext): StepWords {
   return { words: name ? `Popup ${name} ${verb}` : `Popup ${verb}`, short: '', known: name !== undefined }
 }
 
-export const popupOpenPiece: StepPiece<'POPUP_OPEN'> = { words: popupWords, tab: () => 'POPUP' }
+export const popupOpenSummary: StepSummary<'POPUP_OPEN'> = { words: popupWords, tab: () => 'POPUP' }
 
-export const popupClosePiece: StepPiece<'POPUP_CLOSE'> = { words: popupWords, tab: () => 'POPUP' }
+export const popupCloseSummary: StepSummary<'POPUP_CLOSE'> = { words: popupWords, tab: () => 'POPUP' }
 
-export const popupTab: StepTabPiece = {
+export const popupTab: StepTabDef = {
   key: 'POPUP',
   name: 'Popup',
   start: (id, step) =>

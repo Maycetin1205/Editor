@@ -7,7 +7,7 @@ import { useEditor } from '../state/useEditor'
 import { EventChain } from './ActionsSection'
 import { useStepContext } from './useStepContext'
 import { claimEntryKey, entryChainsOf, entryEventsOf, type EntryChain } from './entryEvents'
-import { NEW_STEP_TAB } from './stepPiece'
+import { NEW_STEP_TAB } from './stepRegistry'
 
 const titleOf = (entry: EntryChain): string => (entry.title === '' ? `Zeile ${entry.index + 1}` : `„${entry.title}“`)
 

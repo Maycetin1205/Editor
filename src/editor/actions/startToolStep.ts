@@ -1,6 +1,6 @@
 import type { StartToolStep } from '../../core/data/steps/startTool'
 import { StartToolBody } from './StartToolBody'
-import type { StepPiece, StepTabPiece } from './piece'
+import type { StepSummary, StepTabDef } from './stepTypes'
 
 const emptyTool = (id: string): StartToolStep => ({
   id,
@@ -10,7 +10,7 @@ const emptyTool = (id: string): StartToolStep => ({
   parameter: [],
 })
 
-export const startToolPiece: StepPiece<'START_TOOL'> = {
+export const startToolSummary: StepSummary<'START_TOOL'> = {
   words(step) {
     const nr = step.toolNumber.trim()
     const places = step.parameter.length
@@ -23,7 +23,7 @@ export const startToolPiece: StepPiece<'START_TOOL'> = {
   tab: () => 'TOOL',
 }
 
-export const toolTab: StepTabPiece = {
+export const toolTab: StepTabDef = {
   key: 'TOOL',
   name: 'Tool',
   start: (id, step) => (step?.kind === 'START_TOOL' ? step : emptyTool(id)),

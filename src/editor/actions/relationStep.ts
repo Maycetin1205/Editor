@@ -2,7 +2,7 @@ import type { ComponentType } from 'react'
 import { relationGroup, type RelationTemplate } from '../../core/data/relations'
 import type { RelationStep } from '../../core/data/steps/relation'
 import { ReadRelationBody, WriteRelationBody } from './RelationBody'
-import type { StepBodyProps, StepContext, StepPiece, StepTabPiece } from './piece'
+import type { StepBodyProps, StepContext, StepSummary, StepTabDef } from './stepTypes'
 
 const VERB_SHORT: Record<RelationTemplate['verb'], string> = {
   GET_RELATION: 'GET',
@@ -22,7 +22,7 @@ const emptyRelation = (id: string): RelationStep => ({
 const templateOf = (step: RelationStep, context: StepContext): RelationTemplate | undefined =>
   context.relations.find((r) => r.id === step.relationId)
 
-export const relationPiece: StepPiece<'RELATION'> = {
+export const relationSummary: StepSummary<'RELATION'> = {
   words(step, context) {
     const t = templateOf(step, context)
     return { words: t?.name ?? 'Relation', short: t ? `${VERB_SHORT[t.verb]} ${t.nr}` : '', known: t !== undefined }
@@ -35,7 +35,7 @@ function relationTab(
   name: string,
   group: 'read' | 'write',
   Body: ComponentType<StepBodyProps>,
-): StepTabPiece {
+): StepTabDef {
   return {
     key,
     name,

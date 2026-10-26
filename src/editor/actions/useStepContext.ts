@@ -4,7 +4,7 @@ import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
 import { useRelations } from '../state/useRelations'
 import { maskReach } from '../origin/reach'
-import type { StepContext } from './stepPiece'
+import type { StepContext } from './stepRegistry'
 
 export function useStepContext(): StepContext {
   const ed = useEditor()

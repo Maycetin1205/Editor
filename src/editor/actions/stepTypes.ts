@@ -20,7 +20,7 @@ export interface StepWords {
 type StepOf<K extends StepKind> = Step & { kind: K }
 
 // What the editor says and shows about one kind of step.
-export interface StepPiece<K extends StepKind> {
+export interface StepSummary<K extends StepKind> {
   words(step: StepOf<K>, context: StepContext): StepWords
   tab(step: StepOf<K>, context: StepContext): StepTab
 }
@@ -32,7 +32,7 @@ export interface StepBodyProps {
   onChange: (step: Step) => void
 }
 
-export interface StepTabPiece {
+export interface StepTabDef {
   key: StepTab
   name: string
   count?: (context: StepContext) => number
