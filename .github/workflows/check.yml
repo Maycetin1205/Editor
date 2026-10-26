@@ -16,8 +16,9 @@ jobs:
       - run: npm ci
       - run: npm run build:runtime
       - run: npx tsc -b
-      - run: npx eslint src
+      - run: npx eslint .
       - run: npx prettier --check .
       - run: npm run knip
       - run: npm run cycles
+      - run: npx vitest run
       - run: npx vite build

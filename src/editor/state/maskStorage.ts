@@ -207,7 +207,7 @@ export function persistSourceTabs(tabs: readonly string[]): void {
   write(SOURCE_TABS_KEY, JSON.stringify(tabs))
 }
 
-export interface WindowSize {
+interface WindowSize {
   width: number
   height: number
 }

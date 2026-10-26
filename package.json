@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "build:runtime": "node tools/buildRuntime.mjs",
-    "check": "tsc -b && eslint src && prettier --check . && npm run cycles",
+    "test": "vitest run",
+    "pretest": "npm run build:runtime",
+    "check": "tsc -b && eslint . && prettier --check . && npm run cycles && npm run knip && vitest run",
     "predev": "npm run build:runtime",
     "prebuild": "npm run build:runtime",
     "format": "prettier --write .",
@@ -35,6 +37,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.6",
     "globals": "^17.12.0",
+    "happy-dom": "^21.0.4",
     "knip": "5.88.1",
     "postcss": "^8.5.27",
     "prettier": "3.9.10",
@@ -42,6 +45,7 @@
     "tailwindcss": "^3.4.19",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.69.0",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "vitest": "^4.1.12"
   }
 }
