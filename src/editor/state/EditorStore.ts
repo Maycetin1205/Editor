@@ -212,10 +212,16 @@ export class EditorStore extends Subject<EditorStore> {
     return this._history.transaction(() => this.snapshot(), run)
   }
 
+  // One undo step for a gesture; cancel puts the mask back as it was when
+  // the gesture began.
   openGesture(): GestureBracket {
     return gestureBracket(
       () => this.beginTransaction(),
       () => this.endTransaction(),
+      () => {
+        const start = this._history.abandon()
+        if (start) this.restoreFrom(start)
+      },
     )
   }
 

@@ -51,8 +51,8 @@ function slotAt({ edge, start, capacity, least }: SlotLimits, columns: number, d
 }
 
 // Resizes a block in its grid area at one grip. Every changed slot is written
-// right away, all of them under one undo step. An end without a drop keeps
-// the slot reached so far, as on a lost pointer.
+// right away, all of them under one undo step. An end without a drop (Escape,
+// a lost pointer or focus) puts the slot back, as moving a block does.
 function gridSizeDrag(
   editor: EditorStore,
   blockRef: RefObject<BlockNode>,
@@ -97,7 +97,7 @@ function gridSizeDrag(
       bracket.close()
       if (last !== start) swallowNextClick()
     },
-    cancel: () => bracket.close(),
+    cancel: () => bracket.cancel(),
   }
 }
 

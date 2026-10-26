@@ -18,7 +18,7 @@ export function axesOf(edge: Edge): Axis[] {
 
 // Pulls a centred window wider or taller at one grip, on both sides at once.
 // Every change is written right away, all of them under one undo step. An
-// end without a drop keeps the size reached so far, as on a lost pointer.
+// end without a drop (Escape, a lost pointer or focus) puts the size back.
 // The click after the release is the grip's: under a window it would reach
 // the canvas and take the choice away.
 export function sizeDrag(
@@ -57,6 +57,6 @@ export function sizeDrag(
       bracket.close()
       swallowNextClick()
     },
-    cancel: () => bracket.close(),
+    cancel: () => bracket.cancel(),
   }
 }
