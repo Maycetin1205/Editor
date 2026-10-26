@@ -16,6 +16,7 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - Kanban: ein Titel mit „$&“ landet als Text in der Meldung, nicht als Muster.
 - Erfassung, Verteilen: bei absteigender Sortierung stehen leere Werte hinten, nicht vorn.
 - Kanban: die Meldung einer Spalte bleibt nicht mehr stehen, wenn das Brett während der Meldung aus- und wieder eingehängt wird (etwa beim Schließen und Öffnen eines Popups).
+- Kanban: die Meldung einer Spalte („Meldung beim Ankommen“) erscheint erst, wenn das Schreiben bestätigt ist. Vorher erschien sie beim Ablegen, auch wenn die Aktion danach scheiterte und die Karte zurücksprang. Ohne Aktionskette, die schreibt, gibt es keine Meldung.
 
 ### Für Entwickler
 

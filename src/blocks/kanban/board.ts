@@ -185,7 +185,6 @@ export class Board {
     const fromPlace = placeAt(columns, from)
     this.moved.set(card.key, spot)
     this.writes = true
-    this.el.arrived(card, spot)
     this.el.requestUpdate()
     const result = await runEvent(this.el, 'onCardDrop', {
       PINDEX: card.record,
@@ -195,6 +194,8 @@ export class Board {
     this.writes = false
     const back = !result.written || (result.state !== 'ran' && result.state !== 'unconfirmed')
     if (back || result.state === 'ran') this.moved.delete(card.key)
+    // The column's notice only once the chain wrote and nothing is left unconfirmed.
+    if (result.written && result.state === 'ran') this.el.arrived(card, spot)
     this.el.requestUpdate()
   }
 }
