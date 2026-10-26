@@ -53,18 +53,11 @@ export function cellFromPointer(gridEl: HTMLElement, clientX: number, clientY: n
 
 function draggedSize(
   ed: ReturnType<typeof useEditor>,
-  dnd: DndState,
   dt: DataTransfer,
   parentId: string,
 ): { w: number; h: number } | null {
   const parent = ed.getNode(parentId)
   if (!parent) return null
-  if (dnd.dragId !== null) {
-    const node = ed.getNode(dnd.dragId)
-    if (!node || !mayContain(parent.type, node.type)) return null
-    const spec = gridMetricsOf(blockType(node.type))
-    return { w: spec.startWidth, h: spec.startHeight }
-  }
   const type = newBlockDragType(dt)
   const def = type ? blockType(type) : undefined
   if (!type || !def || !mayContain(parent.type, type)) return null
@@ -75,11 +68,10 @@ function draggedSize(
 function gridTarget(
   e: DragEvent,
   ed: ReturnType<typeof useEditor>,
-  dnd: DndState,
   parentId: string,
   gridEl: HTMLElement,
 ): DropTarget | null {
-  const size = draggedSize(ed, dnd, e.dataTransfer, parentId)
+  const size = draggedSize(ed, e.dataTransfer, parentId)
   if (!size) return null
   const cell = cellFromPointer(gridEl, e.clientX, e.clientY)
   const columns = columnsOf(ed.tree, parentId)
@@ -87,7 +79,7 @@ function gridTarget(
   const x = Math.max(0, Math.min(cell.x, columns - w))
   const capacity = rowsCapacity(ed.tree, parentId, gridEl)
   const y = rowInBox(capacity, cell.y, size.h)
-  const free = !slotTaken(ed.tree, parentId, { x, y, w, h: size.h }, dnd.dragId)
+  const free = !slotTaken(ed.tree, parentId, { x, y, w, h: size.h }, null)
   return { parentId, x, y, w, h: size.h, free }
 }
 
@@ -97,14 +89,14 @@ function gridTarget(
 export function pageDrop(ed: ReturnType<typeof useEditor>, dnd: DndState, pageId: string, on = true) {
   return {
     onDragOver: (e: DragEvent) => {
-      if (!on || (dnd.dragId === null && !isNewBlockDrag(e.dataTransfer))) return
+      if (!on || !isNewBlockDrag(e.dataTransfer)) return
       const target = areaUnderPointer(ed.tree, pageId, e.clientX, e.clientY)
       if (!target) {
         dnd.setDropTarget(null)
         return
       }
       e.preventDefault()
-      dnd.setDropTarget(gridTarget(e, ed, dnd, target.parentId, target.area))
+      dnd.setDropTarget(gridTarget(e, ed, target.parentId, target.area))
     },
     onDragLeave: (e: DragEvent<HTMLElement>) => {
       if (!e.currentTarget.contains(e.relatedTarget as Node | null)) dnd.setDropTarget(null)

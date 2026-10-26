@@ -72,15 +72,13 @@ function useDndState(): DndState {
   )
 }
 
+// A new block from the palette lands. Moving a block on the canvas runs on
+// pointer events (positionDrag.ts) and never reaches a drop.
 function commitDrop(e: DragEvent, ed: ReturnType<typeof useEditor>, dnd: DndState): void {
   const target = dnd.dropTarget
-  if (target && target.free) {
-    if (dnd.dragId !== null) {
-      ed.moveNodeToCell(dnd.dragId, target.parentId, target.x, target.y)
-    } else if (isNewBlockDrag(e.dataTransfer)) {
-      const type = e.dataTransfer.getData(NEW_BLOCK_MIME)
-      if (blockType(type)) ed.addBlockAtCell(type, target.parentId, target.x, target.y)
-    }
+  if (target && target.free && isNewBlockDrag(e.dataTransfer)) {
+    const type = e.dataTransfer.getData(NEW_BLOCK_MIME)
+    if (blockType(type)) ed.addBlockAtCell(type, target.parentId, target.x, target.y)
   }
   dnd.reset()
 }
