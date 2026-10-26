@@ -79,7 +79,7 @@ Ein Wort je Ding, damit niemand raten muss:
 
 | Wort | heißt | nicht zu verwechseln mit |
 |---|---|---|
-| **Spot** (`BindableSpot`, `ValueSpot`, `SpotClick`) | eine Stelle in einem Baustein, an der ein Feldwert landet | der Platz auf dem Kanban-Brett (`BoardCell`), die Ankerstelle eines Nachschlagefelds (`inputSpot.ts`, wird umbenannt) |
+| **Spot** (`BindableSpot`, `ValueSpot`, `SpotClick`) | eine Stelle in einem Baustein, an der ein Feldwert landet | der Platz auf dem Kanban-Brett (`BoardCell`), die Ankerstelle eines Nachschlagefelds (`InputAnchor`) |
 | **selected** (`selectedId`, `selectedNode`) | der Baustein, der im Editor markiert ist | |
 | **chosen** (`chosenRow`, `chosenDay`, `chooseSelection`) | die Zeile oder der Tag, den der Nutzer in der laufenden Maske gewählt hat | |
 | **pick** (`CapturedPick`, `picks`) | ein Betrag, den die Erfassung aus einem Satz nimmt (Verteilen) | |

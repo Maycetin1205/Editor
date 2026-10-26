@@ -1,7 +1,7 @@
 import { html, nothing, type TemplateResult } from 'lit'
 import { repeat } from 'lit/directives/repeat.js'
 import { styleMap } from 'lit/directives/style-map.js'
-import { inputSpotTpl } from '../lookup/inputSpot'
+import { inputAnchorTpl } from '../lookup/inputAnchor'
 import { cellsClass } from './cells'
 import { columnEditable, type CaptureColumn } from './column'
 import { shownValue, type Column } from '../parts/column'
@@ -16,7 +16,7 @@ import type { WorkingRow } from './workingRow'
 
 function typingCellTpl(ledger: CaptureLedger, rawIndex: number, slot: number, column: Column): TemplateResult {
   const booked = ledger.booked
-  return inputSpotTpl(
+  return inputAnchorTpl(
     {
       value: booked.cellValue(rawIndex, slot),
       title: column.title,

@@ -5,7 +5,7 @@ import { automaticColumns, fetchEntries, openLookup, closeLookupFor, type Entry 
 import type { Column } from '../parts/column'
 import { keyOf, SuggestionState } from './suggestionState'
 import { orderedSuggestions } from './suggestionList'
-import { inputSpotTpl } from './inputSpot'
+import { inputAnchorTpl } from './inputAnchor'
 import { rowFits } from '../parts/cellSearch'
 import { maskHost } from '../../runtime/host'
 import { focusNextField } from '../../runtime/nextField'
@@ -80,7 +80,7 @@ export class LookupControl implements ReactiveController {
   }
 
   render(inputClass: string, title: string): TemplateResult {
-    return html`${inputSpotTpl(
+    return html`${inputAnchorTpl(
       {
         value: this.inField,
         title,

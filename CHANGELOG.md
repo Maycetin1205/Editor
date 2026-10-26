@@ -11,6 +11,10 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - Die Suche findet „Müller“ mit „muller“ in jeder Liste, auch im Kanban.
 - Kanban: der Kartenavatar zeigt den Anfangsbuchstaben; die Tierarten-Symbole der Kleintierpraxis sind weg. „Wartet seit“ heißt „Seit“.
 - Alte Masken: die Knopffarbe „accent“ aus Stufe 27/28 und die Textfarbe „petrol“ aus Stufe 28 werden als „Akzent“ gelesen; vorher zeigte der Inspektor eine leere Auswahl.
+- Ziehen auf der Fläche: Escape bricht das Verschieben eines Bausteins ab, der Baustein bleibt, wo er war; vorher hob Escape nur die Auswahl auf und der Baustein wurde trotzdem abgelegt. Beim Größenändern behält Escape die erreichte Größe.
+- Ziehen hebt die Auswahl nicht mehr auf.
+- Kanban: ein Titel mit „$&“ landet als Text in der Meldung, nicht als Muster.
+- Erfassung, Verteilen: bei absteigender Sortierung stehen leere Werte hinten, nicht vorn.
 
 ### Für Entwickler
 
@@ -23,6 +27,9 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - Export als Befehl (`editor/commands/exportMask.ts`).
 - SoftEngine: `hostQueue.ts` in Reihe, Fragen, Schreiben, Auftrag; `fields.ts` neben `data.ts`.
 - Hebungen in `editor/state/lifts/`.
+- Bausteine: Kanban ohne Praxis-Reste, Stil je Teil, Karte und Platz als Module. Tabellenmotor in Modell, Zeichnen und Bedienung geteilt, Klassennamen in `TABLE_PART`. Erfassung ohne Fassade, Tippzeile in `capture/row`, Aufteilung in `capture/split`, Tasten über `keys.ts`.
+- Editor-Fläche: ein Zieh-Helfer (`canvas/pointerDrag.ts`) für Verschieben, Rastergröße, Fenstergröße und Spaltenköpfe; `ff-list-bind` durch einen Rückruf ersetzt; große Fenster-Dateien geteilt.
+- eslint-Warnungen zu Größe: 63 → 16.
 - Zustände im Code auf Englisch (`quiet`, `loading`, `writing`, `saved`, `sent`, `failed`).
 - Tests (vitest) an den Nähten: Export-Markup, Escaping, Maskendatei mit Hebung, Aktionsketten, SoftEngine-Datenlesen. `npm test`, in `npm run check` und auf GitHub.
 - Rauchprobe im Browser: `npm run smoke` (braucht Playwright).

@@ -1,7 +1,7 @@
 import { html, nothing, type TemplateResult } from 'lit'
 import { styleMap } from 'lit/directives/style-map.js'
 import type { SuggestionRow } from '../../lookup/suggestionList'
-import { inputSpotTpl } from '../../lookup/inputSpot'
+import { inputAnchorTpl } from '../../lookup/inputAnchor'
 import type { Column } from '../../parts/column'
 import { figureAt, greyCellTpl, type RowLayout } from '../../parts/cell'
 import { cellsClass } from '../cells'
@@ -94,7 +94,7 @@ function captureInputTpl(placement: CapturePlacement, act: CaptureAct, column: C
   const list = !free && placement.typingColumn === slot
   const value = placement.value(slot)
 
-  return html`${inputSpotTpl(
+  return html`${inputAnchorTpl(
     {
       value,
       title: column.title,
