@@ -7,9 +7,9 @@ import { packLibrary, packLibraryFrom } from './libraryFile'
 import { CURRENT_SCHEMA_VERSION } from './maskSchema'
 import { readMask } from './readMask'
 
-const STORAGE_KEY = 'aufbau_editor_mask'
+export const MASK_STORAGE_KEY = 'aufbau_editor_mask'
 
-const LIBRARY_KEY = 'aufbau_editor_library'
+export const LIBRARY_STORAGE_KEY = 'aufbau_editor_library'
 
 const FORMER_LIBRARY_KEY = 'aufbau_editor_datencenter'
 
@@ -88,8 +88,8 @@ class Slot {
   }
 }
 
-const maskSlot = new Slot(STORAGE_KEY)
-const librarySlot = new Slot(LIBRARY_KEY, FORMER_LIBRARY_KEY)
+const maskSlot = new Slot(MASK_STORAGE_KEY)
+const librarySlot = new Slot(LIBRARY_STORAGE_KEY, FORMER_LIBRARY_KEY)
 
 export function loadLibraryFromStorage(): StoredLibrary {
   return (
