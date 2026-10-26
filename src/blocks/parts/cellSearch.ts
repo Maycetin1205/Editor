@@ -1,29 +1,16 @@
 import { html, type TemplateResult } from 'lit'
+import { matchesSearch, searchWords } from '../../runtime/searchText'
 
-export function plainText(text: string): string {
-  return text.toLowerCase().replace(/ß/g, 'ss').normalize('NFD').replace(/\p{M}/gu, '')
-}
-
-function wordsOf(text: string): string[] {
-  return text
-    .trim()
-    .toLowerCase()
-    .split(/\s+/)
-    .filter((w) => w !== '')
-}
+export { plainText } from '../../runtime/searchText'
 
 export function rowFits(row: readonly string[], searchText: string): boolean {
-  const words = wordsOf(searchText)
-  if (words.length === 0) return true
-
-  const rowText = plainText(row.join(' '))
-  return words.every((word) => rowText.includes(plainText(word)))
+  return matchesSearch(row, searchText)
 }
 
 const SPECIAL_CHARS = /[.*+?^${}()|[\]\\]/g
 
 export function markHit(text: string, searchText: string): TemplateResult | string {
-  const words = wordsOf(searchText)
+  const words = searchWords(searchText)
   if (words.length === 0 || text === '') return text
 
   let template: RegExp
