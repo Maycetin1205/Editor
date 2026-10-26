@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { startPointerDrag, type PointerDrag } from './pointerDrag'
+import { startPointerDrag, type PointerDrag } from '../src/editor/canvas/pointerDrag'
 
 function fire(on: EventTarget, type: string, extra: Record<string, unknown> = {}): Event {
   const ev = Object.assign(new Event(type, { cancelable: true }), { pointerId: 1, clientX: 0, ...extra })
