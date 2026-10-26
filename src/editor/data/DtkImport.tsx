@@ -4,10 +4,15 @@ import { Checkbox } from '@/editor/widgets/Checkbox'
 import { cn } from '@/editor/widgets/cn'
 import { Strip } from '@/editor/widgets/Grid'
 import { LINE_HOVER } from '@/editor/widgets/lineLook'
-import { keyDisplay } from '../../core/data/dataSources'
+import { keyDisplay, type DataSource } from '../../core/data/dataSources'
 import type { DtkTable } from '../../core/data/dtkImport'
 import { useDataSources } from '../state/useDataSources'
-import { newSource } from './sourceEdit'
+import { newSource, withEntry } from './sourceEdit'
+
+const sameFields = (t: DtkTable, s: DataSource | undefined): boolean =>
+  s !== undefined &&
+  t.fields.length === s.fields.length &&
+  t.fields.every((f, i) => f.code === s.fields[i]?.code && f.name === s.fields[i]?.name)
 
 export function DtkImport({
   fileName,
@@ -19,11 +24,11 @@ export function DtkImport({
   onClose: () => void
 }) {
   const store = useDataSources()
-  const present = new Set(store.list.map((s) => s.tableId).filter((k) => k !== ''))
+  const present = new Map(store.list.filter((s) => s.tableId !== '').map((s) => [s.tableId, s]))
   const [ticked, setTicked] = useState<ReadonlySet<string>>(
-    () => new Set(tables.filter((t) => !present.has(t.key) && t.fields.length > 0).map((t) => t.key)),
+    () => new Set(tables.filter((t) => t.fields.length > 0 && !sameFields(t, present.get(t.key))).map((t) => t.key)),
   )
-  const count = [...ticked].filter((k) => !present.has(k)).length
+  const count = ticked.size
 
   const toggle = (key: string) =>
     setTicked((old) => {
@@ -33,10 +38,17 @@ export function DtkImport({
       return next
     })
 
+  // A table that is already a source gets the fields of the file.
   const adopt = () => {
     for (const t of tables) {
-      if (!ticked.has(t.key) || present.has(t.key)) continue
-      store.add(newSource(t.name !== '' ? t.name : keyDisplay(t.key), { preset: 'idb', tableId: t.key }, t.fields))
+      if (!ticked.has(t.key)) continue
+      const old = present.get(t.key)
+      if (!old) {
+        store.add(newSource(t.name !== '' ? t.name : keyDisplay(t.key), { preset: 'idb', tableId: t.key }, t.fields))
+        continue
+      }
+      const next = withEntry(old, { fields: t.fields })
+      if (next) store.update(old.id, next)
     }
     onClose()
   }
@@ -46,19 +58,22 @@ export function DtkImport({
       <Strip>{fileName}</Strip>
       <div className="min-h-0 flex-1 overflow-y-auto">
         {tables.map((t) => {
-          const locked = present.has(t.key)
+          const old = present.get(t.key)
           return (
             <Checkbox
               key={t.key}
-              checked={!locked && ticked.has(t.key)}
-              disabled={locked}
+              checked={ticked.has(t.key)}
+              disabled={t.fields.length === 0}
               onChange={() => toggle(t.key)}
-              className={cn('h-[40px] border-b border-line-soft px-[12px]', !locked && LINE_HOVER)}
+              className={cn('h-[40px] border-b border-line-soft px-[12px]', LINE_HOVER)}
             >
               <span className="flex items-baseline gap-[8px]">
                 <span className="truncate font-semibold">{t.name !== '' ? t.name : keyDisplay(t.key)}</span>
                 <span className="shrink-0 font-mono text-dense text-muted">{keyDisplay(t.key)}</span>
-                <span className="ml-auto shrink-0 text-dense text-muted">{t.fields.length} Felder</span>
+                <span className="ml-auto shrink-0 text-dense text-muted">
+                  {old ? `vorhanden mit ${old.fields.length}, ` : ''}
+                  {t.fields.length} Felder
+                </span>
               </span>
             </Checkbox>
           )
