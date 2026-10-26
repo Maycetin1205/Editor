@@ -12,14 +12,7 @@ export function spotBinding(label: string, attribute: string): Property<string> 
   })
 }
 
-export function avatarBinding(label: string): Property<string> {
-  return fieldProperty({
-    default: '',
-    label,
-    place: 'source',
-    attribute: 'avatarfield',
-  })
-}
+export const AVATAR_SPOT = { prop: 'avatar', name: 'Avatar' } as const
 
 export const avatarStyle = css`
   .avatar {
@@ -48,9 +41,10 @@ function animalAvatarTpl(animal: Animal): TemplateResult {
   >${animalOutline(animal)}</span>`
 }
 
+const initial = (text: string): string => (Array.from(text.trim())[0] ?? '').toUpperCase()
+
 function letterAvatarTpl(text: string): TemplateResult {
-  const first = Array.from(text.trim())[0] ?? ''
-  return html`<span class="avatar letter" aria-hidden="true">${first.toUpperCase()}</span>`
+  return html`<span class="avatar letter" aria-hidden="true">${initial(text)}</span>`
 }
 
 function avatarTpl(value: string): TemplateResult | typeof nothing {
@@ -85,7 +79,7 @@ export function cardOf<P extends string>(
   const onlyBound = !el.editable && spots.some((s) => bound(s.prop))
   const shows = (prop: P | 'avatar'): boolean => {
     if (values !== null) return (values[prop] ?? '').trim() !== ''
-    if (prop === 'avatar') return (el.spotTexts.avatar ?? '') !== ''
+    if (prop === 'avatar') return el.editable || (el.spotTexts.avatar ?? '') !== ''
     return !onlyBound || bound(prop)
   }
   const spot = (prop: P, className: string): TemplateResult => {
@@ -102,7 +96,16 @@ export function cardOf<P extends string>(
   }
   const avatar = (): TemplateResult | typeof nothing => {
     if (!shows('avatar')) return nothing
-    return values === null ? letterAvatarTpl(el.spotTexts.avatar ?? '') : avatarTpl(values.avatar ?? '')
+    if (values !== null) return avatarTpl(values.avatar ?? '')
+    const text = el.spotTexts.avatar ?? ''
+    return html`<span
+      class="avatar letter"
+      data-ff-spot="avatar"
+      data-ff-in-card
+      ?data-ff-bound=${text !== ''}
+      @click=${report}
+      @dblclick=${report}
+    >${initial(text)}</span>`
   }
   return { shows, spot, avatar }
 }

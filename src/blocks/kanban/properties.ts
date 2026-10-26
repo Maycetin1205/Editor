@@ -1,6 +1,6 @@
 import { booleanProperty, fieldProperty, segmentProperty, type ValuesOf } from '../../core/block/property'
 import { DAY_FIELD_PROPERTY } from '../../core/block/dayFieldProperty'
-import { avatarBinding, spotBinding } from '../parts/card'
+import { spotBinding } from '../parts/card'
 import { kanbanColumnsProperty } from './columns'
 
 export const kanbanProperties = {
@@ -27,7 +27,7 @@ export const kanbanProperties = {
     },
   ),
   dayField: DAY_FIELD_PROPERTY,
-  avatarField: avatarBinding('Avatar'),
+  avatarField: spotBinding('Avatar', 'avatarfield'),
   columns: kanbanColumnsProperty(),
   summary: booleanProperty({
     default: false,

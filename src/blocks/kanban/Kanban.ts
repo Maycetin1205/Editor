@@ -7,7 +7,7 @@ import { asNumber, shownNumber } from '../../core/data/number'
 import { onSearchText } from '../../runtime/searchText'
 import { lookStyle, toneValue } from '../look/look'
 import { spotValue, type DataPreamble } from '../../runtime/source'
-import { avatarStyle, cardOf, cardSpotStyle, type Card, type CardValues } from '../parts/card'
+import { AVATAR_SPOT, avatarStyle, cardOf, cardSpotStyle, type Card, type CardValues } from '../parts/card'
 import { Board, boardRegister, boardUnregister, type CardData } from './board'
 import { cardsByClock, SAMPLE_HOUR_LINE, SAMPLE_UNTIL, waitOf, type Until } from './clock'
 import { KANBAN_COLUMNS_BINDING, type KanbanColumn, type KanbanPlace } from './columns'
@@ -65,10 +65,9 @@ export class Kanban extends BlockElement {
   }
 
   cardValues(row: unknown, read: DataPreamble['read']): Record<string, string> {
-    const bound = Object.fromEntries(
-      CARD_SPOTS.map(({ prop }) => [prop, spotValue('', this[`${prop}Field`], row, read)]),
+    return Object.fromEntries(
+      [...CARD_SPOTS, AVATAR_SPOT].map(({ prop }) => [prop, spotValue('', this[`${prop}Field`], row, read)]),
     )
-    return { ...bound, avatar: this.avatarField === '' ? '' : read(row, this.avatarField) }
   }
 
   // A card came to a column: its notice shows for a moment.
@@ -406,7 +405,7 @@ defineBlock(Kanban, {
     { kind: 'source', helpers: 'beside' },
     { kind: 'recordPick' },
     { kind: 'list', binding: KANBAN_COLUMNS_BINDING },
-    bindable<typeof kanbanProperties>(CARD_SPOTS),
+    bindable<typeof kanbanProperties>([...CARD_SPOTS, AVATAR_SPOT]),
     {
       kind: 'events',
       list: [

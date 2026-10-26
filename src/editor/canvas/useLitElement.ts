@@ -99,11 +99,6 @@ export function useLitElement({ editor, blockRef, block, selected, bindableSpots
         el.setDeclared(spot.nameProp, boundNames(value, sources))
       }
     }
-    const avatar = block.values[bindingProp('avatar')]
-    if (typeof avatar === 'string' && avatar !== '') {
-      const name = boundNames(avatar, sources)
-      if (name !== '') texts.avatar = name
-    }
     const list = capability(blockType(block.type), 'list')?.binding
     list?.entries(block.values[list.prop]).forEach((entry, i) => {
       const names = boundNames(list.fieldOf(entry), sources, HELPER_MARK)

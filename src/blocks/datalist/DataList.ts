@@ -4,7 +4,7 @@ import { BlockElement, defineBlock } from '../base/BlockElement'
 import { bindable } from '../../core/block/capability'
 import { chooseSelection, giverIdOf, relocateSelection, rowsToSelection } from '../../runtime/selection'
 import { makeDataLink, readDataPreamble, rowKeys, spotValue } from '../../runtime/source'
-import { avatarStyle, cardOf, cardSpotStyle } from '../parts/card'
+import { AVATAR_SPOT, avatarStyle, cardOf, cardSpotStyle } from '../parts/card'
 import { dataListStyle } from './dataListStyle'
 import { dataListProperties, PICK_ONE, ROW_SPOTS, type DataListValues } from './properties'
 
@@ -37,12 +37,12 @@ export class DataList extends BlockElement {
       ? rows.map((row, i) => ({
           key: keys[i],
           row,
-          values: {
-            ...Object.fromEntries(
-              ROW_SPOTS.map(({ prop }) => [prop, spotValue('', this[`${prop}Field`], row, preamble.read)]),
-            ),
-            avatar: this.avatarField === '' ? '' : preamble.read(row, this.avatarField),
-          },
+          values: Object.fromEntries(
+            [...ROW_SPOTS, AVATAR_SPOT].map(({ prop }) => [
+              prop,
+              spotValue('', this[`${prop}Field`], row, preamble.read),
+            ]),
+          ),
         }))
       : []
     const hit =
@@ -125,7 +125,7 @@ defineBlock(DataList, {
     { kind: 'source' },
     { kind: 'recordPick', gives: PICK_ONE },
     { kind: 'followsSelection' },
-    bindable<typeof dataListProperties>(ROW_SPOTS),
+    bindable<typeof dataListProperties>([...ROW_SPOTS, AVATAR_SPOT]),
   ],
   grid: { startWidth: 24, startHeight: 10, minWidth: 8, minHeight: 3 },
 })
