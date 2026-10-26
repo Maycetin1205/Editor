@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type RefObject } from 'react'
 import { Check, Search } from '@/editor/icons/icon'
 import { cn } from '@/editor/widgets/cn'
 import { Badge } from './Badge'
@@ -41,6 +41,8 @@ function fits(text: string, search: string): boolean {
   return text.toLowerCase().includes(search)
 }
 
+const textClass = (wrap: boolean): string => cn('min-w-0', !wrap && 'truncate')
+
 export function List({
   groups,
   value,
@@ -51,16 +53,49 @@ export function List({
   wrap = false,
   onChoose,
 }: ListProps) {
-  const text = cn('min-w-0', !wrap && 'truncate')
   const [search, setSearch] = useState('')
+  const wanted = search.trim().toLowerCase()
+  const { searchRef, rowsRef, onSearchKey, onRowsKey } = useListNavigation(searchable, wanted)
+
+  const filtered = useMemo(() => {
+    if (wanted === '') return groups
+    return groups
+      .map((g) => ({
+        ...g,
+        entries: g.entries.filter((e) => fits(e.name, wanted) || fits(e.badge ?? '', wanted)),
+      }))
+      .filter((g) => g.entries.length > 0)
+  }, [groups, wanted])
+
+  return (
+    <div className={cn('flex flex-col', fill && 'min-h-0 flex-1')}>
+      {searchable && <SearchBox value={search} inputRef={searchRef} onChange={setSearch} onKeyDown={onSearchKey} />}
+
+      <div
+        ref={rowsRef}
+        onKeyDown={onRowsKey}
+        className={cn('flex flex-col', fill && 'min-h-0 flex-1 overflow-y-auto')}
+      >
+        {emptyText !== undefined && wanted === '' && (
+          <EmptyChoice text={emptyText} chosen={value === ''} wrap={wrap} onChoose={() => onChoose('')} />
+        )}
+
+        {filtered.map((g) => (
+          <GroupSection key={g.key} group={g} value={value} values={values} wrap={wrap} onChoose={onChoose} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Focus and arrow-key movement between the search box and the enabled rows.
+function useListNavigation(searchable: boolean, wanted: string) {
   const searchRef = useRef<HTMLInputElement | null>(null)
   const rowsRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (searchable) searchRef.current?.focus()
   }, [searchable])
-
-  const wanted = search.trim().toLowerCase()
 
   const choices = (): HTMLButtonElement[] => [
     ...(rowsRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') ?? []),
@@ -98,91 +133,130 @@ export function List({
     step(e.target, e.key === 'ArrowDown' ? 1 : -1)
   }
 
-  const filtered = useMemo(() => {
-    if (wanted === '') return groups
-    return groups
-      .map((g) => ({
-        ...g,
-        entries: g.entries.filter((e) => fits(e.name, wanted) || fits(e.badge ?? '', wanted)),
-      }))
-      .filter((g) => g.entries.length > 0)
-  }, [groups, wanted])
+  return { searchRef, rowsRef, onSearchKey, onRowsKey }
+}
 
+function SearchBox({
+  value,
+  inputRef,
+  onChange,
+  onKeyDown,
+}: {
+  value: string
+  inputRef: RefObject<HTMLInputElement | null>
+  onChange: (value: string) => void
+  onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void
+}) {
   return (
-    <div className={cn('flex flex-col', fill && 'min-h-0 flex-1')}>
-      {searchable && (
-        <div className="mb-[4px] flex shrink-0 items-center gap-[6px] rounded border border-transparent bg-control px-[9px] transition-colors focus-within:border-accent focus-within:bg-panel focus-within:shadow-focus">
-          <Search size={13} aria-hidden className="shrink-0 text-muted" />
-          <input
-            ref={searchRef}
-            value={search}
-            onChange={(e) => setSearch(e.currentTarget.value)}
-            onKeyDown={onSearchKey}
-            placeholder="Suchen…"
-            aria-label="Suchen"
-            className="h-control min-w-0 flex-1 bg-transparent text-ui font-semibold text-ink outline-none placeholder:text-muted"
-          />
-        </div>
-      )}
-
-      <div
-        ref={rowsRef}
-        onKeyDown={onRowsKey}
-        className={cn('flex flex-col', fill && 'min-h-0 flex-1 overflow-y-auto')}
-      >
-        {emptyText !== undefined && wanted === '' && (
-          <button
-            type="button"
-            onClick={() => onChoose('')}
-            className={cn(ROW, 'text-muted hover:text-ink', LINE_HOVER, value === '' && LINE_CHOSEN)}
-          >
-            <span className="w-[12px] shrink-0 text-accent">{value === '' && <Check size={12} />}</span>
-            <span className={cn(text, 'flex-1')}>{emptyText}</span>
-          </button>
-        )}
-
-        {filtered.map((g) => (
-          <div key={g.key} className="flex flex-col">
-            {g.name !== undefined && g.name !== '' && (
-              <p className="flex items-baseline gap-[8px] px-[9px] pb-[2px] pt-[8px] text-dense font-semibold text-muted">
-                <span className={text}>{g.name}</span>
-                {g.badge !== undefined && g.badge !== '' && <Badge className="font-normal">{g.badge}</Badge>}
-              </p>
-            )}
-            {g.entries.map((e) => {
-              const chosen = values ? values.includes(e.value) : e.value === value
-              return (
-                <button
-                  key={`${g.key}::${e.value}`}
-                  type="button"
-                  disabled={e.disabled}
-                  onClick={() => onChoose(e.value)}
-                  className={cn(
-                    ROW,
-                    e.disabled ? 'cursor-not-allowed text-muted opacity-[.45]' : cn('text-ink', LINE_HOVER),
-                    chosen && LINE_CHOSEN,
-                  )}
-                >
-                  <span className="w-[12px] shrink-0 text-accent">{chosen && <Check size={12} />}</span>
-                  {wrap ? (
-                    <span className="min-w-0 flex-1">
-                      {e.name}
-                      {e.badge !== undefined && e.badge !== '' && (
-                        <span className="block break-all font-mono text-dense text-muted">{e.badge}</span>
-                      )}
-                    </span>
-                  ) : (
-                    <>
-                      <span className="min-w-0 flex-1 truncate">{e.name}</span>
-                      {e.badge !== undefined && e.badge !== '' && <Badge className="max-w-[50%]">{e.badge}</Badge>}
-                    </>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        ))}
-      </div>
+    <div className="mb-[4px] flex shrink-0 items-center gap-[6px] rounded border border-transparent bg-control px-[9px] transition-colors focus-within:border-accent focus-within:bg-panel focus-within:shadow-focus">
+      <Search size={13} aria-hidden className="shrink-0 text-muted" />
+      <input
+        ref={inputRef}
+        value={value}
+        onChange={(e) => onChange(e.currentTarget.value)}
+        onKeyDown={onKeyDown}
+        placeholder="Suchen…"
+        aria-label="Suchen"
+        className="h-control min-w-0 flex-1 bg-transparent text-ui font-semibold text-ink outline-none placeholder:text-muted"
+      />
     </div>
+  )
+}
+
+// The row that picks the empty value.
+function EmptyChoice({
+  text,
+  chosen,
+  wrap,
+  onChoose,
+}: {
+  text: string
+  chosen: boolean
+  wrap: boolean
+  onChoose: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onChoose}
+      className={cn(ROW, 'text-muted hover:text-ink', LINE_HOVER, chosen && LINE_CHOSEN)}
+    >
+      <span className="w-[12px] shrink-0 text-accent">{chosen && <Check size={12} />}</span>
+      <span className={cn(textClass(wrap), 'flex-1')}>{text}</span>
+    </button>
+  )
+}
+
+function GroupSection({
+  group: g,
+  value,
+  values,
+  wrap,
+  onChoose,
+}: {
+  group: ListGroup
+  value: string
+  values: readonly string[] | undefined
+  wrap: boolean
+  onChoose: (value: string) => void
+}) {
+  return (
+    <div className="flex flex-col">
+      {g.name !== undefined && g.name !== '' && (
+        <p className="flex items-baseline gap-[8px] px-[9px] pb-[2px] pt-[8px] text-dense font-semibold text-muted">
+          <span className={textClass(wrap)}>{g.name}</span>
+          {g.badge !== undefined && g.badge !== '' && <Badge className="font-normal">{g.badge}</Badge>}
+        </p>
+      )}
+      {g.entries.map((e) => (
+        <EntryRow
+          key={`${g.key}::${e.value}`}
+          entry={e}
+          chosen={values ? values.includes(e.value) : e.value === value}
+          wrap={wrap}
+          onChoose={onChoose}
+        />
+      ))}
+    </div>
+  )
+}
+
+function EntryRow({
+  entry: e,
+  chosen,
+  wrap,
+  onChoose,
+}: {
+  entry: ListEntry
+  chosen: boolean
+  wrap: boolean
+  onChoose: (value: string) => void
+}) {
+  return (
+    <button
+      type="button"
+      disabled={e.disabled}
+      onClick={() => onChoose(e.value)}
+      className={cn(
+        ROW,
+        e.disabled ? 'cursor-not-allowed text-muted opacity-[.45]' : cn('text-ink', LINE_HOVER),
+        chosen && LINE_CHOSEN,
+      )}
+    >
+      <span className="w-[12px] shrink-0 text-accent">{chosen && <Check size={12} />}</span>
+      {wrap ? (
+        <span className="min-w-0 flex-1">
+          {e.name}
+          {e.badge !== undefined && e.badge !== '' && (
+            <span className="block break-all font-mono text-dense text-muted">{e.badge}</span>
+          )}
+        </span>
+      ) : (
+        <>
+          <span className="min-w-0 flex-1 truncate">{e.name}</span>
+          {e.badge !== undefined && e.badge !== '' && <Badge className="max-w-[50%]">{e.badge}</Badge>}
+        </>
+      )}
+    </button>
   )
 }
