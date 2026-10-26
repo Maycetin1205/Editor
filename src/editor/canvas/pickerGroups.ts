@@ -19,14 +19,14 @@ export function librarySourcesChoice(
   blockId: string,
   sources: readonly SourceInReach[],
   library: readonly DataSource[],
-  onData: () => void,
+  onLeave: () => void,
 ): SourcesChoice | undefined {
   if (sources.length > 0 || sourcesCarrier(editor.tree, blockId) === undefined) return undefined
   return {
     entries: library.map((s) => ({ value: s.id, name: s.name, badge: sourcesKey(s) })),
-    onData: () => {
-      onData()
-      editor.showData(true)
+    onNewSource: () => {
+      onLeave()
+      editor.startNewSource()
     },
     onChoose: (sourceId: string) => {
       const carrier = sourcesCarrier(editor.tree, blockId)

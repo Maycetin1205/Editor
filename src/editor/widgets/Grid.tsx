@@ -1,4 +1,13 @@
-import { createContext, useContext, useRef, useState, type FocusEvent, type KeyboardEvent, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useRef,
+  useState,
+  type FocusEvent,
+  type KeyboardEvent,
+  type ReactNode,
+  type RefObject,
+} from 'react'
 import { Plus, Trash2 } from '@/editor/icons/icon'
 import { cn } from './cn'
 import { binArea, LINE_HOVER, ROW_CHOSEN } from './lineLook'
@@ -15,7 +24,8 @@ const TH = 'h-[28px] truncate border-b border-line-soft bg-panel px-[10px] text-
 export const TD = 'h-[29px] border-b border-line-soft p-0'
 export const CELL_TEXT = 'block truncate px-[10px]'
 export const CELL_TEXT_WRAPPED = 'block break-words px-[10px] py-[5px]'
-export const INPUT = 'h-[28px] w-full min-w-0 bg-transparent px-[10px] text-ui text-ink outline-none'
+export const INPUT =
+  'h-[28px] w-full min-w-0 bg-transparent px-[10px] text-ui text-ink outline-none placeholder:text-muted'
 export const MARKED = ROW_CHOSEN
 const TYPING = 'bg-panel'
 
@@ -265,17 +275,24 @@ export function GridLine({
 
 export function GridNewLine({
   names,
+  placeholders = [],
+  firstRef,
+  autoFocus = false,
   valid,
   onAdd,
 }: {
   names: readonly string[]
+  placeholders?: readonly string[]
+  firstRef?: RefObject<HTMLInputElement | null>
+  autoFocus?: boolean
   valid: (v: readonly string[]) => boolean
   onAdd: (v: readonly string[]) => boolean
 }) {
   const columns = useContext(ColumnsOf)
   const empty = columns.map(() => '')
   const [v, setV] = useState<readonly string[]>(empty)
-  const first = useRef<HTMLInputElement>(null)
+  const ownFirst = useRef<HTMLInputElement>(null)
+  const first = firstRef ?? ownFirst
   const typed = v.some((x) => x.trim() !== '')
   const ok = !typed || valid(v)
   const add = (): boolean => {
@@ -290,6 +307,8 @@ export function GridNewLine({
           <input
             ref={k === 0 ? first : undefined}
             aria-label={names[k] ?? c.name}
+            placeholder={placeholders[k]}
+            autoFocus={k === 0 && autoFocus}
             value={v[k] ?? ''}
             spellCheck={false}
             className={inputClass(c, !ok)}

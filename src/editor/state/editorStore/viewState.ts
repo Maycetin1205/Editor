@@ -49,7 +49,7 @@ export class EditorView {
 
   private _followPickFor: string | null = null
 
-  private _dataWindow = false
+  private _dataWindow: 'closed' | 'open' | 'newSource' = 'closed'
 
   private _sideTab = loadSide()
 
@@ -70,12 +70,23 @@ export class EditorView {
   }
 
   get dataWindow(): boolean {
-    return this._dataWindow
+    return this._dataWindow !== 'closed'
+  }
+
+  get startsNewSource(): boolean {
+    return this._dataWindow === 'newSource'
   }
 
   showData(open: boolean): void {
-    if (this._dataWindow === open) return
-    this._dataWindow = open
+    const next = open ? 'open' : 'closed'
+    if (this._dataWindow === next) return
+    this._dataWindow = next
+    this.changed()
+  }
+
+  startNewSource(): void {
+    if (this._dataWindow === 'newSource') return
+    this._dataWindow = 'newSource'
     this.changed()
   }
 

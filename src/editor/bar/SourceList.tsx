@@ -14,6 +14,8 @@ import { PickerControl } from '../controls/PickerControl'
 import { Labeled } from './Labeled'
 import { KeyPairRows } from './KeyPairRows'
 
+const NEW_SOURCE = 'new-source'
+
 interface SourceListProps {
   block: BlockNode
 
@@ -105,18 +107,19 @@ export function SourceList({ block, part = 'all' }: SourceListProps) {
               badge: sourcesKey(s),
             })),
           },
+          { key: 'new', entries: [{ value: NEW_SOURCE, name: 'Neue Datenquelle' }] },
         ]}
         value={value}
         emptyText="Keine"
-        onChoose={onValue}
+        onChoose={(v) => (v === NEW_SOURCE ? ed.startNewSource() : onValue(v))}
       />
     </Labeled>
   )
 
   if (library.length === 0) {
     return (
-      <Button className="self-start" onClick={() => ed.showData(true)}>
-        Daten öffnen
+      <Button className="self-start" onClick={() => ed.startNewSource()}>
+        <Plus size={14} /> Neue Datenquelle
       </Button>
     )
   }

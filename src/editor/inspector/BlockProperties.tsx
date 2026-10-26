@@ -7,7 +7,7 @@ import { blockName } from '../../core/block/blockName'
 import { capability } from '../../core/block/capability'
 import { propertyVisible, type PropertyPlace } from '../../core/block/property'
 import { propertiesFor, type DeclaredProperty } from '../../core/block/propertyPlace'
-import { bindableSpotsOf, carriesOwnSource, maySelectionFollows } from '../../core/block/treeQuery'
+import { carriesOwnSource, maySelectionFollows } from '../../core/block/treeQuery'
 import { declaredValue } from '../../core/block/registry'
 import { SOURCE_PROPERTY } from '../../core/block/sourceProperty'
 import { BLOCK_ICONS } from '../blockIcons'
@@ -70,9 +70,6 @@ export function BlockProperties({ block, def, folds, onRemove }: BlockProperties
 
   const choices = at('bar')
   const fonts = at('font')
-  // Only the spots of a card or row, which have no property of their own;
-  // whether text and field show theirs here too is open (docs/offen.md).
-  const spots = def ? bindableSpotsOf(block).filter((spot) => !Object.hasOwn(def.properties, spot.prop)) : []
   const searchWindow = capability(def, 'lookupWindow')?.window
   const windowShown =
     searchWindow !== undefined &&
@@ -114,7 +111,6 @@ export function BlockProperties({ block, def, folds, onRemove }: BlockProperties
         controls={controls}
         sourceProps={at('source')}
         shows={at('display')}
-        spots={spots}
         lookupProps={at('lookup')}
         searchWindow={windowShown ? searchWindow : undefined}
         helpers={helpers === 'apart' && declaredValue(block, SOURCE_PROPERTY) === '' ? undefined : helpers}

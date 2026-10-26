@@ -40,7 +40,7 @@ function FilePick({
   )
 }
 
-export function DataWindow({ onClose }: { onClose: () => void }) {
+export function DataWindow({ startsNewSource, onClose }: { startsNewSource: boolean; onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('sources')
   const [importing, setImporting] = useState<{ fileName: string; tables: DtkTable[] } | null>(null)
   const sources = useDataSources().list
@@ -100,7 +100,7 @@ export function DataWindow({ onClose }: { onClose: () => void }) {
       {importing ? (
         <DtkImport fileName={importing.fileName} tables={importing.tables} onClose={() => setImporting(null)} />
       ) : tab === 'sources' ? (
-        <SourcesTab />
+        <SourcesTab startsNew={startsNewSource} />
       ) : (
         <RelationsTab />
       )}

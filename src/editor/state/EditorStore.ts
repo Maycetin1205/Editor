@@ -449,8 +449,16 @@ export class EditorStore extends Subject<EditorStore> {
     return this._shows.dataWindow
   }
 
+  get startsNewSource(): boolean {
+    return this._shows.startsNewSource
+  }
+
   showData(open: boolean): void {
     this._shows.showData(open)
+  }
+
+  startNewSource(): void {
+    this._shows.startNewSource()
   }
 
   get outlines(): boolean {

@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { Plus } from '@/editor/icons/icon'
+import { Button } from '@/editor/widgets/Button'
 import { Grid, GridLine, GridNewLine, Strip } from '@/editor/widgets/Grid'
 import type { DataSource } from '../../core/data/dataSources'
 import { sourcePreset } from '../../core/data/presets/presets'
@@ -11,7 +13,7 @@ const SOURCE_COLUMNS = [{ name: 'Name' }, { name: 'Tabelle', width: 110, mono: t
 
 const at = (v: readonly string[], k: number): string => v[k] ?? ''
 
-export function SourcesTab() {
+export function SourcesTab({ startsNew }: { startsNew: boolean }) {
   const store = useDataSources()
   const ed = useEditor()
   const [markedId, setMarkedId] = useState<string | null>(() =>
@@ -19,11 +21,20 @@ export function SourcesTab() {
   )
   const marked = store.list.find((s) => s.id === markedId) ?? store.list[0]
   const taken = (name: string, except?: string) => nameTaken(store.list, name, except)
+  const newName = useRef<HTMLInputElement>(null)
 
   return (
     <>
       <div className="flex w-[340px] shrink-0 flex-col border-r border-line-soft">
-        <Strip>Quellen</Strip>
+        <Strip
+          right={
+            <Button onClick={() => newName.current?.focus()}>
+              <Plus size={14} /> Neu
+            </Button>
+          }
+        >
+          Quellen
+        </Strip>
         <Grid columns={SOURCE_COLUMNS} wrap>
           {store.list.map((s) => (
             <GridLine
@@ -42,6 +53,9 @@ export function SourcesTab() {
           ))}
           <GridNewLine
             names={['Neue Quelle, Name', 'Neue Quelle, Tabelle']}
+            placeholders={['Neue Quelle', 'Tabelle']}
+            firstRef={newName}
+            autoFocus={startsNew}
             valid={(v) => !taken(at(v, 0)) && (at(v, 1).trim() === '' || tableKind(at(v, 1)) !== null)}
             onAdd={(v) => {
               const kind = tableKind(at(v, 1))

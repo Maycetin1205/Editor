@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react'
 import { ChevronDown } from '@/editor/icons/icon'
 import { cn } from '@/editor/widgets/cn'
-import type { BindableSpot, EventDef, LookupWindow } from '../../core/block/capability'
+import type { EventDef, LookupWindow } from '../../core/block/capability'
 import type { DeclaredProperty } from '../../core/block/propertyPlace'
 import type { BlockNode } from '../../core/block/tree'
 import { canCompute, carriesOwnSource } from '../../core/block/treeQuery'
 import { blockType, declaredValue } from '../../core/block/registry'
 import { hasCapability } from '../../core/block/capability'
 import { SOURCE_PROPERTY } from '../../core/block/sourceProperty'
-import { extraSourcesProperty, type SourceInReach } from '../../core/data/extraSources'
+import { extraSourcesProperty } from '../../core/data/extraSources'
 import { ActionsSection } from '../actions/ActionsSection'
 import { EntryActions } from '../actions/EntryActions'
 import { entryEventsOf, entryStepCount } from '../actions/entryEvents'
@@ -17,11 +17,10 @@ import { FollowPick } from '../bar/FollowPick'
 import { LookupWindowSection } from '../bar/LookupWindowSection'
 import { SelectionFollowSection } from '../bar/SelectionFollowSection'
 import { SourceList } from '../bar/SourceList'
-import { spotBinding } from '../canvas/useBindingPicker'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
 import { carriesSplit } from '../canvas/splitWords'
-import { CalculationRow, SplitRow, SpotRows } from './SpotRows'
+import { CalculationRow, SplitRow } from './WindowRows'
 
 export interface Folds {
   folded: (name: string) => boolean
@@ -73,11 +72,6 @@ function changedOf(block: BlockNode, props: readonly DeclaredProperty[]): string
   return changed.length === 0 ? 'wie vorgegeben' : changed.map(({ property }) => property.label).join(' · ')
 }
 
-function boundOf(block: BlockNode, spots: readonly BindableSpot[], sources: readonly SourceInReach[]): string {
-  const bound = spots.filter((spot) => spotBinding(block, spot, sources) !== '')
-  return bound.length === 0 ? 'nichts gebunden' : bound.map((spot) => spot.name).join(' · ')
-}
-
 interface SectionsProps {
   block: BlockNode
 
@@ -85,7 +79,6 @@ interface SectionsProps {
 
   sourceProps: DeclaredProperty[]
   shows: DeclaredProperty[]
-  spots: readonly BindableSpot[]
   lookupProps: DeclaredProperty[]
 
   searchWindow: LookupWindow | undefined
@@ -105,7 +98,6 @@ export function Sections({
   controls,
   sourceProps,
   shows,
-  spots,
   lookupProps,
   searchWindow,
   helpers,
@@ -141,13 +133,8 @@ export function Sections({
           {carriesSplit(block) && extra.length > 0 && <SplitRow block={block} />}
         </Section>
       )}
-      {(shows.length > 0 || spots.length > 0 || computes) && (
-        <Section
-          name="Anzeige"
-          summary={spots.length > 0 ? boundOf(block, spots, ed.sourcesFor(block.id)) : changedOf(block, shows)}
-          folds={folds}
-        >
-          <SpotRows block={block} spots={spots} />
+      {(shows.length > 0 || computes) && (
+        <Section name="Anzeige" summary={changedOf(block, shows)} folds={folds}>
           {computes && <CalculationRow block={block} />}
           {controls(shows)}
         </Section>

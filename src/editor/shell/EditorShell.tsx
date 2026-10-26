@@ -26,7 +26,7 @@ export function EditorShell() {
         <Inspector />
       </div>
 
-      {view.dataWindow && <DataWindow onClose={() => view.showData(false)} />}
+      {view.dataWindow && <DataWindow startsNewSource={view.startsNewSource} onClose={() => view.showData(false)} />}
 
       <LookupColumns />
       <OpenCalculationWindow />

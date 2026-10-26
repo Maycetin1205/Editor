@@ -11,7 +11,7 @@ import type { SourceInReach } from '../../core/data/extraSources'
 import type { EditorStore } from '../state/EditorStore'
 import { capacityOf } from './gridArea'
 
-export const HELPER_MARK = ' ↗'
+const HELPER_MARK = ' ↗'
 
 interface LitElementArgs {
   editor: EditorStore

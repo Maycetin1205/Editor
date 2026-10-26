@@ -1,4 +1,5 @@
 import type { RefObject } from 'react'
+import { Plus } from '@/editor/icons/icon'
 import { Popover } from '@/editor/widgets/Popover'
 import { cn } from '@/editor/widgets/cn'
 import { Badge } from '@/editor/widgets/Badge'
@@ -34,7 +35,7 @@ export interface SourcesChoice {
   entries: readonly { value: string; name: string; badge?: string }[]
   onChoose: (sourceId: string) => void
 
-  onData?: () => void
+  onNewSource?: () => void
 }
 
 interface FieldPickerProps {
@@ -157,9 +158,9 @@ export function FieldPicker({
         {sourcesChoice ? (
           sourcesChoice.entries.length === 0 ? (
             <div className="flex shrink-0 flex-col gap-2 px-1.5 pb-1">
-              {sourcesChoice.onData && (
-                <Button kind="primary" className="self-start" onClick={sourcesChoice.onData}>
-                  Daten öffnen
+              {sourcesChoice.onNewSource && (
+                <Button kind="primary" className="self-start" onClick={sourcesChoice.onNewSource}>
+                  <Plus size={14} /> Neue Datenquelle
                 </Button>
               )}
             </div>
