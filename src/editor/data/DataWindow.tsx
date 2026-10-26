@@ -4,6 +4,7 @@ import { Button } from '@/editor/widgets/Button'
 import { Window } from '@/editor/widgets/Window'
 import { dtkRead, type DtkTable } from '../../core/data/dtkImport'
 import { loadLibraryFromFile, saveLibraryAsFile } from '../state/libraryFile'
+import { loadDataWindowSize, persistDataWindowSize } from '../state/maskStorage'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
 import { useRelations } from '../state/useRelations'
@@ -42,6 +43,7 @@ function FilePick({
 
 export function DataWindow({ startsNewSource, onClose }: { startsNewSource: boolean; onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('sources')
+  const [size, setSize] = useState(() => loadDataWindowSize() ?? { width: 1040, height: 720 })
   const [importing, setImporting] = useState<{ fileName: string; tables: DtkTable[] } | null>(null)
   const sources = useDataSources().list
   const relations = useRelations().list
@@ -65,8 +67,12 @@ export function DataWindow({ startsNewSource, onClose }: { startsNewSource: bool
       panel
       title="Daten"
       tabsInHead
-      width={1040}
-      height={720}
+      width={size.width}
+      height={size.height}
+      onResize={(next) => {
+        setSize(next)
+        persistDataWindowSize(next)
+      }}
       tabs={[
         { key: 'sources', name: 'Quellen', count: sources.length },
         { key: 'relations', name: 'Relationen', count: relations.length },

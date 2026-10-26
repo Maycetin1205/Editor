@@ -3,6 +3,7 @@ import {
   useContext,
   useRef,
   useState,
+  type DragEvent,
   type FocusEvent,
   type KeyboardEvent,
   type ReactNode,
@@ -39,7 +40,9 @@ export function Strip({ children, right, wrap = false }: { children: ReactNode; 
     >
       <span className={cn('flex min-w-0 items-center gap-[8px]', !wrap && 'truncate')}>{children}</span>
       {right !== undefined && (
-        <span className="ml-auto flex shrink-0 items-center text-dense font-semibold text-muted">{right}</span>
+        <span className="ml-auto flex shrink-0 items-center gap-[6px] text-dense font-semibold text-muted">
+          {right}
+        </span>
       )}
     </div>
   )
@@ -175,6 +178,7 @@ export function GridLine({
   onSave,
   onRemove,
   removeName,
+  onDragStart,
 }: {
   cells: readonly string[]
   names?: readonly string[]
@@ -185,6 +189,8 @@ export function GridLine({
   onSave?: (v: readonly string[]) => void
   onRemove?: () => void
   removeName?: string
+  // Given, the line can be dragged while it is not being typed in.
+  onDragStart?: (e: DragEvent<HTMLTableRowElement>) => void
 }) {
   const columns = useContext(ColumnsOf)
   const wraps = useContext(Wraps)
@@ -228,6 +234,8 @@ export function GridLine({
       ref={row}
       data-grid-line
       tabIndex={marked ? 0 : -1}
+      draggable={onDragStart !== undefined && draft === null}
+      onDragStart={onDragStart}
       onFocus={onMark}
       onClick={onMark}
       onKeyDown={onKey}

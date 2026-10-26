@@ -18,6 +18,10 @@ const OUTLINES_KEY = 'aufbau_editor_outlines'
 const COLUMNS_KEY = 'aufbau_editor_columns'
 
 const SIDE_KEY = 'aufbau_editor_side'
+
+const SOURCE_TABS_KEY = 'aufbau_editor_source_tabs'
+
+const DATA_WINDOW_KEY = 'aufbau_editor_data_window'
 export const SAVE_DEBOUNCE_MS = 500
 
 export interface StoredMask {
@@ -183,6 +187,40 @@ export function loadShutColumns(): ReadonlySet<Column> {
 
 export function persistShutColumns(shut: ReadonlySet<Column>): void {
   write(COLUMNS_KEY, [...shut].join(' '))
+}
+
+function storedJson(key: string): unknown {
+  try {
+    return JSON.parse(read(key) ?? 'null')
+  } catch {
+    return null
+  }
+}
+
+// The tabs the user made in the data window, also while no source is in them.
+export function loadSourceTabs(): string[] {
+  const tabs = storedJson(SOURCE_TABS_KEY)
+  return Array.isArray(tabs) ? tabs.filter((t): t is string => typeof t === 'string' && t.trim() !== '') : []
+}
+
+export function persistSourceTabs(tabs: readonly string[]): void {
+  write(SOURCE_TABS_KEY, JSON.stringify(tabs))
+}
+
+export interface WindowSize {
+  width: number
+  height: number
+}
+
+export function loadDataWindowSize(): WindowSize | null {
+  const size = storedJson(DATA_WINDOW_KEY) as Partial<WindowSize> | null
+  return size && typeof size.width === 'number' && typeof size.height === 'number'
+    ? { width: size.width, height: size.height }
+    : null
+}
+
+export function persistDataWindowSize(size: WindowSize): void {
+  write(DATA_WINDOW_KEY, JSON.stringify(size))
 }
 
 export function persistLibrary(library: StoredLibrary): string {

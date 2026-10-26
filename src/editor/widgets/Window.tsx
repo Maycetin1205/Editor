@@ -1,10 +1,44 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from '@/editor/icons/icon'
 import { Button } from './Button'
 import { cn } from './cn'
 import { FamilyMember } from './Popover'
 import { useCloseOnEscape } from './useCloseOnEscape'
+
+interface WindowSize {
+  width: number
+  height: number
+}
+
+// Tells onResize the size of the frame each time the user pulls at its corner.
+function useSizeReport(onResize: ((size: WindowSize) => void) | undefined) {
+  const frame = useRef<HTMLElement>(null)
+  const report = useRef(onResize)
+  useEffect(() => {
+    report.current = onResize
+  })
+  const resizable = onResize !== undefined
+  useEffect(() => {
+    const el = frame.current
+    if (!resizable || !el) return
+    const watch = new ResizeObserver(() => {
+      const { width, height } = el.getBoundingClientRect()
+      report.current?.({ width: Math.round(width), height: Math.round(height) })
+    })
+    watch.observe(el)
+    return () => watch.disconnect()
+  }, [resizable])
+  return { frame, resizable }
+}
+
+function frameSize(width: number, height: number | undefined, resizable: boolean): CSSProperties {
+  return {
+    width: `min(${width}px, 96vw)`,
+    ...(height === undefined ? { maxHeight: '92vh' } : { height: `min(${height}px, 92vh)` }),
+    ...(resizable ? { resize: 'both', minWidth: 720, minHeight: 420, maxWidth: '96vw', maxHeight: '92vh' } : {}),
+  }
+}
 
 interface WindowTab<K extends string> {
   key: K
@@ -25,6 +59,7 @@ export function Window<K extends string>({
   panel = false,
   level = 40,
   foot,
+  onResize,
   onClose,
   children,
 }: {
@@ -40,24 +75,24 @@ export function Window<K extends string>({
   panel?: boolean
   level?: number
   foot?: ReactNode
+  // Given, the window can be pulled larger at its lower right corner.
+  onResize?: (size: WindowSize) => void
   onClose: () => void
   children: ReactNode
 }) {
   useCloseOnEscape(onClose)
+  const { frame, resizable } = useSizeReport(onResize)
   return (
     <FamilyMember>
       {(family) =>
         createPortal(
           <section
+            ref={frame}
             role={panel ? 'region' : 'dialog'}
             aria-label={title}
             data-ff-popover-family={family}
             {...(panel ? { 'data-ff-data-panel': '' } : { 'data-ff-editor-helper': '' })}
-            style={{
-              width: `min(${width}px, 96vw)`,
-              ...(height === undefined ? { maxHeight: '92vh' } : { height: `min(${height}px, 92vh)` }),
-              zIndex: level,
-            }}
+            style={{ ...frameSize(width, height, resizable), zIndex: level }}
             className="fixed left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[var(--radius-card)] bg-panel text-ui text-ink shadow-overlay"
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}

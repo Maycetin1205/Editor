@@ -36,6 +36,9 @@ export interface DataSource {
 
   fieldPrefix?: string
 
+  // The tab of the data window the user put the source in; unset, the table decides.
+  folder?: string
+
   fields: readonly DataField[]
 }
 
@@ -232,6 +235,7 @@ function sourceRead(e: unknown): { read: DataSource; guessed: boolean } | null {
       delivery,
       write: write ?? { kind: 'none' },
       ...(typeof e.fieldPrefix === 'string' && e.fieldPrefix !== '' ? { fieldPrefix: e.fieldPrefix } : {}),
+      ...(typeof e.folder === 'string' && e.folder.trim() !== '' ? { folder: e.folder.trim() } : {}),
       fields: fieldsRead(e.fields),
     },
     guessed,
