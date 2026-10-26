@@ -1,2 +1,2 @@
 export { coerceCaptureColumns, type CaptureColumn } from './column'
-export { windowColumnsIn } from './row'
+export { windowColumnsIn } from './row/context'

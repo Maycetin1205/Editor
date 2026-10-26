@@ -13,7 +13,7 @@ import { CapturedRows, type PendingRow } from './ledger/capturedRows'
 import { Outbound, type RowState } from './ledger/outbound'
 import { splitKey } from './split/splitKeys'
 import type { SplitState } from './split/splitState'
-import { captureContext, type CaptureContext } from './row'
+import { captureContext, type CaptureContext } from './row/context'
 
 export type { RowState } from './ledger/outbound'
 

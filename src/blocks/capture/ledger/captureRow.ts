@@ -29,7 +29,7 @@ import {
   targetIn,
   windowColumnsIn,
   type CaptureContext,
-} from '../row'
+} from '../row/context'
 
 export interface Helpers {
   chosen: ReadonlyMap<string, unknown>
