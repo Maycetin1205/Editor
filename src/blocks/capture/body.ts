@@ -6,10 +6,14 @@ import { cellsClass } from './cells'
 import { columnEditable } from './column'
 import { shownValue, type Column } from '../parts/column'
 import { figureAt, greyCellTpl, type GreyPart, type RowLayout } from '../parts/cell'
-import { WITHOUT_DECORATION, type RowDecoration } from '../list'
+import { WITHOUT_DECORATION, type RowDecoration, type RowsBelow } from '../list'
+import type { CaptureColumn } from './column'
+import { captureRowFor } from './controls'
 import type { CaptureLedger } from './ledger'
 import { keyCell } from './ledger/bookedKeys'
+import { bringBack } from './ledger/capturing'
 import type { RowState } from './ledger/outbound'
+import type { WorkingRow } from './workingRow'
 
 function typingCellTpl(ledger: CaptureLedger, rawIndex: number, slot: number, column: Column): TemplateResult {
   const booked = ledger.booked
@@ -113,7 +117,7 @@ function capturedRowTpl(placement: CapturedPlacement, act: CapturedAct, rowsInde
   </div>`
 }
 
-export function capturedRowsTpl(placement: CapturedPlacement, act: CapturedAct): TemplateResult {
+function capturedRowsTpl(placement: CapturedPlacement, act: CapturedAct): TemplateResult {
   const lines = placement.captured.map((_, rowsIndex) => rowsIndex)
   const typingAt = placement.correctionSlot === null ? lines.length : Math.min(placement.correctionSlot, lines.length)
   lines.splice(typingAt, 0, TYPING)
@@ -122,6 +126,68 @@ export function capturedRowsTpl(placement: CapturedPlacement, act: CapturedAct):
     (rowsIndex) => (rowsIndex === TYPING ? 'typing' : placement.keyAt(rowsIndex)),
     (rowsIndex) => (rowsIndex === TYPING ? placement.capture : capturedRowTpl(placement, act, rowsIndex)),
   )}`
+}
+
+interface BelowHost {
+  ledger: CaptureLedger
+
+  working: WorkingRow
+
+  block: HTMLElement
+
+  preview: boolean
+
+  sourceId: string
+
+  columns: () => readonly CaptureColumn[]
+
+  backToTyping: () => void
+
+  report: () => void
+}
+
+// Below the booked rows: the captured rows, and the typing row after them or
+// in the gap of the row being corrected.
+export function rowsBelow(host: BelowHost): RowsBelow {
+  const { ledger, working } = host
+  const captured = ledger.captured.values
+  return {
+    count: 1 + captured.length,
+    render: ({ view, cols, layout, rulerTicks }) => {
+      const correctionSlot = ledger.captured.correctionSlot
+      return capturedRowsTpl(
+        {
+          slots: view.slots,
+          cols,
+          layout,
+          captured,
+          keyAt: (index) => ledger.captured.keyAt(index),
+          capturedState: (index) => ledger.captured.statusAt(index),
+          chosen: (index) => working.chosen(ledger.captured.keyAt(index)),
+          correctionSlot,
+          capture: captureRowFor(
+            { ledger, block: host.block, preview: host.preview, sourceId: host.sourceId },
+            view,
+            cols,
+            layout,
+            correctionSlot === null && (rulerTicks ?? 1) <= 0,
+          ),
+        },
+        {
+          takeCapturedRow: (index) => {
+            ledger.captured.remove(index)
+            host.backToTyping()
+          },
+          bringBackCapturedRow: (index) => bringBack(ledger, index),
+          chooseCapturedRow: (index) => {
+            working.toggleCaptured(ledger.captured.keyAt(index), host.columns(), captured[index] ?? [])
+            host.report()
+            host.backToTyping()
+          },
+        },
+      )
+    },
+  }
 }
 
 interface DecorationPlacement {
