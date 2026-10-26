@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { EditorStore } from './state/EditorStore'
 import { EditorProvider } from './state/EditorProvider'
 import { ErrorBoundary } from './ErrorBoundary'
+import { offerToSmoke } from './smokeAccess'
 
 interface ProvidersProps {
   children: ReactNode
@@ -12,6 +13,7 @@ export function Providers({ children }: ProvidersProps) {
 
   useEffect(() => {
     void editor.files.reopenFolder()
+    offerToSmoke(editor)
   }, [editor])
 
   useEffect(() => {

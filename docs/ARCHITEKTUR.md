@@ -57,6 +57,8 @@ Ein Baustein ist eine Klasse `extends BlockElement` mit `static type`, `static t
 
 Ein neuer Baustein braucht: Ordner unter `src/blocks`, `properties.ts`, die Klasse, einen Eintrag in `register.ts`, ein Symbol in `editor/blockIcons.ts`. Nichts sonst. Der Editor zeigt die Eigenschaften aus der Deklaration, der Export schreibt die Attribute aus der Deklaration.
 
+Fertig ist er erst, wenn `npm run smoke` ihn besteht: in der Palette einfügbar, auf der Fläche verschiebbar und in der Größe änderbar, jede Eigenschaft über die Oberfläche einstellbar, Felder an seine Stellen bindbar, Ereignisse mit Aktionsketten belegbar, im Export richtig geschrieben und in der exportierten Maske tätig. Die Probe liest die Deklaration und prüft daraus, was der Baustein verspricht; sie braucht Zutaten nur für Neues: ein neues Ereignis braucht seine Auslösung in `tools/smoke/triggers.mjs`, ein Baustein, der zum Zeigen von Zeilen mehr braucht als Quelle, Stellen und ersten Eintrag, einen Eintrag in `FUNCTION_SETUP` (`tools/smoke.mjs`). Eine Eigenschaft ohne Weg in der Oberfläche lässt die Probe scheitern. Den Zustand des Editors liest sie über `src/editor/smokeAccess.ts`, das nur der Entwicklungsbau anbietet; handeln tut sie nur über die Oberfläche.
+
 ## Der Export (`src/export`)
 
 `exportMask.ts` baut aus dem Baum das Markup (`nodeToHtml`), aus den Quellen `window.FF_DATA_SOURCES`, aus den Relationen `window.FF_RELATIONS`, aus `runtime.json` die Laufzeit der benutzten Bausteine (`runtime.ts`) und aus den Bestellungen das SEvariablen-Blatt (`sevariablen.ts`). `serializer.ts` sorgt dafür, dass kein Nutzertext aus Attribut, Skript oder Stil ausbrechen kann. `validator.ts` prüft die fertige Datei, bevor sie geschrieben wird.

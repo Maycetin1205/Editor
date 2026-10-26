@@ -40,7 +40,7 @@ In Chrome oder Edge:
 6. Die exportierte HTML-Datei direkt im Browser öffnen: alle Bausteine sichtbar, in der Konsole nur der Fehler zur fehlenden Brücke (`basis.html.interface.js`).
 7. Die zwei Dateien in SoftEngine einsetzen und die Maske dort öffnen.
 
-Schritte 1, 2, 5 und 6 laufen automatisch mit `node tools/smoke.mjs` gegen einen laufenden `npm run dev` (braucht Playwright und Chromium auf dem Rechner, siehe Kopf der Datei).
+Schritte 1, 2, 5 und 6 laufen automatisch mit `npm run smoke` gegen einen laufenden `npm run dev` (braucht Playwright und Chromium auf dem Rechner, siehe Kopf von `tools/smoke.mjs`), und weit darüber hinaus: je Baustein der Palette Einfügen, Größe, Verschieben, jede Eigenschaft über ihr Bedienelement, Wörter auf der Fläche, Binden der Stellen und des ersten Listeneintrags, Aktionsketten an jedem Ereignis, der Export jeder gesetzten Eigenschaft und in der exportierten Maske die gebundenen Werte und der Werkzeugstart jedes Ereignisses. Die Maske läuft dabei mit einem Stellvertreter der Brücke; das prüft den Code der Maske, nicht SoftEngine (Schritt 7 bleibt). Am Ende nennt die Probe die Wege, die sie kennt, aber nicht geht (Hilfsquelle, „Folgt der Auswahl“, Berechnung, Verteilen, Griffe des Suchfensters).
 
 ## Nach der Freigabe
 

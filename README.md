@@ -38,6 +38,8 @@ npm test
 
 Die Tests liegen in `test/` und prüfen die Nähte, an denen ein Fehler teuer wird: das Markup des Exports (Abbild in `test/__snapshots__`), das Escaping feindlicher Eingaben, die Maskendatei mit Leftover und Abweisung fremder Stufen, die Aktionsketten und das Lesen der SoftEngine-Daten. Ändert sich das Export-Markup absichtlich, wird das Abbild mit `npx vitest run -u` erneuert und der Unterschied im Commit erklärt.
 
+Die Rauchprobe im Browser (`npm run smoke`, gegen einen laufenden `npm run dev`, braucht Playwright) prüft jeden Baustein so, wie ein Nutzer ihn braucht, bis in die exportierte Maske. Ein neuer Baustein ist erst fertig, wenn er sie besteht; was sie dafür braucht, steht in `docs/ARCHITEKTUR.md`.
+
 ## Bauen
 
 ```sh
