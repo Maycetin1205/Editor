@@ -188,7 +188,7 @@ export function BarControl({ block, propertyKey, property, sourceInReach, sessio
       )
     case 'segment':
       return (
-        <Labeled label={property.label}>
+        <Labeled label={property.label} fixedWidth>
           <SegmentControl name={property.label} options={options} value={String(value ?? '')} onChange={set} />
         </Labeled>
       )

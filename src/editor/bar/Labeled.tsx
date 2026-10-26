@@ -1,14 +1,34 @@
 import { useContext, type ReactNode } from 'react'
+import { cn } from '@/editor/widgets/cn'
 import { Tile } from '@/editor/widgets/Tile'
 import { TickBox } from '@/editor/widgets/TickBox'
 import { LabelsShown } from './labelsShown'
 
-export function Labeled({ label, detail = '', children }: { label: string; detail?: string; children: ReactNode }) {
+// A control that cannot shrink, like a segment of words, moves under its
+// label when the line is too narrow for both.
+export function Labeled({
+  label,
+  detail = '',
+  fixedWidth = false,
+  children,
+}: {
+  label: string
+  detail?: string
+  fixedWidth?: boolean
+  children: ReactNode
+}) {
   if (!useContext(LabelsShown)) return <>{children}</>
   return (
-    <span className="grid min-h-[36px] w-full min-w-0 grid-cols-[132px_minmax(0,1fr)] items-center gap-x-[12px] py-[2px]">
-      <span className="break-words text-dense font-semibold leading-tight text-muted">{label}</span>
-      <span className="flex min-w-0 items-center gap-[6px]">
+    <span
+      className={cn(
+        'min-h-[36px] w-full min-w-0 items-center gap-x-[12px] py-[2px]',
+        fixedWidth ? 'flex flex-wrap gap-y-[4px]' : 'grid grid-cols-[132px_minmax(0,1fr)]',
+      )}
+    >
+      <span className={cn('break-words text-dense font-semibold leading-tight text-muted', fixedWidth && 'w-[132px]')}>
+        {label}
+      </span>
+      <span className={cn('flex items-center gap-[6px]', fixedWidth ? 'min-w-fit flex-1' : 'min-w-0')}>
         {detail !== '' && <span className="shrink-0 font-semibold text-ink">{detail}</span>}
         {children}
       </span>
