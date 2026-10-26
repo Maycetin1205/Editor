@@ -4,6 +4,7 @@ import { styleMap } from 'lit/directives/style-map.js'
 import type { Column } from '../parts/column'
 import { markHit, plainText } from '../parts/cellSearch'
 import { maskHost } from '../../runtime/host'
+import { TABLE_PART } from '../list/parts'
 
 const SUGGESTIONS_MAX = 50
 
@@ -46,7 +47,7 @@ function areaLimits(el: HTMLElement): { left: number; right: number } {
         ? document.documentElement.clientWidth
         : 10000
 
-  const table = el.closest?.('.table')
+  const table = el.closest?.(`.${TABLE_PART.table}`)
   if (table instanceof (globalThis.HTMLElement ?? Object) && typeof table.getBoundingClientRect === 'function') {
     const tRect = table.getBoundingClientRect()
     if (tRect.width > 0) {
