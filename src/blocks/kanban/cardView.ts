@@ -162,7 +162,12 @@ function footTpl(
 
 // What a card shows; without a card, the editor's sample with the names of
 // its spots.
-export function cardContent(el: KanbanElement, spot: BoardCell, card: CardData | null, until: Until | null): TemplateResult {
+export function cardContent(
+  el: KanbanElement,
+  spot: BoardCell,
+  card: CardData | null,
+  until: Until | null,
+): TemplateResult {
   const column = el.columns[spot.column]
   const values: CardValues = card === null ? null : card.values
   const look = el.cardLook(values)
