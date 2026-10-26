@@ -103,24 +103,49 @@ function RelationBody({
           }
         />
       </div>
-      <div className="flex min-h-0 flex-col overflow-y-auto">
-        <button
-          type="button"
-          aria-expanded={showResult}
-          onClick={() => setShowResult(!showResult)}
-          className="flex h-[36px] shrink-0 items-center gap-[8px] border-b border-line-soft bg-panel px-[12px] text-left text-ui font-bold text-ink transition-colors hover:bg-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
-        >
-          <ChevronDown
-            size={14}
-            aria-hidden
-            className={cn('shrink-0 text-muted transition-transform', !showResult && '-rotate-90')}
-          />
-          Ergebnis
-        </button>
-        {showResult && <Result template={template} filled={step} reach={reach} />}
-        <Strip>Bezeichnung</Strip>
-        <div className="px-[12px] py-[9px]">{template.name}</div>
-      </div>
+      <RelationSide
+        template={template}
+        step={step}
+        reach={reach}
+        showResult={showResult}
+        onToggleResult={() => setShowResult(!showResult)}
+      />
+    </div>
+  )
+}
+
+// Right column: collapsible result preview and the relation's name.
+function RelationSide({
+  template,
+  step,
+  reach,
+  showResult,
+  onToggleResult,
+}: {
+  template: RelationTemplate
+  step: RelationStep
+  reach: Reach
+  showResult: boolean
+  onToggleResult: () => void
+}) {
+  return (
+    <div className="flex min-h-0 flex-col overflow-y-auto">
+      <button
+        type="button"
+        aria-expanded={showResult}
+        onClick={onToggleResult}
+        className="flex h-[36px] shrink-0 items-center gap-[8px] border-b border-line-soft bg-panel px-[12px] text-left text-ui font-bold text-ink transition-colors hover:bg-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
+      >
+        <ChevronDown
+          size={14}
+          aria-hidden
+          className={cn('shrink-0 text-muted transition-transform', !showResult && '-rotate-90')}
+        />
+        Ergebnis
+      </button>
+      {showResult && <Result template={template} filled={step} reach={reach} />}
+      <Strip>Bezeichnung</Strip>
+      <div className="px-[12px] py-[9px]">{template.name}</div>
     </div>
   )
 }
