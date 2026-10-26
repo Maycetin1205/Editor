@@ -5,7 +5,7 @@ import { GRID, gridSlotRead, gridMetricsOf, type GridSlot } from '../../core/blo
 import { columnsOf, freeRowOn, isGridArea, usedColumnsOn } from '../../core/block/gridArea'
 import type { EditorStore } from '../state/EditorStore'
 import { areaOf, heightInBox, capacityOf, rowsCapacity } from './gridArea'
-import { swallowNextClick } from './dragPosition'
+import { swallowNextClick } from './pointerDrag'
 import { cellFromPointer } from './gridDnd'
 import { cssZoomOf } from '../../blocks/base/cssZoom'
 
