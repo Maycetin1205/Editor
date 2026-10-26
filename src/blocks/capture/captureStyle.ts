@@ -23,6 +23,17 @@ export const captureStyle = css`
       }
       .row.capture > [role='cell']:focus-within { box-shadow: var(--se-cell-focus); }
 
+      /* An emptied corrected row asks before it goes: red with the red bar
+         like a booked row that asks (list/style/rowAsk.ts), the question
+         from its left edge. Not the class asking, which would
+         take the row out of its sticky place. */
+      .row.capture.drop-asked,
+      .body > .row.capture.drop-asked:hover {
+        background: var(--se-danger-tint);
+        box-shadow: var(--se-ask-bar);
+      }
+      .row.capture > .row-ask { left: 0; }
+
       /* A cell that holds the row back (its typed text names no record, or
          it is required and empty) stands on a red lower edge, also with the
          cursor, and its column says its name in red: the head, the name in

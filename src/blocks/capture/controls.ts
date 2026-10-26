@@ -17,6 +17,7 @@ import { captureRowTpl } from './row/rowTpl'
 import { adoptSuggestion, decideKey, setMark } from './row/suggestions'
 import { emptyCell, leaveCell, neighbour, typeCell } from './row/typing'
 import { splitFor } from './splitControls'
+import { dropAskTpl } from './dropAsk'
 
 import '../table/Table'
 
@@ -28,6 +29,8 @@ interface CaptureRowPlacement {
   preview: boolean
 
   sourceId: string
+
+  dropAskAbove: boolean
 }
 
 function openWindow(placement: CaptureRowPlacement, index: number): void {
@@ -140,6 +143,9 @@ export function captureRowFor(
       placeholder: placement.preview ? () => '' : placeholders(placement.block, view, waitingSources(row)),
       listToTop,
       split: splitFor(placement.ledger, view, placement.preview),
+      ...(placement.ledger.captured.dropAsked
+        ? { asking: { content: dropAskTpl(placement.ledger), above: placement.dropAskAbove } }
+        : {}),
     },
     {
       typing: (i, text) => typeCell(row, i, text),

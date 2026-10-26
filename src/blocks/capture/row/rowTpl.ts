@@ -38,6 +38,10 @@ interface CapturePlacement {
   listToTop: boolean
 
   split?: { slot: number; content: TemplateResult }
+
+  // The question before an emptied corrected row goes, above the row where
+  // the list ends under it.
+  asking?: { content: TemplateResult; above: boolean }
 }
 
 interface CaptureAct {
@@ -51,7 +55,15 @@ interface CaptureAct {
 
 export function captureRowTpl(placement: CapturePlacement, act: CaptureAct): TemplateResult {
   const under = placement.layout.under
-  return html`<div class="row capture${under.size > 0 ? ' subline' : ''}" role="row" style=${styleMap(placement.cols)}>
+  const classes = [
+    'row capture',
+    under.size > 0 ? 'subline' : '',
+    placement.asking ? 'drop-asked' : '',
+    placement.asking?.above === true ? 'ask-above' : '',
+  ]
+    .filter((k) => k !== '')
+    .join(' ')
+  return html`<div class=${classes} role="row" style=${styleMap(placement.cols)}>
     ${placement.columns.map((column, i) => captureCellTpl(placement, act, column, placement.slots[i]))}
     ${
       under.size === 0
@@ -71,6 +83,7 @@ export function captureRowTpl(placement: CapturePlacement, act: CaptureAct): Tem
             })
           })
     }
+    ${placement.asking?.content ?? nothing}
   </div>`
 }
 

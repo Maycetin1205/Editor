@@ -31,3 +31,22 @@ describe('CapturedRows.lastAdded', () => {
     expect(list.lastAdded).toBeNull()
   })
 })
+
+describe('CapturedRows.dropAsked', () => {
+  it('asks only while a row is corrected and forgets the question with the correction', () => {
+    const list = rows()
+    list.askDrop()
+    expect(list.dropAsked).toBe(false)
+    list.add(['a'], helpers)
+    list.takeBack(list.correctable(0)!)
+    list.askDrop()
+    expect(list.dropAsked).toBe(true)
+    list.keepCorrection()
+    expect(list.dropAsked).toBe(false)
+    expect(list.correcting).toBe(true)
+    list.askDrop()
+    list.restoreCorrection()
+    expect(list.dropAsked).toBe(false)
+    expect(list.values).toEqual([['a']])
+  })
+})

@@ -138,6 +138,8 @@ interface BelowHost {
 
   sourceId: string
 
+  dropAskAbove: boolean
+
   columns: () => readonly CaptureColumn[]
 
   backToTyping: () => void
@@ -165,7 +167,13 @@ export function rowsBelow(host: BelowHost): RowsBelow {
           chosen: (index) => working.chosen(ledger.captured.keyAt(index)),
           correctionSlot,
           capture: captureRowFor(
-            { ledger, block: host.block, preview: host.preview, sourceId: host.sourceId },
+            {
+              ledger,
+              block: host.block,
+              preview: host.preview,
+              sourceId: host.sourceId,
+              dropAskAbove: host.dropAskAbove,
+            },
             view,
             cols,
             layout,

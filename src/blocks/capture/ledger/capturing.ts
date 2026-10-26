@@ -7,19 +7,19 @@ import { adoptRow, helpersNow } from '../row/rowHelpers'
 import { openSplit } from '../row/rowSplit'
 import { firstCell, holdBack } from '../row/typing'
 
-type Capturing = 'captured' | 'nothing' | 'waits' | 'split' | { missing: number }
+type Capturing = 'captured' | 'nothing' | 'waits' | 'split' | 'asks' | { missing: number }
 
 // Moves the typing row into the captured rows, unless a cell holds it back,
-// a source is still loading or its amount is still to be split.
+// a source is still loading or its amount is still to be split. A corrected
+// row emptied asks before it goes.
 function capture(ledger: CaptureLedger, context: CaptureContext): Capturing {
   const { row, captured } = ledger
   computeCells(row, context)
   const values = context.columns.map((_, i) => valueIn(row, context, i))
   if (values.every((w) => w === '')) {
     if (!captured.correcting) return 'nothing'
-    captured.dropCorrection()
-    clearRow(row)
-    return 'captured'
+    captured.askDrop()
+    return 'asks'
   }
   const missing = holdBack(row)
   if (missing !== -1) return { missing }
@@ -39,6 +39,7 @@ export function captureRow(ledger: CaptureLedger): boolean {
   if (outcome === 'split') host.splitOpened()
   else if (outcome === 'captured') host.captured()
   else if (outcome === 'waits') ledger.row.cells.captureAsked = true
+  else if (outcome === 'asks') host.dropAsked()
   else {
     host.report()
     host.focusCell(outcome.missing)
@@ -60,6 +61,10 @@ export function bringBack(ledger: CaptureLedger, index: number): void {
     return
   }
   if (before === 'waits') return
+  if (before === 'asks') {
+    host.dropAsked()
+    return
+  }
   if (before === 'split') {
     host.splitOpened()
     return
@@ -68,6 +73,21 @@ export function bringBack(ledger: CaptureLedger, index: number): void {
   adoptRow(typing, context, taken.values, taken)
   host.report()
   host.focusCell(firstCell(typing))
+}
+
+// The answer to the question before an emptied corrected row goes. Focus
+// stays where it went when the question lost it.
+export function answerDrop(ledger: CaptureLedger, drop: boolean, refocus: boolean): void {
+  const { row, captured, host } = ledger
+  if (!captured.dropAsked) return
+  if (drop) {
+    captured.dropCorrection()
+    clearRow(row)
+  } else {
+    captured.keepCorrection()
+  }
+  host.report()
+  if (refocus) host.focusCell(firstCell(row))
 }
 
 // Escape gives up the typing row: it empties, and a row taken back to be

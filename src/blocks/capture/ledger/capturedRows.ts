@@ -38,6 +38,9 @@ export class CapturedRows {
   // row was emptied and went for good.
   private added: string | null = null
 
+  // The corrected row was emptied: it asks before it goes.
+  private asked = false
+
   constructor(report: () => void, status: Status) {
     this.report = report
     this.status = status
@@ -86,10 +89,24 @@ export class CapturedRows {
     return this.correction !== null
   }
 
+  get dropAsked(): boolean {
+    return this.asked
+  }
+
+  askDrop(): void {
+    this.asked = this.correction !== null
+  }
+
+  // The answer was no: the row stays in the typing row to be corrected.
+  keepCorrection(): void {
+    this.asked = false
+  }
+
   // Into the gap of a corrected row, else at the end.
   add(values: string[], helpers: Helpers): void {
     const row = { key: this.topKey, values, ...helpers }
     this.added = row.key
+    this.asked = false
     const back = this.correction
     if (back) {
       this.rows = [...this.rows.slice(0, back.slot), row, ...this.rows.slice(back.slot)]
@@ -113,6 +130,7 @@ export class CapturedRows {
     if (now === -1) return false
     this.rows = this.rows.filter((_, i) => i !== now)
     this.correction = { row, slot: now }
+    this.asked = false
     return true
   }
 
@@ -120,6 +138,7 @@ export class CapturedRows {
   dropCorrection(): void {
     this.correction = null
     this.added = null
+    this.asked = false
   }
 
   restoreCorrection(): void {
@@ -127,6 +146,7 @@ export class CapturedRows {
     if (back === null) return
     this.rows = [...this.rows.slice(0, back.slot), back.row, ...this.rows.slice(back.slot)]
     this.correction = null
+    this.asked = false
   }
 
   remove(index: number): void {

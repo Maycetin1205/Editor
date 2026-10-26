@@ -29,6 +29,8 @@ interface LedgerHost {
 
   captured: () => void
 
+  dropAsked: () => void
+
   rowAdded: () => void
 
   split: () => Split | undefined

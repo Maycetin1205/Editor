@@ -61,6 +61,8 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
 
   private _justCaptured = false
 
+  private _dropAskAbove = false
+
   private readonly _ledger: CaptureLedger = createLedger({
     block: this,
     columns: () => this.listColumns(),
@@ -76,6 +78,11 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
       this.requestUpdate()
       this.focusCaptureCell(firstCell(this._ledger.row))
       this.showLastCaptured()
+    },
+    dropAsked: () => {
+      this._dropAskAbove = this.endsUnderTyping()
+      this.requestUpdate()
+      this.focusDropAsk()
     },
     rowAdded: () => this.writeCaptured(),
     split: () => this.splits[0],
@@ -100,6 +107,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
         block: this,
         preview: this.preview,
         sourceId: this.source,
+        dropAskAbove: this._dropAskAbove,
         columns: () => this.listColumns(),
         backToTyping: () => this.backToTyping(),
         report: () => this.requestUpdate(),
@@ -155,6 +163,22 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
   private focusCaptureCell(index: number): void {
     void this.updateComplete.then(() => {
       enterCell(cellsFields(this.shadowRoot, '.row.capture', [index])[0])
+    })
+  }
+
+  // The rule of the question at a booked row (list/rowAsk.ts): above the row
+  // when one more row would not fit under it.
+  private endsUnderTyping(): boolean {
+    const row = this.shadowRoot?.querySelector<HTMLElement>('.row.capture')
+    const body = row?.closest(`.${TABLE_PART.body}`)
+    if (!row || !body) return true
+    const frame = row.getBoundingClientRect()
+    return frame.bottom + frame.height > body.getBoundingClientRect().bottom
+  }
+
+  private focusDropAsk(): void {
+    void this.updateComplete.then(() => {
+      this.shadowRoot?.querySelector<HTMLElement>('.row.capture > .row-ask > .ask-drop')?.focus({ preventScroll: true })
     })
   }
 
