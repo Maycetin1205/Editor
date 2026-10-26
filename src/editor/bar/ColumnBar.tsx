@@ -1,4 +1,4 @@
-import { createElement, useEffect, useMemo, useRef, useState, type ComponentProps } from 'react'
+import { createElement, useMemo, useRef, useState, type ComponentProps } from 'react'
 import { ArrowRight, ChevronDown, Trash2, type Icon } from '@/editor/icons/icon'
 import { Button, OPENER } from '@/editor/widgets/Button'
 import { Separator } from '@/editor/widgets/Separator'
@@ -14,6 +14,7 @@ import { Labeled, Switch } from './Labeled'
 import { BarFrame, BarSign } from './BarFrame'
 import { BarWindow } from './BarWindow'
 import { controlShown } from './controlShown'
+import { useCloseOnPressBeside } from '@/editor/widgets/closeBeside'
 
 const BAR_PARTS = 7
 
@@ -110,22 +111,6 @@ export function ColumnBar({
 }
 
 // Closes the bar on a press outside of it and of every popup or helper.
-function useCloseOnPressBeside(onClose: () => void) {
-  useEffect(() => {
-    const beside = (e: PointerEvent): void => {
-      const inside = e
-        .composedPath()
-        .some(
-          (t) =>
-            t instanceof HTMLElement && (t.getAttribute('role') === 'dialog' || t.dataset.ffEditorHelper !== undefined),
-        )
-      if (!inside) onClose()
-    }
-    document.addEventListener('pointerdown', beside, true)
-    return () => document.removeEventListener('pointerdown', beside, true)
-  }, [onClose])
-}
-
 type BarSession = ComponentProps<typeof BarControl>['session']
 
 interface OwnControl {

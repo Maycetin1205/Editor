@@ -1,21 +1,13 @@
-import { createElement, useEffect, useLayoutEffect, useRef, type ReactNode } from 'react'
+import { createElement, useLayoutEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Component } from '@/editor/icons/icon'
 import { BLOCK_ICONS } from '../blockIcons'
 import { LabelsShown } from './labelsShown'
+import { useCloseOnScrollBeside } from '@/editor/widgets/closeBeside'
 
 const hold = (e: { stopPropagation: () => void }): void => e.stopPropagation()
 
 const EDGE = 8
-
-function fromHelper(e: Event): boolean {
-  return e
-    .composedPath()
-    .some(
-      (t) =>
-        t instanceof HTMLElement && (t.getAttribute('role') === 'dialog' || t.dataset.ffEditorHelper !== undefined),
-    )
-}
 
 export function BarFrame({
   at,
@@ -35,13 +27,7 @@ export function BarFrame({
     bar.style.left = `${Math.max(EDGE, Math.min(at.left, window.innerWidth - EDGE - width))}px`
   })
 
-  useEffect(() => {
-    const scrolled = (e: Event): void => {
-      if (!fromHelper(e)) onClose()
-    }
-    document.addEventListener('scroll', scrolled, true)
-    return () => document.removeEventListener('scroll', scrolled, true)
-  }, [onClose])
+  useCloseOnScrollBeside(onClose)
 
   return createPortal(
     <div
