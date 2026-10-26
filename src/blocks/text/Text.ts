@@ -9,19 +9,13 @@ import { readBoundSpot } from '../../runtime/boundSpot'
 import { makeDataLink, sourceIdOf, spotValue } from '../../runtime/source'
 import { makeFieldReader } from '../../runtime/foreignSources'
 import { runEvent } from '../../runtime/actions/runEvent'
-import { BINDING_JOINERS, bindingFields, bindingJoiner, joinedBinding } from '../../core/block/binding'
-import {
-  fieldShortName,
-  hasSlots,
-  patternForEditing,
-  patternFromEditing,
-  patternPieces,
-  slotFields,
-} from '../../core/block/fieldPattern'
+import { BINDING_JOINERS, bindingFields, bindingJoiner } from '../../core/block/binding'
+import { hasSlots, patternForEditing, patternPieces } from '../../core/block/fieldPattern'
 import { symbolTpl } from '../look/symbol'
 import { textStyle } from './textStyle'
 import { textProperties, type TextValues } from './properties'
 import { patternText, replacingReader } from './fieldValues'
+import { adoptPattern, editedPattern, fieldNameOf } from './woven'
 import { CALCULATIONS_PROP } from '../../core/data/calculation'
 import { calculatedText } from '../../runtime/calculated'
 import { PENDING_EVENT } from '../../runtime/pendingState'
@@ -68,7 +62,7 @@ export class Text extends BlockElement {
     reportsHeight(this, () => this.renderRoot.querySelector('.with-label') ?? this.renderRoot.querySelector('.text'))
   }
 
-  private get woven(): boolean {
+  get woven(): boolean {
     return hasSlots(this.pattern)
   }
 
@@ -110,28 +104,10 @@ export class Text extends BlockElement {
   // while typed in, as {Name} in the words.
   private wordsOf(): string | TemplateResult {
     if (!this.preview || (!this.woven && !this.patternTyped)) return this.text
-    if (this.patternTyped) return patternForEditing(this.editedPattern(), (field) => this.fieldName(field))
+    if (this.patternTyped) return patternForEditing(editedPattern(this), (field) => fieldNameOf(this, field))
     return html`${patternPieces(this.pattern).map((p) =>
-      p.field === undefined ? p.text : html`<span class="slot">${this.fieldName(p.field)}</span>`,
+      p.field === undefined ? p.text : html`<span class="slot">${fieldNameOf(this, p.field)}</span>`,
     )}`
-  }
-
-  private fieldNames(): Map<string, string> {
-    const fields = bindingFields(this.textField)
-    const shown = (this.spotTexts.text ?? '').split(bindingJoiner(this.textField)).map((name) => name.trim())
-    return new Map(fields.length === shown.length ? fields.map((field, i) => [field, shown[i]]) : [])
-  }
-
-  private fieldName(field: string): string {
-    return this.fieldNames().get(field) || fieldShortName(field)
-  }
-
-  // A text of fields only becomes a woven one once typed in: its fields
-  // stand in it as they show, joined as before.
-  private editedPattern(): string {
-    if (this.woven) return this.pattern
-    const fields = bindingFields(this.textField)
-    return fields.map((field) => `{{${field}}}`).join(bindingJoiner(this.textField))
   }
 
   private textTpl(
@@ -186,34 +162,6 @@ export class Text extends BlockElement {
     this.patternTyped = true
   }
 
-  // What was typed over a woven text: the fields named in it stay slots, the
-  // ones no longer named leave the text; without a field it is plain words.
-  private adoptPattern(typed: string): void {
-    const fields = bindingFields(this.textField)
-    const pattern = patternFromEditing(
-      typed,
-      fields.map((field) => ({ field, name: this.fieldName(field) })),
-    )
-    if (!hasSlots(pattern)) {
-      sendPropChange(this, 'textField', '')
-      sendPropChange(this, 'text', typed)
-      sendPropChange(this, 'pattern', '')
-      return
-    }
-    const named = slotFields(pattern)
-    if (fields.some((field) => !named.includes(field))) {
-      sendPropChange(
-        this,
-        'textField',
-        joinedBinding(
-          fields.filter((field) => named.includes(field)),
-          bindingJoiner(this.textField),
-        ),
-      )
-    }
-    sendPropChange(this, 'pattern', pattern)
-  }
-
   protected override updated(changed: PropertyValues): void {
     super.updated(changed)
     if (changed.has('labelTyped') && this.labelTyped) this.renameLabel()
@@ -246,7 +194,7 @@ export class Text extends BlockElement {
     startRename(
       words,
       (text, original) => {
-        if (text !== original) this.adoptPattern(text)
+        if (text !== original) adoptPattern(this, text)
       },
       () => {
         this.patternTyped = false

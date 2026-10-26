@@ -7,10 +7,8 @@ import { reportsHeight } from '../base/heightReport'
 import { actionValue, bindable, type ValueCarrier } from '../../core/block/capability'
 import { propertyVisible } from '../../core/block/property'
 import { LOOKUP_COLUMNS_BINDING } from '../lookup/lookup'
-import { dayKey } from '../../runtime/chosenDay'
 import { focusNextField } from '../../runtime/nextField'
 import { setSearchText } from '../../runtime/searchText'
-import { asNumber } from '../../core/data/number'
 import { suggestionStyle } from '../lookup/suggestionList'
 import { LookupControl } from '../lookup/lookupControl'
 import { icon, type IconName } from '../parts/icons'
@@ -19,8 +17,8 @@ import { symbolTpl } from '../look/symbol'
 import '../table/Table'
 import { disconnectValue, connectValue } from './valueBinding'
 import { fieldStyle } from './formFieldStyle'
+import { fieldTypeOf, forInput, fromInput } from './inputValue'
 import {
-  FIELD_TYPES,
   NOT_CHECKBOX,
   ONLY_LOOKUP,
   TICKED,
@@ -30,39 +28,6 @@ import {
   type FieldType,
   type FormFieldValues,
 } from './properties'
-
-function fieldTypeOf(v: unknown): FieldType {
-  return FIELD_TYPES.includes(v as FieldType) ? (v as FieldType) : 'text'
-}
-
-function dateFromInput(value: string): string {
-  const iso = /^(\d{4,})-(\d{2})-(\d{2})$/.exec(value)
-  return iso ? `${iso[3]}.${iso[2]}.${iso[1]}` : value
-}
-
-function dateForInput(value: string): string {
-  const german = /^(\d{2})\.(\d{2})\.(\d{4,})$/.exec(value)
-  return german ? `${german[3]}-${german[2]}-${german[1]}` : dayKey(value) || value
-}
-
-function numberFromInput(value: string): string {
-  return value.replace('.', ',')
-}
-
-function numberForInput(value: string): string {
-  const number = asNumber(value)
-  return number === null ? '' : String(number)
-}
-
-function forInput(kind: FieldType, value: string): string {
-  if (kind === 'date') return dateForInput(value)
-  return kind === 'number' ? numberForInput(value) : value
-}
-
-function fromInput(kind: FieldType, value: string): string {
-  if (kind === 'date') return dateFromInput(value)
-  return kind === 'number' ? numberFromInput(value) : value
-}
 
 const SIGNS: Partial<Record<FieldType, IconName>> = {
   select: 'caretDown',
