@@ -5,7 +5,6 @@ import type { DataSource } from '../../core/data/dataSources'
 import type { RelationTemplate } from '../../core/data/relations'
 import { collectDataSources } from '../../export/usedSources'
 import { collectRelation } from '../../export/usedRelations'
-import { downloadFile } from './downloadFile'
 import { writeFile, type FileOnDisk } from './fileOnDisk'
 import { canPickFolder, reasonOf } from './folderOnDisk'
 import type { EditorView } from './editorStore/viewState'
@@ -14,8 +13,8 @@ import { leftoverForFile, NO_LEFTOVER, treeForFile, type Leftover } from './left
 import { LIBRARY_FILE_KIND } from './libraryFile'
 import type { MaskEntry, MaskFolder } from './maskFolder'
 import { CURRENT_SCHEMA_VERSION } from './maskSchema'
-import { storedMaskText } from './maskStorage'
 import { readMask } from './readMask'
+import { NO_MASK, whyNotRead } from './stageNotice'
 import type { NoticeLine, NoticeText } from '../widgets/Notice'
 
 const MASK_FILE_KIND = 'aufbau-editor-maske'
@@ -43,8 +42,6 @@ export interface MaskFileAt {
 type UnpackResult = { ok: true; content: MaskContent; note: ReadNote } | { ok: false; why: string }
 
 type EntryRead = { ok: true; content: MaskContent; note: ReadNote; modified: number } | { ok: false; why: string }
-
-const NO_MASK = 'ist keine Maske des Editors.'
 
 // What saving and opening a mask need from the editor.
 export interface MaskEditor {
@@ -307,33 +304,4 @@ function unpack(text: string): UnpackResult {
     content: { tree: read.tree, dataSources: read.dataSources, relation: read.relation, leftover: read.leftover },
     note: { newer: newerEditor(file.editorVersion), lines: read.lines },
   }
-}
-
-// The browser holds a mask of a stage this editor does not read. It stays
-// there: the slot of the browser is not written while it holds it.
-export function storedMaskRefused(step: unknown): NoticeText {
-  return {
-    title: 'Maske im Browser nicht geöffnet',
-    lead:
-      `Die Maske im Browser ${whyNotRead(step)} Sie bleibt dort unverändert liegen. ` +
-      'Solange sie dort liegt, hält der Editor eine neue Maske nicht im Browser fest; „Speichern“ sichert sie in eine Datei.',
-    action: {
-      label: 'Alte Maske herunterladen',
-      run: () => {
-        const text = storedMaskText()
-        if (text !== null) downloadFile('aufbau-alte-maske.json', text, 'application/json')
-      },
-    },
-  }
-}
-
-function whyNotRead(step: unknown): string {
-  if (typeof step !== 'number') return NO_MASK
-  if (step > CURRENT_SCHEMA_VERSION) {
-    return (
-      `kommt aus einer neueren Fassung des Editors (Stufe ${step}, dieser kennt bis ${CURRENT_SCHEMA_VERSION}). ` +
-      'Erst den Editor auf den neuesten Stand bringen.'
-    )
-  }
-  return `kommt aus einer zu alten Fassung des Editors (Stufe ${step}), die dieser nicht mehr liest.`
 }
