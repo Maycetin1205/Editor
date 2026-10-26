@@ -18,6 +18,7 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - Kanban: die Meldung einer Spalte bleibt nicht mehr stehen, wenn das Brett während der Meldung aus- und wieder eingehängt wird (etwa beim Schließen und Öffnen eines Popups).
 - Kanban: die Meldung einer Spalte („Meldung beim Ankommen“) erscheint erst, wenn das Schreiben bestätigt ist. Vorher erschien sie beim Ablegen, auch wenn die Aktion danach scheiterte und die Karte zurücksprang. Ohne Aktionskette, die schreibt, gibt es keine Meldung.
 - Kanban, Spalte nach Uhrzeit: sind alle Zeiten vorbei, steht die Jetzt-Linie vor den Karten ohne Uhrzeit, nicht mehr dahinter.
+- Erfassung: nach dem Erfassen einer korrigierten Zeile gilt die Auswahl der Maske für diese Zeile, nicht mehr für die letzte erfasste Zeile.
 
 ### Für Entwickler
 

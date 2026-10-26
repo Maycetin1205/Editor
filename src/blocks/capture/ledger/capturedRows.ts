@@ -34,6 +34,10 @@ export class CapturedRows {
 
   private correction: { row: CapturedRow; slot: number } | null = null
 
+  // The key of the row the typing row went into last; null once a corrected
+  // row was emptied and went for good.
+  private added: string | null = null
+
   constructor(report: () => void, status: Status) {
     this.report = report
     this.status = status
@@ -65,6 +69,10 @@ export class CapturedRows {
     return this.rows.some((row) => this.status('captured', row.key, 'captured').status === 'error')
   }
 
+  get lastAdded(): string | null {
+    return this.added
+  }
+
   keyAt(index: number): string {
     return this.rows[index]?.key ?? ''
   }
@@ -81,6 +89,7 @@ export class CapturedRows {
   // Into the gap of a corrected row, else at the end.
   add(values: string[], helpers: Helpers): void {
     const row = { key: this.topKey, values, ...helpers }
+    this.added = row.key
     const back = this.correction
     if (back) {
       this.rows = [...this.rows.slice(0, back.slot), row, ...this.rows.slice(back.slot)]
@@ -110,6 +119,7 @@ export class CapturedRows {
   // A corrected row emptied in the typing row goes for good.
   dropCorrection(): void {
     this.correction = null
+    this.added = null
   }
 
   restoreCorrection(): void {

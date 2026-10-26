@@ -230,7 +230,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
         this.listColumns(),
         touched(this._ledger.row),
         () => rowView(this._ledger.row).map((cell) => cell.value),
-        this._justCaptured ? this._ledger.captured.keyAt(this._ledger.captured.values.length - 1) : null,
+        this._justCaptured ? this._ledger.captured.lastAdded : null,
       )
     }
     this._justCaptured = false
