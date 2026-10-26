@@ -1,12 +1,5 @@
 import type { PendingKind, WrittenRow } from '../../../core/block/capability'
-import type { CaptureColumn } from '../column'
-import type { CaptureContext } from '../row/context'
-import { clearRow, type CaptureRow } from '../row/captureRow'
-import { touched, valueIn } from '../row/cellValues'
-import { computeCells } from '../row/computedCells'
-import { adoptRow, helpersNow, type Helpers } from '../row/rowHelpers'
-import { openSplit } from '../row/rowSplit'
-import { firstCell, holdBack } from '../row/typing'
+import type { Helpers } from '../row/rowHelpers'
 import type { SplitPick } from '../split/splitState'
 import type { RowState, RowsStatus } from './outbound'
 
@@ -26,28 +19,12 @@ interface PendingRow {
   picks: readonly SplitPick[]
 }
 
-interface CapturedRowsHost {
-  context: () => CaptureContext
-
-  columns: () => readonly CaptureColumn[]
-
-  report: () => void
-
-  focusCell: (index: number) => void
-
-  captured: () => void
-
-  rowAdded: () => void
-
-  splitOpened: () => void
-}
-
 type Status = (kind: PendingKind, key: string, base: RowsStatus) => RowState
 
+// The rows captured from the typing row and not yet booked, in their order,
+// with the gap of a row taken back into the typing row to be corrected.
 export class CapturedRows {
-  private readonly host: CapturedRowsHost
-
-  private readonly row: CaptureRow
+  private readonly report: () => void
 
   private readonly status: Status
 
@@ -57,9 +34,8 @@ export class CapturedRows {
 
   private correction: { row: CapturedRow; slot: number } | null = null
 
-  constructor(host: CapturedRowsHost, row: CaptureRow, status: Status) {
-    this.host = host
-    this.row = row
+  constructor(report: () => void, status: Status) {
+    this.report = report
     this.status = status
   }
 
@@ -98,85 +74,49 @@ export class CapturedRows {
     return this.status('captured', row?.key ?? '', row?.written === undefined ? 'captured' : 'written')
   }
 
-  captureRow(): boolean {
-    const outcome = this.capture(this.host.context())
-    if (outcome === 'nothing') return false
-    if (outcome === 'split') this.host.splitOpened()
-    else if (outcome === 'captured') this.host.captured()
-    else if (outcome === 'waits') this.row.cells.captureAsked = true
-    else {
-      this.host.report()
-      this.host.focusCell(outcome.missing)
-    }
-    return true
+  get correcting(): boolean {
+    return this.correction !== null
   }
 
-  private capture(context: CaptureContext): 'captured' | 'nothing' | 'waits' | 'split' | { missing: number } {
-    computeCells(this.row, context)
-    const values = context.columns.map((_, i) => valueIn(this.row, context, i))
+  // Into the gap of a corrected row, else at the end.
+  add(values: string[], helpers: Helpers): void {
+    const row = { key: this.topKey, values, ...helpers }
     const back = this.correction
-    if (values.every((w) => w === '')) {
-      if (!back) return 'nothing'
-      this.correction = null
-      clearRow(this.row)
-      return 'captured'
-    }
-    const missing = holdBack(this.row)
-    if (missing !== -1) return { missing }
-    if (this.row.cells.waiting.size > 0) return 'waits'
-    if (openSplit(this.row, context) !== 'none') return 'split'
     if (back) {
-      this.rows = [
-        ...this.rows.slice(0, back.slot),
-        { key: this.topKey, values, ...helpersNow(this.row) },
-        ...this.rows.slice(back.slot),
-      ]
+      this.rows = [...this.rows.slice(0, back.slot), row, ...this.rows.slice(back.slot)]
       this.nextKey += 1
       this.correction = null
     } else {
-      this.rows = [...this.rows, { key: this.topKey, values, ...helpersNow(this.row) }]
+      this.rows = [...this.rows, row]
       this.nextKey += 1
     }
-    clearRow(this.row)
-    this.host.rowAdded()
-    return 'captured'
   }
 
-  bringBack(index: number): void {
-    const context = this.host.context()
+  // A row written, or on its way, stays as it is.
+  correctable(index: number): CapturedRow | undefined {
     const row = this.rows[index]
-    if (!row || row.written !== undefined || this.isOut(row)) return
-    const before = this.capture(context)
-    if (typeof before === 'object') {
-      this.host.report()
-      this.host.focusCell(before.missing)
-      return
-    }
-    if (before === 'waits') return
-    if (before === 'split') {
-      this.host.splitOpened()
-      return
-    }
+    return !row || row.written !== undefined || this.isOut(row) ? undefined : row
+  }
+
+  // Leaves a gap where the row stood; false when the row is gone.
+  takeBack(row: CapturedRow): boolean {
     const now = this.rows.indexOf(row)
-    if (now === -1) return
+    if (now === -1) return false
     this.rows = this.rows.filter((_, i) => i !== now)
     this.correction = { row, slot: now }
-    adoptRow(this.row, context, row.values, row)
-    this.host.report()
-    this.host.focusCell(firstCell(this.row))
+    return true
   }
 
-  giveUp(): boolean {
+  // A corrected row emptied in the typing row goes for good.
+  dropCorrection(): void {
+    this.correction = null
+  }
+
+  restoreCorrection(): void {
     const back = this.correction
-    if (back === null && !touched(this.row)) return false
-    if (back !== null) {
-      this.rows = [...this.rows.slice(0, back.slot), back.row, ...this.rows.slice(back.slot)]
-      this.correction = null
-    }
-    clearRow(this.row)
-    this.host.report()
-    this.host.focusCell(firstCell(this.row))
-    return true
+    if (back === null) return
+    this.rows = [...this.rows.slice(0, back.slot), back.row, ...this.rows.slice(back.slot)]
+    this.correction = null
   }
 
   remove(index: number): void {
@@ -185,7 +125,7 @@ export class CapturedRows {
     if (this.correction !== null && index < this.correction.slot) {
       this.correction = { ...this.correction, slot: this.correction.slot - 1 }
     }
-    this.host.report()
+    this.report()
   }
 
   markWritten(written: readonly WrittenRow[], keepShown: boolean): boolean {

@@ -31,6 +31,7 @@ import { capturedRowsTpl, captureDecoration } from './body'
 import { CAPTURE_COLUMNS_BINDING, greyLine, type CaptureColumn } from './column'
 import { keyIntent } from './keys'
 import { createLedger, type CaptureLedger } from './ledger'
+import { bringBack, captureRow } from './ledger/capturing'
 import { runDone, writtenArrived } from './ledger/runReport'
 import { rowView, touched } from './row/cellValues'
 import { refreshRow } from './row/refresh'
@@ -249,7 +250,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
               this._ledger.captured.remove(index)
               this.backToTyping()
             },
-            bringBackCapturedRow: (index) => this._ledger.captured.bringBack(index),
+            bringBackCapturedRow: (index) => bringBack(this._ledger, index),
             chooseCapturedRow: (index) => {
               this._working.toggleCaptured(
                 this._ledger.captured.keyAt(index),
@@ -290,7 +291,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
 
   protected override willUpdate(changed: PropertyValues): void {
     super.willUpdate(changed)
-    if (refreshRow(this._ledger.row)) this._ledger.captured.captureRow()
+    if (refreshRow(this._ledger.row)) captureRow(this._ledger)
   }
 
   protected override updated(): void {

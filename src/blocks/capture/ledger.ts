@@ -39,10 +39,10 @@ interface LedgerHost {
 
 // The rows the capture block keeps: the typing row, the rows captured from
 // it and not yet booked, the changes to booked rows, and which of them are on
-// their way out. ledger/moves.ts and ledger/runReport.ts move rows between
-// the parts.
+// their way out. ledger/capturing.ts, ledger/moves.ts and ledger/runReport.ts
+// move rows between the parts.
 export interface CaptureLedger {
-  readonly host: LedgerHost
+  readonly host: LedgerHost & { context: () => CaptureContext }
 
   readonly row: CaptureRow
 
@@ -59,7 +59,7 @@ export function createLedger(host: LedgerHost): CaptureLedger {
   const outbound = new Outbound(host.report)
   const status = outbound.shows.bind(outbound)
   const row = createCaptureRow({ ...host, context })
-  const captured = new CapturedRows({ ...host, context }, row, status)
+  const captured = new CapturedRows(host.report, status)
   const booked = new BookedRows({ ...host, firstCell: () => firstCell(row) }, status)
-  return { host, row, captured, booked, outbound }
+  return { host: { ...host, context }, row, captured, booked, outbound }
 }

@@ -1,6 +1,7 @@
 import type { TemplateResult } from 'lit'
 import type { ColumnView } from '../parts/column'
 import type { CaptureLedger } from './ledger'
+import { captureRow } from './ledger/capturing'
 import { closeSplit, confirmSplit, splitAnchor } from './row/rowSplit'
 import { openCell } from './row/typing'
 import { splitKey } from './split/splitKeys'
@@ -15,7 +16,7 @@ function key(ledger: CaptureLedger, e: KeyboardEvent): void {
   e.stopPropagation()
   if (outcome === 'done') {
     confirmSplit(row)
-    ledger.captured.captureRow()
+    captureRow(ledger)
   } else if (outcome === 'back') {
     const anchor = splitAnchor(row)
     closeSplit(row)

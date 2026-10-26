@@ -6,6 +6,7 @@ import type { ColumnView } from '../parts/column'
 import type { RowLayout } from '../parts/cell'
 import type { CaptureColumn } from './column'
 import type { CaptureLedger } from './ledger'
+import { giveUp } from './ledger/capturing'
 import { enterFrom, jumpFrom, moveDown, moveUp } from './ledger/moves'
 import { keyIntent } from './keys'
 import { captureProperties } from './properties'
@@ -90,7 +91,7 @@ function key(placement: CaptureRowPlacement, index: number, e: KeyboardEvent): v
   } else if (action === 'down') keep = moveDown(ledger, index)
   else if (action === 'up') keep = moveUp(ledger, index)
   else if (action === 'clear') emptyCell(row, index)
-  else if (action === 'giveUp') keep = ledger.captured.giveUp()
+  else if (action === 'giveUp') keep = giveUp(ledger)
   if (keep) e.preventDefault()
 }
 

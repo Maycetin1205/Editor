@@ -2,6 +2,7 @@ import { cellAbove, cellBelow, stripeOf } from '../../parts/cell'
 import type { CaptureLedger } from '../ledger'
 import { lookupAt } from '../row/lookupSpot'
 import { holdBack, neighbour, settleCell } from '../row/typing'
+import { captureRow } from './capturing'
 
 // Leaving the typing row past its last cell captures it; up from its top line
 // goes into the booked rows. Each returns false where the key did nothing.
@@ -13,7 +14,7 @@ export function jumpFrom(ledger: CaptureLedger, index: number): boolean {
     ledger.host.focusCell(next)
     return true
   }
-  return ledger.captured.captureRow()
+  return captureRow(ledger)
 }
 
 // 'window' where the cell's text named no single record and the lookup window
@@ -23,7 +24,7 @@ export function enterFrom(ledger: CaptureLedger, index: number): 'window' | 'don
   if (row.cells.held.has(index) && lookupAt(row, index) !== null) return 'window'
   settleCell(row, index)
   if (row.cells.held.has(index)) return 'done'
-  if (ledger.captured.captureRow()) return 'done'
+  if (captureRow(ledger)) return 'done'
   const held = holdBack(row)
   if (held !== -1) {
     ledger.host.report()
@@ -35,7 +36,7 @@ export function enterFrom(ledger: CaptureLedger, index: number): 'window' | 'don
 export function moveDown(ledger: CaptureLedger, index: number): boolean {
   settleCell(ledger.row, index)
   const below = cellBelow(ledger.host.layout(), index)
-  if (below === -1) return ledger.captured.captureRow()
+  if (below === -1) return captureRow(ledger)
   ledger.host.focusCell(below)
   return true
 }
