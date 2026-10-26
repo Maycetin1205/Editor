@@ -2,21 +2,15 @@ import type { PendingKind } from '../../../core/block/capability'
 import { columnSlots, rowValues, type Calculation } from '../../../core/data/calculation'
 import { asNumber } from '../../../core/data/number'
 import { columnWithKey } from '../../parts/column'
-import { stripeOf, type RowLayout } from '../../parts/cell'
 import { rowsIndexOf } from '../../list'
-import { cellsFields, enterCell } from '../cells'
 import type { CaptureColumn } from '../column'
 import type { RowState, RowsStatus } from './outbound'
 import { cellIn, dropCell, dropRecord, hasRecordIn, recordsIn, setCell, type Cells } from './recordCells'
-
-const BOOKED_ROWS = '.body > .row:not(.capture)'
 
 interface BookedRowsHost {
   block: HTMLElement
 
   columns: () => readonly CaptureColumn[]
-
-  layout: () => RowLayout
 
   calculations: () => readonly Calculation[]
 
@@ -25,10 +19,6 @@ interface BookedRowsHost {
   dataRows: () => readonly string[][]
 
   report: () => void
-
-  focusCell: (index: number) => void
-
-  firstCell: () => number
 }
 
 type Status = (kind: PendingKind, key: string, base: RowsStatus) => RowState
@@ -41,6 +31,8 @@ function valueEquals(a: string, b: string): boolean {
   return number !== null && number === asNumber(y)
 }
 
+// What the operator changed in booked rows, and what of it was sent, until
+// the list shows the written rows.
 export class BookedRows {
   private readonly host: BookedRowsHost
 
@@ -161,56 +153,9 @@ export class BookedRows {
     if (changed) this.host.report()
   }
 
-  keyCell(rawIndex: number, columnsIndex: number, e: KeyboardEvent): void {
-    const field = e.target as HTMLInputElement
-
-    if (e.key === 'F5') {
-      e.preventDefault()
-      return
-    }
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      e.stopPropagation()
-      if (dropCell(this.changes, this.recordOf(rawIndex), columnsIndex)) {
-        this.host.report()
-      }
-      return
-    }
-    const steps: Record<string, number> = {
-      Enter: 1,
-      ArrowDown: 1,
-      ArrowUp: -1,
-      PageDown: 10,
-      PageUp: -10,
-    }
-    const step = steps[e.key]
-    if (step === undefined) return
-    e.preventDefault()
-    e.stopPropagation()
-    const arrow = e.key === 'ArrowDown' || e.key === 'ArrowUp'
-    this.cellNeighbour(arrow ? stripeOf(this.host.layout(), columnsIndex) : [columnsIndex], field, step, e.key)
-  }
-
-  private cellNeighbour(slots: readonly number[], of: HTMLInputElement, step: number, key: string): void {
-    const fields = cellsFields(this.host.block.shadowRoot, BOOKED_ROWS, slots)
-    const now = fields.indexOf(of)
-    if (now < 0) return
-    let target = now + step
-    if (target > fields.length - 1) {
-      if (key === 'Enter' || key === 'ArrowDown') {
-        this.host.focusCell(key === 'Enter' ? this.host.firstCell() : slots[0])
-        return
-      }
-      target = fields.length - 1
-    }
-    if (target < 0) target = 0
-    const field = fields[target]
-    if (field === of) return
-    enterCell(field)
-  }
-
-  enterLast(slots: readonly number[]): boolean {
-    return enterCell(cellsFields(this.host.block.shadowRoot, BOOKED_ROWS, slots).at(-1))
+  // Escape in a booked cell takes back what was typed there.
+  dropChange(rawIndex: number, columnsIndex: number): void {
+    if (dropCell(this.changes, this.recordOf(rawIndex), columnsIndex)) this.host.report()
   }
 
   takeOut(keys: readonly string[]): void {

@@ -1,77 +1,21 @@
 import { asNumber, numberText } from '../../../core/data/number'
-import type { Split, SplitColumn } from '../../../core/data/split'
-import { readDate } from '../../../runtime/chosenDay'
-import { maskHost } from '../../../runtime/host'
+import type { Split } from '../../../core/data/split'
 import { plainText } from '../../parts/cellSearch'
+import { splitColumnText, splitStock } from './splitRecords'
 
 export interface SplitPick {
   record: unknown
   amount: string
 }
 
-type SplitTone = 'soon' | 'past' | undefined
+// Amounts of the split, suggested or summed up, show at most this many decimals.
+export const SPLIT_DECIMALS = 3
 
-type SplitKey = 'done' | 'back' | 'blocked' | 'handled' | 'nothing'
-
+// Letters typed within this pause search on from the letters before.
 const SEARCH_PAUSE_MS = 900
 
-const PAGE = 8
-
-const AMOUNT_DECIMALS = 3
-
-const read = (record: unknown, field: string): string =>
-  field === '' ? '' : maskHost().readField(record, field).trim()
-
-function startOfDay(moment: Date): number {
-  return new Date(moment.getFullYear(), moment.getMonth(), moment.getDate()).getTime()
-}
-
-function compared(a: string, b: string): number {
-  if (a === '' || b === '') return a === b ? 0 : a === '' ? 1 : -1
-  const da = readDate(a)
-  const db = readDate(b)
-  if (da !== null && db !== null) return da.getTime() - db.getTime()
-  const na = asNumber(a)
-  const nb = asNumber(b)
-  if (na !== null && nb !== null) return na - nb
-  return a.localeCompare(b, 'de', { numeric: true, sensitivity: 'base' })
-}
-
-export function splitRows(split: Split, records: readonly unknown[]): unknown[] {
-  const shown = records.filter((record) => {
-    if (split.hide.some((h) => read(record, h.field) === h.value.trim())) return false
-    if (!split.hideEmpty || split.stockField === '') return true
-    const stock = asNumber(read(record, split.stockField))
-    return stock === null || stock > 0
-  })
-  if (split.sort.length === 0) return shown
-  return shown
-    .map((record, at) => ({ record, at }))
-    .sort((x, y) => {
-      for (const key of split.sort) {
-        const order = compared(read(x.record, key.field), read(y.record, key.field))
-        if (order !== 0) return key.down === true ? -order : order
-      }
-      return x.at - y.at
-    })
-    .map((o) => o.record)
-}
-
-export function splitTone(column: SplitColumn, value: string, today: Date = new Date()): SplitTone {
-  if (column.soonDays === undefined) return undefined
-  const date = readDate(value)
-  if (date === null) return undefined
-  const day = startOfDay(date)
-  const now = startOfDay(today)
-  if (day < now) return 'past'
-  const soon = new Date(today.getFullYear(), today.getMonth(), today.getDate() + column.soonDays).getTime()
-  return day <= soon ? 'soon' : undefined
-}
-
-export function splitColumnText(record: unknown, column: SplitColumn): string {
-  return read(record, column.field)
-}
-
+// The open split list: its records, the amount picked per record, the marked
+// row and the amount being typed.
 export class SplitState {
   private spec: Split | null = null
 
@@ -157,8 +101,8 @@ export class SplitState {
   }
 
   private sameRecord(a: unknown, b: unknown): boolean {
-    const fields = this.spec?.columns.map((c) => c.field) ?? []
-    return fields.length > 0 && fields.every((field) => read(a, field) === read(b, field))
+    const columns = this.spec?.columns ?? []
+    return columns.length > 0 && columns.every((c) => splitColumnText(a, c) === splitColumnText(b, c))
   }
 
   amountOf(row: unknown): string | undefined {
@@ -166,8 +110,7 @@ export class SplitState {
   }
 
   stockOf(row: unknown): number | null {
-    const field = this.spec?.stockField ?? ''
-    return field === '' ? null : asNumber(read(row, field))
+    return this.spec === null ? null : splitStock(this.spec, row)
   }
 
   private sum(except?: unknown): number {
@@ -211,6 +154,10 @@ export class SplitState {
     })
   }
 
+  setBlocked(blocked: boolean): void {
+    this._blocked = blocked
+  }
+
   setMark(index: number): void {
     if (index < 0 || index >= this._rows.length) return
     if (index !== this._mark) this._editing = false
@@ -237,14 +184,18 @@ export class SplitState {
     this._editing = true
   }
 
+  stopEditing(): void {
+    this._editing = false
+  }
+
   private suggested(row: unknown): string {
     const stock = this.stockOf(row)
     const open = this._total === null ? null : this._total - this.sum(row)
     const wanted = open === null ? stock : stock === null ? open : Math.min(open, stock)
-    return wanted === null || wanted <= 0 ? '' : numberText(wanted, AMOUNT_DECIMALS)
+    return wanted === null || wanted <= 0 ? '' : numberText(wanted, SPLIT_DECIMALS)
   }
 
-  private typeChar(char: string): void {
+  typeChar(char: string): void {
     const row = this._rows[this._mark]
     if (row === undefined) return
     const before = this._editing ? (this.picks.get(row) ?? '') : ''
@@ -253,7 +204,7 @@ export class SplitState {
     this._editing = true
   }
 
-  private backspace(): void {
+  backspace(): void {
     const row = this._rows[this._mark]
     if (row === undefined || !this.picks.has(row)) return
     const before = this.picks.get(row) ?? ''
@@ -261,73 +212,20 @@ export class SplitState {
     this._editing = true
   }
 
-  private seek(char: string, now: number): void {
+  dropMarked(): void {
+    const row = this._rows[this._mark]
+    if (row !== undefined) this.picks.delete(row)
+    this._editing = false
+  }
+
+  seek(char: string, now: number): void {
     const text = now - this.search.at > SEARCH_PAUSE_MS ? char : this.search.text + char
     this.search = { text, at: now }
     const wanted = plainText(text)
     const columns = this.spec?.columns ?? []
-    const hit = this._rows.findIndex((row) => columns.some((c) => plainText(read(row, c.field)).startsWith(wanted)))
+    const hit = this._rows.findIndex((row) =>
+      columns.some((c) => plainText(splitColumnText(row, c)).startsWith(wanted)),
+    )
     if (hit !== -1) this.setMark(hit)
-  }
-
-  key(e: Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'altKey' | 'metaKey'>, now: number = Date.now()): SplitKey {
-    const outcome = this.keyOutcome(e, now)
-    this._blocked = outcome === 'blocked'
-    return outcome
-  }
-
-  private keyOutcome(e: Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'altKey' | 'metaKey'>, now: number): SplitKey {
-    const last = this._rows.length - 1
-    switch (e.key) {
-      case 'ArrowDown':
-        this.setMark(Math.min(last, this._mark + 1))
-        return 'handled'
-      case 'ArrowUp':
-        this.setMark(Math.max(0, this._mark - 1))
-        return 'handled'
-      case 'PageDown':
-        this.setMark(Math.min(last, this._mark + PAGE))
-        return 'handled'
-      case 'PageUp':
-        this.setMark(Math.max(0, this._mark - PAGE))
-        return 'handled'
-      case 'Home':
-        this.setMark(0)
-        return 'handled'
-      case 'End':
-        this.setMark(last)
-        return 'handled'
-      case ' ':
-        this.toggle(this._mark)
-        return 'handled'
-      case 'Delete': {
-        const row = this._rows[this._mark]
-        if (row !== undefined) this.picks.delete(row)
-        this._editing = false
-        return 'handled'
-      }
-      case 'Backspace':
-        this.backspace()
-        return 'handled'
-      case 'Enter':
-      case 'Tab':
-        this._editing = false
-        return this.ready ? 'done' : 'blocked'
-      case 'Escape':
-        if (this._editing) {
-          this._editing = false
-          return 'handled'
-        }
-        return 'back'
-      default:
-        break
-    }
-    if (e.ctrlKey || e.altKey || e.metaKey || e.key.length !== 1) return 'nothing'
-    if (/[0-9,]/.test(e.key)) {
-      this.typeChar(e.key)
-      return 'handled'
-    }
-    this.seek(e.key, now)
-    return 'handled'
   }
 }

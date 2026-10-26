@@ -6,9 +6,17 @@ import type { ColumnView } from '../parts/column'
 import type { RowLayout } from '../parts/cell'
 import type { CaptureColumn } from './column'
 import type { CaptureLedger } from './ledger'
+import { giveUp } from './ledger/capturing'
+import { enterFrom, jumpFrom, moveDown, moveUp } from './ledger/moves'
+import { keyIntent } from './keys'
 import { captureProperties } from './properties'
-import { captureRowTpl } from './row'
-import { splitListTpl } from './splitList'
+import { rowView, waitingSources } from './row/cellValues'
+import { adopt } from './row/linkedRecords'
+import { lookupAt, windowColumnsAt } from './row/lookupSpot'
+import { captureRowTpl } from './row/rowTpl'
+import { adoptSuggestion, decideKey, setMark } from './row/suggestions'
+import { emptyCell, leaveCell, neighbour, typeCell } from './row/typing'
+import { splitFor } from './splitControls'
 
 import '../table/Table'
 
@@ -23,7 +31,8 @@ interface CaptureRowPlacement {
 }
 
 function openWindow(placement: CaptureRowPlacement, index: number): void {
-  const spot = placement.ledger.lookupAt(index)
+  const ledger = placement.ledger
+  const spot = lookupAt(ledger.row, index)
   if (spot === null) return
   openLookup({
     el: placement.block,
@@ -37,49 +46,52 @@ function openWindow(placement: CaptureRowPlacement, index: number): void {
     height: spot.height,
     entries: spot.entries,
 
-    backFocus: () => placement.ledger.focusCell(index),
+    backFocus: () => ledger.host.focusCell(index),
     searchText: spot.searchText,
     onAdopt: (_display, _value, record) => {
-      placement.ledger.adopt(index, record)
-      placement.ledger.enter(index)
+      adopt(ledger.row, index, record)
+      enterFrom(ledger, index)
     },
   })
 }
 
 function enter(placement: CaptureRowPlacement, index: number): void {
-  if (placement.ledger.enter(index) === 'window') openWindow(placement, index)
+  if (enterFrom(placement.ledger, index) === 'window') openWindow(placement, index)
 }
 
 function key(placement: CaptureRowPlacement, index: number, e: KeyboardEvent): void {
   const ledger = placement.ledger
-  if (e.key === 'F5') e.preventDefault()
+  const row = ledger.row
+  const intent = keyIntent(e)
+  if (intent === 'lookup') e.preventDefault()
 
-  if (e.key === 'Tab' && e.shiftKey) {
-    const previous = ledger.neighbour(index, -1)
+  if (intent === 'backTab') {
+    const previous = neighbour(row, index, -1)
     if (previous === -1) return
     e.preventDefault()
-    ledger.focusCell(previous)
+    ledger.host.focusCell(previous)
     return
   }
-  let action = ledger.decideKey(index, keyOf(e))
-  if (action === 'clear' && ledger.correctionSlot !== null) action = 'giveUp'
+  // The suggestion list speaks the key names of the lookup, where Alt+Down is F5.
+  let action = decideKey(row, index, keyOf(e))
+  if (action === 'clear' && ledger.captured.correctionSlot !== null) action = 'giveUp'
   if (action === 'nothing') {
-    if (e.key === 'Enter') e.preventDefault()
+    if (intent === 'enter') e.preventDefault()
     return
   }
   let keep = true
   if (action === 'adopt') {
-    ledger.adoptSuggestion(index, ledger.mark)
-    if (e.key === 'Tab') keep = ledger.jumpFrom(index)
+    adoptSuggestion(row, index, row.suggestions.mark)
+    if (intent === 'tab') keep = jumpFrom(ledger, index)
     else enter(placement, index)
   } else if (action === 'window') openWindow(placement, index)
   else if (action === 'further') {
-    if (e.key === 'Enter') enter(placement, index)
-    else keep = ledger.jumpFrom(index)
-  } else if (action === 'down') keep = ledger.down(index)
-  else if (action === 'up') keep = ledger.up(index)
-  else if (action === 'clear') ledger.empty(index)
-  else if (action === 'giveUp') keep = ledger.giveUp()
+    if (intent === 'enter') enter(placement, index)
+    else keep = jumpFrom(ledger, index)
+  } else if (action === 'down') keep = moveDown(ledger, index)
+  else if (action === 'up') keep = moveUp(ledger, index)
+  else if (action === 'clear') emptyCell(row, index)
+  else if (action === 'giveUp') keep = giveUp(ledger)
   if (keep) e.preventDefault()
 }
 
@@ -100,26 +112,6 @@ function placeholders(
   }
 }
 
-function splitFor(
-  placement: CaptureRowPlacement,
-  view: ColumnView,
-): { slot: number; content: TemplateResult } | undefined {
-  const ledger = placement.ledger
-  if (placement.preview || !ledger.split.open) return undefined
-  const anchor = ledger.splitAnchor()
-  const slot = view.slots.includes(anchor) ? anchor : view.slots[view.slots.length - 1]
-  if (slot === undefined) return undefined
-  const title = anchor === -1 ? '' : (view.columns[view.slots.indexOf(anchor)]?.title ?? '')
-  const content = splitListTpl(ledger.split, title, {
-    key: (e) => ledger.splitKey(e),
-    toggle: (i) => ledger.splitToggle(i),
-    mark: (i) => ledger.splitMark(i),
-    amount: (i) => ledger.splitAmount(i),
-    leave: (e) => ledger.splitLeave(e),
-  })
-  return typeof content === 'symbol' ? undefined : { slot, content }
-}
-
 export function captureRowFor(
   placement: CaptureRowPlacement,
   view: ColumnView,
@@ -127,8 +119,8 @@ export function captureRowFor(
   layout: RowLayout,
   listToTop: boolean,
 ): TemplateResult {
-  const ledger = placement.ledger
-  const cells = ledger.rowView()
+  const row = placement.ledger.row
+  const cells = rowView(row)
   return captureRowTpl(
     {
       columns: view.columns,
@@ -140,21 +132,21 @@ export function captureRowFor(
       value: (i) => cells[i]?.value ?? '',
       automatic: (i) => cells[i]?.automatic === true,
       held: (i) => cells[i]?.held === true,
-      typingColumn: ledger.typingColumn,
-      suggestions: ledger.suggestions,
-      mark: ledger.mark,
-      typed: (i) => ledger.typedAt(i),
-      windowColumns: (i) => ledger.windowColumnsAt(i),
-      placeholder: placement.preview ? () => '' : placeholders(placement.block, view, ledger.waitingSources()),
+      typingColumn: row.cells.cursor,
+      suggestions: row.suggestions.hit,
+      mark: row.suggestions.mark,
+      typed: (i) => row.cells.typed.get(i) ?? '',
+      windowColumns: (i) => windowColumnsAt(row, i),
+      placeholder: placement.preview ? () => '' : placeholders(placement.block, view, waitingSources(row)),
       listToTop,
-      split: splitFor(placement, view),
+      split: splitFor(placement.ledger, view, placement.preview),
     },
     {
-      typing: (i, text) => ledger.type(i, text),
+      typing: (i, text) => typeCell(row, i, text),
       key: (i, e) => key(placement, i, e),
-      leave: (i) => ledger.leave(i),
-      chooseSuggestion: (listIndex) => ledger.adoptSuggestion(ledger.typingColumn, listIndex),
-      setMark: (listIndex) => ledger.setMark(listIndex),
+      leave: (i) => leaveCell(row, i),
+      chooseSuggestion: (listIndex) => adoptSuggestion(row, row.cells.cursor, listIndex),
+      setMark: (listIndex) => setMark(row, listIndex),
     },
   )
 }
