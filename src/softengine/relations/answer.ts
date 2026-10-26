@@ -1,4 +1,5 @@
-import { fieldRead, isObject, rowsFromQueryAnswer, type JsonObject } from '../data'
+import { isObject, rowsFromQueryAnswer, type JsonObject } from '../data'
+import { fieldRead } from '../fields'
 
 function parsed(value: unknown): unknown {
   if (typeof value !== 'string') return value

@@ -4,8 +4,6 @@ import { isUnread } from '../../unread'
 import { conditionRead, type StepCondition } from './stepAdapter'
 import { isStepKind, stepAdapter, type ActionChains, type RuntimeStep, type Step } from './steps'
 
-export { sectionsOf } from './chainsRead'
-
 // The action chains as a mask file holds them. A chain with one unreadable
 // step is left out whole: half a chain would do half the work.
 export function chainsClean(raw: unknown, allowedEvents: readonly string[]): ActionChains | undefined {

@@ -16,18 +16,18 @@ import {
 export type { SideTab } from '../maskStorage'
 
 // What the toolbar just finished, shown for a moment as a tick.
-export type Finished = 'saved' | 'exported' | 'template'
+type Finished = 'saved' | 'exported' | 'template'
 
 const DONE_MS = 1600
 
-export interface OpenStep {
+interface OpenStep {
   blockId: string
   eventKey: string
   stepId: string | null
   tab: StepTab
 }
 
-export interface OpenCalculation {
+interface OpenCalculation {
   blockId: string
   column: string
 }

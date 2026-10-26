@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
   dataFromContent,
-  fieldRead,
-  fieldWrite,
   messagesContent,
   rowsFromQueryAnswer,
   rowsOfSource,
   sourceFromList,
 } from '../src/softengine/data'
+import { fieldRead, fieldWrite } from '../src/softengine/fields'
 
 describe('fieldRead', () => {
   it('reads a direct column, then a prefixed or suffixed one', () => {

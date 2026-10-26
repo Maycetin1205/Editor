@@ -58,7 +58,7 @@ function rowsReferenceOf(step: Step | RuntimeStep): RowsReference | null {
   return hit
 }
 
-export interface Section {
+interface Section {
   kind: 'once' | PendingKind
 
   blockId: string

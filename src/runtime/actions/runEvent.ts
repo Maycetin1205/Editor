@@ -9,7 +9,7 @@ import type { ActionResult } from './actionResult'
 import { searchCarrier } from './carrier'
 import { runSections } from './runSections'
 
-export type { ActionResult, RunState } from './actionResult'
+export type { ActionResult } from './actionResult'
 export { searchCarrier } from './carrier'
 
 // One run per block and event at a time: a second click while the first

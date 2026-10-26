@@ -14,13 +14,13 @@ import type { Leftover } from '../state/leftover'
 import { leftoverLines } from '../state/leftoverLines'
 import type { EditorView } from '../state/editorStore/viewState'
 
-export const MASK_FILE_NAMES = {
+const MASK_FILE_NAMES = {
   html: 'index.basis.source.html',
   sevariablen: 'index.basis.SEvariablen.json',
 }
 
 // What the export needs from the editor.
-export interface ExportEditor {
+interface ExportEditor {
   readonly tree: Readonly<MaskTree>
   readonly leftover: Leftover
   readonly dataSources: { readonly list: readonly DataSource[] }

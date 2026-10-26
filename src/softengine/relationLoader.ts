@@ -1,7 +1,7 @@
 import type { RuntimeLoadRelation } from '../core/data/deliveries/relationRows'
 import { positionParams, type PositionFetch, type RelationAnswer, type RuntimeRelation } from '../core/data/relations'
 import { reportTrigger, seWindow } from './bridge'
-import { fieldRead } from './data'
+import { fieldRead } from './fields'
 import { fetchedRowsFor, setFetchedRows } from './fetchedRows'
 import { rowsByNumber, type PositionStep } from './positionNumbers'
 import { relationFromList, relationRun } from './relations'

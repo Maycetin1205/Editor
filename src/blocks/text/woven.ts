@@ -4,7 +4,7 @@ import { fieldShortName, hasSlots, patternFromEditing, slotFields } from '../../
 
 // A woven text: words with fields in slots ({{12_8}}), the fields bound in
 // textField and shown by the names in spotTexts.
-export interface WovenText extends HTMLElement {
+interface WovenText extends HTMLElement {
   textField: string
   pattern: string
   spotTexts: Readonly<Record<string, string>>

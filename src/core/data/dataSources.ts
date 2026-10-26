@@ -12,7 +12,7 @@ export { fieldPrefixFromInput, keyDisplay } from './sourceInput'
 
 export const LENGTH_MAX = 200
 
-export type { DataField, SourceFacts } from './sourceFacts'
+export type { DataField } from './sourceFacts'
 
 export interface DataSource extends SourceFacts {
   preset: PresetId

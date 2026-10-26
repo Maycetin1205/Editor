@@ -5,7 +5,7 @@ import { popupClosePiece, popupOpenPiece, popupTab } from './popupPiece'
 import { getTab, putTab, relationPiece } from './relationPiece'
 import { startToolPiece, toolTab } from './startToolPiece'
 
-export type { StepBodyProps, StepContext, StepPiece, StepTab, StepTabPiece, StepWords } from './piece'
+export type { StepContext, StepTab } from './piece'
 
 const STEP_PIECES: { [K in StepKind]: StepPiece<K> } = {
   RELATION: relationPiece,

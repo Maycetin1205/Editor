@@ -4,7 +4,7 @@ import { putRelation, type PutRelationWrite } from './putRelation'
 
 export type Write = NoWrite | PutRelationWrite
 
-export type WriteKind = Write['kind']
+type WriteKind = Write['kind']
 
 const WRITE_ADAPTERS: { [K in WriteKind]: WriteAdapter<Write & { kind: K }> } = {
   none: noWrite,

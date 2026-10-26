@@ -7,7 +7,7 @@ import { runEvent } from '../../runtime/actions/runEvent'
 
 // The field as this binding needs it: its value, and whether it fills
 // itself from a lookup instead of from a bound row.
-export interface ValueField extends HTMLElement {
+interface ValueField extends HTMLElement {
   value: string
   fillsSelf(): boolean
   checkOwnValue(): void

@@ -11,7 +11,7 @@ interface LibraryList<T> {
 }
 
 // What saving and loading the library need from the editor.
-export interface LibraryEditor {
+interface LibraryEditor {
   readonly files: { readonly libraryOnDisk: FileOnDisk }
   readonly dataSources: LibraryList<DataSource>
   readonly relation: LibraryList<RelationTemplate>

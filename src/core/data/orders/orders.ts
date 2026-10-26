@@ -8,7 +8,7 @@ import { mask, type MaskOrder } from './mask'
 
 export type Order = NoOrder | SefileloopOrder | VarOrder | ErpApiCallOrder | DatasetOrder | MaskOrder
 
-export type OrderKind = Order['kind']
+type OrderKind = Order['kind']
 
 const ORDER_ADAPTERS: { [K in OrderKind]: OrderAdapter<Order & { kind: K }> } = {
   none: noOrder,
