@@ -1,6 +1,6 @@
 import type { LookupWindow } from '../../../core/block/capability'
 import type { StepTab } from '../../actions/stepRegistry'
-import type { NoticeText } from '../../widgets/Notice'
+import type { NoticeText } from '../noticeText'
 import { Subject } from '../Subject'
 import {
   loadOutlines,

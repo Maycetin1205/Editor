@@ -38,7 +38,7 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - `editor/state/lifts/` ist weg; `maskSchema.ts` liest nur die laufende Stufe (`currentState`).
 - Bausteine: Kanban ohne Praxis-Reste, Stil je Teil, Karte und Platz als Module. Tabellenmotor in Modell, Zeichnen und Bedienung geteilt, Klassennamen in `TABLE_PART`. Erfassung ohne Fassade, Tippzeile in `capture/row`, Aufteilung in `capture/split`, Tasten über `keys.ts`.
 - Editor-Fläche: ein Zieh-Helfer (`canvas/pointerDrag.ts`) für Verschieben, Rastergröße, Fenstergröße und Spaltenköpfe; `ff-list-bind` durch einen Rückruf ersetzt; große Fenster-Dateien geteilt.
-- eslint-Warnungen zu Größe: 63 → 16.
+- eslint-Warnungen zu Größe: 63 → 16. Die Typen einer Meldung (`NoticeText`, `NoticeLine`) liegen in `editor/state/noticeText.ts`; der Zustand importiert dafür keinen React-Teil mehr.
 - Zustände im Code auf Englisch (`quiet`, `loading`, `writing`, `saved`, `sent`, `failed`).
 - Tests (vitest) an den Nähten: Export-Markup, Escaping, Maskendatei mit Leftover und Abweisung fremder Stufen, Aktionsketten, SoftEngine-Datenlesen. `npm test`, in `npm run check` und auf GitHub.
 - Rauchprobe im Browser: `npm run smoke` (braucht Playwright).

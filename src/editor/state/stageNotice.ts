@@ -1,7 +1,7 @@
 import { downloadFile } from './downloadFile'
 import { CURRENT_SCHEMA_VERSION } from './maskSchema'
 import { storedMaskText } from './maskStorage'
-import type { NoticeText } from '../widgets/Notice'
+import type { NoticeText } from './noticeText'
 
 export const NO_MASK = 'ist keine Maske des Editors.'
 

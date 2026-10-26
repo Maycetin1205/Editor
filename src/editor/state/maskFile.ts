@@ -15,7 +15,7 @@ import type { MaskEntry, MaskFolder } from './maskFolder'
 import { CURRENT_SCHEMA_VERSION } from './maskSchema'
 import { readMask } from './readMask'
 import { NO_MASK, whyNotRead } from './stageNotice'
-import type { NoticeLine, NoticeText } from '../widgets/Notice'
+import type { NoticeLine, NoticeText } from './noticeText'
 
 const MASK_FILE_KIND = 'aufbau-editor-maske'
 

@@ -2,7 +2,7 @@ import { capability } from '../../core/block/capability'
 import { blockType } from '../../core/block/registry'
 import type { MaskTree } from '../../core/block/tree'
 import type { DataSource } from '../../core/data/dataSources'
-import type { NoticeLine } from '../widgets/Notice'
+import type { NoticeLine } from './noticeText'
 import { idOf, leftoverForFile, valuesKept, type Leftover } from './leftover'
 
 // Names what of a mask this editor keeps aside as it stands now: what was
