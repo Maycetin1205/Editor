@@ -2,7 +2,7 @@ import type { PointerEvent as ReactPointerEvent } from 'react'
 import { cssZoomOf } from '../../blocks/base/cssZoom'
 import { DIALOG_MIN_HEIGHT, DIALOG_MIN_WIDTH } from '../../blocks/dialog/DialogFrame'
 import type { EditorStore } from '../state/EditorStore'
-import type { PointerDrag } from './pointerDrag'
+import { swallowNextClick, type PointerDrag } from './pointerDrag'
 import type { Edge } from './useBlockResize'
 
 export type Axis = 'width' | 'height'
@@ -19,6 +19,8 @@ export function axesOf(edge: Edge): Axis[] {
 // Pulls a centred window wider or taller at one grip, on both sides at once.
 // Every change is written right away, all of them under one undo step. An
 // end without a drop keeps the size reached so far, as on a lost pointer.
+// The click after the release is the grip's: under a window it would reach
+// the canvas and take the choice away.
 export function sizeDrag(
   editor: EditorStore,
   e: ReactPointerEvent<HTMLElement>,
@@ -51,7 +53,10 @@ export function sizeDrag(
         write(axis, next)
       }
     },
-    drop: () => bracket.close(),
+    drop: () => {
+      bracket.close()
+      swallowNextClick()
+    },
     cancel: () => bracket.close(),
   }
 }
