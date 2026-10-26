@@ -287,7 +287,7 @@ export class RecordList implements ReactiveController {
       rulerTicks: plain ? null : view.rulerTicks,
       showsRows: view.showsRows,
       picks: this.look.picks(),
-      selectionIndex: this._rowsChoice.slotIn(el.rawRows),
+      chosenIndex: this._rowsChoice.slotIn(el.rawRows),
       decoration,
       required: (slot) => this.hooks?.required(slot) ?? false,
       held: (slot) => this.hooks?.held(slot) ?? false,

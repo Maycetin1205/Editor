@@ -65,7 +65,7 @@ function either(test: Condition, then: Condition, otherwise: Condition): Conditi
 
 function selectionSourceSet(capable: { capabilities: readonly Capability[] }): Condition {
   const set = (key: string): Condition => ({ key, notEquals: '' })
-  const pick = capability(capable, 'recordPick')
+  const pick = capability(capable, 'recordChoice')
   if (pick?.sourceProp === undefined) return set(SOURCE_PROP)
   if (!pick.when) return set(pick.sourceProp)
   return either(pick.when, set(pick.sourceProp), set(SOURCE_PROP))

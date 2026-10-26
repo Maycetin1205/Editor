@@ -14,7 +14,8 @@ export const TABLE_PART = {
   headText: 'head-text',
   row: 'row',
   ruler: 'ruler',
-  selected: 'selected',
+  // The row the operator chose (in the editor, selected is the marked block).
+  chosen: 'chosen',
   subline: 'subline',
   sub: 'sub',
   right: 'right',

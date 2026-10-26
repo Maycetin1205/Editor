@@ -1,7 +1,7 @@
 import { css } from 'lit'
 import { TABLE_PART_CSS } from '../list/parts'
 
-const { table, plain, body, row, selected } = TABLE_PART_CSS
+const { table, plain, body, row, chosen } = TABLE_PART_CSS
 
 // The table as a plain list keeps the look the data list had before it ran
 // on the table: no frame, larger type, a row of card height with the words
@@ -41,7 +41,7 @@ export const dataListStyle = css`
     background: var(--se-panel);
     box-shadow: var(--se-focus-ring);
   }
-  .${plain} .${body} > .${row}.${selected}:focus-visible { background: var(--se-selection); }
+  .${plain} .${body} > .${row}.${chosen}:focus-visible { background: var(--se-selection); }
 
   /* Keine: the rows are only read. */
   .pick-none .${body} > .${row}:not([data-status]):hover { background: var(--se-panel); }

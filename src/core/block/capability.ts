@@ -74,7 +74,7 @@ export type LookupWindow<K extends string = string> = BlockLookupWindow<K> | Ent
 
 export type Capability<K extends string = string> =
   | { kind: 'source'; when?: Condition<K>; helpers?: 'beside' | 'apart'; after?: K }
-  | { kind: 'recordPick'; sourceProp?: K; when?: Condition<K>; gives?: Condition<K> }
+  | { kind: 'recordChoice'; sourceProp?: K; when?: Condition<K>; gives?: Condition<K> }
   | { kind: 'followsSelection' }
   | { kind: 'bindable'; spots: readonly BindableSpot[] }
   | { kind: 'actionValue'; spots: readonly ValueSpot[] }

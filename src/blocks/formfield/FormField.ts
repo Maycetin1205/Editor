@@ -283,7 +283,7 @@ defineBlock(FormField, {
   capabilities: [
     { kind: 'source', when: WITH_VALUE, after: 'options' },
     { kind: 'followsSelection' },
-    { kind: 'recordPick', sourceProp: 'lookupSource', when: ONLY_LOOKUP },
+    { kind: 'recordChoice', sourceProp: 'lookupSource', when: ONLY_LOOKUP },
     { kind: 'list', binding: LOOKUP_COLUMNS_BINDING },
     {
       kind: 'lookupWindow',

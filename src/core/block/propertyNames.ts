@@ -33,7 +33,7 @@ function inCapability(c: Capability): Named[] {
   switch (c.kind) {
     case 'source':
       return [...named('after', c.after), ...inCondition(c.when, 'when')]
-    case 'recordPick':
+    case 'recordChoice':
       return [...named('sourceProp', c.sourceProp), ...inCondition(c.when, 'when'), ...inCondition(c.gives, 'gives')]
     case 'bindable':
       return c.spots.flatMap((spot) => [

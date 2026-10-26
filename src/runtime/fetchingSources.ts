@@ -24,13 +24,13 @@ const state = {
 function defsWithRecordChoice(): Map<string, BlockType> {
   const map = new Map<string, BlockType>()
   for (const def of allBlockTypes()) {
-    if (hasCapability(def, 'recordPick')) map.set(def.tag.toLowerCase(), def)
+    if (hasCapability(def, 'recordChoice')) map.set(def.tag.toLowerCase(), def)
   }
   return map
 }
 
 function sourcesAttrFor(el: Element, def: BlockType): string {
-  const choice = capability(def, 'recordPick')
+  const choice = capability(def, 'recordChoice')
   if (!choice) return ''
   let active = true
   if (choice.when) {

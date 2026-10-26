@@ -1,7 +1,7 @@
 import { css } from 'lit'
 import { TABLE_PART_CSS } from '../parts'
 
-const { body, row, ruler, selected } = TABLE_PART_CSS
+const { body, row, ruler, chosen } = TABLE_PART_CSS
 
 // The scrolling body and its rows: hover, focus and the chosen row.
 export const rowsStyle = css`
@@ -53,13 +53,13 @@ export const rowsStyle = css`
   }
   .${body} > .${row}:focus:not(:focus-visible) { outline: none; }
 
-  .${row}.${selected},
+  .${row}.${chosen},
   .${row}:focus-visible,
-  .${body} > .${row}.${selected}:not([data-status]):hover,
+  .${body} > .${row}.${chosen}:not([data-status]):hover,
   .${body} > .${row}:not([data-status]):focus-visible:hover {
     background: var(--se-selection);
   }
   /* The chosen row, as in every list of the mask: the soft accent with
      the accent bar at its left edge; its words keep their ink. */
-  .${row}.${selected} { box-shadow: var(--se-mark-bar); }
+  .${row}.${chosen} { box-shadow: var(--se-mark-bar); }
 `

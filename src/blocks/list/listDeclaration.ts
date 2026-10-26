@@ -57,7 +57,7 @@ export function listCapabilities<K extends string>(
 ): Capability<K>[] {
   return [
     source,
-    { kind: 'recordPick' },
+    { kind: 'recordChoice' },
     { kind: 'followsSelection' },
     { kind: 'list', binding },
     { kind: 'events', list: [...LIST_EVENTS, ...ownEvents] },

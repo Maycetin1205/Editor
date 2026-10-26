@@ -176,7 +176,7 @@ defineBlock(Kanban, {
   properties: kanbanProperties,
   capabilities: [
     { kind: 'source', helpers: 'beside' },
-    { kind: 'recordPick' },
+    { kind: 'recordChoice' },
     { kind: 'list', binding: KANBAN_COLUMNS_BINDING },
     bindable<typeof kanbanProperties>([...CARD_SPOTS, AVATAR_SPOT]),
     {

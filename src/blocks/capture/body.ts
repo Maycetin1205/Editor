@@ -7,6 +7,7 @@ import { columnEditable, type CaptureColumn } from './column'
 import { shownValue, type Column } from '../parts/column'
 import { figureAt, greyCellTpl, type GreyPart, type RowLayout } from '../parts/cell'
 import { WITHOUT_DECORATION, type RowDecoration, type RowsBelow } from '../list'
+import { TABLE_PART } from '../list/parts'
 import { captureRowFor } from './controls'
 import type { CaptureLedger } from './ledger'
 import { keyCell } from './ledger/bookedKeys'
@@ -93,7 +94,7 @@ function capturedRowTpl(placement: CapturedPlacement, act: CapturedAct, rowsInde
     return html`<div class=${figure !== null ? 'right' : nothing} role="cell">${shownValue(figure, values[slot] ?? '')}</div>`
   }
   return html`<div
-    class="row captured${grey !== null ? ' subline' : ''}${placement.chosen(rowsIndex) ? ' selected' : ''}"
+    class="row captured${grey !== null ? ' subline' : ''}${placement.chosen(rowsIndex) ? ` ${TABLE_PART.chosen}` : ''}"
     role="row"
     data-ff-leads-to-typing
     data-status=${state.status}

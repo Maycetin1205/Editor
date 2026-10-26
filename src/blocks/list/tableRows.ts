@@ -33,7 +33,7 @@ export interface RowsPlacement {
   showsRows: boolean
   // Whether a click or Enter picks a row.
   picks: boolean
-  selectionIndex: number
+  chosenIndex: number
 
   decoration: (rawIndex: number) => RowDecoration
 }
@@ -105,7 +105,7 @@ function rowClass(placement: RowsPlacement, rawIndex: number, grey: boolean, dec
   return [
     TABLE_PART.row,
     placement.showsRows && placement.picks ? 'selectable' : '',
-    rawIndex === placement.selectionIndex ? TABLE_PART.selected : '',
+    rawIndex === placement.chosenIndex ? TABLE_PART.chosen : '',
     grey ? TABLE_PART.subline : '',
     decoration.className,
   ]
@@ -123,9 +123,9 @@ function rowTpl(placement: RowsPlacement, act: RowsAct, rawIndex: number, viewIn
     data-status=${decoration.status === '' ? nothing : decoration.status}
     data-ff-row=${placement.keyOf(rawIndex)}
     tabindex="0"
-    aria-selected=${placement.selectionSemantics ? String(rawIndex === placement.selectionIndex) : nothing}
+    aria-selected=${placement.selectionSemantics ? String(rawIndex === placement.chosenIndex) : nothing}
     style=${styleMap(placement.cols)}
-    @click=${(e: MouseEvent) => rowClicked(e, rawIndex === placement.selectionIndex, activate)}
+    @click=${(e: MouseEvent) => rowClicked(e, rawIndex === placement.chosenIndex, activate)}
     @dblclick=${(e: MouseEvent) => rowDoubleClicked(e, () => act.rowDouble(rawIndex))}
     @keydown=${(e: KeyboardEvent) => rowKeyDown(e, decoration, activate)}
   >

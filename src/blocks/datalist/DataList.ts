@@ -121,7 +121,7 @@ defineBlock(DataList, {
   properties: dataListProperties,
   capabilities: [
     { kind: 'source' },
-    { kind: 'recordPick', gives: PICK_ONE },
+    { kind: 'recordChoice', gives: PICK_ONE },
     { kind: 'followsSelection' },
     bindable<typeof dataListProperties>([...ROW_SPOTS, AVATAR_SPOT]),
     { kind: 'events', list: [...LIST_EVENTS] },
