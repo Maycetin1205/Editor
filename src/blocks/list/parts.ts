@@ -7,6 +7,8 @@ import { unsafeCSS, type CSSResult } from 'lit'
 // of its own places.
 export const TABLE_PART = {
   table: 'table',
+  // A table drawn as a plain list: no head, no foot, one column (the data list).
+  plain: 'plain',
   body: 'body',
   head: 'head',
   headText: 'head-text',

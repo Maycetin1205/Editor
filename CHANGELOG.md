@@ -17,6 +17,7 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - Popup-Seite und Nachschlagefenster: Ziehen oder Klicken an einem Griff hebt die Auswahl nicht mehr auf. Vorher lief der Klick nach dem Loslassen bis zur Fläche und die Griffe verschwanden.
 - Kanban: ein Titel mit „$&“ landet als Text in der Meldung, nicht als Muster.
 - Erfassung, Verteilen: bei absteigender Sortierung stehen leere Werte hinten, nicht vorn.
+- Datenliste: läuft auf dem Tabellenmotor (eine Spalte, ohne Kopf und Fuß). Sie sieht aus wie vorher, wählt, lädt und hört auf Tasten wie die Tabelle: Pfeil auf/ab gehen durch die Zeilen, Enter wählt, F4 und Doppelklick lösen Aktionen aus. Neu sind darum die Ereignisse „Zeile gewählt“, „Zeile doppelt geklickt“ und „F4 – Aktion an der Zeile“. Gespeicherte Masken öffnen unverändert.
 - Kanban: die Meldung einer Spalte bleibt nicht mehr stehen, wenn das Brett während der Meldung aus- und wieder eingehängt wird (etwa beim Schließen und Öffnen eines Popups).
 - Kanban: die Meldung einer Spalte („Meldung beim Ankommen“) erscheint erst, wenn das Schreiben bestätigt ist. Vorher erschien sie beim Ablegen, auch wenn die Aktion danach scheiterte und die Karte zurücksprang. Ohne Aktionskette, die schreibt, gibt es keine Meldung.
 - Kanban, Spalte nach Uhrzeit: sind alle Zeiten vorbei, steht die Jetzt-Linie vor den Karten ohne Uhrzeit, nicht mehr dahinter.
@@ -44,6 +45,7 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - Rauchprobe im Browser: `npm run smoke` (braucht Playwright).
 - Tabellenmotor: ein Wechsel der Zeilenquelle (`rowsFrom`) löscht die gemerkte Sortierung des Bedieners nicht mehr, sondern liest sie gegen die neuen Spalten neu. Heute schaltet kein Baustein nach dem ersten Zeichnen um; der Fehler war still.
 - Editor-Fläche: `commitDrop`, `draggedSize` und `pageDrop` kennen nur noch das Ablegen aus der Palette; die Zweige für einen verschobenen Baustein (`dnd.dragId !== null`) waren tot, weil Verschieben über Zeigerereignisse läuft.
+- Tabellenmotor: `RecordList` kennt eine schlichte Darstellung (`ListLook.plain`: kein Kopf, keine Suche, kein Fuß, keine Leerzeilen) und ob ein Klick eine Zeile wählt (`picks`). `ff-datalist` nutzt sie; die Ereignisse einer Zeile stehen einmal in `LIST_EVENTS`.
 - Tabellenmotor: eine Zeile hat immer einen Index; die Zweige für eine Zeile ohne Index (`rawIndex === null`) in `tableRows.ts`, `rowActivation.ts`, `rowAsk.ts` und der Erfassung sind entfernt. Sie waren tot.
 - GitHub legt `dist/` als Artefakt ab.
 - Dokumente: `README.md`, `docs/ARCHITEKTUR.md`, `docs/BAUSTEINE.md`, `docs/SOFTENGINE-SCHNITTSTELLE.md`, `docs/RELEASE.md`, `BAUPLAN.md` (Stand und offene Punkte).

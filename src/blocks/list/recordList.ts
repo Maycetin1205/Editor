@@ -31,6 +31,16 @@ import {
   type RowsElement,
 } from './sourceRows'
 
+// How the list shows. A table has its head (with search, sorting and the
+// column picker), its foot and empty ruler lines under the records; a plain
+// list only its rows. picks says whether a click or Enter picks a row.
+interface ListLook {
+  plain: boolean
+  picks: () => boolean
+}
+
+const TABLE_LOOK: ListLook = { plain: false, picks: () => true }
+
 interface ListElement extends RowsElement, ListSettings, MeasureTarget, ReactiveControllerHost {
   readonly columns: readonly Column[]
   readonly preview: boolean
@@ -43,6 +53,7 @@ interface ListElement extends RowsElement, ListSettings, MeasureTarget, Reactive
 export class RecordList implements ReactiveController {
   private readonly el: ListElement
   private readonly hooks: ListHooks | null
+  private readonly look: ListLook
   private _rowsFrom: RowsFrom = 'source'
   private readonly _widths: WidthsState
   private readonly _view: ViewChoices
@@ -53,9 +64,10 @@ export class RecordList implements ReactiveController {
   private _columns: readonly Column[] | null = null
   private _keys: { rows: readonly unknown[]; keys: readonly string[] } = { rows: [], keys: [] }
 
-  constructor(el: ListElement, hooks: ListHooks | null = null) {
+  constructor(el: ListElement, hooks: ListHooks | null = null, look: ListLook = TABLE_LOOK) {
     this.el = el
     this.hooks = hooks
+    this.look = look
     this._widths = new WidthsState({
       preview: () => el.preview,
       fullSlot: (rendered) => this.rowLayout().main.slots[rendered] ?? rendered,
@@ -138,7 +150,7 @@ export class RecordList implements ReactiveController {
   }
 
   private get columnPickerOn(): boolean {
-    return this.el.columnPicker && !this.el.preview
+    return this.el.columnPicker && !this.el.preview && !this.look.plain
   }
 
   private rowKeys(): readonly string[] {
@@ -198,14 +210,15 @@ export class RecordList implements ReactiveController {
     const bottom = this.hooks?.bottom() ?? null
     const decoration = this.decoration()
     const view = this.renderModel(layout, bottom?.count ?? 0)
-    return html`<div class=${TABLE_PART.table} style=${styleMap({
+    const plain = this.look.plain
+    return html`<div class=${plain ? `${TABLE_PART.table} ${TABLE_PART.plain}` : TABLE_PART.table} style=${styleMap({
       '--tick': `${view.tick}px`,
       '--row-height': `${view.tick}px`,
       '--sub-height': `${subHeight}px`,
       '--record-height': `${view.tick + subHeight}px`,
     })}>
       ${tableBody(this.bodyPlacement(layout, view, decoration, bottom), this.bodyAct())}
-      ${tableFoot(view, { page: (to) => this._view.goToPage(to) })}
+      ${plain ? nothing : tableFoot(view, { page: (to) => this._view.goToPage(to) })}
     </div>`
   }
 
@@ -252,7 +265,9 @@ export class RecordList implements ReactiveController {
   ): BodyPlacement {
     const el = this.el
     const visible = layout.main
+    const plain = this.look.plain
     return {
+      head: !plain,
       columns: visible.columns,
       slots: visible.slots,
       cols: view.cols,
@@ -262,15 +277,16 @@ export class RecordList implements ReactiveController {
       columnPickerOn: this.columnPickerOn,
       columnPicker: this._choice.placement(el.listColumns()),
       selectionSemantics: giverIdOf(el) !== '',
-      showSearch: el.search,
+      showSearch: el.search && !plain,
       searchText: this._view.searchText,
       sortColumn: this._view.sortColumn,
       sortAscending: this._view.sortAscending,
       rows: view.rows,
       keyOf: (rawIndex) => this.keyOf(rawIndex),
       valueAt: (row, column) => this.cellValue(row, column),
-      rulerTicks: view.rulerTicks,
+      rulerTicks: plain ? null : view.rulerTicks,
       showsRows: view.showsRows,
+      picks: this.look.picks(),
       selectionIndex: this._rowsChoice.slotIn(el.rawRows),
       decoration,
       required: (slot) => this.hooks?.required(slot) ?? false,
@@ -291,6 +307,7 @@ export class RecordList implements ReactiveController {
       widths: this._widths.hostForDrag(),
       clickHead: (i) => this._view.clickSort(i),
       activateRow: (rawIndex, viewIndex) => {
+        if (!this.look.picks()) return
         activateRow(el, this._rowsChoice, el.rawRows, rawIndex, viewIndex)
         el.requestUpdate()
       },

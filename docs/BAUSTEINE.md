@@ -14,7 +14,7 @@ Stand 26.10.2026. Eine Bewertung, keine Entscheidung. Die Entscheidung trifft da
 | Text | `ff-text` | Wort, Wert eines Feldes, Text mit eingewebten Feldern, Berechnung | 12 | bleibt |
 | Bild | `ff-image` | Bild aus Datei, Feld oder Relation | 9 | bleibt |
 | Tabelle | `ff-table` | Zeilen einer Quelle mit Suche, Sortieren, Blättern, Spaltenwahl | 5 + Spalten | bleibt |
-| Datenliste | `ff-datalist` | einfache Liste zum Auswählen | 1 + Spalten | prüfen, ob die Tabelle sie nicht abdeckt |
+| Datenliste | `ff-datalist` | einfache Liste zum Auswählen; die Tabelle ohne Kopf und Fuß mit einer Spalte (Karte) | 1 + 4 Felder | bleibt, als Modus der Tabelle gebaut |
 | Kanban | `ff-kanban` | Karten in Spalten nach einem Feldwert, Plätze mit Belegung, Verschieben löst Aktion aus | 4 + 18 je Spalte | bleibt, verallgemeinert (Praxis-Reste raus) |
 | Werteliste | `ff-valuelist` | Beschriftung und Wert je Zeile, Summen | 1 + Zeilen | bleibt |
 | Popup | `ff-popup` | eigene Seite, die eine Aktion öffnet | 3 | bleibt |

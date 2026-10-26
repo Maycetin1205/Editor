@@ -31,6 +31,8 @@ export interface RowsPlacement {
   rulerTicks: number | null
 
   showsRows: boolean
+  // Whether a click or Enter picks a row.
+  picks: boolean
   selectionIndex: number
 
   decoration: (rawIndex: number) => RowDecoration
@@ -102,7 +104,7 @@ function greyParts(placement: RowsPlacement, decoration: RowDecoration, rawIndex
 function rowClass(placement: RowsPlacement, rawIndex: number, grey: boolean, decoration: RowDecoration): string {
   return [
     TABLE_PART.row,
-    placement.showsRows ? 'selectable' : '',
+    placement.showsRows && placement.picks ? 'selectable' : '',
     rawIndex === placement.selectionIndex ? TABLE_PART.selected : '',
     grey ? TABLE_PART.subline : '',
     decoration.className,

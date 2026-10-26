@@ -1,5 +1,5 @@
 export { RecordList } from './recordList'
-export { LIST_GRID, listCapabilities, listProperties } from './listDeclaration'
+export { LIST_EVENTS, LIST_GRID, listCapabilities, listProperties } from './listDeclaration'
 export { tableStyle } from './tableStyle'
 export { hasRecordNumber, rowsIndexOf, type HandedRow, type RowsFrom } from './sourceRows'
 export { WITHOUT_DECORATION, type RowDecoration, type RowsBelow } from './listHooks'

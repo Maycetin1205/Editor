@@ -1,51 +1,50 @@
 import { css } from 'lit'
+import { TABLE_PART_CSS } from '../list/parts'
 
+const { table, plain, body, row, selected } = TABLE_PART_CSS
+
+// The table as a plain list keeps the look the data list had before it ran
+// on the table: no frame, larger type, a row of card height with the words
+// 10 px in, the chosen row on the soft accent with the bar.
 export const dataListStyle = css`
   :host { min-width: 0; height: 100%; }
 
-  .list {
-    box-sizing: border-box;
-    height: 100%;
-    overflow: auto;
-    scrollbar-width: thin;
-    background: var(--se-panel);
-    font-family: var(--se-font);
+  .list { height: 100%; }
+
+  .${table}.${plain},
+  :host-context(ff-area) .${table}.${plain},
+  :host-context(ff-popup) .${table}.${plain},
+  :host-context(ff-dialog) .${table}.${plain} {
+    border: 0;
+    border-radius: 0;
     font-size: var(--se-fs-lg);
-    color: var(--se-ink);
   }
 
-  /* .dl-row: the words 10 px in, as in a field. */
-  .row {
+  .${plain} .${row} {
+    height: auto;
+    min-height: 44px;
+  }
+  .${plain} .${row}:has(.avatar) { min-height: 48px; }
+
+  .${plain} .${row} > [role='cell'] {
     box-sizing: border-box;
     display: flex;
     align-items: center;
     gap: 12px;
-    width: 100%;
-    min-height: 44px;
     padding: 8px 10px;
-    border: 0;
-    border-bottom: var(--se-border) solid var(--se-line-soft);
-    border-radius: 0;
-    background: transparent;
-    transition: background-color var(--se-move);
-    cursor: pointer;
-  }
-  .row:has(.avatar) { min-height: 48px; }
-
-  .row:hover { background: var(--se-row-hover); }
-  .row.chosen {
-    background: var(--se-selection);
-    box-shadow: var(--se-mark-bar);
+    line-height: inherit;
+    white-space: normal;
   }
 
-  /* Keine: the rows are only read. */
-  .pick-none .row { cursor: default; }
-  .pick-none .row:hover { background: transparent; }
-
-  .row:focus-visible {
-    outline: none;
+  .${plain} .${body} > .${row}:focus { outline: none; }
+  .${plain} .${body} > .${row}:focus-visible {
+    background: var(--se-panel);
     box-shadow: var(--se-focus-ring);
   }
+  .${plain} .${body} > .${row}.${selected}:focus-visible { background: var(--se-selection); }
+
+  /* Keine: the rows are only read. */
+  .pick-none .${body} > .${row}:not([data-status]):hover { background: var(--se-panel); }
 
   /* .t1 and .t2: the name, the line under it. */
   .ident {
@@ -85,6 +84,4 @@ export const dataListStyle = css`
     font-weight: 700;
     font-variant-numeric: tabular-nums;
   }
-
-  :host([preview]) .row { cursor: default; }
 `
