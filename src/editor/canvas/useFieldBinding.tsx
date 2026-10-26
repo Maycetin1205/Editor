@@ -32,6 +32,51 @@ interface FieldBindingArgs {
   onSelect?: () => void
 }
 
+interface FieldBinding {
+  onClick: (e: ReactMouseEvent<HTMLDivElement>) => void
+  onDoubleClick: (e: ReactMouseEvent<HTMLDivElement>) => void
+  pickers: ReactNode
+
+  openEntry: number | null
+
+  openSpot: ListPick | null
+
+  pickList: (pick: ListPick) => void
+}
+
+const samePick = (a: ListPick, b: ListPick): boolean =>
+  a.index === b.index &&
+  a.inner === b.inner &&
+  a.key === b.key &&
+  a.below === b.below &&
+  a.top === b.top &&
+  a.left === b.left
+
+// The entry bar that is open, if any. It closes when the block is no longer
+// chosen or its entry is gone, and follows its entry by key when it moves.
+function useOpenListPick(block: BlockNode, selected: boolean | undefined, listBinding: ListBinding | undefined) {
+  const [listPicker, setListPicker] = useState<ListPick | null>(null)
+  const closeListPicker = useCallback(() => setListPicker(null), [])
+  if (!selected && listPicker !== null) setListPicker(null)
+
+  // ColumnControls opens the bar of a list entry; the same place keeps the
+  // same pick, so the bar does not render again.
+  const pickList = useCallback((next: ListPick) => {
+    setListPicker((before) => (before !== null && samePick(before, next) ? before : next))
+  }, [])
+
+  const entriesNow = listBinding ? listBinding.entries(block.values[listBinding.prop]) : []
+  const pickAt =
+    listPicker === null
+      ? -1
+      : listPicker.key === undefined
+        ? listPicker.index
+        : entriesNow.findIndex((e) => listBinding?.keyOf?.(e) === listPicker.key)
+  if (listPicker !== null && entriesNow[pickAt] === undefined) setListPicker(null)
+  const pick = listPicker === null || pickAt === -1 ? null : { ...listPicker, index: pickAt }
+  return { pick, pickList, closeListPicker }
+}
+
 export function useFieldBinding({
   editor,
   blockRef,
@@ -44,17 +89,7 @@ export function useFieldBinding({
   element,
   spotClickOf,
   onSelect,
-}: FieldBindingArgs): {
-  onClick: (e: ReactMouseEvent<HTMLDivElement>) => void
-  onDoubleClick: (e: ReactMouseEvent<HTMLDivElement>) => void
-  pickers: ReactNode
-
-  openEntry: number | null
-
-  openSpot: ListPick | null
-
-  pickList: (pick: ListPick) => void
-} {
+}: FieldBindingArgs): FieldBinding {
   const library = useDataSources().list
 
   const hasSource = sources.length > 0
@@ -72,31 +107,13 @@ export function useFieldBinding({
     onSelect,
   })
 
-  const [listPicker, setListPicker] = useState<ListPick | null>(null)
-  const closeListPicker = useCallback(() => setListPicker(null), [])
-  if (!selected && listPicker !== null) setListPicker(null)
+  const { pick, pickList, closeListPicker } = useOpenListPick(block, selected, listBinding)
 
   const sourceFromProp =
     listBinding?.sourceProp === undefined
       ? undefined
       : library.find((s) => s.id === String(block.values[listBinding.sourceProp ?? ''] ?? ''))
   const listPickerHasFields = listBinding?.sourceProp !== undefined ? sourceFromProp !== undefined : hasOffer
-
-  // ColumnControls opens the bar of a list entry; the same place keeps the
-  // same pick, so the bar does not render again.
-  const pickList = useCallback((next: ListPick) => {
-    setListPicker((before) => (before !== null && samePick(before, next) ? before : next))
-  }, [])
-
-  const entriesNow = listBinding ? listBinding.entries(block.values[listBinding.prop]) : []
-  const pickAt =
-    listPicker === null
-      ? -1
-      : listPicker.key === undefined
-        ? listPicker.index
-        : entriesNow.findIndex((e) => listBinding?.keyOf?.(e) === listPicker.key)
-  if (listPicker !== null && entriesNow[pickAt] === undefined) setListPicker(null)
-  const pick = listPicker === null || pickAt === -1 ? null : { ...listPicker, index: pickAt }
 
   const ownWindow = searchWindow?.entriesProp !== undefined && searchWindow.entriesProp === listBinding?.prop
 
@@ -146,11 +163,3 @@ export function useFieldBinding({
 
   return { onClick, onDoubleClick, pickers, openEntry, openSpot: columnOpen ? pick : null, pickList }
 }
-
-const samePick = (a: ListPick, b: ListPick): boolean =>
-  a.index === b.index &&
-  a.inner === b.inner &&
-  a.key === b.key &&
-  a.below === b.below &&
-  a.top === b.top &&
-  a.left === b.left
