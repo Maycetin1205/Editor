@@ -45,7 +45,11 @@ export function splitRows(split: Split, records: readonly unknown[]): unknown[] 
     .map((record, at) => ({ record, at }))
     .sort((x, y) => {
       for (const key of split.sort) {
-        const order = compared(read(x.record, key.field), read(y.record, key.field))
+        const a = read(x.record, key.field)
+        const b = read(y.record, key.field)
+        // An empty value goes last in either direction.
+        if ((a === '') !== (b === '')) return a === '' ? 1 : -1
+        const order = compared(a, b)
         if (order !== 0) return key.down === true ? -order : order
       }
       return x.at - y.at

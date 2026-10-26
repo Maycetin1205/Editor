@@ -3,8 +3,9 @@ import { cellsFields, enterCell } from '../cells'
 import { keyIntent, type KeyIntent } from '../keys'
 import type { CaptureLedger } from '../ledger'
 import { firstCell } from '../row/typing'
+import { TABLE_PART } from '../../list/parts'
 
-const BOOKED_ROWS = '.body > .row:not(.capture)'
+const BOOKED_ROWS = `.${TABLE_PART.body} > .${TABLE_PART.row}:not(.capture)`
 
 // How many booked rows a key moves the cursor.
 const STEPS: ReadonlyMap<KeyIntent, number> = new Map([

@@ -32,6 +32,7 @@ import { captureProperties, type CaptureValues } from './properties'
 import { ROW_CAPTURED, rowCapturedRunner } from './rowCaptured'
 import { WorkingRow } from './workingRow'
 import type { SourceValue } from '../../core/block/sourceProperty'
+import { TABLE_PART } from '../list/parts'
 
 export interface Capture extends CaptureValues, SourceValue {}
 
@@ -172,12 +173,12 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
 
   private readonly roomClick = (e: Event): void => {
     const spot = e.composedPath()[0]
-    if (spot instanceof Element && spot.closest('.ruler') !== null) this.backToTyping()
+    if (spot instanceof Element && spot.closest(`.${TABLE_PART.ruler}`) !== null) this.backToTyping()
   }
 
   private showLastCaptured(): void {
     void this.updateComplete.then(() => {
-      const body = this.shadowRoot?.querySelector<HTMLElement>('.body')
+      const body = this.shadowRoot?.querySelector<HTMLElement>(`.${TABLE_PART.body}`)
       if (body) body.scrollTop = body.scrollHeight
     })
   }
@@ -224,7 +225,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
   protected override updated(): void {
     reportPendingMarks(this)
     if (!this.preview) {
-      this.renderRoot.querySelector('.ruler')?.setAttribute(LEADS_TO_TYPING_ATTR, '')
+      this.renderRoot.querySelector(`.${TABLE_PART.ruler}`)?.setAttribute(LEADS_TO_TYPING_ATTR, '')
       this._working.followTyping(
         this.listColumns(),
         touched(this._ledger.row),
