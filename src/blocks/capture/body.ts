@@ -8,6 +8,7 @@ import { shownValue, type Column } from '../parts/column'
 import { figureAt, greyCellTpl, type GreyPart, type RowLayout } from '../parts/cell'
 import { WITHOUT_DECORATION, type RowDecoration } from '../list'
 import type { CaptureLedger } from './ledger'
+import { keyCell } from './ledger/bookedKeys'
 import type { RowState } from './ledger/outbound'
 
 function typingCellTpl(ledger: CaptureLedger, rawIndex: number, slot: number, column: Column): TemplateResult {
@@ -29,7 +30,7 @@ function typingCellTpl(ledger: CaptureLedger, rawIndex: number, slot: number, co
     },
     {
       typing: (text) => booked.typeCell(rawIndex, slot, text),
-      key: (e) => booked.keyCell(rawIndex, slot, e),
+      key: (e) => keyCell(ledger, rawIndex, slot, e),
       leave: (text) => booked.leaveCell(rawIndex, slot, text),
       chooseSuggestion: () => {},
       setMark: () => {},

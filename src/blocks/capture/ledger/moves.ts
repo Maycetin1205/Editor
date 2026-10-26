@@ -2,6 +2,7 @@ import { cellAbove, cellBelow, stripeOf } from '../../parts/cell'
 import type { CaptureLedger } from '../ledger'
 import { lookupAt } from '../row/lookupSpot'
 import { holdBack, neighbour, settleCell } from '../row/typing'
+import { enterLast } from './bookedKeys'
 import { captureRow } from './capturing'
 
 // Leaving the typing row past its last cell captures it; up from its top line
@@ -45,7 +46,7 @@ export function moveUp(ledger: CaptureLedger, index: number): boolean {
   settleCell(ledger.row, index)
   const layout = ledger.host.layout()
   const above = cellAbove(layout, index)
-  if (above === -1) return ledger.booked.enterLast(stripeOf(layout, index))
+  if (above === -1) return enterLast(ledger, stripeOf(layout, index))
   ledger.host.focusCell(above)
   return true
 }

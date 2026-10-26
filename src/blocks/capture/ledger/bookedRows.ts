@@ -2,31 +2,15 @@ import type { PendingKind } from '../../../core/block/capability'
 import { columnSlots, rowValues, type Calculation } from '../../../core/data/calculation'
 import { asNumber } from '../../../core/data/number'
 import { columnWithKey } from '../../parts/column'
-import { stripeOf, type RowLayout } from '../../parts/cell'
 import { rowsIndexOf } from '../../list'
-import { cellsFields, enterCell } from '../cells'
 import type { CaptureColumn } from '../column'
-import { keyIntent, type KeyIntent } from '../keys'
 import type { RowState, RowsStatus } from './outbound'
 import { cellIn, dropCell, dropRecord, hasRecordIn, recordsIn, setCell, type Cells } from './recordCells'
-
-const BOOKED_ROWS = '.body > .row:not(.capture)'
-
-// How many booked rows a key moves the cursor.
-const STEPS: ReadonlyMap<KeyIntent, number> = new Map([
-  ['enter', 1],
-  ['down', 1],
-  ['up', -1],
-  ['pageDown', 10],
-  ['pageUp', -10],
-])
 
 interface BookedRowsHost {
   block: HTMLElement
 
   columns: () => readonly CaptureColumn[]
-
-  layout: () => RowLayout
 
   calculations: () => readonly Calculation[]
 
@@ -35,10 +19,6 @@ interface BookedRowsHost {
   dataRows: () => readonly string[][]
 
   report: () => void
-
-  focusCell: (index: number) => void
-
-  firstCell: () => number
 }
 
 type Status = (kind: PendingKind, key: string, base: RowsStatus) => RowState
@@ -51,6 +31,8 @@ function valueEquals(a: string, b: string): boolean {
   return number !== null && number === asNumber(y)
 }
 
+// What the operator changed in booked rows, and what of it was sent, until
+// the list shows the written rows.
 export class BookedRows {
   private readonly host: BookedRowsHost
 
@@ -171,50 +153,9 @@ export class BookedRows {
     if (changed) this.host.report()
   }
 
-  keyCell(rawIndex: number, columnsIndex: number, e: KeyboardEvent): void {
-    const field = e.target as HTMLInputElement
-    const intent = keyIntent(e)
-
-    if (intent === 'lookup') {
-      e.preventDefault()
-      return
-    }
-    if (intent === 'escape') {
-      e.preventDefault()
-      e.stopPropagation()
-      if (dropCell(this.changes, this.recordOf(rawIndex), columnsIndex)) {
-        this.host.report()
-      }
-      return
-    }
-    const step = STEPS.get(intent)
-    if (step === undefined) return
-    e.preventDefault()
-    e.stopPropagation()
-    const arrow = intent === 'down' || intent === 'up'
-    this.cellNeighbour(arrow ? stripeOf(this.host.layout(), columnsIndex) : [columnsIndex], field, step, intent)
-  }
-
-  private cellNeighbour(slots: readonly number[], of: HTMLInputElement, step: number, intent: KeyIntent): void {
-    const fields = cellsFields(this.host.block.shadowRoot, BOOKED_ROWS, slots)
-    const now = fields.indexOf(of)
-    if (now < 0) return
-    let target = now + step
-    if (target > fields.length - 1) {
-      if (intent === 'enter' || intent === 'down') {
-        this.host.focusCell(intent === 'enter' ? this.host.firstCell() : slots[0])
-        return
-      }
-      target = fields.length - 1
-    }
-    if (target < 0) target = 0
-    const field = fields[target]
-    if (field === of) return
-    enterCell(field)
-  }
-
-  enterLast(slots: readonly number[]): boolean {
-    return enterCell(cellsFields(this.host.block.shadowRoot, BOOKED_ROWS, slots).at(-1))
+  // Escape in a booked cell takes back what was typed there.
+  dropChange(rawIndex: number, columnsIndex: number): void {
+    if (dropCell(this.changes, this.recordOf(rawIndex), columnsIndex)) this.host.report()
   }
 
   takeOut(keys: readonly string[]): void {

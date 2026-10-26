@@ -7,7 +7,6 @@ import { CapturedRows } from './ledger/capturedRows'
 import { Outbound } from './ledger/outbound'
 import { createCaptureRow, type CaptureRow } from './row/captureRow'
 import { captureContext, type CaptureContext } from './row/context'
-import { firstCell } from './row/typing'
 
 interface LedgerHost {
   block: HTMLElement
@@ -60,6 +59,6 @@ export function createLedger(host: LedgerHost): CaptureLedger {
   const status = outbound.shows.bind(outbound)
   const row = createCaptureRow({ ...host, context })
   const captured = new CapturedRows(host.report, status)
-  const booked = new BookedRows({ ...host, firstCell: () => firstCell(row) }, status)
+  const booked = new BookedRows(host, status)
   return { host: { ...host, context }, row, captured, booked, outbound }
 }
