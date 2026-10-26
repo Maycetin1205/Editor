@@ -95,7 +95,7 @@ Größenbremse: eslint `max-lines` (300) und `max-lines-per-function` (80) laufe
 
 ## Reihenfolge
 
-Jeder Schritt ist ein eigener Stand auf GitHub. Danach laufen Typprüfung, eslint, Formatierung, knip und der Build, und es wird gegen den Fingerabdruck der gebauten Masken verglichen.
+Jeder Schritt ist ein eigener Stand auf GitHub. Danach laufen Typprüfung, eslint, Formatierung, knip, die Kreis-Prüfung und der Build.
 
 **Phase 1: Ordnung ohne Verhaltensänderung** (nacheinander, geringes Risiko)
 - Doppeltes einsammeln: `data-ff-actions`, Feldcode-Lesen, Enter/Leertaste, Listen bearbeiten, Zahlformat, eine gemeinsame Suche (behebt den Müller-Fehler, die einzige gewollte Verhaltensänderung).
@@ -125,4 +125,4 @@ Jeder Schritt ist ein eigener Stand auf GitHub. Danach laufen Typprüfung, eslin
 - Ein Begriff pro Schritt.
 - Was in gespeicherten oder exportierten Masken steht, bleibt als Alias gültig.
 
-**Danach:** Prüfnetz (nach Entscheidung des Nutzers), dann neue Bausteine.
+**Danach:** neue Bausteine.

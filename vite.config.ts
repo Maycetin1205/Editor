@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -14,11 +14,5 @@ export default defineConfig({
     alias: {
       '@': path.resolve(here, 'src'),
     },
-  },
-  test: {
-    // Without this the `?raw` import of mask.css yields an empty string in a
-    // test run (vitest stubs CSS), and the export test would check a mask
-    // without the mask tokens.
-    css: true,
   },
 })
