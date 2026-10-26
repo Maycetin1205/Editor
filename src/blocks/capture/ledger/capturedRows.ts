@@ -2,7 +2,7 @@ import type { PendingKind, WrittenRow } from '../../../core/block/capability'
 import type { CaptureColumn } from '../column'
 import type { CaptureContext } from '../row'
 import type { CaptureRow, Helpers } from './captureRow'
-import type { SplitPick } from './split'
+import type { SplitPick } from '../split/splitState'
 import type { RowState, RowsStatus } from './outbound'
 
 type CapturedRow = Helpers & {

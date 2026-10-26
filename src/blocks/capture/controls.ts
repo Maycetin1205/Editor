@@ -9,7 +9,7 @@ import type { CaptureLedger } from './ledger'
 import { keyIntent } from './keys'
 import { captureProperties } from './properties'
 import { captureRowTpl } from './row'
-import { splitListTpl } from './splitList'
+import { splitListTpl } from './split/splitList'
 
 import '../table/Table'
 

@@ -16,7 +16,8 @@ import {
 } from '../../lookup/lookup'
 import { orderedSuggestions } from '../../lookup/suggestionList'
 import { SuggestionState, type KeyAction } from '../../lookup/suggestionState'
-import { splitRows, SplitState, type SplitPick } from './split'
+import { splitRows } from '../split/splitRecords'
+import { SplitState, type SplitPick } from '../split/splitState'
 import {
   cellTargetOf,
   displayColumnIn,

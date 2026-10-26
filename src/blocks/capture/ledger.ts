@@ -11,7 +11,8 @@ import { BookedRows } from './ledger/bookedRows'
 import { CaptureRow, type LookupSpot } from './ledger/captureRow'
 import { CapturedRows, type PendingRow } from './ledger/capturedRows'
 import { Outbound, type RowState } from './ledger/outbound'
-import type { SplitState } from './ledger/split'
+import { splitKey } from './split/splitKeys'
+import type { SplitState } from './split/splitState'
 import { captureContext, type CaptureContext } from './row'
 
 export type { RowState } from './ledger/outbound'
@@ -208,7 +209,7 @@ export class CaptureLedger {
   }
 
   splitKey(e: KeyboardEvent): void {
-    const outcome = this.row.split.key(e)
+    const outcome = splitKey(this.row.split, e)
     if (outcome === 'nothing') return
     e.preventDefault()
     e.stopPropagation()
