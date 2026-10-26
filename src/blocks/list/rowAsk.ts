@@ -4,7 +4,7 @@ import type { RowConfirm } from '../../runtime/steps/confirm'
 import type { ActionResult } from '../../runtime/actions/runEvent'
 import { warn } from '../../runtime/log'
 import { maskHost } from '../../runtime/host'
-import { moveRowsFocus, rowElement } from './rowActivation'
+import { moveRowsFocus, rowElement } from './rowFocus'
 import { rowsIndexOf, rowsTraitOf } from './sourceRows'
 import type { RowDecoration } from './tableBody'
 

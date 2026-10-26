@@ -6,7 +6,7 @@ import { markHit } from '../parts/cellSearch'
 import { shownValue, type Column, type ColumnView, type ColumnsGrid } from '../parts/column'
 import { figureAt, greyCellTpl, type GreyPart, type RowLayout } from '../parts/cell'
 import { widthsHandles, type WidthsHost } from './columnWidth'
-import { moveRowsFocus, focusFirstRow, focusSearchRow } from './rowActivation'
+import { moveRowsFocus, focusFirstRow, focusSearchRow } from './rowFocus'
 import { recordText } from './tableModel'
 import { icon } from '../parts/icons'
 

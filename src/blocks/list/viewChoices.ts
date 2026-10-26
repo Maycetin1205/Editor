@@ -1,6 +1,6 @@
 import { ROWS_HEIGHT, type RowMetrics } from './pageSize'
 import { observeBody, measuredMetrics, headHeight, WITHOUT_BODY, bodyHeight, type MeasureTarget } from './bodyMeasure'
-import { focusedRowKey, restoreRowsFocus } from './rowActivation'
+import { focusedRowKey, restoreRowsFocus } from './rowFocus'
 import { rememberedSorting } from './sorting'
 
 interface ViewElement extends HTMLElement, MeasureTarget {
