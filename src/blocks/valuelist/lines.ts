@@ -2,7 +2,7 @@ import { listForExport, withEntryValue, type EntrySwitch, type ListBinding } fro
 import { entryEventKeys, type EntryEvents } from '../../core/block/capability'
 import { listProperty, type Property } from '../../core/block/property'
 import { isUnread } from '../../core/unread'
-import { holdingChoice } from '../parts/column'
+import { kindChoice } from '../parts/column'
 
 export type ValueLine = {
   label: string
@@ -107,7 +107,7 @@ export const LINES_BINDING: ListBinding<ValueLine, 'lines'> = {
   entriesDown: true,
 
   entryFlag: [SUM],
-  entryChoice: [holdingChoice<ValueLine>('Art')],
+  entryChoice: [kindChoice<ValueLine>('Art')],
 }
 
 const NEW_LINES = 3

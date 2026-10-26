@@ -195,29 +195,30 @@ const TEXT = 'text'
 const FIGURE = 'figure'
 const AMOUNT = 'amount'
 
-interface Holder {
+// What kind of value a column or line holds: text, a figure or an amount.
+interface KindMarks {
   figure?: boolean
   amount?: boolean
   total?: boolean
 }
 
-function holdingOf(entry: Holder): string {
+function kindOf(entry: KindMarks): string {
   if (entry.amount === true) return AMOUNT
   return entry.figure === true || entry.total === true ? FIGURE : TEXT
 }
 
-function withHolding<E extends Holder>(entry: E, holding: string): E {
-  if (holding === holdingOf(entry)) return entry
+function withKind<E extends KindMarks>(entry: E, kind: string): E {
+  if (kind === kindOf(entry)) return entry
   const next: E = { ...entry }
   delete next.figure
   delete next.amount
-  if (holding === TEXT) delete next.total
-  return Object.assign(next, holding === FIGURE ? { figure: true } : holding === AMOUNT ? { amount: true } : {})
+  if (kind === TEXT) delete next.total
+  return Object.assign(next, kind === FIGURE ? { figure: true } : kind === AMOUNT ? { amount: true } : {})
 }
 
-export function holdingChoice<E extends Holder>(label: string): EntryChoice<E> {
+export function kindChoice<E extends KindMarks>(label: string): EntryChoice<E> {
   return {
-    key: 'holding',
+    key: 'kind',
     property: segmentProperty(
       [
         { value: TEXT, name: 'Text' },
@@ -226,27 +227,27 @@ export function holdingChoice<E extends Holder>(label: string): EntryChoice<E> {
       ],
       { default: TEXT, label },
     ),
-    valueOf: holdingOf,
-    withValue: withHolding,
+    valueOf: kindOf,
+    withValue: withKind,
   }
 }
 
-const HOLDING = holdingChoice<Column>('Spaltentyp')
+const KIND = kindChoice<Column>('Spaltentyp')
 
-export function holdsNumbers(entry: Holder): boolean {
-  return holdingOf(entry) !== TEXT
+export function holdsNumbers(entry: KindMarks): boolean {
+  return kindOf(entry) !== TEXT
 }
 
-export function shownHeld(entry: Holder, value: string): string {
-  const holding = holdingOf(entry)
-  return holding === TEXT ? value : shownFigure(value, holding === AMOUNT ? AMOUNT_DECIMALS : null)
+export function shownByKind(entry: KindMarks, value: string): string {
+  const kind = kindOf(entry)
+  return kind === TEXT ? value : shownFigure(value, kind === AMOUNT ? AMOUNT_DECIMALS : null)
 }
 
 const TOTAL: EntrySwitch<Column> = {
   key: 'total',
   name: 'Summe in der Fußzeile',
   short: 'Summe',
-  shown: (column) => holdingOf(column) !== TEXT,
+  shown: (column) => kindOf(column) !== TEXT,
   valueOf: (column) => column.total,
   withValue: (column, on) => withEntryValue(column, 'total', on),
 }
@@ -274,7 +275,7 @@ export const COLUMNS_BINDING: ListBinding<Column, 'columns'> = {
 
   entryFlag: [TOTAL, HIDDEN],
 
-  entryChoice: [HOLDING],
+  entryChoice: [KIND],
 }
 
 export function columnsProperty(): Property<Column[]> {
