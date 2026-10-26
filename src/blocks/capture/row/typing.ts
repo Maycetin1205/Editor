@@ -91,7 +91,8 @@ export function holdBack(row: CaptureRow): number {
   return missing
 }
 
-// The next cell to type in, -1 past the end; filled cells are passed over.
+// The next cell to type in, -1 past the end; cells filled from a record or a
+// calculation are passed over.
 export function neighbour(row: CaptureRow, from: number, direction: 1 | -1): number {
   const view = rowView(row)
   const typed = walkOrder(row.host.layout()).filter((slot) => view[slot]?.automatic !== true)

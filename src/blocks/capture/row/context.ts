@@ -8,6 +8,8 @@ import { windowColumnsOr } from '../../lookup/lookup'
 import { FIELD_KEY_PREFIX, type Column } from '../../parts/column'
 import type { CaptureColumn } from '../column'
 
+// A cell is typed freely, or fills from the block's own source, or from a
+// linked helper source.
 type CellKind = 'free' | 'own' | 'linked'
 
 interface CellTarget {
@@ -18,6 +20,7 @@ interface CellTarget {
   code: string
 }
 
+// What the typing row needs to know of its block to fill its cells.
 export interface CaptureContext {
   block?: HTMLElement
   columns: readonly CaptureColumn[]

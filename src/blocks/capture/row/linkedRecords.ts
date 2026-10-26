@@ -28,9 +28,10 @@ export function chooseRecord(row: CaptureRow, context: CaptureContext, sourceId:
   }
 }
 
-// The value a key field of the record must have: from the partner's record,
-// else from the record of the block's own source, else from a record the
-// operator chose for another source. undefined while nothing says.
+// The value a key field of the record must have: from the partner's record
+// (empty while it has none), else from the record of the block's own source,
+// else from a record the operator chose for another source. undefined while
+// nothing says.
 function keyValue(
   row: CaptureRow,
   context: CaptureContext,

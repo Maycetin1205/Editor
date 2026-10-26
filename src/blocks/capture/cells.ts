@@ -62,10 +62,10 @@ export const cellsInputStyle = css`
         border-radius: var(--se-radius);
       }
 
-      /* No box in a row, in the capture row as little as in any other
-         (user, 07.10. and 09.10.): a cell being typed into looks like any
-         other, only with the cursor; the capture row marks that cell with a
-         lower edge of the accent (captureStyle). */
+      /* No box in a row, in the capture row as little as in any other: a
+         cell being typed into looks like any other, only with the cursor;
+         the capture row marks that cell with a lower edge of the accent
+         (captureStyle). */
       .cell-input:focus { outline: none; }
 
       .right .cell-holder > .cell-input { text-align: right; }

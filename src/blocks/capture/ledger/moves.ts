@@ -6,7 +6,7 @@ import { enterLast } from './bookedKeys'
 import { captureRow } from './capturing'
 
 // Leaving the typing row past its last cell captures it; up from its top line
-// goes into the booked rows. Each returns false where the key did nothing.
+// goes into the booked rows. A false return means the key did nothing.
 
 export function jumpFrom(ledger: CaptureLedger, index: number): boolean {
   settleCell(ledger.row, index)
