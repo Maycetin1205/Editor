@@ -2,7 +2,7 @@ import { columnSlots, rowValues } from '../../../core/data/calculation'
 import { asNumber } from '../../../core/data/number'
 import type { KeyPair } from '../../../core/data/extraSources'
 import { outsideValue } from '../../../runtime/foreignSources'
-import { maskState } from '../../../runtime/maskState'
+import { maskHost } from '../../../runtime/host'
 import { columnWithKey, type Column } from '../../parts/column'
 import { walkOrder, type RowLayout } from '../../parts/cell'
 import { plainText, rowFits } from '../../parts/cellSearch'
@@ -155,7 +155,7 @@ export class CaptureRow {
     const target = targetIn(context, index)
     if (target.sourceId === '' || target.code === '') return ''
     const record = this.chosen.get(target.sourceId)
-    return record === undefined ? '' : maskState.host.readField(record, target.code)
+    return record === undefined ? '' : maskHost().readField(record, target.code)
   }
 
   type(index: number, text: string): void {
@@ -278,7 +278,7 @@ export class CaptureRow {
       }
       if (this.valueIn(context, slot) !== '') continue
       seen.add(target.sourceId)
-      named.set(slot, maskState.host.source(target.sourceId)?.name ?? '')
+      named.set(slot, maskHost().source(target.sourceId)?.name ?? '')
     }
     return named
   }
@@ -370,7 +370,7 @@ export class CaptureRow {
     const texts = (e: Entry): string[] => [
       e.display,
       e.value,
-      ...codes.map((code) => maskState.host.readField(e.record, code)),
+      ...codes.map((code) => maskHost().readField(e.record, code)),
     ]
     const entries = this.entriesIn(context, index)
     const hit = typed.trim() === '' ? entries : entries.filter((e) => rowFits(texts(e), typed))
@@ -396,7 +396,7 @@ export class CaptureRow {
       (slot) => this.givenIn(context, slot),
       (sourceId, field) => {
         const record = this.chosen.get(sourceId ?? context.sourceId)
-        return record === undefined ? '' : maskState.host.readField(record, field)
+        return record === undefined ? '' : maskHost().readField(record, field)
       },
     )
   }
@@ -418,10 +418,10 @@ export class CaptureRow {
   private keyValue(context: CaptureContext, partnerId: string, field: string, except: string): string | undefined {
     if (partnerId !== '' && partnerId !== context.sourceId) {
       const record = this.chosen.get(partnerId)
-      return record === undefined ? '' : maskState.host.readField(record, field)
+      return record === undefined ? '' : maskHost().readField(record, field)
     }
     const base = this.chosen.get(context.sourceId)
-    if (base !== undefined) return maskState.host.readField(base, field)
+    if (base !== undefined) return maskHost().readField(base, field)
     for (const sourceId of linkedSourcesIn(context)) {
       if (sourceId === except || !this.byHand.has(sourceId)) continue
 
@@ -431,7 +431,7 @@ export class CaptureRow {
       if (record === undefined) continue
       for (const pair of context.pairsTo(sourceId)) {
         if (pair.from !== undefined || pair.fromField !== field) continue
-        const value = maskState.host.readField(record, pair.toField)
+        const value = maskHost().readField(record, pair.toField)
         if (value !== '') return value
       }
     }
@@ -459,9 +459,7 @@ export class CaptureRow {
         if (record !== undefined) {
           const fits = pairs.every((p) => {
             const expected = this.pairValue(context, partnerId, p, sourceId)
-            return (
-              expected === undefined || (expected !== '' && expected === maskState.host.readField(record, p.toField))
-            )
+            return expected === undefined || (expected !== '' && expected === maskHost().readField(record, p.toField))
           })
           if (!fits) {
             this.choose(context, sourceId, undefined)

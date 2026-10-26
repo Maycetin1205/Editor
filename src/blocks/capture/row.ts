@@ -12,7 +12,7 @@ import type { Calculation } from '../../core/data/calculation'
 import type { KeyPair } from '../../core/data/extraSources'
 import type { Split } from '../../core/data/split'
 import { extraSourcesOf } from '../../runtime/foreignSources'
-import { maskState } from '../../runtime/maskState'
+import { maskHost } from '../../runtime/host'
 
 interface CapturePlacement {
   columns: readonly Column[]
@@ -256,6 +256,6 @@ export function fittingRecords(
     .filter((b): b is { toField: string; expected: string } => b.expected !== undefined)
   if (known.length === 0) return [...candidates]
   return candidates.filter((record) =>
-    known.every((b) => b.expected !== '' && b.expected === maskState.host.readField(record, b.toField)),
+    known.every((b) => b.expected !== '' && b.expected === maskHost().readField(record, b.toField)),
   )
 }

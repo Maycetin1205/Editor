@@ -1,4 +1,4 @@
-import { maskState } from './maskState'
+const state = { text: '', listeners: new Set<() => void>() }
 
 // What a search field of the mask holds: the boards of the mask show only
 // the cards that carry it. One search for the whole mask, as one chosen day.
@@ -6,19 +6,19 @@ import { maskState } from './maskState'
 const plain = (text: string): string => text.trim().toLowerCase()
 
 function searchText(): string {
-  return maskState.search.text
+  return state.text
 }
 
 export function setSearchText(value: string): void {
   const next = plain(value)
-  const search = maskState.search
+  const search = state
   if (next === search.text) return
   search.text = next
   search.listeners.forEach((cb) => cb())
 }
 
 export function onSearchText(cb: () => void): () => void {
-  const listeners = maskState.search.listeners
+  const listeners = state.listeners
   listeners.add(cb)
   return () => {
     listeners.delete(cb)

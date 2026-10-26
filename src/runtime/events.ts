@@ -4,7 +4,7 @@ import { stepAdapter, type RuntimeStep } from '../core/data/steps/steps'
 import { stepRunner } from './steps/runners'
 import type { CapturedPick, RunReportElement, PendingKind } from '../core/block/capability'
 import { giverIdOf, selectionFor } from './selection'
-import { maskState } from './maskState'
+import { maskHost } from './host'
 import { contractOf, readActionValue } from '../core/block/registry'
 import type { ValueCarrier } from '../core/block/capability'
 import type { PickValues } from '../core/data/actions'
@@ -113,8 +113,8 @@ function recordOfRun(result: RunResult, row: RunRow): string {
 async function conditionHolds(condition: StepCondition | undefined): Promise<boolean> {
   if (condition === undefined) return true
   await sourceSettled(condition.sourceId)
-  const source = maskState.host.source(condition.sourceId)
-  const rows = source === undefined ? 0 : maskState.host.rows(source).length
+  const source = maskHost().source(condition.sourceId)
+  const rows = source === undefined ? 0 : maskHost().rows(source).length
   return rows > 0 === condition.rows
 }
 
@@ -125,7 +125,7 @@ function readsPick(step: RuntimeStep): boolean {
 }
 
 function pickValues(pick: CapturedPick): PickValues {
-  return { amount: pick.amount, read: (field) => maskState.host.readField(pick.record, field) }
+  return { amount: pick.amount, read: (field) => maskHost().readField(pick.record, field) }
 }
 
 function jobOriginOf(el: HTMLElement, rowKey?: string): string {
@@ -147,7 +147,7 @@ async function runSteps(
 
   picks: readonly CapturedPick[] = [],
 ): Promise<RunResult> {
-  const host = maskState.host
+  const host = maskHost()
   let written = false
   let unconfirmed = false
   let unconfirmedReason: JobReason | undefined
@@ -393,7 +393,7 @@ async function runSections(
       if (stopped) break
     }
 
-    if (written) maskState.host.requestFreshData()
+    if (written) maskHost().requestFreshData()
     const end: { reason?: JobReason } | null = stopped
     const failedWrite = writeFailed ? { writeFailed } : {}
     if (end === null) {

@@ -1,7 +1,7 @@
 import { bindingAttr } from '../../core/block/capability'
 import { giverIdOf, clearSelection, setSelection } from '../../runtime/selection'
 import { makeDataLink, recordOf } from '../../runtime/source'
-import { maskState } from '../../runtime/maskState'
+import { maskHost } from '../../runtime/host'
 import { readBoundSpot } from '../../runtime/boundSpot'
 import { runEvent } from '../../runtime/events'
 
@@ -73,7 +73,7 @@ function hydrate(el: ValueField): void {
 
 function writeLocal(el: ValueField): Connected | undefined {
   const state = data.get(el)
-  if (state) maskState.host.writeField(state.row, state.code, el.value)
+  if (state) maskHost().writeField(state.row, state.code, el.value)
   return state
 }
 

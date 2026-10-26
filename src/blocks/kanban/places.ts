@@ -1,4 +1,4 @@
-import { maskState } from '../../runtime/maskState'
+import { maskHost } from '../../runtime/host'
 import type { KanbanColumn, KanbanPlace } from './columns'
 
 export interface Spot {
@@ -28,7 +28,7 @@ export function spotOf(
   row: unknown,
   hideOthers: boolean,
 ): Spot | null {
-  const value = field === '' ? '' : maskState.host.readField(row, field)
+  const value = field === '' ? '' : maskHost().readField(row, field)
   if (value.trim() !== '') {
     for (const [c, column] of columns.entries()) {
       const p = column.places.findIndex((place) => same(placeValue(column, place), value))

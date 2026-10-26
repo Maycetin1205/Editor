@@ -8,7 +8,7 @@ import { stepAdapter, type RuntimeStep } from '../../core/data/steps/steps'
 import { makeDataLink, readDataPreamble } from '../../runtime/source'
 import { firstRowToSelection } from '../../runtime/selection'
 import { runEvent } from '../../runtime/events'
-import { maskState } from '../../runtime/maskState'
+import { maskHost } from '../../runtime/host'
 import { holdsNumbers, shownHeld } from '../parts/column'
 import { icon } from '../parts/icons'
 import { LINE_CLICK_EVENTS, LINE_CLICKS, LINES_BINDING, type ValueLine } from './lines'
@@ -109,8 +109,7 @@ export class ValueList extends BlockElement {
 
   private readChains(): void {
     this.chains = chainsRead(this.getAttribute(CHAINS_ATTR))
-    if (Object.values(this.chains).some((chain) => chain.some((s) => stepAdapter(s.kind).answers)))
-      maskState.host.start()
+    if (Object.values(this.chains).some((chain) => chain.some((s) => stepAdapter(s.kind).answers))) maskHost().start()
     this.requestUpdate()
   }
 }

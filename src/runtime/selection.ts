@@ -2,7 +2,25 @@ import { BLOCK_ID_ATTR } from '../core/data/actions'
 import { completePairs } from '../core/data/extraSources'
 import { followsSelectionProperty, followUsable, type SelectionFollow } from '../core/data/selectionFollow'
 import { outsideValue } from './foreignSources'
-import { maskState } from './maskState'
+import { maskHost } from './host'
+
+interface Chosen {
+  row: unknown
+  trait: string
+  number: number
+  made?: true
+}
+
+// One chosen row per giver, and the guard that keeps a report from starting
+// while listeners still hear the last one.
+const state = {
+  chosen: new Map<string, Chosen>(),
+  listeners: new Set<(byControls: boolean) => void>(),
+  counter: 0,
+  messageRuns: false,
+  lateReport: false,
+  toControls: false,
+}
 
 export function traitOf(row: unknown): string {
   if (row == null) return ''
@@ -19,7 +37,7 @@ export function traitOf(row: unknown): string {
 }
 
 function report(byControls: boolean): void {
-  const selection = maskState.selection
+  const selection = state
   if (selection.messageRuns) {
     selection.lateReport = true
     selection.toControls ||= byControls
@@ -40,19 +58,19 @@ function report(byControls: boolean): void {
 }
 
 export function onSelectionList(cb: (byControls: boolean) => void): void {
-  maskState.selection.listeners.add(cb)
+  state.listeners.add(cb)
 }
 
 export function selectionFor(giverId: string): unknown | undefined {
-  return maskState.selection.chosen.get(giverId)?.row
+  return state.chosen.get(giverId)?.row
 }
 
 function selectionTrait(giverId: string): string {
-  return maskState.selection.chosen.get(giverId)?.trait ?? ''
+  return state.chosen.get(giverId)?.trait ?? ''
 }
 
 export function selectionNumber(giverId: string): number {
-  return maskState.selection.chosen.get(giverId)?.number ?? 0
+  return state.chosen.get(giverId)?.number ?? 0
 }
 
 export function giverIdOf(el: Element): string {
@@ -66,7 +84,7 @@ export function relocateSelection<T>(
   keyFor?: (candidate: T) => string,
 ): number[] {
   if (giverId === '') return []
-  if (maskState.selection.chosen.get(giverId)?.made) return []
+  if (state.chosen.get(giverId)?.made) return []
   const trait = selectionTrait(giverId)
   if (trait === '') return []
   const hit: number[] = []
@@ -75,7 +93,7 @@ export function relocateSelection<T>(
   })
   if (hit.length === 0) clearSelection(giverId)
   else {
-    const chosen = maskState.selection.chosen
+    const chosen = state.chosen
     const old = chosen.get(giverId)
     const row = rowOf(candidates[hit[0]])
     if (old && traitOf(old.row) !== traitOf(row)) {
@@ -90,7 +108,7 @@ export function chooseSelection(giverId: string, row: unknown, key = ''): void {
   if (giverId === '') return
   const trait = key || traitOf(row)
   if (trait === '') return
-  const selection = maskState.selection
+  const selection = state
   const old = selection.chosen.get(giverId)
   if (old && old.trait === trait) selection.chosen.delete(giverId)
   else selection.chosen.set(giverId, { row, trait, number: ++selection.counter })
@@ -101,7 +119,7 @@ export function setSelection(giverId: string, row: unknown, byControls = false, 
   if (giverId === '') return
   const trait = key || traitOf(row)
   if (trait === '') return
-  const selection = maskState.selection
+  const selection = state
   if (selection.chosen.get(giverId)?.trait === trait) return
   selection.chosen.set(giverId, { row, trait, number: ++selection.counter })
   report(byControls)
@@ -109,14 +127,14 @@ export function setSelection(giverId: string, row: unknown, byControls = false, 
 
 export function setMadeSelection(giverId: string, row: unknown, key: string): void {
   if (giverId === '' || key === '') return
-  const selection = maskState.selection
+  const selection = state
   if (selection.chosen.get(giverId)?.trait === key) return
   selection.chosen.set(giverId, { row, trait: key, number: ++selection.counter, made: true })
   report(true)
 }
 
 export function clearSelection(giverId: string): void {
-  const chosen = maskState.selection.chosen
+  const chosen = state.chosen
   if (!chosen.has(giverId)) return
   chosen.delete(giverId)
   report(false)
@@ -141,7 +159,7 @@ export function followsFormField(el: HTMLElement, blockId: string): boolean {
 }
 
 export function rowsToSelection(el: HTMLElement, rows: unknown[]): unknown[] {
-  const host = maskState.host
+  const host = maskHost()
   let out = rows
   for (const follow of followsFromAttribute(el)) {
     const needsRow =

@@ -1,7 +1,7 @@
 import { asNumber, numberText } from '../../../core/data/number'
 import type { Split, SplitColumn } from '../../../core/data/split'
 import { readDate } from '../../../runtime/chosenDay'
-import { maskState } from '../../../runtime/maskState'
+import { maskHost } from '../../../runtime/host'
 import { plainText } from '../../parts/cellSearch'
 
 export interface SplitPick {
@@ -20,7 +20,7 @@ const PAGE = 8
 const AMOUNT_DECIMALS = 3
 
 const read = (record: unknown, field: string): string =>
-  field === '' ? '' : maskState.host.readField(record, field).trim()
+  field === '' ? '' : maskHost().readField(record, field).trim()
 
 function startOfDay(moment: Date): number {
   return new Date(moment.getFullYear(), moment.getMonth(), moment.getDate()).getTime()

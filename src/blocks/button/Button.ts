@@ -7,7 +7,7 @@ import { sectionsOf, chainsRead } from '../../core/data/steps/chainsRead'
 import { stepAdapter } from '../../core/data/steps/steps'
 import { runEvent, searchCarrier } from '../../runtime/events'
 import { PENDING_EVENT, pendingRows } from '../../runtime/pendingState'
-import { maskState } from '../../runtime/maskState'
+import { maskHost } from '../../runtime/host'
 import { lookClass, lookStyle } from '../look/look'
 import { buttonStyle } from './buttonStyle'
 import { buttonProperties, type ButtonValues } from './properties'
@@ -81,7 +81,7 @@ export class Button extends BlockElement {
     this.wired = true
     const chains = chainsRead(this.getAttribute(CHAINS_ATTR))
 
-    if (Object.values(chains).some((chain) => chain.some((s) => stepAdapter(s.kind).answers))) maskState.host.start()
+    if (Object.values(chains).some((chain) => chain.some((s) => stepAdapter(s.kind).answers))) maskHost().start()
     this.addEventListener('click', () => {
       void runEvent(this, CLICK, {})
     })

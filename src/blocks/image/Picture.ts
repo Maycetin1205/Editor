@@ -6,7 +6,7 @@ import { bindable, bindingAttr } from '../../core/block/capability'
 import { readBoundSpot } from '../../runtime/boundSpot'
 import { makeDataLink } from '../../runtime/source'
 import { runEvent } from '../../runtime/events'
-import { maskState } from '../../runtime/maskState'
+import { maskHost } from '../../runtime/host'
 import {
   fileNameOf,
   imageLibrary,
@@ -162,7 +162,7 @@ export class Picture extends BlockElement {
     }
     this.fieldValue = ''
     this.standing = 'waiting'
-    void maskState.host
+    void maskHost()
       .runRelation(ask.relation, [key, ...ask.more], { origin: this.origin, selibGet: true })
       .then((answer) => {
         if (generation === this.generation) this.take(answer.failed === true ? '' : answer.value, 'noPicture')

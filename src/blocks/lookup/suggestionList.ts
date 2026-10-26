@@ -3,7 +3,7 @@ import { ref } from 'lit/directives/ref.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import type { Column } from '../parts/column'
 import { markHit, plainText } from '../parts/cellSearch'
-import { maskState } from '../../runtime/maskState'
+import { maskHost } from '../../runtime/host'
 
 const SUGGESTIONS_MAX = 50
 
@@ -109,7 +109,7 @@ export function alignSuggestionsFrom(el: HTMLElement): void {
 
 function cellText(entry: SuggestionRow, column: Column): string {
   if (column.field === '') return entry.display !== '' ? entry.display : entry.value
-  return maskState.host.readField(entry.record, column.field)
+  return maskHost().readField(entry.record, column.field)
 }
 
 function keepInSight(el: Element | undefined): void {

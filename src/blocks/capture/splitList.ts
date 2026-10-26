@@ -2,7 +2,7 @@ import { css, html, nothing, type TemplateResult } from 'lit'
 import { ref } from 'lit/directives/ref.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { asNumber, numberText } from '../../core/data/number'
-import { maskState } from '../../runtime/maskState'
+import { maskHost } from '../../runtime/host'
 import { alignSuggestionsFrom } from '../lookup/suggestionList'
 import { splitColumnText, splitTone, type SplitState } from './ledger/split'
 
@@ -46,7 +46,7 @@ export function splitListTpl(state: SplitState, amountTitle: string, act: SplitA
   const split = state.split
   if (split === null) return nothing
   const columns = split.columns
-  const name = maskState.host.source(split.sourceId)?.name ?? ''
+  const name = maskHost().source(split.sourceId)?.name ?? ''
   const total = state.total
   const rest = state.rest
   const right = columns.map(

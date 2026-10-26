@@ -2,7 +2,7 @@ import { completePairs, extraSourcesProperty, sourceUsable, type KeyPair } from 
 import { splitBinding } from '../core/block/blockType'
 import { readActionValue } from '../core/block/registry'
 import { BLOCK_ID_ATTR } from '../core/data/actions'
-import { maskState } from './maskState'
+import { maskHost } from './host'
 
 export type FieldReader = (row: unknown, value: string) => string
 
@@ -15,7 +15,7 @@ interface Lookup {
 }
 
 export function outsideValue(pair: KeyPair, el: Element): string | undefined {
-  const host = maskState.host
+  const host = maskHost()
   if (pair.from === 'document') {
     const source = host.source(pair.fromSourceId ?? '')
     const record = source ? host.rows(source)[0] : undefined
@@ -60,7 +60,7 @@ export function keyedByFormField(el: HTMLElement, blockId: string): boolean {
 }
 
 export function makeFieldReader(el: HTMLElement): FieldReader {
-  const host = maskState.host
+  const host = maskHost()
   const extra = extraSourcesOf(el)
   if (extra.length === 0) return (row, value) => host.readField(row, splitBinding(value).code)
 

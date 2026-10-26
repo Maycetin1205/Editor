@@ -3,7 +3,7 @@ import { styleMap } from 'lit/directives/style-map.js'
 import type { RowConfirm } from '../../runtime/steps/confirm'
 import type { ActionResult } from '../../runtime/events'
 import { warn } from '../../runtime/log'
-import { maskState } from '../../runtime/maskState'
+import { maskHost } from '../../runtime/host'
 import { moveRowsFocus, rowElement } from './rowActivation'
 import { rowsIndexOf, rowsTraitOf } from './sourceRows'
 import type { RowDecoration } from './tableBody'
@@ -70,7 +70,7 @@ export class RowAsk {
   }
 
   connect(): void {
-    this.unfollow ??= maskState.host.onData((delivery) => {
+    this.unfollow ??= maskHost().onData((delivery) => {
       if (!delivery) return
       let ended = false
       for (const [trait, state] of this.dropping) {
