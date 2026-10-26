@@ -3,7 +3,7 @@ import type { CardData } from './board'
 import { cardContent, cardTpl, type KanbanElement } from './cardView'
 import { cardsByClock, SAMPLE_HOUR_LINE, SAMPLE_UNTIL } from './clock'
 import type { KanbanColumn, KanbanPlace } from './columns'
-import type { Spot } from './places'
+import type { BoardCell } from './places'
 
 function empty(column: KanbanColumn | undefined): TemplateResult | typeof nothing {
   const text = column?.empty.trim() ?? ''
@@ -11,7 +11,7 @@ function empty(column: KanbanColumn | undefined): TemplateResult | typeof nothin
 }
 
 // The cards of a place; in the editor one sample card in the first place.
-export function cardsAt(el: KanbanElement, spot: Spot): TemplateResult | TemplateResult[] | typeof nothing {
+export function cardsAt(el: KanbanElement, spot: BoardCell): TemplateResult | TemplateResult[] | typeof nothing {
   const column = el.columns[spot.column]
   const byTime = column?.byTime === true
   if (el.preview) {
@@ -34,11 +34,11 @@ export function count(el: KanbanElement, cards: readonly CardData[]): string | n
 }
 
 // Whether a place holds a card, whatever a search leaves.
-export function isTaken(el: KanbanElement, spot: Spot): boolean {
+export function isTaken(el: KanbanElement, spot: BoardCell): boolean {
   return el.preview ? spot.place === 0 : el.board.allAt(spot).length > 0
 }
 
-export function placeTpl(el: KanbanElement, spot: Spot, place: KanbanPlace): TemplateResult {
+export function placeTpl(el: KanbanElement, spot: BoardCell, place: KanbanPlace): TemplateResult {
   const board = el.board
   const column = el.columns[spot.column]
   const occupancy = column?.occupancy === true

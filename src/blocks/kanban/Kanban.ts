@@ -8,7 +8,7 @@ import { spotValue, type DataPreamble } from '../../runtime/source'
 import { AVATAR_SPOT, avatarStyle, cardOf, cardSpotStyle, type Card, type CardValues } from '../parts/card'
 import { Board, boardRegister, boardUnregister, type CardData } from './board'
 import { KANBAN_COLUMNS_BINDING, type KanbanColumn, type KanbanPlace } from './columns'
-import type { Spot } from './places'
+import type { BoardCell } from './places'
 import { cardsAt, count, isTaken, placeTpl } from './placeView'
 import { boardStyle } from './style/board'
 import { columnStyle } from './style/column'
@@ -80,7 +80,7 @@ export class Kanban extends BlockElement {
   }
 
   // A card came to a column: its notice shows for a moment.
-  arrived(card: CardData, spot: Spot): void {
+  arrived(card: CardData, spot: BoardCell): void {
     const column = this.columns[spot.column]
     if (!column || column.notice.trim() === '') return
     this.message = noticeText(column.notice, card, column, column.places[spot.place])
@@ -117,7 +117,7 @@ export class Kanban extends BlockElement {
       ${this.summary ? this.summaryTpl() : nothing}
       <div class="board" aria-busy=${String(board.writes)} @dragleave=${(e: DragEvent) => board.leave(e)}>
         ${this.columns.map((column, i) => {
-          const only: Spot = { column: i, place: 0 }
+          const only: BoardCell = { column: i, place: 0 }
           const single = column.places.length === 1
           const subtitle = column.subtitle.trim()
           return html`<div

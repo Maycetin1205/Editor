@@ -73,6 +73,22 @@ Ein neuer Baustein braucht: Ordner unter `src/blocks`, `properties.ts`, die Klas
 
 React-Teile sprechen mit dem Zustand über `useEditor()` (Modell) und `useView()` (Ansicht). Beide sind `useSyncExternalStore` auf einer Versionsnummer.
 
+## Wörter
+
+Ein Wort je Ding, damit niemand raten muss:
+
+| Wort | heißt | nicht zu verwechseln mit |
+|---|---|---|
+| **Spot** (`BindableSpot`, `ValueSpot`, `SpotClick`) | eine Stelle in einem Baustein, an der ein Feldwert landet | der Platz auf dem Kanban-Brett (`BoardCell`), die Ankerstelle eines Nachschlagefelds (`inputSpot.ts`, wird umbenannt) |
+| **selected** (`selectedId`, `selectedNode`) | der Baustein, der im Editor markiert ist | |
+| **chosen** (`chosenRow`, `chosenDay`, `chooseSelection`) | die Zeile oder der Tag, den der Nutzer in der laufenden Maske gewählt hat | |
+| **pick** (`CapturedPick`, `picks`) | ein Betrag, den die Erfassung aus einem Satz nimmt (Verteilen) | |
+| **source** / Quelle | eine Datenquelle (`DataSource`) | `origin`: der Baustein, von dem eine Aktion ausgeht |
+| **binding** | `Quelle::Feldcode`, an einer Stelle gespeichert | |
+| **chain** / Kette | die Schritte zu einem Ereignis eines Bausteins | |
+| **leftover** | was dieser Editor in einer Datei nicht lesen kann und unverändert zurückschreibt | |
+| **host** | die Steckdose zur Umgebung der Maske (`MaskHost`) | |
+
 ## Regeln, die der Code durchsetzt
 
 - Typen streng (`strict`, keine unbenutzten Lokalen, `noImplicitOverride`).

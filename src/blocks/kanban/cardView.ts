@@ -6,7 +6,7 @@ import type { Card, CardValues } from '../parts/card'
 import type { Board, CardData } from './board'
 import { waitOf, type Until } from './clock'
 import type { KanbanColumn } from './columns'
-import type { Spot } from './places'
+import type { BoardCell } from './places'
 import type { CardSpot, KanbanValues } from './properties'
 
 // The kanban element as its card and place views read it.
@@ -96,7 +96,7 @@ function cornerTpl(
 // fixed text; a text before place or note leads them in.
 function footWords(
   column: KanbanColumn,
-  spot: Spot,
+  spot: BoardCell,
   look: Card<CardSpot>,
   values: CardValues,
 ): TemplateResult | string | typeof nothing {
@@ -117,7 +117,7 @@ function footWords(
 
 // A choice of the places of the next column: the card moves there without
 // being dragged.
-function pickTpl(el: KanbanElement, spot: Spot, card: CardData | null): TemplateResult | typeof nothing {
+function pickTpl(el: KanbanElement, spot: BoardCell, card: CardData | null): TemplateResult | typeof nothing {
   const next = el.columns[spot.column + 1]
   if (!el.columns[spot.column]?.placePick || !next) return nothing
   return html`<select
@@ -142,7 +142,7 @@ function pickTpl(el: KanbanElement, spot: Spot, card: CardData | null): Template
 
 function footTpl(
   el: KanbanElement,
-  spot: Spot,
+  spot: BoardCell,
   card: CardData | null,
   look: Card<CardSpot>,
   values: CardValues,
@@ -162,7 +162,7 @@ function footTpl(
 
 // What a card shows; without a card, the editor's sample with the names of
 // its spots.
-export function cardContent(el: KanbanElement, spot: Spot, card: CardData | null, until: Until | null): TemplateResult {
+export function cardContent(el: KanbanElement, spot: BoardCell, card: CardData | null, until: Until | null): TemplateResult {
   const column = el.columns[spot.column]
   const values: CardValues = card === null ? null : card.values
   const look = el.cardLook(values)
@@ -196,7 +196,7 @@ export function cardContent(el: KanbanElement, spot: Spot, card: CardData | null
     ${footTpl(el, spot, card, look, values)}`
 }
 
-export function cardTpl(el: KanbanElement, card: CardData, spot: Spot, until: Until | null): TemplateResult {
+export function cardTpl(el: KanbanElement, card: CardData, spot: BoardCell, until: Until | null): TemplateResult {
   const board = el.board
   const chosen = card.key === board.chosen
   return html`<div
