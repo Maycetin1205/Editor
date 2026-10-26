@@ -37,6 +37,7 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - Tests (vitest) an den Nähten: Export-Markup, Escaping, Maskendatei mit Hebung, Aktionsketten, SoftEngine-Datenlesen. `npm test`, in `npm run check` und auf GitHub.
 - Rauchprobe im Browser: `npm run smoke` (braucht Playwright).
 - Tabellenmotor: ein Wechsel der Zeilenquelle (`rowsFrom`) löscht die gemerkte Sortierung des Bedieners nicht mehr, sondern liest sie gegen die neuen Spalten neu. Heute schaltet kein Baustein nach dem ersten Zeichnen um; der Fehler war still.
+- Tabellenmotor: eine Zeile hat immer einen Index; die Zweige für eine Zeile ohne Index (`rawIndex === null`) in `tableRows.ts`, `rowActivation.ts`, `rowAsk.ts` und der Erfassung sind entfernt. Sie waren tot.
 - GitHub legt `dist/` als Artefakt ab.
 - Dokumente: `README.md`, `docs/ARCHITEKTUR.md`, `docs/BAUSTEINE.md`, `docs/SOFTENGINE-SCHNITTSTELLE.md`, `docs/RELEASE.md`, `BAUPLAN.md` (Stand und offene Punkte).
 

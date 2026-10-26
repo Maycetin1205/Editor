@@ -195,9 +195,8 @@ interface DecorationPlacement {
   ledger: CaptureLedger
 }
 
-export function captureDecoration(placement: DecorationPlacement): (rawIndex: number | null) => RowDecoration {
+export function captureDecoration(placement: DecorationPlacement): (rawIndex: number) => RowDecoration {
   return (rawIndex) => {
-    if (rawIndex === null) return WITHOUT_DECORATION
     const state = placement.ledger.booked.statusOf(rawIndex)
     return {
       ...WITHOUT_DECORATION,

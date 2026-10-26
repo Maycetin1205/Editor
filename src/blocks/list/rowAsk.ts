@@ -121,8 +121,8 @@ export class RowAsk {
     if (this.asking !== null && !this.el.shadowRoot?.querySelector('.row-ask')) this.answer(false)
   }
 
-  decorate(own: RowDecoration, rawIndex: number | null): RowDecoration {
-    if (rawIndex === null || (this.asking === null && this.dropping.size === 0)) return own
+  decorate(own: RowDecoration, rawIndex: number): RowDecoration {
+    if (this.asking === null && this.dropping.size === 0) return own
     const trait = rowsTraitOf(this.el, this.el.rawRows[rawIndex])
     if (this.asking?.trait === trait) {
       return {

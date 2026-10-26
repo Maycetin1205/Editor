@@ -81,10 +81,9 @@ export function activateRow(
   el: HTMLElement,
   choice: RowsChoice,
   rawRows: readonly unknown[],
-  rawIndex: number | null,
+  rawIndex: number,
   viewIndex: number,
 ): void {
-  if (rawIndex === null) return
   const rawRow = rawRows[rawIndex]
   if (rawRow === undefined) return
 
@@ -96,8 +95,7 @@ export function activateRow(
   void runEvent(el, ROW_CHOSEN, { PINDEX: rowsIndexOf(el, rawRow) })
 }
 
-export function rowDouble(el: HTMLElement, rawRows: readonly unknown[], rawIndex: number | null): void {
-  if (rawIndex === null) return
+export function rowDouble(el: HTMLElement, rawRows: readonly unknown[], rawIndex: number): void {
   const rawRow = rawRows[rawIndex]
   if (rawRow === undefined) return
   void runEvent(el, ROW_DOUBLE, { PINDEX: rowsIndexOf(el, rawRow) })

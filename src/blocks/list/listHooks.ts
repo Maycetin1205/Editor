@@ -41,7 +41,7 @@ export interface RowsBelow {
 export interface ListHooks {
   cellValue: (rawIndex: number, slot: number) => string
 
-  decoration: () => (rawIndex: number | null) => RowDecoration
+  decoration: () => (rawIndex: number) => RowDecoration
 
   required: (slot: number) => boolean
 

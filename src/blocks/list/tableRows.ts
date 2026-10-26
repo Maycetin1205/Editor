@@ -33,13 +33,13 @@ export interface RowsPlacement {
   showsRows: boolean
   selectionIndex: number
 
-  decoration: (rawIndex: number | null) => RowDecoration
+  decoration: (rawIndex: number) => RowDecoration
 }
 
 export interface RowsAct {
-  activateRow: (rawIndex: number | null, viewIndex: number) => void
+  activateRow: (rawIndex: number, viewIndex: number) => void
 
-  rowDouble: (rawIndex: number | null) => void
+  rowDouble: (rawIndex: number) => void
 }
 
 interface CellPart {
@@ -53,12 +53,12 @@ interface CellPart {
 function partOf(
   placement: RowsPlacement,
   decoration: RowDecoration,
-  rawIndex: number | null,
+  rawIndex: number,
   column: Column,
   slot: number,
 ): CellPart {
-  const value = rawIndex !== null ? placement.valueAt(rawIndex, slot) : ''
-  const own = rawIndex === null ? null : decoration.cell(slot, column, value)
+  const value = placement.valueAt(rawIndex, slot)
+  const own = decoration.cell(slot, column, value)
   const shown = shownValue(figureAt(placement.layout, slot), value)
   return {
     value,
@@ -70,7 +70,7 @@ function partOf(
 function cellTpl(
   placement: RowsPlacement,
   decoration: RowDecoration,
-  rawIndex: number | null,
+  rawIndex: number,
   s: Column,
   slot: number,
 ): TemplateResult {
@@ -85,12 +85,8 @@ function cellTpl(
   return html`<div class=${classes === '' ? nothing : classes} role="cell">${main.content}</div>`
 }
 
-function greyParts(
-  placement: RowsPlacement,
-  decoration: RowDecoration,
-  rawIndex: number | null,
-): (GreyPart | null)[] | null {
-  if (rawIndex === null || placement.layout.under.size === 0) return null
+function greyParts(placement: RowsPlacement, decoration: RowDecoration, rawIndex: number): (GreyPart | null)[] | null {
+  if (placement.layout.under.size === 0) return null
   const parts = placement.slots.map((slot): GreyPart | null => {
     const sub = placement.layout.under.get(slot)
     if (sub === undefined) return null
@@ -103,11 +99,11 @@ function greyParts(
   return parts.some((part) => part !== null) ? parts : null
 }
 
-function rowClass(placement: RowsPlacement, rawIndex: number | null, grey: boolean, decoration: RowDecoration): string {
+function rowClass(placement: RowsPlacement, rawIndex: number, grey: boolean, decoration: RowDecoration): string {
   return [
     TABLE_PART.row,
-    rawIndex !== null && placement.showsRows ? 'selectable' : '',
-    rawIndex !== null && rawIndex === placement.selectionIndex ? TABLE_PART.selected : '',
+    placement.showsRows ? 'selectable' : '',
+    rawIndex === placement.selectionIndex ? TABLE_PART.selected : '',
     grey ? TABLE_PART.subline : '',
     decoration.className,
   ]
@@ -115,8 +111,7 @@ function rowClass(placement: RowsPlacement, rawIndex: number | null, grey: boole
     .join(' ')
 }
 
-function rowTpl(placement: RowsPlacement, act: RowsAct, rawIndex: number | null, viewIndex: number): TemplateResult {
-  const activatable = rawIndex !== null
+function rowTpl(placement: RowsPlacement, act: RowsAct, rawIndex: number, viewIndex: number): TemplateResult {
   const decoration = placement.decoration(rawIndex)
   const grey = greyParts(placement, decoration, rawIndex)
   const activate = (): void => act.activateRow(rawIndex, viewIndex)
@@ -124,13 +119,11 @@ function rowTpl(placement: RowsPlacement, act: RowsAct, rawIndex: number | null,
     class=${rowClass(placement, rawIndex, grey !== null, decoration)}
     role="row"
     data-status=${decoration.status === '' ? nothing : decoration.status}
-    data-ff-row=${rawIndex === null ? nothing : placement.keyOf(rawIndex)}
-    tabindex=${activatable ? '0' : nothing}
-    aria-selected=${
-      placement.selectionSemantics && rawIndex !== null ? String(rawIndex === placement.selectionIndex) : nothing
-    }
+    data-ff-row=${placement.keyOf(rawIndex)}
+    tabindex="0"
+    aria-selected=${placement.selectionSemantics ? String(rawIndex === placement.selectionIndex) : nothing}
     style=${styleMap(placement.cols)}
-    @click=${(e: MouseEvent) => rowClicked(e, rawIndex !== null && rawIndex === placement.selectionIndex, activate)}
+    @click=${(e: MouseEvent) => rowClicked(e, rawIndex === placement.selectionIndex, activate)}
     @dblclick=${(e: MouseEvent) => rowDoubleClicked(e, () => act.rowDouble(rawIndex))}
     @keydown=${(e: KeyboardEvent) => rowKeyDown(e, decoration, activate)}
   >

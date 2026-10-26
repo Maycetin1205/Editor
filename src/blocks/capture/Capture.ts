@@ -187,7 +187,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
     return this.source.trim() !== '' && hasRecordNumber(this)
   }
 
-  private rowsDecoration(): (rawIndex: number | null) => RowDecoration {
+  private rowsDecoration(): (rawIndex: number) => RowDecoration {
     return captureDecoration({
       typable: this.changePossible,
       ledger: this._ledger,

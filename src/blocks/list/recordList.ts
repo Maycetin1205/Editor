@@ -210,7 +210,7 @@ export class RecordList implements ReactiveController {
   }
 
   // The block's own look of a row, with the question before a row goes on top.
-  private decoration(): (rawIndex: number | null) => RowDecoration {
+  private decoration(): (rawIndex: number) => RowDecoration {
     const own = this.hooks?.decoration() ?? ((): RowDecoration => WITHOUT_DECORATION)
     return (rawIndex) => this._ask.decorate(own(rawIndex), rawIndex)
   }
@@ -247,7 +247,7 @@ export class RecordList implements ReactiveController {
   private bodyPlacement(
     layout: RowLayout,
     view: TableRenderModel,
-    decoration: (rawIndex: number | null) => RowDecoration,
+    decoration: (rawIndex: number) => RowDecoration,
     bottom: RowsBelow | null,
   ): BodyPlacement {
     const el = this.el
