@@ -44,7 +44,7 @@ function liftTo22(tree: unknown): void {
   }
 }
 
-const COLUMN_VALUES_23 = ['heading', 'tone', 'catchAll']
+const COLUMN_VALUES_23 = ['heading', 'tone', 'catchAll', 'button']
 const CARD_VALUES_23 = [
   'chipTone',
   'heading',
@@ -193,8 +193,8 @@ function liftTo27(tree: unknown): void {
 const STANDARD_LOOK_28 = { tone: 'neutral', emphasis: 'outline' }
 const BUTTON_LOOKS_28: Readonly<Record<string, { tone: string; emphasis: string }>> = {
   standard: STANDARD_LOOK_28,
-  primary: { tone: 'accent', emphasis: 'solid' },
-  quiet: { tone: 'accent', emphasis: 'soft' },
+  primary: { tone: 'info', emphasis: 'solid' },
+  quiet: { tone: 'info', emphasis: 'soft' },
   ghost: { tone: 'neutral', emphasis: 'text' },
 }
 
@@ -208,7 +208,7 @@ function liftTo28(tree: unknown): void {
 }
 
 const TEXT_TONES_29: Readonly<Record<string, string>> = {
-  petrol: 'accent',
+  petrol: 'info',
   blue: 'info',
   green: 'success',
   ochre: 'warning',
