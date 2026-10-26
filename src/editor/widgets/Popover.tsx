@@ -55,59 +55,9 @@ export function Popover({
   const ancestors = useContext(Family)
   const family = [...ancestors, id]
   const ref = useRef<HTMLDivElement | null>(null)
-  const [slot, setSlot] = useState<{ top: number; left: number } | null>(null)
   useCloseOnEscape(onClose)
-
-  const atTop = at?.top
-  const atLeft = at?.left
-  useLayoutEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const measure = () => {
-      const own = el.getBoundingClientRect()
-      const maxLeft = Math.max(EDGE, window.innerWidth - EDGE - own.width)
-      const maxTop = Math.max(EDGE, window.innerHeight - EDGE - own.height)
-      let top: number
-      let left: number
-      if (atTop !== undefined && atLeft !== undefined) {
-        top = Math.max(EDGE, Math.min(atTop, maxTop))
-        left = Math.max(EDGE, Math.min(atLeft, maxLeft))
-      } else {
-        const a = anchor?.current?.getBoundingClientRect()
-        if (!a) return
-        const bottomFits = a.bottom + 4 <= maxTop
-        top = bottomFits ? a.bottom + 4 : Math.max(EDGE, a.top - 4 - own.height)
-        left = Math.max(EDGE, Math.min(a.left, maxLeft))
-      }
-      setSlot((before) => (before?.top === top && before.left === left ? before : { top, left: left }))
-    }
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [anchor, atTop, atLeft])
-
-  useEffect(() => {
-    const inFamily = (e: Event): boolean =>
-      e.composedPath().some((el) => el instanceof HTMLElement && el.dataset.ffPopoverFamily?.split(' ').includes(id))
-    const onto = (e: PointerEvent) => {
-      const target = e.target as Node
-      if (inFamily(e)) return
-      if (ref.current?.contains(target) || anchor?.current?.contains(target)) return
-      onClose()
-    }
-    const scrolled = (e: Event) => {
-      if (inFamily(e)) return
-      if (ref.current && e.target instanceof Node && ref.current.contains(e.target)) return
-      onClose()
-    }
-    document.addEventListener('pointerdown', onto, true)
-    document.addEventListener('scroll', scrolled, true)
-    return () => {
-      document.removeEventListener('pointerdown', onto, true)
-      document.removeEventListener('scroll', scrolled, true)
-    }
-  }, [anchor, onClose, id])
+  const slot = usePopoverSlot(ref, anchor, at)
+  useCloseOnOutside(ref, anchor, id, onClose)
 
   return createPortal(
     <div
@@ -142,4 +92,74 @@ export function Popover({
     </div>,
     document.body,
   )
+}
+
+type Slot = { top: number; left: number }
+
+// Fixed position of the popover: at a given point or below the anchor, kept inside the window.
+function usePopoverSlot(
+  ref: RefObject<HTMLDivElement | null>,
+  anchor: RefObject<HTMLElement | null> | undefined,
+  at: Slot | undefined,
+): Slot | null {
+  const [slot, setSlot] = useState<Slot | null>(null)
+  const atTop = at?.top
+  const atLeft = at?.left
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const measure = () => {
+      const own = el.getBoundingClientRect()
+      const maxLeft = Math.max(EDGE, window.innerWidth - EDGE - own.width)
+      const maxTop = Math.max(EDGE, window.innerHeight - EDGE - own.height)
+      let top: number
+      let left: number
+      if (atTop !== undefined && atLeft !== undefined) {
+        top = Math.max(EDGE, Math.min(atTop, maxTop))
+        left = Math.max(EDGE, Math.min(atLeft, maxLeft))
+      } else {
+        const a = anchor?.current?.getBoundingClientRect()
+        if (!a) return
+        const bottomFits = a.bottom + 4 <= maxTop
+        top = bottomFits ? a.bottom + 4 : Math.max(EDGE, a.top - 4 - own.height)
+        left = Math.max(EDGE, Math.min(a.left, maxLeft))
+      }
+      setSlot((before) => (before?.top === top && before.left === left ? before : { top, left: left }))
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [ref, anchor, atTop, atLeft])
+  return slot
+}
+
+// Closes on a press or a scroll outside the popover, its anchor and its family.
+function useCloseOnOutside(
+  ref: RefObject<HTMLDivElement | null>,
+  anchor: RefObject<HTMLElement | null> | undefined,
+  id: string,
+  onClose: () => void,
+) {
+  useEffect(() => {
+    const inFamily = (e: Event): boolean =>
+      e.composedPath().some((el) => el instanceof HTMLElement && el.dataset.ffPopoverFamily?.split(' ').includes(id))
+    const onto = (e: PointerEvent) => {
+      const target = e.target as Node
+      if (inFamily(e)) return
+      if (ref.current?.contains(target) || anchor?.current?.contains(target)) return
+      onClose()
+    }
+    const scrolled = (e: Event) => {
+      if (inFamily(e)) return
+      if (ref.current && e.target instanceof Node && ref.current.contains(e.target)) return
+      onClose()
+    }
+    document.addEventListener('pointerdown', onto, true)
+    document.addEventListener('scroll', scrolled, true)
+    return () => {
+      document.removeEventListener('pointerdown', onto, true)
+      document.removeEventListener('scroll', scrolled, true)
+    }
+  }, [ref, anchor, onClose, id])
 }
