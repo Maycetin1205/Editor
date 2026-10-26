@@ -1,3 +1,4 @@
+import type { BlockType } from '../../core/block/blockType'
 import type { PropertyMap, PropertyValue } from '../../core/block/property'
 import { ROOT_ID, ROOT_TYPE, type BlockNode, type MaskTree } from '../../core/block/tree'
 import { blockType, mayContain } from '../../core/block/registry'
@@ -65,6 +66,51 @@ function chainsLeft(raw: unknown, kept: BlockNode['chains']): Record<string, unk
   return Object.keys(left).length > 0 ? left : null
 }
 
+interface NodeRead {
+  node: BlockNode
+  valuesNotRead: Record<string, ValueLeft> | null
+  chainsNotRead: Record<string, unknown> | null
+}
+
+// One node as this editor keeps it: declared values read, the rest noted.
+function readNode(id: string, node: BlockNode, def: BlockType | undefined): NodeRead {
+  const kept =
+    id === ROOT_ID
+      ? (Object.fromEntries(
+          Object.entries(node.values).filter(([key, value]) => ROOT_KEYS.includes(key) && typeof value === 'string'),
+        ) as Record<string, PropertyValue>)
+      : valuesClean(node.type, node.values)
+  const valuesNotRead = valuesLeft(node.values, kept, id === ROOT_ID ? null : (def?.properties ?? null))
+  const events = chainsClean(
+    node.chains,
+    (capability(def, 'events')?.list ?? []).map((event) => event.key),
+  )
+  return {
+    node: {
+      id,
+      type: node.type,
+      parentId: node.parentId,
+      values: kept,
+      childIds: [...node.childIds],
+      ...(events ? { chains: events } : {}),
+    },
+    valuesNotRead,
+    chainsNotRead: chainsLeft(node.chains, events),
+  }
+}
+
+// Where a node stood in its parent's children, for the leftover to put it back.
+function placesOf(nodes: Readonly<Record<string, unknown>>, source: Readonly<Record<string, unknown>>) {
+  const places: Record<string, number> = {}
+  for (const [id, node] of Object.entries(nodes)) {
+    const parentId = isUnread<BlockNode>(node) && typeof node.parentId === 'string' ? node.parentId : null
+    const parent = parentId === null ? undefined : source[parentId]
+    const at = isUnread<BlockNode>(parent) && Array.isArray(parent.childIds) ? parent.childIds.indexOf(id) : -1
+    if (at >= 0) places[id] = at
+  }
+  return places
+}
+
 export function checkTreeState(raw: { tree?: unknown; selectedId?: unknown }): TreeRead | null {
   if (!isUnread<MaskTree>(raw.tree)) return null
   const source: Readonly<Record<string, unknown>> = raw.tree
@@ -90,35 +136,18 @@ export function checkTreeState(raw: { tree?: unknown; selectedId?: unknown }): T
       }
       continue
     }
-    const kept =
-      id === ROOT_ID
-        ? (Object.fromEntries(
-            Object.entries(node.values).filter(([key, value]) => ROOT_KEYS.includes(key) && typeof value === 'string'),
-          ) as Record<string, PropertyValue>)
-        : valuesClean(node.type, node.values)
-    const valuesNotRead = valuesLeft(node.values, kept, id === ROOT_ID ? null : (def?.properties ?? null))
-    if (valuesNotRead) values[id] = valuesNotRead
-    const events = chainsClean(
-      node.chains,
-      (capability(def, 'events')?.list ?? []).map((event) => event.key),
-    )
-    const chainsNotRead = chainsLeft(node.chains, events)
-    if (chainsNotRead) {
-      chains[id] = chainsNotRead
-      for (const event of Object.keys(chainsNotRead)) missed.push({ kind: 'chain', id, type: node.type, event })
+    const got = readNode(id, node, def)
+    if (got.valuesNotRead) values[id] = got.valuesNotRead
+    if (got.chainsNotRead) {
+      chains[id] = got.chainsNotRead
+      for (const event of Object.keys(got.chainsNotRead)) missed.push({ kind: 'chain', id, type: node.type, event })
     }
-    read[id] = {
-      id,
-      type: node.type,
-      parentId: node.parentId,
-      values: kept,
-      childIds: [...node.childIds],
-      ...(events ? { chains: events } : {}),
-    }
+    read[id] = got.node
   }
   if (!read[ROOT_ID]) return null
   const tree = treeFromRoot(read)
 
+  // Nodes the root does not reach: kept aside, and named by why.
   const outside = Object.values(read).filter((node) => !tree[node.id])
   for (const node of outside) {
     nodes[node.id] = source[node.id]
@@ -134,19 +163,11 @@ export function checkTreeState(raw: { tree?: unknown; selectedId?: unknown }): T
     missed.push(refused ? { kind: 'place', id, type: node.type, parentType: parent.type } : { kind: 'lost', id })
   }
 
-  const places: Record<string, number> = {}
-  for (const [id, node] of Object.entries(nodes)) {
-    const parentId = isUnread<BlockNode>(node) && typeof node.parentId === 'string' ? node.parentId : null
-    const parent = parentId === null ? undefined : source[parentId]
-    const at = isUnread<BlockNode>(parent) && Array.isArray(parent.childIds) ? parent.childIds.indexOf(id) : -1
-    if (at >= 0) places[id] = at
-  }
-
   return {
     tree,
     selectedId:
       typeof raw.selectedId === 'string' && raw.selectedId !== ROOT_ID && tree[raw.selectedId] ? raw.selectedId : null,
-    leftover: { nodes, places, values, chains },
+    leftover: { nodes, places: placesOf(nodes, source), values, chains },
     missed: missed.filter((m) => m.kind !== 'chain' || !Object.hasOwn(nodes, m.id)),
   }
 }
