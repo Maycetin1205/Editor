@@ -50,7 +50,14 @@ export function BlockPalette() {
             marked={def.type === markedType}
             onAdd={() => {
               const parentId = insertParentFor(def.type)
-              ed.addBlock(def.type, parentId, undefined, capacityOf(ed.tree, parentId))
+              if (ed.addBlock(def.type, parentId, undefined, capacityOf(ed.tree, parentId))) return
+              // The chosen area is full: the page takes the block, or says why not.
+              const onPage = parentId !== undefined && parentId !== ed.rootId && parentId !== ROOT_ID
+              if (onPage && ed.addBlock(def.type, undefined, undefined, capacityOf(ed.tree, undefined))) return
+              ed.view.showNotice({
+                title: 'Kein Platz',
+                lead: `„${def.name}“ passt nicht mehr ${onPage ? 'in den gewählten Bereich und nicht ' : ''}auf die Seite. Platz schaffen oder einen anderen Bereich wählen.`,
+              })
             }}
           />
         </Fragment>
