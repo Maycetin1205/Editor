@@ -6,7 +6,10 @@ import { PageBar } from '../canvas/PageBar'
 import { exportCurrentMask, exportTargetFolder } from '../commands/exportMask'
 import { leftoverLines } from '../state/leftoverLines'
 import { saveOrAsk } from '../state/maskFile'
+import { useEditorInstance } from '../state/EditorContext'
+import type { EditorStore } from '../state/EditorStore'
 import { useEditor } from '../state/useEditor'
+import { useEditorSelect } from '../state/useEditorSelect'
 import { useView } from '../state/useView'
 import { Button, PRESSED } from '@/editor/widgets/Button'
 import { cn } from '@/editor/widgets/cn'
@@ -21,12 +24,18 @@ const TIME = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digi
 const LABEL = 'max-lg:sr-only'
 const NARROW = 'max-lg:px-[9px]'
 
+// The bar reads four values of the store; it does not redraw for the rest.
+const selectTarget = (editor: EditorStore): string => exportTargetFolder(editor)
+
 export function Toolbar() {
-  const ed = useEditor()
+  const ed = useEditorInstance()
+  const canUndo = useEditorSelect((e) => e.canUndo)
+  const canRedo = useEditorSelect((e) => e.canRedo)
+  const blockCount = useEditorSelect((e) => e.blockCount)
+  const target = useEditorSelect(selectTarget)
   const view = useView()
   const dataOpen = view.dataWindow
   const outlines = view.outlines
-  const target = exportTargetFolder(ed)
 
   return (
     <header className="flex h-[44px] shrink-0 items-center border-b border-line bg-ground">
@@ -44,7 +53,7 @@ export function Toolbar() {
           aria-label="Rückgängig (Strg+Z)"
           title="Rückgängig (Strg+Z)"
           onClick={() => ed.undo()}
-          disabled={!ed.canUndo}
+          disabled={!canUndo}
         >
           <Undo2 size={15} />
         </Button>
@@ -54,7 +63,7 @@ export function Toolbar() {
           aria-label="Wiederholen (Strg+Umschalt+Z)"
           title="Wiederholen (Strg+Umschalt+Z)"
           onClick={() => ed.redo()}
-          disabled={!ed.canRedo}
+          disabled={!canRedo}
         >
           <Redo2 size={15} />
         </Button>
@@ -84,7 +93,7 @@ export function Toolbar() {
           kind="primary"
           className="ml-[4px]"
           onClick={() => void exportCurrentMask(ed)}
-          disabled={ed.blockCount === 0}
+          disabled={blockCount === 0}
           title={target === '' ? 'Lädt die Maske herunter' : `Schreibt die Maske in den Ordner „${target}“`}
         >
           <DoneLabel
