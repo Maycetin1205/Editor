@@ -49,10 +49,6 @@ export class ViewChoices {
     return this._searchText
   }
 
-  get searchesActive(): boolean {
-    return this._searchText.trim() !== ''
-  }
-
   private get remembers(): boolean {
     return !this.el.preview
   }

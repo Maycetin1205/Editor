@@ -87,8 +87,22 @@ export class ColumnsChoiceState {
     this.host = host
   }
 
-  get open(): { left: number; top: number } | null {
-    return this._open
+  placement(columns: readonly Column[]): ColumnsChoicePlacement | null {
+    if (this._open === null) return null
+    return {
+      selectable: columns.filter((column) => column.hidden !== true),
+      away: this.away(),
+      left: this._open.left,
+      top: this._open.top,
+    }
+  }
+
+  act(): ColumnsChoiceAct {
+    return {
+      toggle: (key) => this.toggle(key),
+      showAll: () => this.showAll(),
+      close: () => this.close(),
+    }
   }
 
   away(): ReadonlySet<string> {

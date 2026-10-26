@@ -1,20 +1,11 @@
 import { html, nothing, type TemplateResult } from 'lit'
+import type { TableRenderModel } from './tableModel'
 
-interface FootPlacement {
-  showsRows: boolean
-
-  visible: number
-  total: number
-  searchesActive: boolean
-  page: number
-  pageCount: number
-
-  totals: readonly { title: string; text: string }[]
-
-  paging: boolean
-
-  empty: boolean
-}
+// The foot reads the counts, the page and the sums straight from the model.
+type FootPlacement = Pick<
+  TableRenderModel,
+  'showsRows' | 'total' | 'records' | 'searchesActive' | 'page' | 'pageCount' | 'totals' | 'paging' | 'empty'
+>
 
 interface FootAct {
   page: (to: number) => void
@@ -58,8 +49,8 @@ export function tableFoot(placement: FootPlacement, act: FootAct): TemplateResul
   return html`<div class="foot">
     <div class="page-info">${recordText({
       showsRows: placement.showsRows,
-      visible: placement.visible,
-      total: placement.total,
+      visible: placement.total,
+      total: placement.records,
       searchesActive: placement.searchesActive,
     })}</div>
     ${

@@ -37,7 +37,7 @@ interface ViewQuestion {
   paging: boolean
 }
 
-interface TableRenderModel {
+export interface TableRenderModel {
   cols: ColumnsGrid
 
   tick: number
@@ -46,6 +46,9 @@ interface TableRenderModel {
   empty: boolean
 
   total: number
+  records: number
+  searchesActive: boolean
+  paging: boolean
   pageCount: number
   page: number
 
@@ -114,6 +117,9 @@ export function tableRenderModel(question: ViewQuestion): TableRenderModel {
     showsRows,
     empty,
     total: allVisible.length,
+    records: question.dataRows.length,
+    searchesActive: question.searchText.trim() !== '',
+    paging: question.paging,
     pageCount: pages,
     page,
     rows,
