@@ -8,13 +8,13 @@ const FORMER_LOOKUP_KEY_PART = '/nachschlagen/'
 const FORMER_FIELD_KEY_PREFIX = 'feld:'
 
 interface OperatorState<T> {
-  read: (el: HTMLElement, key?: string) => T | null
+  read: (el: HTMLElement) => T | null
 
   remember: (el: HTMLElement, state: T | null) => void
 }
 
-function idFor(el: HTMLElement, key?: string): string {
-  const id = key ?? el.getAttribute(BLOCK_ID_ATTR)
+function idFor(el: HTMLElement): string {
+  const id = el.getAttribute(BLOCK_ID_ATTR)
   if (id !== null && id !== '') return id
   const same = Array.from(el.ownerDocument?.querySelectorAll(el.tagName) ?? [])
   return `#${Math.max(0, same.indexOf(el))}`
@@ -55,8 +55,8 @@ export function makeOperatorState<T>(
     return state
   }
 
-  const read = (el: HTMLElement, key?: string): T | null => {
-    const id = idFor(el, key)
+  const read = (el: HTMLElement): T | null => {
+    const id = idFor(el)
     const storeKey = keyFor(prefix, id)
     if (inMemory.has(storeKey)) return inMemory.get(storeKey) ?? null
     try {
