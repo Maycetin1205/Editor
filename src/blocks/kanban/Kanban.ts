@@ -166,6 +166,7 @@ export class Kanban extends BlockElement {
     this.unlistenSearch?.()
     this.unlistenSearch = null
     clearTimeout(this.messageTimer)
+    this.message = ''
   }
 }
 

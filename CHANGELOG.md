@@ -15,6 +15,7 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - Ziehen hebt die Auswahl nicht mehr auf.
 - Kanban: ein Titel mit „$&“ landet als Text in der Meldung, nicht als Muster.
 - Erfassung, Verteilen: bei absteigender Sortierung stehen leere Werte hinten, nicht vorn.
+- Kanban: die Meldung einer Spalte bleibt nicht mehr stehen, wenn das Brett während der Meldung aus- und wieder eingehängt wird (etwa beim Schließen und Öffnen eines Popups).
 
 ### Für Entwickler
 
