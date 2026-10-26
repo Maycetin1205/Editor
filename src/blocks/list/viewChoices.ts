@@ -1,13 +1,5 @@
-import {
-  observeBody,
-  measuredMetrics,
-  headHeight,
-  WITHOUT_BODY,
-  bodyHeight,
-  ROWS_HEIGHT,
-  type MeasureTarget,
-  type RowMetrics,
-} from './pageSize'
+import { ROWS_HEIGHT, type RowMetrics } from './pageSize'
+import { observeBody, measuredMetrics, headHeight, WITHOUT_BODY, bodyHeight, type MeasureTarget } from './bodyMeasure'
 import { focusedRowKey, restoreRowsFocus } from './rowActivation'
 import { rememberedSorting } from './sorting'
 
