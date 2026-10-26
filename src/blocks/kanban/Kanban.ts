@@ -22,10 +22,11 @@ const MESSAGE_SHOWN_MS = 2_400
 
 // The words of a column's notice with the card and its place woven in.
 function noticeText(words: string, card: CardData, column: KanbanColumn, place: KanbanPlace | undefined): string {
+  // Replacer functions: a heading with "$&" in it must land as typed.
   return words
-    .replace(/\{titel\}/gi, card.values.heading ?? '')
-    .replace(/\{platz\}/gi, place?.name ?? column.heading)
-    .replace(/\{spalte\}/gi, column.heading)
+    .replace(/\{titel\}/gi, () => card.values.heading ?? '')
+    .replace(/\{platz\}/gi, () => place?.name ?? column.heading)
+    .replace(/\{spalte\}/gi, () => column.heading)
     .replace(/\s{2,}/g, ' ')
     .trim()
 }
