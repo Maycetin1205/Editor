@@ -7,16 +7,15 @@ import { cssZoomOf } from '../../blocks/base/cssZoom'
 import type { HeadsPlaced } from '../../blocks/base/headsReport'
 import type { DialogFrame } from '../../blocks/dialog/DialogFrame'
 import type { Table } from '../../blocks/table/Table'
-import { newColumn, COLUMNS_MAX, DEFAULT_TITLE, type Column } from '../../blocks/parts/column'
-import { fieldOf, sourcesKey } from '../../core/data/dataSources'
+import { newColumn, COLUMNS_MAX } from '../../blocks/parts/column'
+import type { EditorStore } from '../state/EditorStore'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
 import { useView } from '../state/useView'
 import type { OpenLookup } from '../state/editorStore/viewState'
 import { windowFrameInEditor, windowStateOf, type WindowState } from './lookupWindowState'
-import { widthFromLength } from './fieldWidth'
-import { FieldPicker, type PickerGroup } from './FieldPicker'
-import { axesOf, dragSize } from './dragSize'
+import { LookupColumnPicker } from './LookupColumnPicker'
+import { axesOf, sizeDrag } from './sizeDrag'
 import { Grip } from './Grip'
 import { GRIPS } from './useBlockResize'
 import { useHeadsPlaced } from './useHeadsPlaced'
@@ -28,6 +27,13 @@ const PLUS_WIDTH = 26
 interface Head {
   slot: number
 
+  left: number
+  top: number
+  width: number
+  height: number
+}
+
+interface Box {
   left: number
   top: number
   width: number
@@ -76,12 +82,77 @@ export function LookupColumns() {
   return <Heads key={`${open.blockId}:${open.slot}`} open={open} />
 }
 
+function HeadSpot({ head, chosen, onChoose }: { head: Head; chosen: boolean; onChoose: () => void }) {
+  const left = head.left + HANDLE_EDGE
+  const right = head.left + head.width - HANDLE_EDGE
+  return (
+    <div
+      className={cn(
+        'pointer-events-auto absolute cursor-pointer',
+        'hover:bg-selection/[.08]',
+        chosen && 'bg-selection/[.08]',
+      )}
+      style={{ left: left, top: head.top, width: Math.max(0, right - left), height: head.height }}
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation()
+        onChoose()
+      }}
+    />
+  )
+}
+
+// The grips around the lookup window; a double click lets a side size itself.
+function WindowGrips({ ed, state, box }: { ed: EditorStore; state: WindowState; box: Box }) {
+  return (
+    <div className="absolute" style={box}>
+      {GRIPS.map((edge) => (
+        <Grip
+          key={edge}
+          edge={edge}
+          onDrag={(e) => sizeDrag(ed, e, edge, box, (axis, value) => state.setMetrics(axis, value))}
+          onReset={() =>
+            ed.transaction(() => {
+              for (const axis of axesOf(edge)) state.setMetrics(axis, undefined)
+            })
+          }
+        />
+      ))}
+    </div>
+  )
+}
+
+function AddColumn({ right, top, onAdd }: { right: number; top: number; onAdd: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-label="Spalte anfügen"
+      title="Spalte anfügen"
+      className={cn(
+        'pointer-events-auto absolute grid cursor-pointer place-items-center rounded border border-line bg-panel',
+        'text-selection hover:bg-selection/[.08]',
+      )}
+      style={{ left: right - PLUS_WIDTH, top: top - 29, width: PLUS_WIDTH, height: 24 }}
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation()
+        onAdd()
+      }}
+    >
+      <Plus size={13} />
+    </button>
+  )
+}
+
+// What the editor lays over the open lookup window: a spot per column head
+// to bind it, grips to size the window and a button to add a column.
 function Heads({ open }: { open: OpenLookup }) {
   const ed = useEditor()
   const library = useDataSources().list
   const [chosen, setChosen] = useState<number | null>(null)
   const layerRef = useRef<HTMLDivElement | null>(null)
 
+  // The window can close itself; the layer goes with it.
   useEffect(() => {
     const check = (): void => {
       if (windowFrameInEditor() === null) ed.view.setLookupWindow(null)
@@ -107,37 +178,13 @@ function Heads({ open }: { open: OpenLookup }) {
 
   if (state === null) return null
 
-  const source = library.find((s) => s.id === state.sourceId)
-  const groups: PickerGroup[] =
-    source === undefined
-      ? []
-      : [
-          {
-            sourceId: '',
-            name: source.name,
-            badge: sourcesKey(source),
-            fields: source.fields,
-          },
-        ]
-
-  const change = (slot: number, part: Partial<Column>): void => {
-    state.setColumns(state.columns.map((s, i) => (i === slot ? { ...s, ...part } : s)))
-  }
-
   const append = (): void => {
     const slot = state.columns.length
     state.setColumns([...state.columns, newColumn(slot)])
     setChosen(slot)
   }
-
   const headOfPickers = chosen === null ? undefined : heads.find((k) => k.slot === chosen)
-  const columnOfPickers = chosen === null ? undefined : state.columns[chosen]
-  const defaultTitle = DEFAULT_TITLE.replace('{n}', String((chosen ?? 0) + 1))
-
-  const plus =
-    state.columns.length < COLUMNS_MAX && heads.length > 0
-      ? { right: Math.max(...heads.map((h) => h.left + h.width)), top: Math.min(...heads.map((h) => h.top)) }
-      : null
+  const plus = state.columns.length < COLUMNS_MAX && heads.length > 0
   const rect = frame?.windowBox() ?? null
   const box = rect === null ? null : { left: rect.left, top: rect.top, width: rect.width, height: rect.height }
 
@@ -149,105 +196,32 @@ function Heads({ open }: { open: OpenLookup }) {
         className="pointer-events-none fixed inset-0"
         style={{ zIndex: LEVEL_OVER_MASK_WINDOW }}
       >
-        {heads.map((head) => {
-          const left = head.left + HANDLE_EDGE
-          const right = head.left + head.width - HANDLE_EDGE
-          return (
-            <div
-              key={head.slot}
-              className={cn(
-                'pointer-events-auto absolute cursor-pointer',
-                'hover:bg-selection/[.08]',
-                chosen === head.slot && 'bg-selection/[.08]',
-              )}
-              style={{
-                left: left,
-                top: head.top,
-                width: Math.max(0, right - left),
-                height: head.height,
-              }}
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation()
-                setChosen((v) => (v === head.slot ? null : head.slot))
-              }}
-            />
-          )
-        })}
-
-        {box !== null && (
-          <div className="absolute" style={box}>
-            {GRIPS.map((edge) => (
-              <Grip
-                key={edge}
-                edge={edge}
-                onStart={(e) => dragSize(ed, e, edge, box, (axis, value) => state.setMetrics(axis, value))}
-                onReset={() =>
-                  ed.transaction(() => {
-                    for (const axis of axesOf(edge)) state.setMetrics(axis, undefined)
-                  })
-                }
-              />
-            ))}
-          </div>
-        )}
-
-        {plus !== null && (
-          <button
-            type="button"
-            aria-label="Spalte anfügen"
-            title="Spalte anfügen"
-            className={cn(
-              'pointer-events-auto absolute grid cursor-pointer place-items-center rounded border border-line bg-panel',
-              'text-selection hover:bg-selection/[.08]',
-            )}
-            style={{
-              left: plus.right - PLUS_WIDTH,
-              top: plus.top - 29,
-              width: PLUS_WIDTH,
-              height: 24,
-            }}
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => {
-              e.stopPropagation()
-              append()
-            }}
-          >
-            <Plus size={13} />
-          </button>
+        {heads.map((head) => (
+          <HeadSpot
+            key={head.slot}
+            head={head}
+            chosen={chosen === head.slot}
+            onChoose={() => setChosen((v) => (v === head.slot ? null : head.slot))}
+          />
+        ))}
+        {box !== null && <WindowGrips ed={ed} state={state} box={box} />}
+        {plus && (
+          <AddColumn
+            right={Math.max(...heads.map((h) => h.left + h.width))}
+            top={Math.min(...heads.map((h) => h.top))}
+            onAdd={append}
+          />
         )}
       </div>
 
-      {headOfPickers !== undefined && columnOfPickers !== undefined && chosen !== null && (
-        <FieldPicker
+      {headOfPickers !== undefined && chosen !== null && (
+        <LookupColumnPicker
           key={chosen}
-          level={LEVEL_OVER_MASK_WINDOW}
-          spotLabel={columnOfPickers.title === '' ? defaultTitle : columnOfPickers.title}
-          groups={groups}
-          current={columnOfPickers.field}
-          anchor={layerRef}
-          top={headOfPickers.top + headOfPickers.height + 4}
-          left={headOfPickers.left}
-
-          onPick={(value) => {
-            const field = fieldOf(source, value)
-            const plainName = field?.name ?? ''
-            const width = widthFromLength(field?.length)
-            change(chosen, {
-              field: value,
-              title: value === '' ? defaultTitle : plainName !== '' ? plainName : value,
-              ...(width === undefined ? {} : { width }),
-            })
-          }}
-          removeLabel="Spalte entfernen"
-          onRemove={
-            !state.provided && state.columns.length <= 1
-              ? undefined
-              : () => {
-                  state.setColumns(state.columns.filter((_, i) => i !== chosen))
-                  setChosen(null)
-                }
-          }
+          state={state}
+          source={library.find((s) => s.id === state.sourceId)}
+          slot={chosen}
+          head={headOfPickers}
+          layer={layerRef}
           onClose={() => setChosen(null)}
         />
       )}

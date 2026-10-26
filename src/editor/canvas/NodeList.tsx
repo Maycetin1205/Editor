@@ -5,7 +5,8 @@ import { areaColumnsStyle } from '../../core/block/gridArea'
 import { useEditor } from '../state/useEditor'
 import { BlockHost } from './BlockHost'
 import { useDnd } from './dndState'
-import { dragPosition } from './dragPosition'
+import { positionDrag } from './positionDrag'
+import { usePointerDrag } from './pointerDrag'
 
 function GridGhost({ slot, free }: { slot: GridSlot; free: boolean }) {
   const tone = free ? '--wb-selection' : '--wb-error'
@@ -56,6 +57,7 @@ function underChosen(ed: ReturnType<typeof useEditor>, parentId: string): boolea
 function CanvasNode({ node, parentId }: { node: BlockNode; parentId: string }) {
   const ed = useEditor()
   const dnd = useDnd()
+  const drag = usePointerDrag()
   const isContainer = blockType(node.type)?.takesChildren ?? false
   const carried = dnd.dragId === node.id ? dnd.dragOffset : null
 
@@ -63,7 +65,7 @@ function CanvasNode({ node, parentId }: { node: BlockNode; parentId: string }) {
     <div
       onPointerDown={(e) => {
         if (underChosen(ed, parentId)) return
-        dragPosition(ed, dnd, e, node, parentId)
+        drag(e, positionDrag(ed, dnd, e, node, parentId))
       }}
       style={{
         ...gridSlotStyle(gridSlotRead(node.values)),
