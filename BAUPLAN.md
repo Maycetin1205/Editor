@@ -28,10 +28,10 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 | Erfassung: Fassade `ledger.ts` (54 Durchreich-Methoden), `captureRow.ts` (555) | Fassade weg, Tippzeile in zehn Teile unter `capture/row`, Aufteilung unter `capture/split`, Tasten über `keys.ts`; größte Datei 265 Zeilen |
 | Lange React-Komponenten (acht Dateien) | keine Funktion über 80 Zeilen, Teile mit eigenen Props und Hooks |
 | Zwei Kopien von „Schließen bei Druck daneben“ | `widgets/closeBeside.ts` |
-
-## In Arbeit
-
-- Editor-Fläche: ein Zieh-Ablauf mit Escape und Aufräumen statt vier; `SplitWindow.tsx` (378), `ColumnControls.tsx` (363), `Places.tsx` (357), `Grid.tsx` (350) teilen; React spricht nicht mehr über ein DOM-Ereignis (`ff-list-bind`) mit React.
+| Vier selbstgebaute Zieh-Abläufe auf der Fläche, nur einer kannte Escape, keiner räumte beim Unmount auf | ein Helfer `canvas/pointerDrag.ts` (Schwelle, Zeigererfassung, Escape, pointercancel, blur, Unmount); Verschieben, Rastergröße, Fenstergröße und Spaltenköpfe laufen darüber; Ablegen aus der Palette bleibt HTML5 |
+| React sprach über das DOM-Ereignis `ff-list-bind` mit React | ein Rückruf `onPick` |
+| `SplitWindow.tsx` (378), `ColumnControls.tsx` (363), `Places.tsx` (357), `Grid.tsx` (350), `SourceSettings.tsx` (316) | je in Rahmen, Liste, Zeile, Einstellungen geteilt; größte Datei 246 Zeilen |
+| Hörer und Stilobjekte, die bei jedem Zeichnen neu entstanden | behoben in ColumnPlus, BlockHost, Canvas, useView |
 
 ## Offen
 
@@ -45,7 +45,10 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
    - Kanban: die Meldung einer Karte bleibt nach Aus- und Einhängen stehen (`Kanban.ts`, `disconnectedCallback`); die Ankunftsmeldung erscheint, bevor das Schreiben bestätigt ist (`board.ts`); die Jetzt-Linie der Uhr steht hinter Karten ohne Uhrzeit, wenn alle Zeiten vorbei sind (`clock.ts`).
    - Tabelle: `viewChoices.ts` `reset()` löscht beim Wechsel der Zeilenquelle die gemerkte Sortierung des Bedieners; in `tableRows.ts` sind die Zweige für `rawIndex === null` womöglich tot (die Erfassung ist der einzige Lieferant, prüfen).
    - Erfassung: nach dem Erfassen einer korrigierten Zeile folgt die Auswahl der letzten statt der korrigierten Zeile (`Capture.ts`, `followTyping`); leere Tippzeile plus Enter während einer Korrektur löscht die Zeile ohne Rückfrage (`ledger/capturing.ts`); Einfügen ohne Fokus nimmt die erste Erfassung im Dokument, auch in einem geschlossenen Popup (`Capture.ts`); Doppelklick auf eine erfasste Zeile tut nichts, solange eine Quelle lädt, ohne Rückmeldung (`ledger/capturing.ts`).
+   - Fläche: nach einem Griff der Popup-Seite läuft der Klick womöglich bis zum Canvas und hebt die Auswahl auf (`Grip.tsx`, `Canvas.tsx`); die Zweige mit `dnd.dragId !== null` bei dragover/drop in `dndState.ts` und `gridDnd.ts` sind wohl tot; ist während eines Ziehens ein Popover offen, schließt das erste Escape nur das Popover (`useCloseOnEscape.ts` hört zuerst).
    - Behoben: Platzhalter `$&` in Kanban-Meldungen; leere Werte bei absteigender Sortierung der Aufteilung.
+8. **Escape beim Größenändern** behält die erreichte Größe statt zurückzusetzen. Ein echtes Zurücksetzen braucht ein `GestureBracket.cancel()` in `editor/state/history.ts`, das auf den Stand beim Öffnen zurückrollt, ohne einen Rückgängig-Schritt zu hinterlassen.
+9. **Beim Ziehen eines Bausteins zeichnet die ganze Fläche** bei jeder Zeigerbewegung neu, weil der Zieh-Zustand im Canvas-Kontext liegt. Erst messen, dann mit Selektoren (`useEditorSelect`) und gemerkten Knoten beheben.
 
 ## Danach
 
