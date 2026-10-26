@@ -32,6 +32,7 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 | React sprach über das DOM-Ereignis `ff-list-bind` mit React | ein Rückruf `onPick` |
 | `SplitWindow.tsx` (378), `ColumnControls.tsx` (363), `Places.tsx` (357), `Grid.tsx` (350), `SourceSettings.tsx` (316) | je in Rahmen, Liste, Zeile, Einstellungen geteilt; größte Datei 246 Zeilen |
 | Hörer und Stilobjekte, die bei jedem Zeichnen neu entstanden | behoben in ColumnPlus, BlockHost, Canvas, useView |
+| Verdacht auf Fehler (12 Fälle aus dem Umbau) | je ein Commit: Kanban (Meldung nach Aushängen, Ankunftsmeldung erst nach bestätigtem Schreiben, Jetzt-Linie vor Karten ohne Uhrzeit); Tabelle (Sortierung bleibt beim Wechsel der Zeilenquelle, tote `rawIndex === null`-Zweige raus); Erfassung (Auswahl folgt der korrigierten Zeile, geleerte Korrektur fragt vor dem Löschen, Einfügen nur an eine sichtbare Erfassung, Doppelklick beim Laden wird nachgeholt); Fläche (Fenstergriff hebt die Auswahl nicht auf, tote `dragId`-Zweige raus, Escape beim Ziehen geht vor offenen Fenstern) |
 
 ## Offen
 
@@ -41,12 +42,7 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 4. **Erfassung und Kanban**: beide bleiben (Belegpositionen sind Kern, das Brett ist allgemein brauchbar). Beide brauchen nach dem Umbau eine zweite Lesung auf Verständlichkeit.
 5. **Hebungen alter Masken**: Stufe 20 bis 38 sind nur gegen synthetische Dokumente geprüft; es gibt keine echte alte Maske im Projekt. Eine echte Maske jeder noch im Umlauf befindlichen Stufe gehört als Beispiel ins Projekt, oder die Hebungen unter 39 werden gestrichen, wenn es solche Masken nicht mehr gibt.
 6. **SoftEngine-Anschluss**: gegen eine Installation geprüft (laut Betreiber); die offenen Fragen in `docs/SOFTENGINE-SCHNITTSTELLE.md` bleiben dokumentiert.
-7. **Verdacht auf Fehler**, beim Umbau gefunden und bewusst nicht ohne Rücksprache behoben, weil sie Verhalten ändern:
-   - Kanban: die Meldung einer Karte bleibt nach Aus- und Einhängen stehen (`Kanban.ts`, `disconnectedCallback`); die Ankunftsmeldung erscheint, bevor das Schreiben bestätigt ist (`board.ts`); die Jetzt-Linie der Uhr steht hinter Karten ohne Uhrzeit, wenn alle Zeiten vorbei sind (`clock.ts`).
-   - Tabelle: `viewChoices.ts` `reset()` löscht beim Wechsel der Zeilenquelle die gemerkte Sortierung des Bedieners; in `tableRows.ts` sind die Zweige für `rawIndex === null` womöglich tot (die Erfassung ist der einzige Lieferant, prüfen).
-   - Erfassung: nach dem Erfassen einer korrigierten Zeile folgt die Auswahl der letzten statt der korrigierten Zeile (`Capture.ts`, `followTyping`); leere Tippzeile plus Enter während einer Korrektur löscht die Zeile ohne Rückfrage (`ledger/capturing.ts`); Einfügen ohne Fokus nimmt die erste Erfassung im Dokument, auch in einem geschlossenen Popup (`Capture.ts`); Doppelklick auf eine erfasste Zeile tut nichts, solange eine Quelle lädt, ohne Rückmeldung (`ledger/capturing.ts`).
-   - Fläche: nach einem Griff der Popup-Seite läuft der Klick womöglich bis zum Canvas und hebt die Auswahl auf (`Grip.tsx`, `Canvas.tsx`); die Zweige mit `dnd.dragId !== null` bei dragover/drop in `dndState.ts` und `gridDnd.ts` sind wohl tot; ist während eines Ziehens ein Popover offen, schließt das erste Escape nur das Popover (`useCloseOnEscape.ts` hört zuerst).
-   - Behoben: Platzhalter `$&` in Kanban-Meldungen; leere Werte bei absteigender Sortierung der Aufteilung.
+7. **Verdacht auf Fehler**: erledigt, siehe oben.
 8. **Escape beim Größenändern** behält die erreichte Größe statt zurückzusetzen. Ein echtes Zurücksetzen braucht ein `GestureBracket.cancel()` in `editor/state/history.ts`, das auf den Stand beim Öffnen zurückrollt, ohne einen Rückgängig-Schritt zu hinterlassen.
 9. **Beim Ziehen eines Bausteins zeichnet die ganze Fläche** bei jeder Zeigerbewegung neu, weil der Zieh-Zustand im Canvas-Kontext liegt. Erst messen, dann mit Selektoren (`useEditorSelect`) und gemerkten Knoten beheben.
 
