@@ -27,7 +27,7 @@ Der Platzhalter `<!--SOFTENGINE-VAR!EditorPfad-->` wird von SoftEngine ersetzt. 
 
 ## Was die Maske von SoftEngine aufruft
 
-Alle Aufrufe sind in `src/softengine/bridge.ts`, `commands.ts`, `editing.ts` und `relations/hostQueue.ts`. Jeder Aufruf ist mit `typeof ... === 'function'` abgesichert: fehlt eine Funktion, läuft die Maske ohne sie weiter.
+Alle Aufrufe sind in `src/softengine/bridge.ts`, `commands.ts`, `editing.ts`, `relations/getJob.ts` und `relations/putJob.ts`; die Reihenfolge der Aufträge regelt `relations/hostQueue.ts`. Jeder Aufruf ist mit `typeof ... === 'function'` abgesichert: fehlt eine Funktion, läuft die Maske ohne sie weiter.
 
 | Funktion | Wann | Wozu |
 |---|---|---|
@@ -65,7 +65,7 @@ Die Maske sucht Zeilen einer Quelle in dieser Reihenfolge (`src/softengine/data.
 
 Der offene Satz einer Quelle mit Lieferweg `Var` wird aus `Var.WINDOW_VARIABLE` (Schlüssel `<TABELLE>_<feld>`) und `Var.<TABELLE>` zusammengesetzt.
 
-Feldwerte: direkt unter dem Feldcode (`12_8`), unter einem Schlüssel mit Präfix oder Suffix (`KD_12_8`, `12_8_NAME`), als `{WERT: ...}` oder aus dem Rohsatz (`SATZ`, `SATZNEU`, `RAW`) an Position/Länge. HTML-Entities werden dekodiert.
+Feldwerte (`src/softengine/fields.ts`): direkt unter dem Feldcode (`12_8`), unter einem Schlüssel mit Präfix oder Suffix (`KD_12_8`, `12_8_NAME`), als `{WERT: ...}` oder aus dem Rohsatz (`SATZ`, `SATZNEU`, `RAW`) an Position/Länge. HTML-Entities werden dekodiert.
 
 ## Nachrichten
 
