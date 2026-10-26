@@ -59,6 +59,6 @@ defineBlock(Table, {
   name: 'Tabelle',
   category: 'display',
   properties: tableProperties,
-  capabilities: listCapabilities(COLUMNS_BINDING),
+  capabilities: listCapabilities(COLUMNS_BINDING, { kind: 'source', helpers: 'apart' }),
   grid: LIST_GRID,
 })

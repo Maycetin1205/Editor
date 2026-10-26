@@ -8,6 +8,7 @@ import { orderedSuggestions } from './suggestionList'
 import { inputSpotTpl } from './inputSpot'
 import { rowFits } from '../parts/cellSearch'
 import { maskState } from '../../runtime/maskState'
+import { focusNextField } from '../../runtime/nextField'
 import { icon } from '../parts/icons'
 
 function findOnlyHit(entries: readonly Entry[], fieldEmpty: boolean): Entry | null {
@@ -194,13 +195,17 @@ export class LookupControl implements ReactiveController {
       jumps: false,
     })
     if (action === 'nothing') {
-      if (e.key === 'Enter') e.preventDefault()
+      if (e.key !== 'Enter') return
+      e.preventDefault()
+      if (this.inField !== '') focusNextField(this.host.block)
       return
     }
 
     if (e.key !== 'Tab') e.preventDefault()
-    if (action === 'adopt') this.adoptSuggestion(this.list.mark)
-    else if (action === 'window') this.openWindow(this.typed ?? '')
+    if (action === 'adopt') {
+      this.adoptSuggestion(this.list.mark)
+      if (e.key === 'Enter') focusNextField(this.host.block)
+    } else if (action === 'window') this.openWindow(this.typed ?? '')
     else if (action === 'openList') this.list.openList()
     else if (action === 'clear') {
       this.typed = null

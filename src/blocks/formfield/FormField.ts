@@ -8,6 +8,7 @@ import { actionValue, bindable, type ValueCarrier } from '../../core/block/capab
 import { propertyVisible } from '../../core/block/property'
 import { LOOKUP_COLUMNS_BINDING } from '../lookup/lookup'
 import { dayKey } from '../../runtime/chosenDay'
+import { focusNextField } from '../../runtime/nextField'
 import { setSearchText } from '../../runtime/searchText'
 import { asNumber } from '../../core/data/number'
 import { suggestionStyle } from '../lookup/suggestionList'
@@ -147,7 +148,10 @@ export class FormField extends BlockElement implements ValueCarrier {
   }
 
   private onKey(e: KeyboardEvent): void {
-    if (e.key === 'Enter') this.takeTyped()
+    if (e.key !== 'Enter' || this.preview) return
+    e.preventDefault()
+    this.takeTyped()
+    focusNextField(this)
   }
 
   private onFieldClick(e: MouseEvent): void {
@@ -195,6 +199,7 @@ export class FormField extends BlockElement implements ValueCarrier {
         .value=${live(this.value)}
         @input=${this.onInput}
         @change=${this.onChange}
+        @keydown=${this.onKey}
       >
         <option value="" hidden></option>
         ${foreignValue ? html`<option value=${this.value} hidden selected>${this.value}</option>` : nothing}
@@ -241,6 +246,7 @@ export class FormField extends BlockElement implements ValueCarrier {
           .checked=${live(this.ticked)}
           @input=${(e: Event) => this.tick((e.target as HTMLInputElement).checked)}
           @change=${this.onChange}
+          @keydown=${this.onKey}
         />`)}
         ${
           this.showLabel
