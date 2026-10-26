@@ -72,7 +72,7 @@ function draggedSize(
   return { w: spec.startWidth, h: spec.startHeight }
 }
 
-export function gridTarget(
+function gridTarget(
   e: DragEvent,
   ed: ReturnType<typeof useEditor>,
   dnd: DndState,

@@ -85,5 +85,5 @@ function commitDrop(e: DragEvent, ed: ReturnType<typeof useEditor>, dnd: DndStat
   dnd.reset()
 }
 
-export type { DndState, DropTarget, DragOffset }
+export type { DndState, DropTarget }
 export { commitDrop, DndContext, useDnd, useDndState }
