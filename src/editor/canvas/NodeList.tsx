@@ -1,8 +1,13 @@
+import { memo } from 'react'
 import type { BlockNode } from '../../core/block/tree'
 import { blockType } from '../../core/block/registry'
 import { gridSlotRead, gridSlotStyle, type GridSlot } from '../../core/block/grid'
 import { areaColumnsStyle } from '../../core/block/gridArea'
-import { useEditor } from '../state/useEditor'
+import { sourcesCarrier } from '../../core/block/sourcesInReach'
+import { useEditorInstance } from '../state/EditorContext'
+import type { EditorStore } from '../state/EditorStore'
+import { useEditorSelect } from '../state/useEditorSelect'
+import { sameFields, sameItems } from '../state/useStoreSelect'
 import { BlockHost } from './BlockHost'
 import { useDnd } from './dndState'
 import { positionDrag } from './positionDrag'
@@ -27,11 +32,12 @@ function GridGhost({ slot, free }: { slot: GridSlot; free: boolean }) {
   )
 }
 
-export function NodeList({ parentId }: { parentId: string }) {
-  const ed = useEditor()
+// The blocks of one area. It draws again when its blocks change, not on
+// every change of the mask; each block draws on its own (CanvasNode).
+export const NodeList = memo(function NodeList({ parentId }: { parentId: string }) {
   const dnd = useDnd()
 
-  const nodes = ed.childNodesOf(parentId)
+  const nodes = useEditorSelect((e) => e.childNodesOf(parentId), sameItems)
 
   const ghost = dnd.dropTarget !== null && dnd.dropTarget.parentId === parentId ? dnd.dropTarget : null
 
@@ -43,9 +49,9 @@ export function NodeList({ parentId }: { parentId: string }) {
       {ghost && <GridGhost slot={ghost} free={ghost.free} />}
     </>
   )
-}
+})
 
-function underChosen(ed: ReturnType<typeof useEditor>, parentId: string): boolean {
+function underChosen(ed: EditorStore, parentId: string): boolean {
   let id: string | null = parentId
   while (id !== null && id !== ed.rootId) {
     if (ed.selectedId === id) return true
@@ -54,10 +60,26 @@ function underChosen(ed: ReturnType<typeof useEditor>, parentId: string): boolea
   return false
 }
 
-function CanvasNode({ node, parentId }: { node: BlockNode; parentId: string }) {
-  const ed = useEditor()
+// What a block on the canvas draws from besides itself: whether it is chosen
+// and the block that carries its sources (BlockHost reads that from the
+// tree). The chosen block also draws on every change of the mask: its open
+// bars read the rest of it.
+interface NodeLook {
+  selected: boolean
+  carrier: BlockNode | undefined
+  version: number
+}
+
+function nodeLook(e: EditorStore, id: string): NodeLook {
+  const selected = e.selectedId === id
+  return { selected, carrier: sourcesCarrier(e.tree, id), version: selected ? e.version : 0 }
+}
+
+const CanvasNode = memo(function CanvasNode({ node, parentId }: { node: BlockNode; parentId: string }) {
+  const ed = useEditorInstance()
   const dnd = useDnd()
   const drag = usePointerDrag()
+  const look = useEditorSelect((e) => nodeLook(e, node.id), sameFields)
   const isContainer = blockType(node.type)?.takesChildren ?? false
   const carried = dnd.dragId === node.id ? dnd.dragOffset : null
 
@@ -82,9 +104,9 @@ function CanvasNode({ node, parentId }: { node: BlockNode; parentId: string }) {
           : {}),
       }}
     >
-      <BlockHost block={node} selected={ed.selectedId === node.id} onSelect={() => ed.chooseHit(node.id)} grid>
+      <BlockHost block={node} selected={look.selected} onSelect={() => ed.chooseHit(node.id)} grid>
         {isContainer && <NodeList parentId={node.id} />}
       </BlockHost>
     </div>
   )
-}
+})

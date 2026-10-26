@@ -2,7 +2,8 @@ import type { CSSProperties, ReactNode, RefObject } from 'react'
 import { SE_FRAME_WIDTH } from '../../core/block/frameFit'
 import { gridAreaStyle } from '../../core/block/grid'
 import { freeRowOn } from '../../core/block/gridArea'
-import { useEditor } from '../state/useEditor'
+import { useEditorInstance } from '../state/EditorContext'
+import { useEditorSelect } from '../state/useEditorSelect'
 import { NodeList } from './NodeList'
 import { DndContext, useDnd, useDndState } from './dndState'
 import { pageDrop } from './gridDnd'
@@ -36,9 +37,12 @@ const SHEET_ROOM_STYLE: CSSProperties = {
 }
 
 export function Canvas() {
-  const ed = useEditor()
-  const mainPage = ed.pages.find((p) => p.id === ed.activePageId)?.isMainPage ?? true
-  const { canvas, sheet, ...sheetZoom } = useSheetZoom(mainPage, ed.selectedId)
+  const ed = useEditorInstance()
+  const mainPage = useEditorSelect((e) => e.pages.find((p) => p.id === e.activePageId)?.isMainPage ?? true)
+  const selectedId = useEditorSelect((e) => e.selectedId)
+  const empty = useEditorSelect((e) => e.blockCount === 0)
+  const activePageId = useEditorSelect((e) => e.activePageId)
+  const { canvas, sheet, ...sheetZoom } = useSheetZoom(mainPage, selectedId)
   const dnd = useDndState()
 
   return (
@@ -58,8 +62,8 @@ export function Canvas() {
             <RootArea sheet={sheet} mainPage={mainPage} zoom={sheetZoom.zoom} />
           </SheetRoom>
 
-          {mainPage && ed.blockCount === 0 && dnd.dropTarget === null && <EmptyCanvas />}
-          {!mainPage && <PopupPage popupId={ed.activePageId} />}
+          {mainPage && empty && dnd.dropTarget === null && <EmptyCanvas />}
+          {!mainPage && <PopupPage popupId={activePageId} />}
         </div>
         {mainPage && <ZoomBar {...sheetZoom} />}
       </div>
@@ -78,9 +82,10 @@ function RootArea({
   mainPage: boolean
   zoom: number
 }) {
-  const ed = useEditor()
+  const ed = useEditorInstance()
   const dnd = useDnd()
-  const maskRows = mainPage ? freeRowOn(ed.tree, ed.rootId) : 0
+  const maskRows = useEditorSelect((e) => (mainPage ? freeRowOn(e.tree, e.rootId) : 0))
+  const rootId = useEditorSelect((e) => e.rootId)
   return (
     <div
       ref={sheet}
@@ -93,10 +98,10 @@ function RootArea({
         fontVariantNumeric: 'tabular-nums',
         caretColor: 'var(--se-accent)',
       }}
-      {...pageDrop(ed, dnd, ed.rootId, mainPage)}
+      {...pageDrop(ed, dnd, rootId, mainPage)}
     >
       {maskRows > 0 && <Paper rows={maskRows} zoom={zoom} />}
-      {mainPage && <NodeList parentId={ed.rootId} />}
+      {mainPage && <NodeList parentId={rootId} />}
     </div>
   )
 }

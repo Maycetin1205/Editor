@@ -32,6 +32,7 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 | React sprach über das DOM-Ereignis `ff-list-bind` mit React | ein Rückruf `onPick` |
 | `SplitWindow.tsx` (378), `ColumnControls.tsx` (363), `Places.tsx` (357), `Grid.tsx` (350), `SourceSettings.tsx` (316) | je in Rahmen, Liste, Zeile, Einstellungen geteilt; größte Datei 246 Zeilen |
 | Hörer und Stilobjekte, die bei jedem Zeichnen neu entstanden | behoben in ColumnPlus, BlockHost, Canvas, useView |
+| Feine Abos für die Fläche (`useEditorSelect` mit Vergleich) | Ändern einer Eigenschaft zeichnete alle Bausteine der Fläche neu (12 von 12), jetzt nur den geänderten; je Änderung 54 statt 101 Komponenten |
 | Escape beim Größenändern behielt die erreichte Größe | `GestureBracket.cancel()` rollt über `History.abandon()` auf den Stand beim Öffnen zurück, ohne Rückgängig-Schritt, Wiederholen bleibt; gilt für Baustein, Popup-Seite und Nachschlagefenster |
 | Hebungen alter Masken (Stufe 20 bis 38, nur gegen synthetische Dokumente geprüft) | gestrichen; eine Maske unter 39 wird mit „zu alte Fassung“ abgelehnt |
 | Verdacht auf Fehler (12 Fälle aus dem Umbau) | je ein Commit: Kanban (Meldung nach Aushängen, Ankunftsmeldung erst nach bestätigtem Schreiben, Jetzt-Linie vor Karten ohne Uhrzeit); Tabelle (Sortierung bleibt beim Wechsel der Zeilenquelle, tote `rawIndex === null`-Zweige raus); Erfassung (Auswahl folgt der korrigierten Zeile, geleerte Korrektur fragt vor dem Löschen, Einfügen nur an eine sichtbare Erfassung, Doppelklick beim Laden wird nachgeholt); Fläche (Fenstergriff hebt die Auswahl nicht auf, tote `dragId`-Zweige raus, Escape beim Ziehen geht vor offenen Fenstern) |
@@ -39,7 +40,7 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 ## Offen
 
 1. **Namen**: `Piece` (Schritt-Teile im Editor), `holding` (Spalten), `Spot` mit mehreren Bedeutungen, `selected`/`chosen`/`picked` für die Auswahl. Ein Begriff je Ding, Aliasse für alles, was in Dateien steht.
-2. **Feine Abos im Editor**: `useEditor()` zeichnet jeden Abonnenten bei jeder Änderung neu. Ein `useEditorSelect(selector)` auf `useSyncExternalStore`, zuerst für die Fläche.
+2. **Feine Abos im Editor**: für die Fläche erledigt, siehe oben. Offen: Seitenleiste (`BlockPalette`), Werkzeugleiste (`PageBar`, `SaveState`, `MaskWho`) und Inspektor zeichnen weiter bei jeder Änderung (gemessen 54 Komponenten je Eigenschaftsänderung).
 3. **Größenbremse scharf schalten**: `max-lines` 300 und `max-lines-per-function` 80 von Warnung auf Fehler, sobald die laufenden Umbauten drin sind. Für React-Komponenten ist 80 Zeilen zu knapp; Vorschlag 120 für `.tsx`.
 4. **Erfassung und Kanban**: beide bleiben (Belegpositionen sind Kern, das Brett ist allgemein brauchbar). Beide brauchen nach dem Umbau eine zweite Lesung auf Verständlichkeit.
 5. **Hebungen alter Masken**: erledigt, siehe oben.
