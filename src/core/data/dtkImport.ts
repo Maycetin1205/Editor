@@ -91,31 +91,38 @@ function harvestRecord(text: string): Map<string, Map<string, RawField>> {
   return tables
 }
 
-const POS_RECORD = /3,POS,(ID\d{4}), {5,9}(\d{1,4}) {50,64}\1/g
+const POS_RECORD = /3,POS,(ID\d{4}), {5,9}(\d{1,4}) /g
 
-const FIELD_IN_POS_RECORD = / {100,}(\S[^\r\n]{0,49}?) {2,}(?:(\d{1,4}) +)?(\d{1,4})([A-Z]{1,4}\d?)(?=[ \r\n])/
+// A field record has fixed columns, counted from its "3,POS,": the label,
+// then position and length twice. The second pair is the field's code.
+const LABEL: [number, number] = [1082, 1122]
+const SHOWN_LENGTH: [number, number] = [1126, 1130]
+const CODE_POSITION: [number, number] = [1161, 1165]
+const CODE_LENGTH: [number, number] = [1165, 1169]
 
-const FLAGS_AFTER = /[NJ]{2}/
+// Binary bytes inside a record: a page break cut it apart.
+function cutApart(record: string): boolean {
+  for (let i = 0; i < record.length; i++) {
+    const c = record.charCodeAt(i)
+    if (c < 9 || (c > 13 && c < 32)) return true
+  }
+  return false
+}
 
-const RECORD_WINDOW = 1300
+const whole = (column: string): number | null => (/^ *\d+$/.test(column) ? Number(column) : null)
 
 function harvestPosRecords(text: string): Map<string, Map<number, RawField>> {
   const tables = new Map<string, Map<number, RawField>>()
   for (const record of text.matchAll(POS_RECORD)) {
-    if (record.index === undefined) continue
     const number = Number(record[2])
     const fields = tables.get(record[1])
     if (fields?.has(number)) continue
-    const window = text.slice(record.index, record.index + RECORD_WINDOW)
-    const m = FIELD_IN_POS_RECORD.exec(window)
-    if (!m || m.index === undefined) continue
-    const label = cleanLabel(m[1])
-    if (label === '') continue
-    const pos = Number(m[2] ?? 0)
-    const len = Number(m[3])
-    if (len < 1 || pos > 9999) continue
-    const behind = window.slice(m.index + m[0].length, m.index + m[0].length + 60)
-    if (!FLAGS_AFTER.test(behind)) continue
+    const r = text.slice(record.index, record.index + CODE_LENGTH[1])
+    if (r.length < CODE_LENGTH[1] || cutApart(r)) continue
+    const label = cleanLabel(r.slice(...LABEL))
+    const pos = whole(r.slice(...CODE_POSITION))
+    const len = whole(r.slice(...CODE_LENGTH))
+    if (label === '' || pos === null || len === null || len < 1 || whole(r.slice(...SHOWN_LENGTH)) !== len) continue
     const target = fields ?? new Map<number, RawField>()
     if (!fields) tables.set(record[1], target)
     target.set(number, { pos, len, label })
@@ -138,57 +145,50 @@ function expectedCounts(text: string): Map<string, number> {
   return new Map([...numbers].map(([id, s]) => [id, s.size]))
 }
 
+// The table's header record: its key twice, then its name. Where a page
+// break cuts the record, the name is found before its time stamp instead.
+const TABLE_NAME = /0,(ID\d{4}) {2,}\1 {2,}(\S[^\r\n]{0,58}?) {2,}/g
 const HEADER_KEY = /0,(ID\d{4}) {2,}/g
 const NAME_BEFORE_TIME = / {2,}(\S[^\r\n]{0,58}?) {2,}\d{5}\.\d{2}\.\d{4}/
 
 function tablesNames(text: string): Map<string, string> {
   const names = new Map<string, string>()
+  const add = (id: string, raw: string) => {
+    const name = cleanLabel(raw)
+    if (name !== '' && !/^ID\d{4}$/.test(name) && !names.has(id)) names.set(id, name)
+  }
+  for (const m of text.matchAll(TABLE_NAME)) add(m[1], m[2])
   for (const m of text.matchAll(HEADER_KEY)) {
-    if (m.index === undefined || names.has(m[1])) continue
-    const window = text.slice(m.index, m.index + 500)
-    const name = cleanLabel(NAME_BEFORE_TIME.exec(window)?.[1] ?? '')
-    if (name !== '' && !/^ID\d{4}$/.test(name)) names.set(m[1], name)
+    if (!names.has(m[1])) add(m[1], NAME_BEFORE_TIME.exec(text.slice(m.index, m.index + 500))?.[1] ?? '')
   }
   return names
 }
 
-function addTogether(
-  a: Map<string, RawField> | undefined,
-  b: Map<number, RawField> | undefined,
+// The field list names each field with its code. Where a page break cut a
+// line of it, the field records fill the gap.
+function fieldsOf(
+  listed: Map<string, RawField> | undefined,
+  recorded: Map<number, RawField> | undefined,
   expected: number,
-): RawField[] {
-  const aFields = [...(a?.values() ?? [])]
-  const bFields = [...(b?.values() ?? [])]
-  const aCodes = new Set(aFields.map(codeOf))
-  const bCodes = new Set(bFields.map(codeOf))
-
-  const merged = new Map<string, RawField>()
-  for (const f of [...aFields, ...bFields]) {
-    if (!merged.has(codeOf(f))) merged.set(codeOf(f), f)
+) {
+  const fields = new Map(listed)
+  if (fields.size < expected) {
+    for (const f of recorded?.values() ?? []) if (!fields.has(codeOf(f))) fields.set(codeOf(f), f)
   }
-
-  if (expected > 0 && merged.size > expected) {
-    const confirmed = [...bCodes].filter((c) => aCodes.has(c)).length
-    if (confirmed * 2 >= bCodes.size) {
-      return aFields
-    }
-
-    return bFields
-  }
-  return [...merged.values()]
+  return [...fields.values()].sort((x, y) => x.pos - y.pos || x.len - y.len)
 }
 
 function parseDtk(text: string): DtkTable[] {
-  const a = harvestRecord(text)
-  const b = harvestPosRecords(text)
+  const listed = harvestRecord(text)
+  const fromPos = harvestPosRecords(text)
   const expected = expectedCounts(text)
   const names = tablesNames(text)
 
-  const ids = new Set([...a.keys(), ...b.keys(), ...expected.keys()])
+  const ids = new Set([...listed.keys(), ...fromPos.keys(), ...expected.keys()])
   const out: DtkTable[] = []
   for (const id of [...ids].sort()) {
     const expectedCount = expected.get(id) ?? 0
-    const fields = addTogether(a.get(id), b.get(id), expectedCount).sort((x, y) => x.pos - y.pos || x.len - y.len)
+    const fields = fieldsOf(listed.get(id), fromPos.get(id), expectedCount)
 
     if (fields.length === 0 && expectedCount === 0) continue
     out.push({
