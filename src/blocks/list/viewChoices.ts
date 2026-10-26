@@ -180,12 +180,13 @@ export class ViewChoices {
     this._headMeasured = 0
   }
 
+  // New rows: the search starts empty; the operator's sorting stays where it
+  // is remembered and is read again against the columns of the new rows.
   reset(): void {
     this._searchText = ''
     this._sortColumn = -1
     this._sortAscending = true
-
-    if (this._rememberedRead) this.rememberSorting()
+    this._rememberedRead = false
     this.invalidate()
     this._focusRow = null
     this._restoreFocus = false
