@@ -91,6 +91,79 @@ async function askPositions(line: JobLine, watch: PositionsWatch): Promise<unkno
   return rowsFromQueryAnswer(wired.raw) ?? []
 }
 
+// What SoftEngine says while a write is the open question.
+interface WriteSignal {
+  arrived: boolean
+  refusal?: string
+  answer?: unknown
+  wake: () => void
+}
+
+type Ended = [JobState, RunAnswer]
+
+function napUntilTold(signal: WriteSignal, ms: number): Promise<typeof NAPPED> {
+  return new Promise((done) => {
+    if (signal.arrived || signal.refusal !== undefined || signal.answer !== undefined) {
+      done(NAPPED)
+      return
+    }
+    const clock = setTimeout(
+      () => {
+        done(NAPPED)
+      },
+      Math.max(0, ms),
+    )
+    signal.wake = () => {
+      clearTimeout(clock)
+      done(NAPPED)
+    }
+  })
+}
+
+// After the write went out: a refusal fails it, a RESULT answers it, a
+// delivery or an asked position list confirms it, the deadline leaves it
+// unconfirmed.
+async function awaitConfirmation(
+  line: JobLine,
+  job: Job,
+  watch: PositionsWatch | undefined,
+  signal: WriteSignal,
+): Promise<Ended> {
+  const deadline = Date.now() + WRITE_WAIT_MS
+  let asks = watch !== undefined
+  let asking: Promise<unknown[] | undefined> | null = null
+  let nextAsk = Date.now() + FIRST_READ_MS
+  while (job.view.endedAt === undefined && Date.now() < deadline) {
+    if (signal.refusal !== undefined) return ['failed', failedAnswer(refused(signal.refusal))]
+    if (signal.answer !== undefined) {
+      return ['done', { value: resultFromAnswer(signal.answer), raw: signal.answer, confirmed: true }]
+    }
+    if (signal.arrived) {
+      signal.arrived = false
+      if (!watch) return ['unconfirmed', unconfirmedAnswer(NOT_ACKNOWLEDGED)]
+      const hit = watch.match(deliveredRows(watch.confirm.sourceId))
+      if (hit) return ['done', confirmed(watch, hit, true)]
+      continue
+    }
+    if (watch && asks && asking === null && Date.now() >= nextAsk) asking = askPositions(line, watch)
+    const wakeAt = asking === null && asks ? Math.min(nextAsk, deadline) : deadline
+    const outcome = await Promise.race([
+      ...(asking === null ? [] : [asking]),
+      napUntilTold(signal, wakeAt - Date.now()),
+    ])
+    if (outcome === NAPPED) continue
+    asking = null
+    nextAsk = Date.now() + READ_AGAIN_MS
+    if (outcome === undefined) {
+      asks = false
+      continue
+    }
+    const hit = watch?.match(outcome)
+    if (watch && hit) return ['done', confirmed(watch, hit, false)]
+  }
+  return ['unconfirmed', unconfirmedAnswer(watch ? NO_CONFIRMATION : NOT_ACKNOWLEDGED)]
+}
+
 export async function runPut(
   line: JobLine,
   job: Job,
@@ -107,10 +180,7 @@ export async function runPut(
   }
   // What SoftEngine says while this write is the open question: a refusal
   // fails it; a plain RESULT is its answer. Data alone proves nothing.
-  const signal: { arrived: boolean; refusal?: string; answer?: unknown; wake: () => void } = {
-    arrived: false,
-    wake: () => {},
-  }
+  const signal: WriteSignal = { arrived: false, wake: () => {} }
   job.arrived = () => {
     signal.arrived = true
     signal.wake()
@@ -137,66 +207,6 @@ export async function runPut(
     return
   }
 
-  const deadline = Date.now() + WRITE_WAIT_MS
-  const told = (): boolean => signal.arrived || signal.refusal !== undefined || signal.answer !== undefined
-  const nap = (ms: number): Promise<typeof NAPPED> =>
-    new Promise((done) => {
-      if (told()) {
-        done(NAPPED)
-        return
-      }
-      const clock = setTimeout(
-        () => {
-          done(NAPPED)
-        },
-        Math.max(0, ms),
-      )
-      signal.wake = () => {
-        clearTimeout(clock)
-        done(NAPPED)
-      }
-    })
-
-  let asks = watch !== undefined
-  let asking: Promise<unknown[] | undefined> | null = null
-  let nextAsk = Date.now() + FIRST_READ_MS
-  while (job.view.endedAt === undefined && Date.now() < deadline) {
-    if (signal.refusal !== undefined) {
-      end('failed', failedAnswer(refused(signal.refusal)))
-      return
-    }
-    if (signal.answer !== undefined) {
-      end('done', { value: resultFromAnswer(signal.answer), raw: signal.answer, confirmed: true })
-      return
-    }
-    if (signal.arrived) {
-      signal.arrived = false
-      if (!watch) {
-        end('unconfirmed', unconfirmedAnswer(NOT_ACKNOWLEDGED))
-        return
-      }
-      const hit = watch.match(deliveredRows(watch.confirm.sourceId))
-      if (hit) {
-        end('done', confirmed(watch, hit, true))
-        return
-      }
-      continue
-    }
-    if (watch && asks && asking === null && Date.now() >= nextAsk) asking = askPositions(line, watch)
-    const wakeAt = asking === null && asks ? Math.min(nextAsk, deadline) : deadline
-    const outcome = await Promise.race([...(asking === null ? [] : [asking]), nap(wakeAt - Date.now())])
-    if (outcome === NAPPED) continue
-    asking = null
-    nextAsk = Date.now() + READ_AGAIN_MS
-    if (outcome === undefined) {
-      asks = false
-      continue
-    }
-    const hit = watch?.match(outcome)
-    if (watch && hit) {
-      end('done', confirmed(watch, hit, false))
-      return
-    }
-  }
-  end('unconfirmed', unconfirmedAnswer(watch ? NO_CONFIRMATION : NOT_ACKNOWLEDGED))
+  const [state, answer] = await awaitConfirmation(line, job, watch, signal)
+  end(state, answer)
 }
