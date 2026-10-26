@@ -128,7 +128,7 @@ export function startPointerDrag(press: Press, drag: PointerDrag, on: EventTarge
   return cancel
 }
 
-export type StartDrag = (press: Press, drag: PointerDrag | null) => void
+type StartDrag = (press: Press, drag: PointerDrag | null) => void
 
 // One drag at a time for the component that calls it; an unmount cancels
 // the drag that is still running.
