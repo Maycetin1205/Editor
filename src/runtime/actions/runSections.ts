@@ -58,96 +58,120 @@ function recordOfRun(result: RunResult, row: RunRow): string {
   return result.record || (result.transcript.values.PINDEX ?? '')
 }
 
+interface SectionOutcome {
+  written: boolean
+  writeFailed: boolean
+  unconfirmed: JobReason | undefined
+  stopped: { reason?: JobReason } | null
+}
+
+function takeResult(outcome: SectionOutcome, result: RunResult): void {
+  if (result.written) outcome.written = true
+  if (result.writeFailed) outcome.writeFailed = true
+  if (result.unconfirmed && outcome.unconfirmed !== NO_CONFIRMATION) {
+    outcome.unconfirmed = result.unconfirmedReason ?? NOT_ACKNOWLEDGED
+  }
+  if (result.failed) outcome.stopped = result.reason === undefined ? {} : { reason: result.reason }
+}
+
+// The steps of a section once per open row of the list it reads; the list
+// hears of every row that starts, fails or is done.
+async function runRows(
+  el: HTMLElement,
+  steps: readonly RuntimeStep[],
+  context: PlaceholderValues,
+  section: { kind: PendingKind; blockId: string; slots: ReadonlySet<number> },
+  list: ListRun,
+  transcript: Transcript | undefined,
+  outcome: SectionOutcome,
+): Promise<void> {
+  for (const row of list.rows) {
+    if (!list.open(row.key)) continue
+    list.report.rowWrites(section.kind, row.key)
+
+    let result: RunResult
+    try {
+      result = await runSteps(
+        el,
+        steps,
+        rowsContext(context, row),
+        (blockId, columnsIndex) => (blockId === section.blockId ? String(row.values[columnsIndex] ?? '') : ''),
+        section.slots,
+        transcript,
+        row.key,
+        row.picks,
+      )
+    } catch (error) {
+      list.report.rowFailed(section.kind, row.key)
+      throw error
+    }
+    takeResult(outcome, result)
+    if (result.failed) {
+      list.report.rowFailed(section.kind, row.key, result.reason)
+      break
+    }
+    list.report.runDone(section.kind, [
+      {
+        key: row.key,
+        record: recordOfRun(result, row),
+        shown: result.shown,
+        ...(result.booked === undefined ? {} : { row: result.booked }),
+      },
+    ])
+  }
+}
+
+function actionResultOf(outcome: SectionOutcome): ActionResult {
+  const { written, writeFailed, unconfirmed, stopped } = outcome
+  const failedWrite = writeFailed ? { writeFailed } : {}
+  if (stopped === null) {
+    return unconfirmed === undefined
+      ? { state: 'ran', written }
+      : { state: 'unconfirmed', written, reason: unconfirmed }
+  }
+  return stopped.reason === undefined
+    ? { state: 'cancelled', written, ...failedWrite }
+    : { state: 'failed', written, reason: stopped.reason, ...failedWrite }
+}
+
 export async function runSections(
   el: HTMLElement,
   eventKey: string,
   steps: readonly RuntimeStep[],
   context: PlaceholderValues,
 ): Promise<ActionResult> {
-  let written = false
-  let writeFailed = false
+  const outcome: SectionOutcome = { written: false, writeFailed: false, unconfirmed: undefined, stopped: null }
   try {
-    const sections = sectionsOf(steps)
-    let stopped: { reason?: JobReason } | null = null
-    let unconfirmed: JobReason | undefined
-    const take = (result: RunResult): void => {
-      if (result.written) written = true
-      if (result.writeFailed) writeFailed = true
-      if (result.unconfirmed && unconfirmed !== NO_CONFIRMATION) {
-        unconfirmed = result.unconfirmedReason ?? NOT_ACKNOWLEDGED
-      }
-      if (result.failed) stopped = result.reason === undefined ? {} : { reason: result.reason }
-    }
-
     let transcript: Transcript | undefined
-    for (const section of sections) {
+    for (const section of sectionsOf(steps)) {
       if (section.kind === 'once') {
         const result = await runSteps(el, steps, context, undefined, section.slots, transcript)
         transcript = result.transcript
-        take(result)
-        if (stopped) break
+        takeResult(outcome, result)
+        if (outcome.stopped) break
         continue
       }
-      if (section.blockId === '') {
-        stopped = {}
-        break
-      }
-      const carrier = searchCarrier(el.ownerDocument ?? document, section.blockId)
+      const carrier = section.blockId === '' ? undefined : searchCarrier(el.ownerDocument ?? document, section.blockId)
       const list = carrier && rowsOfList(carrier, section.kind)
       if (!list) {
-        stopped = {}
+        outcome.stopped = {}
         break
       }
-      for (const row of list.rows) {
-        if (!list.open(row.key)) continue
-        list.report.rowWrites(section.kind, row.key)
-
-        let result: RunResult
-        try {
-          result = await runSteps(
-            el,
-            steps,
-            rowsContext(context, row),
-            (blockId, columnsIndex) => (blockId === section.blockId ? String(row.values[columnsIndex] ?? '') : ''),
-            section.slots,
-            transcript,
-            row.key,
-            row.picks,
-          )
-        } catch (error) {
-          list.report.rowFailed(section.kind, row.key)
-          throw error
-        }
-        take(result)
-        if (result.failed) {
-          list.report.rowFailed(section.kind, row.key, result.reason)
-          break
-        }
-        list.report.runDone(section.kind, [
-          {
-            key: row.key,
-            record: recordOfRun(result, row),
-            shown: result.shown,
-            ...(result.booked === undefined ? {} : { row: result.booked }),
-          },
-        ])
-      }
-      if (stopped) break
+      await runRows(
+        el,
+        steps,
+        context,
+        { kind: section.kind, blockId: section.blockId, slots: section.slots },
+        list,
+        transcript,
+        outcome,
+      )
+      if (outcome.stopped) break
     }
-
-    if (written) maskHost().requestFreshData()
-    const end: { reason?: JobReason } | null = stopped
-    const failedWrite = writeFailed ? { writeFailed } : {}
-    if (end === null) {
-      return unconfirmed === undefined
-        ? { state: 'ran', written }
-        : { state: 'unconfirmed', written, reason: unconfirmed }
-    }
-    return end.reason === undefined
-      ? { state: 'cancelled', written, ...failedWrite }
-      : { state: 'failed', written, reason: end.reason, ...failedWrite }
+    if (outcome.written) maskHost().requestFreshData()
+    return actionResultOf(outcome)
   } catch (error) {
     warn(`Aktion "${eventKey}" gescheitert`, error)
-    return { state: 'failed', written, ...(writeFailed ? { writeFailed } : {}) }
+    return { state: 'failed', written: outcome.written, ...(outcome.writeFailed ? { writeFailed: true } : {}) }
   }
 }

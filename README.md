@@ -2,9 +2,9 @@
 
 Ein Editor im Browser, mit dem Masken für SoftEngine gebaut werden. Eine Maske wird als eine HTML-Datei plus ein `SEvariablen`-Blatt exportiert und ersetzt in SoftEngine die eingebaute Oberfläche einer Karteikarte.
 
-- Für Anwender: [docs/HANDBUCH.md](docs/HANDBUCH.md)
+- Für Anwender: [docs/BAUSTEINE.md](docs/BAUSTEINE.md) (Bestand der Bausteine und Einstellungen); ein Handbuch folgt, wenn Bausteine und Einstellungen entschieden sind
 - Für den Anschluss an SoftEngine: [docs/SOFTENGINE-SCHNITTSTELLE.md](docs/SOFTENGINE-SCHNITTSTELLE.md)
-- Für Entwickler: dieser Text, dazu [BAUPLAN.md](BAUPLAN.md) (Umbauplan) und [docs/RELEASE.md](docs/RELEASE.md)
+- Für Entwickler: dieser Text, [docs/ARCHITEKTUR.md](docs/ARCHITEKTUR.md), [BAUPLAN.md](BAUPLAN.md) (was noch offen ist) und [docs/RELEASE.md](docs/RELEASE.md)
 
 ## Voraussetzungen
 
