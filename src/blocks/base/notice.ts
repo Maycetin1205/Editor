@@ -3,17 +3,18 @@ import type { NoticeState } from '../../runtime/notice'
 import { icon } from '../parts/icons'
 
 export function noticeSignTpl(state: NoticeState): TemplateResult | typeof nothing {
-  if (state === 'schreibt') {
+  if (state === 'writing') {
     return html`<svg class="ff-ring" aria-hidden="true"><circle pathLength="100"></circle></svg>`
   }
-  if (state === 'gespeichert') return html`<span class="ff-tick" aria-hidden="true">${icon('check')}</span>`
-  if (state === 'gesendet') return html`<span class="ff-tick ff-tick-sent" aria-hidden="true">${icon('check')}</span>`
+  if (state === 'saved') return html`<span class="ff-tick" aria-hidden="true">${icon('check')}</span>`
+  if (state === 'sent') return html`<span class="ff-tick ff-tick-sent" aria-hidden="true">${icon('check')}</span>`
   return nothing
 }
 
 export function busyLineTpl(state: NoticeState): TemplateResult | typeof nothing {
-  if (state !== 'lädt' && state !== 'schreibt') return nothing
-  return html`<div class="ff-busy" role="progressbar" aria-label=${state}><span class="ff-busy-run"></span></div>`
+  if (state !== 'loading' && state !== 'writing') return nothing
+  const label = state === 'loading' ? 'Lädt' : 'Schreibt'
+  return html`<div class="ff-busy" role="progressbar" aria-label=${label}><span class="ff-busy-run"></span></div>`
 }
 
 /* The ring of the ProgressRing of Windows: an arc that grows and shrinks while
@@ -63,8 +64,8 @@ export const noticeStyle = css`
   .ff-tick-sent { color: var(--notice-ink, var(--se-ink-2)); }
 
   .ff-notice-room { display: contents; }
-  :host([data-ff-notice='lädt']),
-  :host([data-ff-notice='schreibt']) { position: relative; }
+  :host([data-ff-notice='loading']),
+  :host([data-ff-notice='writing']) { position: relative; }
   .ff-busy {
     position: absolute;
     inset: var(--se-border) var(--se-border) auto;

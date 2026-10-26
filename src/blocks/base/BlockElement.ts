@@ -173,7 +173,7 @@ export abstract class BlockElement extends LitElement {
   spotTexts: Readonly<Record<string, string>> = {}
 
   @property({ attribute: NOTICE_ATTR, converter: { fromAttribute: noticeStateOf } })
-  notice: NoticeState = 'ruhig'
+  notice: NoticeState = 'quiet'
 
   private noticeRoom: HTMLElement | null = null
 

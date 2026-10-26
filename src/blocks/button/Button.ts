@@ -58,7 +58,7 @@ export class Button extends BlockElement {
     const open = this.open
     return html`<button
       class=${lookClass(this)}
-      ?disabled=${this.notice === 'schreibt'}
+      ?disabled=${this.notice === 'writing'}
       data-ff-editable
       @dblclick=${(e: MouseEvent) => this.inlineEdit(e, 'label')}
     >${noticeSignTpl(this.notice)}<span class="text">${open ? `${this.label} (${open})` : this.label}</span></button>`
