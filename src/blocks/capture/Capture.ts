@@ -23,7 +23,7 @@ import {
 import { closeLookupFor, coerceLookupColumns } from '../lookup/lookup'
 import { alignSuggestionsFrom, suggestionStyle } from '../lookup/suggestionList'
 import { reportPendingMarks } from '../../runtime/pendingState'
-import { runEvent } from '../../runtime/events'
+import { runEvent } from '../../runtime/actions/runEvent'
 import { LEADS_TO_TYPING_ATTR } from '../../core/block/typingMarks'
 import { enterCell, cellsInputStyle, cellsFields } from './cells'
 import { captureRowFor } from './controls'

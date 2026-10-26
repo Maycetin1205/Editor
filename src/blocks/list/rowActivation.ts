@@ -1,6 +1,6 @@
 import { chainsRead } from '../../core/data/steps/chainsRead'
 import { selectionFor, giverIdOf, chooseSelection, setSelection } from '../../runtime/selection'
-import { runEvent, type ActionResult } from '../../runtime/events'
+import { runEvent, type ActionResult } from '../../runtime/actions/runEvent'
 import { rowsIndexOf, rowsTraitOf } from './sourceRows'
 
 export const ROW_ACTIVATED_EVENT = 'ff-row-activate'

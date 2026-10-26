@@ -8,7 +8,7 @@ import {
   refusalText,
   type JobReason,
 } from '../core/data/jobs'
-import type { ActionResult } from './actionResult'
+import type { ActionResult } from './actions/actionResult'
 import { closeFailure, showFailure } from './infoBar'
 
 export type NoticeState = 'ruhig' | 'lädt' | 'schreibt' | 'gespeichert' | 'gesendet' | 'Fehler'

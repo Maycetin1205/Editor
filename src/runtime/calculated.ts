@@ -1,7 +1,7 @@
 import { contractOf } from '../core/block/registry'
 import { calculated, DECIMALS_MAX, type Calculation, type TermOrigin } from '../core/data/calculation'
 import { asNumber, numberText } from '../core/data/number'
-import { searchCarrier } from './events'
+import { searchCarrier } from './actions/carrier'
 import { maskHost } from './host'
 import { selectionFor } from './selection'
 

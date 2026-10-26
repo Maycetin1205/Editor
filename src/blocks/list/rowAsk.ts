@@ -1,7 +1,7 @@
 import { html, type TemplateResult } from 'lit'
 import { styleMap } from 'lit/directives/style-map.js'
 import type { RowConfirm } from '../../runtime/steps/confirm'
-import type { ActionResult } from '../../runtime/events'
+import type { ActionResult } from '../../runtime/actions/runEvent'
 import { warn } from '../../runtime/log'
 import { maskHost } from '../../runtime/host'
 import { moveRowsFocus, rowElement } from './rowActivation'

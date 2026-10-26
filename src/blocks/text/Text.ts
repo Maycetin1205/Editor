@@ -8,7 +8,7 @@ import { bindable, bindingAttr } from '../../core/block/capability'
 import { readBoundSpot } from '../../runtime/boundSpot'
 import { makeDataLink, sourceIdOf, spotValue } from '../../runtime/source'
 import { makeFieldReader } from '../../runtime/foreignSources'
-import { runEvent } from '../../runtime/events'
+import { runEvent } from '../../runtime/actions/runEvent'
 import { BINDING_JOINERS, bindingFields, bindingJoiner, joinedBinding } from '../../core/block/binding'
 import {
   fieldShortName,

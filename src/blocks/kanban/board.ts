@@ -1,6 +1,6 @@
 import { chooseSelection, giverIdOf, relocateSelection } from '../../runtime/selection'
 import { readDataPreamble, makeDataLink, recordOf, rowKeys, type DataPreamble } from '../../runtime/source'
-import { runEvent } from '../../runtime/events'
+import { runEvent } from '../../runtime/actions/runEvent'
 import { matchesSearch } from '../../runtime/searchText'
 import type { KanbanColumn } from './columns'
 import { placeAt, placeValue, sameSpot, spotOf, type Spot } from './places'

@@ -1,4 +1,4 @@
-import type { JobReason } from '../core/data/jobs'
+import type { JobReason } from '../../core/data/jobs'
 
 export type RunState = 'ran' | 'busy' | 'cancelled' | 'failed' | 'unconfirmed'
 

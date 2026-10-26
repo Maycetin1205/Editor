@@ -5,7 +5,7 @@ import { BlockElement, defineBlock } from '../base/BlockElement'
 import { bindable, bindingAttr } from '../../core/block/capability'
 import { readBoundSpot } from '../../runtime/boundSpot'
 import { makeDataLink } from '../../runtime/source'
-import { runEvent } from '../../runtime/events'
+import { runEvent } from '../../runtime/actions/runEvent'
 import { maskHost } from '../../runtime/host'
 import {
   fileNameOf,

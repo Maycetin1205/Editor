@@ -3,7 +3,7 @@ import { giverIdOf, clearSelection, setSelection } from '../../runtime/selection
 import { makeDataLink, recordOf } from '../../runtime/source'
 import { maskHost } from '../../runtime/host'
 import { readBoundSpot } from '../../runtime/boundSpot'
-import { runEvent } from '../../runtime/events'
+import { runEvent } from '../../runtime/actions/runEvent'
 
 // The field as this binding needs it: its value, and whether it fills
 // itself from a lookup instead of from a bound row.
