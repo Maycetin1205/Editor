@@ -1,8 +1,8 @@
 import { html, nothing, type TemplateResult } from 'lit'
 import { styleMap } from 'lit/directives/style-map.js'
-import type { Column, ColumnsGrid } from '../parts/column'
+import type { Column } from '../parts/column'
 import { figureAt, type RowLayout } from '../parts/cell'
-import { widthsHandles, type WidthsHost } from './columnWidth'
+import { widthsHandles, type ColumnsGrid, type WidthsHost } from './columnWidth'
 
 export interface HeadPlacement {
   columns: readonly Column[]

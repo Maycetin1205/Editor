@@ -6,6 +6,28 @@ import type { RowsFrom } from './sourceRows'
 // Which columns a record shows in its row and which in the grey line under it,
 // and whether the list shows rows at all. No DOM here.
 
+// A column the builder hid, or the operator put away, stays out of the mask;
+// the editor shows all. One column always stays.
+export function columnsView(
+  columns: readonly Column[],
+  showAll: boolean,
+  awayByOperator: ReadonlySet<string> = new Set(),
+): ColumnView {
+  const away = (s: Column): boolean => s.hidden === true || awayByOperator.has(s.key)
+  if (showAll || !columns.some(away)) {
+    return { columns, slots: columns.map((_, i) => i) }
+  }
+  const shown: Column[] = []
+  const slots: number[] = []
+  columns.forEach((s, i) => {
+    if (away(s)) return
+    shown.push(s)
+    slots.push(i)
+  })
+  if (shown.length === 0 && columns.length > 0) return { columns: [columns[0]], slots: [0] }
+  return { columns: shown, slots }
+}
+
 export function rowLayoutOf(
   columns: readonly Column[],
   calculations: readonly Calculation[],

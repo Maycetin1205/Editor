@@ -34,26 +34,6 @@ export interface ColumnView {
   slots: readonly number[]
 }
 
-export function columnsView(
-  columns: readonly Column[],
-  showAll: boolean,
-  awayByOperator: ReadonlySet<string> = new Set(),
-): ColumnView {
-  const away = (s: Column): boolean => s.hidden === true || awayByOperator.has(s.key)
-  if (showAll || !columns.some(away)) {
-    return { columns, slots: columns.map((_, i) => i) }
-  }
-  const shown: Column[] = []
-  const slots: number[] = []
-  columns.forEach((s, i) => {
-    if (away(s)) return
-    shown.push(s)
-    slots.push(i)
-  })
-  if (shown.length === 0 && columns.length > 0) return { columns: [columns[0]], slots: [0] }
-  return { columns: shown, slots }
-}
-
 export const FIELD_KEY_PREFIX = 'field:'
 
 export interface Figure {
@@ -172,18 +152,6 @@ export function coerceColumns(v: unknown): Column[] {
 
   if (arr.length < COLUMNS_MIN) arr = [newColumn(0)]
   return withKeys(arr)
-}
-
-export type ColumnsGrid = { gridTemplateColumns: string }
-
-export function columnsTemplate(
-  columns: readonly Column[],
-  widths: (index: number) => number | undefined = () => undefined,
-): string {
-  const own = columns.map((s, i) => widths(i) ?? s.width)
-  const set = own.filter((w): w is number => w !== undefined)
-  const middle = set.length === 0 ? 1 : Math.max(1, Math.round(set.reduce((a, b) => a + b, 0) / set.length))
-  return own.map((w) => `minmax(0, ${w ?? middle}fr)`).join(' ')
 }
 
 function withAddedColumn(columns: readonly Column[]): Column[] | null {

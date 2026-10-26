@@ -1,6 +1,7 @@
 import { rulerTicks, WITHOUT_MEASUREMENT, scrollSplit, pagesSplit, ROWS_HEIGHT, type RowMetrics } from './pageSize'
 import { sortIndices, totalText } from './sorting'
-import { columnsTemplate, type Column, type ColumnsGrid, type Figure } from '../parts/column'
+import type { Column, Figure } from '../parts/column'
+import { columnsTemplate, type ColumnsGrid } from './columnWidth'
 import { rowFits } from '../parts/cellSearch'
 
 // What the table shows: the columns grid, the rows of the page after search

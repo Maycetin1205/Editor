@@ -1,5 +1,6 @@
 import { nothing, type TemplateResult } from 'lit'
-import type { Column, ColumnView, ColumnsGrid } from '../parts/column'
+import type { Column, ColumnView } from '../parts/column'
+import type { ColumnsGrid } from './columnWidth'
 import type { RowLayout } from '../parts/cell'
 
 // What a block built on the list (the capture block) adds to it: its own cell
