@@ -6,7 +6,7 @@ import { targetIn, windowColumnsIn } from './context'
 import { entriesIn } from './linkedRecords'
 
 // What the lookup window of a cell shows.
-export interface LookupSpot {
+interface LookupSpot {
   spot: string
 
   sourceId: string

@@ -18,7 +18,7 @@ type CapturedRow = Helpers & {
   written?: { record: string }
 }
 
-export interface PendingRow {
+interface PendingRow {
   key: string
 
   values: readonly string[]

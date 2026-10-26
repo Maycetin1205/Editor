@@ -7,15 +7,17 @@ import { columnEditable } from './column'
 import { shownValue, type Column } from '../parts/column'
 import { figureAt, greyCellTpl, type GreyPart, type RowLayout } from '../parts/cell'
 import { WITHOUT_DECORATION, type RowDecoration } from '../list'
-import type { CaptureLedger, RowState } from './ledger'
+import type { CaptureLedger } from './ledger'
+import type { RowState } from './ledger/outbound'
 
 function typingCellTpl(ledger: CaptureLedger, rawIndex: number, slot: number, column: Column): TemplateResult {
+  const booked = ledger.booked
   return inputSpotTpl(
     {
-      value: ledger.cellValue(rawIndex, slot),
+      value: booked.cellValue(rawIndex, slot),
       title: column.title,
       placeholder: '',
-      inputClass: cellsClass(ledger.isChanged(rawIndex, slot) ? 'changed' : 'quiet'),
+      inputClass: cellsClass(booked.isChanged(rawIndex, slot) ? 'changed' : 'quiet'),
       holderClass: 'cell-holder',
       marksOnEntering: true,
       keepsTyping: true,
@@ -26,9 +28,9 @@ function typingCellTpl(ledger: CaptureLedger, rawIndex: number, slot: number, co
       mark: 0,
     },
     {
-      typing: (text) => ledger.typeCell(rawIndex, slot, text),
-      key: (e) => ledger.keyCell(rawIndex, slot, e),
-      leave: (text) => ledger.leaveCell(rawIndex, slot, text),
+      typing: (text) => booked.typeCell(rawIndex, slot, text),
+      key: (e) => booked.keyCell(rawIndex, slot, e),
+      leave: (text) => booked.leaveCell(rawIndex, slot, text),
       chooseSuggestion: () => {},
       setMark: () => {},
     },
@@ -130,7 +132,7 @@ interface DecorationPlacement {
 export function captureDecoration(placement: DecorationPlacement): (rawIndex: number | null) => RowDecoration {
   return (rawIndex) => {
     if (rawIndex === null) return WITHOUT_DECORATION
-    const state = placement.ledger.statusOf(rawIndex)
+    const state = placement.ledger.booked.statusOf(rawIndex)
     return {
       ...WITHOUT_DECORATION,
       status: state.status === 'booked' ? '' : state.status,

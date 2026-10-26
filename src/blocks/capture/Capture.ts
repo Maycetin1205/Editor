@@ -30,7 +30,11 @@ import { captureRowFor } from './controls'
 import { capturedRowsTpl, captureDecoration } from './body'
 import { CAPTURE_COLUMNS_BINDING, greyLine, type CaptureColumn } from './column'
 import { keyIntent } from './keys'
-import { CaptureLedger } from './ledger'
+import { createLedger, type CaptureLedger } from './ledger'
+import { runDone, writtenArrived } from './ledger/runReport'
+import { rowView, touched } from './row/cellValues'
+import { refreshRow } from './row/refresh'
+import { firstCell, openCell } from './row/typing'
 import { captureStyle } from './captureStyle'
 import { splitStyle } from './split/splitStyle'
 import { captureProperties, type CaptureValues } from './properties'
@@ -66,7 +70,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
 
   private _justCaptured = false
 
-  private readonly _ledger: CaptureLedger = new CaptureLedger({
+  private readonly _ledger: CaptureLedger = createLedger({
     block: this,
     columns: () => this.listColumns(),
     layout: () => this._list.rowLayout(),
@@ -79,7 +83,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
     captured: () => {
       this._justCaptured = true
       this.requestUpdate()
-      this.focusCaptureCell(this._ledger.firstCell)
+      this.focusCaptureCell(firstCell(this._ledger.row))
       this.showLastCaptured()
     },
     rowAdded: () => this.writeCaptured(),
@@ -95,50 +99,50 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
   private _writeAgain = false
 
   private readonly _list: RecordList = new RecordList(this, {
-    cellValue: (rawIndex, slot) => this._ledger.cellValue(rawIndex, slot),
+    cellValue: (rawIndex, slot) => this._ledger.booked.cellValue(rawIndex, slot),
     decoration: () => this.rowsDecoration(),
     required: (slot) => this.listColumns()[slot]?.required === true,
-    held: (slot) => this._ledger.isHeld(slot),
+    held: (slot) => this._ledger.row.cells.held.has(slot),
     greyLine: (shown) => greyLine(this.listColumns(), shown),
     bottom: () => this.underRows(),
   })
 
   get capturedRows(): readonly (readonly string[])[] {
-    return this._ledger.pendingMarks().map((v) => v.values)
+    return this._ledger.captured.pendingMarks().map((v) => v.values)
   }
 
   get capturedKey(): readonly string[] {
-    return this._ledger.pendingMarks().map((v) => v.key)
+    return this._ledger.captured.pendingMarks().map((v) => v.key)
   }
 
   get capturedPicks(): readonly (readonly CapturedPick[])[] {
-    return this._ledger.pendingMarks().map((v) => v.picks)
+    return this._ledger.captured.pendingMarks().map((v) => v.picks)
   }
 
   capturedColumn(key: string): readonly string[] {
     const slot = this.listColumns().findIndex((column) => column.key === key)
-    return slot < 0 ? [] : this._ledger.capturedValues.map((values) => values[slot] ?? '')
+    return slot < 0 ? [] : this._ledger.captured.values.map((values) => values[slot] ?? '')
   }
 
   get changedRows(): readonly { record: string; values: readonly string[] }[] {
-    return this._ledger.changedRows
+    return this._ledger.booked.changedRows
   }
 
   rowWrites(kind: PendingKind, key: string): void {
-    this._ledger.writes(kind, key)
+    this._ledger.outbound.writes(kind, key)
   }
 
   rowFailed(kind: PendingKind, key: string): void {
-    this._ledger.failed(kind, key)
+    this._ledger.outbound.failed(kind, key)
   }
 
   runDone(kind: PendingKind, written: readonly WrittenRow[]): void {
-    this._ledger.runDone(kind, written)
+    runDone(this._ledger, kind, written)
     if (kind === 'captured') this._working.booked(written)
   }
 
   writtenArrived(): void {
-    this._ledger.writtenArrived()
+    writtenArrived(this._ledger)
   }
 
   listColumns(): readonly CaptureColumn[] {
@@ -175,7 +179,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
         await Promise.resolve()
         do {
           this._writeAgain = false
-          if (this._ledger.hasFailed()) break
+          if (this._ledger.captured.hasFailed()) break
           await runEvent(this, ROW_CAPTURED, {})
         } while (this._writeAgain)
       } finally {
@@ -185,7 +189,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
   }
 
   private backToTyping(): void {
-    if (!this.preview) this.focusCaptureCell(this._ledger.openCell)
+    if (!this.preview) this.focusCaptureCell(openCell(this._ledger.row))
   }
 
   private readonly roomClick = (e: Event): void => {
@@ -212,20 +216,20 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
   }
 
   private underRows(): RowsBelow {
-    const captured = this._ledger.capturedValues
+    const captured = this._ledger.captured.values
     return {
       count: 1 + captured.length,
       render: ({ view, cols, layout, rulerTicks }) => {
-        const correctionSlot = this._ledger.correctionSlot
+        const correctionSlot = this._ledger.captured.correctionSlot
         return capturedRowsTpl(
           {
             slots: view.slots,
             cols,
             layout,
             captured,
-            keyAt: (index) => this._ledger.capturedKeyAt(index),
-            capturedState: (index) => this._ledger.capturedStatus(index),
-            chosen: (index) => this._working.chosen(this._ledger.capturedKeyAt(index)),
+            keyAt: (index) => this._ledger.captured.keyAt(index),
+            capturedState: (index) => this._ledger.captured.statusAt(index),
+            chosen: (index) => this._working.chosen(this._ledger.captured.keyAt(index)),
             correctionSlot,
             capture: captureRowFor(
               {
@@ -242,12 +246,16 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
           },
           {
             takeCapturedRow: (index) => {
-              this._ledger.removeCaptured(index)
+              this._ledger.captured.remove(index)
               this.backToTyping()
             },
-            bringBackCapturedRow: (index) => this._ledger.bringBackCaptured(index),
+            bringBackCapturedRow: (index) => this._ledger.captured.bringBack(index),
             chooseCapturedRow: (index) => {
-              this._working.toggleCaptured(this._ledger.capturedKeyAt(index), this.listColumns(), captured[index] ?? [])
+              this._working.toggleCaptured(
+                this._ledger.captured.keyAt(index),
+                this.listColumns(),
+                captured[index] ?? [],
+              )
               this.requestUpdate()
               this.backToTyping()
             },
@@ -264,7 +272,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
     const responsible = all.find((t) => path.includes(t)) ?? all[0]
     if (responsible !== this) return
     e.preventDefault()
-    this.focusCaptureCell(this._ledger.firstCell)
+    this.focusCaptureCell(firstCell(this._ledger.row))
   }
 
   override connectedCallback(): void {
@@ -282,7 +290,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
 
   protected override willUpdate(changed: PropertyValues): void {
     super.willUpdate(changed)
-    this._ledger.refresh()
+    if (refreshRow(this._ledger.row)) this._ledger.captured.captureRow()
   }
 
   protected override updated(): void {
@@ -291,9 +299,9 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
       this.renderRoot.querySelector('.ruler')?.setAttribute(LEADS_TO_TYPING_ATTR, '')
       this._working.followTyping(
         this.listColumns(),
-        this._ledger.touched,
-        () => this._ledger.rowView().map((cell) => cell.value),
-        this._justCaptured ? this._ledger.capturedKeyAt(this._ledger.capturedValues.length - 1) : null,
+        touched(this._ledger.row),
+        () => rowView(this._ledger.row).map((cell) => cell.value),
+        this._justCaptured ? this._ledger.captured.keyAt(this._ledger.captured.values.length - 1) : null,
       )
     }
     this._justCaptured = false
