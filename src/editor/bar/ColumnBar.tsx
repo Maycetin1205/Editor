@@ -1,10 +1,11 @@
-import { createElement, useEffect, useMemo, useRef, useState } from 'react'
+import { createElement, useEffect, useMemo, useRef, useState, type ComponentProps } from 'react'
 import { ArrowRight, ChevronDown, Trash2, type Icon } from '@/editor/icons/icon'
 import { Button, OPENER } from '@/editor/widgets/Button'
 import { Separator } from '@/editor/widgets/Separator'
 import { useCloseOnEscape } from '@/editor/widgets/useCloseOnEscape'
 import type { BlockNode } from '../../core/block/tree'
 import type { Property } from '../../core/block/property'
+import type { DataSource } from '../../core/data/dataSources'
 import { FieldPicker, type PickerField, type PickerGroup, type SourcesChoice } from '../canvas/FieldPicker'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
@@ -29,6 +30,11 @@ interface ColumnAction {
   onOpen: () => void
 }
 
+interface ColumnEntry {
+  properties: readonly (readonly [string, Property<unknown>])[]
+  access: EntryAccess
+}
+
 interface ColumnBarProps {
   block: BlockNode
 
@@ -44,10 +50,7 @@ interface ColumnBarProps {
   switches: readonly ColumnSwitch[]
   actions: readonly ColumnAction[]
 
-  entries?: readonly {
-    properties: readonly (readonly [string, Property<unknown>])[]
-    access: EntryAccess
-  }[]
+  entries?: readonly ColumnEntry[]
 
   removeLabel: string
   onRemove?: () => void
@@ -69,10 +72,45 @@ export function ColumnBar({
   onRemove,
   onClose,
 }: ColumnBarProps) {
-  const ed = useEditor()
-  const library = useDataSources().list
   useCloseOnEscape(onClose)
+  useCloseOnPressBeside(onClose)
+  const { own, sourceInReach, session } = useOwnControls(block, entries)
+  const parts = 1 + fields.length + own.length + switches.length + actions.length + (onRemove ? 1 : 0)
 
+  return (
+    <BarFrame at={at} onClose={onClose}>
+      <BarSign type={block.type} name={name} />
+      <Separator vertical />
+
+      <FieldChoices fields={fields} groups={groups} sourcesChoice={sourcesChoice} nameOf={nameOf} />
+      <DisplayControls
+        block={block}
+        own={own}
+        sourceInReach={sourceInReach}
+        session={session}
+        switches={switches}
+        folded={parts > BAR_PARTS}
+      />
+      {actions.map((a) => (
+        <Button key={a.label} onlyIcon aria-label={a.label} title={a.label} onClick={a.onOpen}>
+          {createElement(a.icon, { size: 15 })}
+        </Button>
+      ))}
+
+      {onRemove && (
+        <>
+          <Separator vertical />
+          <Button onlyIcon kind="risk" title={removeLabel} aria-label={removeLabel} onClick={onRemove}>
+            <Trash2 size={14} />
+          </Button>
+        </>
+      )}
+    </BarFrame>
+  )
+}
+
+// Closes the bar on a press outside of it and of every popup or helper.
+function useCloseOnPressBeside(onClose: () => void) {
   useEffect(() => {
     const beside = (e: PointerEvent): void => {
       const inside = e
@@ -86,8 +124,22 @@ export function ColumnBar({
     document.addEventListener('pointerdown', beside, true)
     return () => document.removeEventListener('pointerdown', beside, true)
   }, [onClose])
+}
 
-  const session = useMemo(
+type BarSession = ComponentProps<typeof BarControl>['session']
+
+interface OwnControl {
+  key: string
+  propertyKey: string
+  property: Property<unknown>
+  access: EntryAccess
+}
+
+// The shown property controls of the entries, plus what a control needs from the editor.
+function useOwnControls(block: BlockNode, entries: readonly ColumnEntry[]) {
+  const ed = useEditor()
+  const library = useDataSources().list
+  const session = useMemo<BarSession>(
     () => ({
       onBeginEditing: () => ed.beginTransaction(),
       onEndEditing: () => ed.endTransaction(),
@@ -95,15 +147,65 @@ export function ColumnBar({
     [ed],
   )
   const sourceInReach = ed.dataSourceFor(block.id)
-  const own = entries.flatMap(({ properties, access }, group) =>
+  const own: OwnControl[] = entries.flatMap(({ properties, access }, group) =>
     properties
       .filter(([, property]) => controlShown(property, block, sourceInReach, library))
       .map(([key, property]) => ({ key: `${group}:${key}`, propertyKey: key, property, access })),
   )
-  const parts = 1 + fields.length + own.length + switches.length + actions.length + (onRemove ? 1 : 0)
+  return { own, sourceInReach, session }
+}
+
+// Field pickers that read from foreign sources, an arrow, then the ones that write.
+function FieldChoices({
+  fields,
+  groups,
+  sourcesChoice,
+  nameOf,
+}: {
+  fields: readonly PickerField[]
+  groups: readonly PickerGroup[]
+  sourcesChoice?: SourcesChoice
+  nameOf: (value: string) => string
+}) {
   const fieldsFrom = fields.filter((field) => field.onlyForeignSources === true)
   const fieldsTo = fields.filter((field) => field.onlyForeignSources !== true)
+  return (
+    <>
+      {fieldsFrom.map((field) => (
+        <FieldChoice
+          key={field.key}
+          field={field}
+          groups={groups.filter((g) => g.sourceId !== '')}
+          sourcesChoice={sourcesChoice}
+          nameOf={nameOf}
+        />
+      ))}
+      {fieldsFrom.length > 0 && fieldsTo.length > 0 && (
+        <ArrowRight size={13} aria-hidden className="shrink-0 text-muted" />
+      )}
+      {fieldsTo.map((field) => (
+        <FieldChoice key={field.key} field={field} groups={groups} sourcesChoice={sourcesChoice} nameOf={nameOf} />
+      ))}
+    </>
+  )
+}
 
+// Property controls and switches, folded into a "Anzeige" window when the bar gets crowded.
+function DisplayControls({
+  block,
+  own,
+  sourceInReach,
+  session,
+  switches,
+  folded,
+}: {
+  block: BlockNode
+  own: readonly OwnControl[]
+  sourceInReach: DataSource | undefined
+  session: BarSession
+  switches: readonly ColumnSwitch[]
+  folded: boolean
+}) {
   const shows = (
     <>
       {own.map(({ key, propertyKey, property, access }) => (
@@ -122,53 +224,15 @@ export function ColumnBar({
       ))}
     </>
   )
-
+  if (!folded) return shows
   return (
-    <BarFrame at={at} onClose={onClose}>
-      <BarSign type={block.type} name={name} />
-      <Separator vertical />
-
-      {fieldsFrom.map((field) => (
-        <FieldChoice
-          key={field.key}
-          field={field}
-          groups={groups.filter((g) => g.sourceId !== '')}
-          sourcesChoice={sourcesChoice}
-          nameOf={nameOf}
-        />
-      ))}
-      {fieldsFrom.length > 0 && fieldsTo.length > 0 && (
-        <ArrowRight size={13} aria-hidden className="shrink-0 text-muted" />
+    <BarWindow label="Anzeige">
+      {() => (
+        <div className="flex flex-wrap items-center gap-x-[14px] gap-y-[4px] [&>:not([data-switch])]:basis-full">
+          {shows}
+        </div>
       )}
-      {fieldsTo.map((field) => (
-        <FieldChoice key={field.key} field={field} groups={groups} sourcesChoice={sourcesChoice} nameOf={nameOf} />
-      ))}
-      {parts > BAR_PARTS ? (
-        <BarWindow label="Anzeige">
-          {() => (
-            <div className="flex flex-wrap items-center gap-x-[14px] gap-y-[4px] [&>:not([data-switch])]:basis-full">
-              {shows}
-            </div>
-          )}
-        </BarWindow>
-      ) : (
-        shows
-      )}
-      {actions.map((a) => (
-        <Button key={a.label} onlyIcon aria-label={a.label} title={a.label} onClick={a.onOpen}>
-          {createElement(a.icon, { size: 15 })}
-        </Button>
-      ))}
-
-      {onRemove && (
-        <>
-          <Separator vertical />
-          <Button onlyIcon kind="risk" title={removeLabel} aria-label={removeLabel} onClick={onRemove}>
-            <Trash2 size={14} />
-          </Button>
-        </>
-      )}
-    </BarFrame>
+    </BarWindow>
   )
 }
 
