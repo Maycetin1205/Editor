@@ -1,6 +1,6 @@
 import type { StartToolStep } from '../../core/data/steps/startTool'
 import { StartToolBody } from './StartToolBody'
-import type { StepPiece, StepTabPiece } from './stepPiece'
+import type { StepPiece, StepTabPiece } from './piece'
 
 const emptyTool = (id: string): StartToolStep => ({
   id,

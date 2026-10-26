@@ -1,5 +1,5 @@
 import { contractOf } from '../../core/block/registry'
-import { inOpenPopup } from '../../core/data/steps/popupStep'
+import { inOpenPopup } from '../../runtime/steps/popup'
 import { maskState } from '../../runtime/maskState'
 import { relocateSelection, giverIdOf, traitOf, rowsToSelection } from '../../runtime/selection'
 import { readDataPreamble, makeDataLink, identityOf, recordOf, rowKeys, sourceIdOf } from '../../runtime/source'

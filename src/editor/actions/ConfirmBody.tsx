@@ -1,5 +1,5 @@
 import { Strip } from '@/editor/widgets/Grid'
-import type { StepBodyProps } from './stepPiece'
+import type { StepBodyProps } from './piece'
 
 export function ConfirmBody({ step }: StepBodyProps) {
   if (step.kind !== 'CONFIRM') return null

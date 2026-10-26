@@ -2,7 +2,7 @@ import type { ComponentType } from 'react'
 import { relationGroup, type RelationTemplate } from '../../core/data/relations'
 import type { RelationStep } from '../../core/data/steps/relation'
 import { ReadRelationBody, WriteRelationBody } from './RelationBody'
-import type { StepBodyProps, StepContext, StepPiece, StepTabPiece } from './stepPiece'
+import type { StepBodyProps, StepContext, StepPiece, StepTabPiece } from './piece'
 
 const VERB_SHORT: Record<RelationTemplate['verb'], string> = {
   GET_RELATION: 'GET',

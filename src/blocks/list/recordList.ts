@@ -2,7 +2,7 @@ import { html, nothing, type ReactiveController, type ReactiveControllerHost, ty
 import { styleMap } from 'lit/directives/style-map.js'
 import { ViewChoices } from './viewChoices'
 import { giverIdOf } from '../../runtime/selection'
-import { ROW_CONFIRM_EVENT } from '../../core/data/steps/confirm'
+import { ROW_CONFIRM_EVENT } from '../../runtime/steps/confirm'
 import { RowAsk } from './rowAsk'
 import { TAKES_KEYS_ATTR } from '../../core/block/typingMarks'
 import { SUBLINE_HEIGHT, type MeasureTarget } from './pageSize'

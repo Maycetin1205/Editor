@@ -1,6 +1,7 @@
 import { BLOCK_ID_ATTR } from '../core/data/actions'
-import { sectionsOf, chainsRead } from '../core/data/steps/chains'
+import { sectionsOf, chainsRead } from '../core/data/steps/chainsRead'
 import { stepAdapter, type RuntimeStep } from '../core/data/steps/steps'
+import { stepRunner } from './steps/runners'
 import type { CapturedPick, RunReportElement, PendingKind } from '../core/block/capability'
 import { giverIdOf, selectionFor } from './selection'
 import { maskState } from './maskState'
@@ -9,6 +10,7 @@ import type { ValueCarrier } from '../core/block/capability'
 import type { PickValues } from '../core/data/actions'
 import { nowTimeAsText, todayAsText, type PlaceholderValues } from '../core/data/relations'
 import { NO_CONFIRMATION, NOT_ACKNOWLEDGED, type JobReason } from '../core/data/jobs'
+import type { ActionResult } from './actionResult'
 import { warn } from './log'
 import { actionEnded, actionStarted } from './notice'
 import { sourceSettled } from './fetchingSources'
@@ -182,7 +184,7 @@ async function runSteps(
     if (!(await conditionHolds(step.onlyIf))) continue
     const rounds: (CapturedPick | undefined)[] = readsPick(step) ? [...picks] : [undefined]
     for (const pick of rounds) {
-      const outcome = await stepAdapter(step.kind).run(step, {
+      const outcome = await stepRunner(step.kind).run(step, {
         host,
         root: el.ownerDocument ?? document,
         origin: el,
@@ -249,16 +251,7 @@ async function runSteps(
   }
 }
 
-export type RunState = 'ran' | 'busy' | 'cancelled' | 'failed' | 'unconfirmed'
-
-export interface ActionResult {
-  state: RunState
-  written: boolean
-  reason?: JobReason
-  // A write SoftEngine refused or that never went out: what the mask shows
-  // for it is not what SoftEngine holds.
-  writeFailed?: boolean
-}
+export type { ActionResult, RunState } from './actionResult'
 
 function emptyRequired(
   root: ParentNode,

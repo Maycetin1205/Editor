@@ -23,6 +23,9 @@ const REGISTER = path.join(root, 'src', 'blocks', 'register.ts')
 const TSCONFIG = path.join(root, 'tsconfig.app.json')
 const OUT = path.join(root, 'src', 'export', 'generated', 'runtime.json')
 
+// Runs before any block in an exported mask: puts SoftEngine in as the host.
+const HOST_ENTRY = { type: 'softengine-host', file: path.join(root, 'src', 'runtime', 'softEngineStart.ts') }
+
 // --- Entries: the blocks in the order register.ts names them -----------------
 
 function blockEntries() {
@@ -206,7 +209,7 @@ function runtimeParts(chunks, entries) {
 // --- Main ------------------------------------------------------------------------
 
 const started = Date.now()
-const entries = blockEntries()
+const entries = [HOST_ENTRY, ...blockEntries()]
 const parts = runtimeParts(await bundleBlocks(entries), entries)
 const json = JSON.stringify(parts)
 
@@ -216,6 +219,6 @@ if (!unchanged) fs.writeFileSync(OUT, json)
 
 const kb = Math.round(Buffer.byteLength(json) / 1024)
 console.log(
-  `Laufzeit: ${entries.length} Bausteine in ${parts.chunks.length} Teilen, ${kb} KB` +
+  `Laufzeit: ${entries.length - 1} Bausteine in ${parts.chunks.length} Teilen, ${kb} KB` +
     ` -> ${path.relative(root, OUT)}${unchanged ? ' (unveraendert)' : ''}, ${Date.now() - started} ms`,
 )

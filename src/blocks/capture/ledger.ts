@@ -1,7 +1,7 @@
 import type { PendingKind, WrittenRow } from '../../core/block/capability'
 import type { Calculation } from '../../core/data/calculation'
 import type { Split } from '../../core/data/split'
-import { inOpenPopup } from '../../core/data/steps/popupStep'
+import { inOpenPopup } from '../../runtime/steps/popup'
 import type { Column } from '../parts/column'
 import { cellAbove, cellBelow, stripeOf, type RowLayout } from '../parts/cell'
 import type { Entry } from '../lookup/lookup'

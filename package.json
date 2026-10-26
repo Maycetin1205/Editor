@@ -17,7 +17,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "knip": "knip --no-progress",
-    "cycles": "node tools/cycles.mjs --max 8",
+    "cycles": "node tools/cycles.mjs --max 0",
     "smoke": "node tools/smoke.mjs"
   },
   "dependencies": {

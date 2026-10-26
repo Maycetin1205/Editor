@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { chainsClean, chainsForExport, chainsRead, sectionsOf } from '../src/core/data/steps/chains'
+import { chainsClean, chainsForExport } from '../src/core/data/steps/chains'
+import { chainsRead, sectionsOf } from '../src/core/data/steps/chainsRead'
 
 const saved = {
   click: [

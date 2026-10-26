@@ -1,5 +1,5 @@
 import { ConfirmBody } from './ConfirmBody'
-import type { StepPiece, StepTabPiece } from './stepPiece'
+import type { StepPiece, StepTabPiece } from './piece'
 
 export const confirmPiece: StepPiece<'CONFIRM'> = {
   words: () => ({ words: 'Rückfrage: Löschen oder Abbrechen', short: '', known: true }),

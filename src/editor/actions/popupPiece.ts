@@ -1,7 +1,7 @@
 import type { PopupCloseStep } from '../../core/data/steps/popupClose'
 import type { PopupOpenStep } from '../../core/data/steps/popupOpen'
 import { PopupBody } from './PopupBody'
-import type { StepContext, StepPiece, StepTabPiece, StepWords } from './stepPiece'
+import type { StepContext, StepPiece, StepTabPiece, StepWords } from './piece'
 
 type PopupStep = PopupOpenStep | PopupCloseStep
 

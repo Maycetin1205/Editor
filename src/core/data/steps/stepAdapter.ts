@@ -1,9 +1,5 @@
-import type { Parameter, RuntimeValues } from '../actions'
-import type { RuntimeSource } from '../dataSources'
-import type { JobReason, RunAnswer, RunOptions } from '../jobs'
-import type { RuntimeRelation } from '../relations'
-import type { RuntimeStep, Step, StepKind } from './steps'
-import type { Unread } from '../../unread'
+import type { Parameter } from '../actions'
+import { isUnread, type Unread } from '../../unread'
 
 export interface StepCondition {
   sourceId: string
@@ -13,7 +9,7 @@ export interface StepCondition {
 
 export interface StepBase {
   id: string
-  kind: StepKind
+  kind: string
 
   resultName: string
 
@@ -22,53 +18,39 @@ export interface StepBase {
   onlyIf?: StepCondition
 }
 
-type StepOf<K extends StepKind> = Step & { kind: K }
-type RuntimeStepOf<K extends StepKind> = RuntimeStep & { kind: K }
+// A step as the exported mask carries it: without the id, references turned
+// into names and positions.
+export interface RuntimeStepBase {
+  kind: string
+  resultName: string
+  onlyIf?: StepCondition
+}
 
-interface ExportRefs {
+export interface ExportRefs {
   popupName: (id: string) => string
   stepPosition: (id: string) => string
   columnsIndex: (blockId: string, key: string) => string
 }
 
-export interface StepHost {
-  relation(id: string): RuntimeRelation | undefined
-  sources(): RuntimeSource[]
-  source(id: string): RuntimeSource | undefined
-  rows(source: RuntimeSource): unknown[]
-  readField(row: unknown, code: string): string
-  resolveParameter(binding: Parameter, values: RuntimeValues): string
-  runRelation(relation: RuntimeRelation, params: readonly string[], options?: RunOptions): Promise<RunAnswer>
-  startTool(toolNumber: string, params: readonly string[]): boolean
+export function conditionRead(raw: unknown): { onlyIf?: StepCondition } {
+  if (!isUnread<StepCondition>(raw)) return {}
+  const sourceId = typeof raw.sourceId === 'string' ? raw.sourceId.trim() : ''
+  if (sourceId === '' || typeof raw.rows !== 'boolean') return {}
+  return { onlyIf: { sourceId, rows: raw.rows } }
 }
 
-interface StepRun {
-  host: StepHost
-  root: ParentNode
-  origin: HTMLElement
-  jobOrigin: string
-  lastForRow: boolean
-  values: Readonly<Record<string, string | undefined>>
-  parameterValues: RuntimeValues
-}
-
-interface StepOutcome {
-  failed: boolean
-
-  reason?: JobReason
-
-  answer?: { value: string; raw: unknown; wrote: boolean; confirmed?: boolean; reason?: JobReason; record?: string }
-}
-
-export interface StepAdapter<K extends StepKind> {
-  kind: K
+// What the editor and the export know about a kind of step. Running a step
+// is the runtime's business: see src/runtime/steps.
+export interface StepAdapter<S extends StepBase, R extends RuntimeStepBase> {
+  kind: S['kind']
+  // Whether SoftEngine answers this step: a mask with such a step starts the
+  // host when it loads.
   answers: boolean
-  read(raw: Unread<StepOf<K>>, base: { id: string; resultName: string }): StepOf<K> | null
-  readExported(raw: Unread<RuntimeStepOf<K>>, resultName: string): RuntimeStepOf<K> | null
-  export(step: StepOf<K>, refs: ExportRefs): RuntimeStepOf<K>
-  run(step: RuntimeStepOf<K>, run: StepRun): Promise<StepOutcome>
-  bindings(step: StepOf<K> | RuntimeStepOf<K>): readonly Parameter[]
-  withBindings(step: StepOf<K>, map: (binding: Parameter) => Parameter): StepOf<K>
-  withBlockIds(step: StepOf<K>, newId: (oldId: string) => string | undefined): StepOf<K>
-  relationId(step: StepOf<K> | RuntimeStepOf<K>): string
+  read(raw: Unread<S>, base: { id: string; resultName: string }): S | null
+  readExported(raw: Unread<R>, resultName: string): R | null
+  export(step: S, refs: ExportRefs): R
+  bindings(step: S | R): readonly Parameter[]
+  withBindings(step: S, map: (binding: Parameter) => Parameter): S
+  withBlockIds(step: S, newId: (oldId: string) => string | undefined): S
+  relationId(step: S | R): string
 }

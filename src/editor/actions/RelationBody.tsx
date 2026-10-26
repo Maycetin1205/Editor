@@ -16,7 +16,7 @@ import { PickerControl } from '../controls/PickerControl'
 import type { Reach } from '../origin/reach'
 import { Places, Result } from './Places'
 import { placeEmpty } from './placeOrigins'
-import type { StepBodyProps } from './stepPiece'
+import type { StepBodyProps } from './piece'
 
 export function ReadRelationBody(props: StepBodyProps) {
   return <RelationTab group="read" {...props} />

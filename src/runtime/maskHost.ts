@@ -1,5 +1,5 @@
 import type { RuntimeSource } from '../core/data/dataSources'
-import type { StepHost } from '../core/data/steps/stepAdapter'
+import type { StepHost } from './steps/stepRunner'
 
 export interface MaskHost extends StepHost {
   start(): void

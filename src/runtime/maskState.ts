@@ -1,6 +1,6 @@
 import type { JobView } from '../core/data/jobs'
 import type { MaskHost } from './maskHost'
-import { softEngineHost } from './softEngineHost'
+import { previewHost } from './previewHost'
 
 interface MaskState {
   host: MaskHost
@@ -39,7 +39,9 @@ interface MaskState {
 }
 
 export const maskState: MaskState = {
-  host: softEngineHost,
+  // The preview host answers nothing; src/runtime/softEngineStart.ts puts
+  // SoftEngine in its place when the exported mask starts.
+  host: previewHost,
   selection: {
     chosen: new Map(),
     listeners: new Set(),

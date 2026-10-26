@@ -1,7 +1,7 @@
 import { NAME, Strip } from '@/editor/widgets/Grid'
 import { Segment } from '@/editor/widgets/Segment'
 import { PickerControl } from '../controls/PickerControl'
-import type { StepBodyProps } from './stepPiece'
+import type { StepBodyProps } from './piece'
 
 export function PopupBody({ step, context, onChange }: StepBodyProps) {
   if (step.kind !== 'POPUP_OPEN' && step.kind !== 'POPUP_CLOSE') return null

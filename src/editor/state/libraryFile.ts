@@ -1,10 +1,22 @@
 import { checkDataSources, type DataSource } from '../../core/data/dataSources'
 import { checkRelationTemplates, type RelationTemplate } from '../../core/data/relations'
-import { writeFile } from './fileOnDisk'
-import type { EditorStore } from './EditorStore'
+import { writeFile, type FileOnDisk } from './fileOnDisk'
 import { LIBRARY_SCHEMA_VERSION, liftLibrary } from './librarySchema'
 
 export const LIBRARY_FILE_KIND = 'aufbau-editor-bibliothek'
+
+interface LibraryList<T> {
+  readonly list: readonly T[]
+  replaceAll(entries: readonly T[]): void
+}
+
+// What saving and loading the library need from the editor.
+export interface LibraryEditor {
+  readonly libraryOnDisk: FileOnDisk
+  readonly dataSources: LibraryList<DataSource>
+  readonly relation: LibraryList<RelationTemplate>
+  transaction<T>(run: () => T): T
+}
 
 const LIBRARY_FILE_VERSION = 2
 
@@ -31,7 +43,7 @@ export function packLibrary(content: LibraryContent): string {
   )
 }
 
-export function saveLibraryAsFile(editor: EditorStore): void {
+export function saveLibraryAsFile(editor: LibraryEditor): void {
   const today = new Date().toISOString().slice(0, 10)
   void writeFile(
     editor.libraryOnDisk,
@@ -98,7 +110,7 @@ export function missingOn<T extends { id: string }>(old: readonly T[], fromMask:
   return missing.length === 0 ? old : [...old, ...missing]
 }
 
-export async function loadLibraryFromFile(editor: EditorStore, file: File): Promise<void> {
+export async function loadLibraryFromFile(editor: LibraryEditor, file: File): Promise<void> {
   let text: string
   try {
     text = await file.text()

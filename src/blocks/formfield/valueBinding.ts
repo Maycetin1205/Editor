@@ -4,7 +4,14 @@ import { makeDataLink, recordOf } from '../../runtime/source'
 import { maskState } from '../../runtime/maskState'
 import { readBoundSpot } from '../../runtime/boundSpot'
 import { runEvent } from '../../runtime/events'
-import type { FormField } from './FormField'
+
+// The field as this binding needs it: its value, and whether it fills
+// itself from a lookup instead of from a bound row.
+export interface ValueField extends HTMLElement {
+  value: string
+  fillsSelf(): boolean
+  checkOwnValue(): void
+}
 
 interface Connected {
   row: unknown
@@ -21,11 +28,11 @@ interface Sending {
   kept: string
 }
 
-const data = new WeakMap<FormField, Connected>()
-const wired = new WeakSet<FormField>()
-const sending = new WeakMap<FormField, Sending>()
+const data = new WeakMap<ValueField, Connected>()
+const wired = new WeakSet<ValueField>()
+const sending = new WeakMap<ValueField, Sending>()
 
-function sendingOf(el: FormField): Sending {
+function sendingOf(el: ValueField): Sending {
   const known = sending.get(el)
   if (known) return known
   const made: Sending = { running: false, again: false, kept: el.value }
@@ -33,7 +40,7 @@ function sendingOf(el: FormField): Sending {
   return made
 }
 
-function fill(el: FormField): void {
+function fill(el: ValueField): void {
   el.checkOwnValue()
   if (el.fillsSelf()) {
     data.delete(el)
@@ -58,24 +65,24 @@ function fill(el: FormField): void {
   setSelection(giverIdOf(el), row)
 }
 
-function hydrate(el: FormField): void {
+function hydrate(el: ValueField): void {
   fill(el)
   const state = sendingOf(el)
   if (!state.running) state.kept = el.value
 }
 
-function writeLocal(el: FormField): Connected | undefined {
+function writeLocal(el: ValueField): Connected | undefined {
   const state = data.get(el)
   if (state) maskState.host.writeField(state.row, state.code, el.value)
   return state
 }
 
-function takeBack(el: FormField, value: string): void {
+function takeBack(el: ValueField, value: string): void {
   el.value = value
   writeLocal(el)
 }
 
-function sendChange(el: FormField): void {
+function sendChange(el: ValueField): void {
   const state = sendingOf(el)
   if (state.running) {
     state.again = true
@@ -104,7 +111,7 @@ function sendChange(el: FormField): void {
   })()
 }
 
-function wire(el: FormField): void {
+function wire(el: ValueField): void {
   if (wired.has(el)) return
   wired.add(el)
   el.addEventListener('input', () => {
@@ -116,7 +123,7 @@ function wire(el: FormField): void {
   })
 }
 
-const link = makeDataLink<FormField>({ hydrate, wire })
+const link = makeDataLink<ValueField>({ hydrate, wire })
 
 export const connectValue = link.connect
 export const disconnectValue = link.disconnect

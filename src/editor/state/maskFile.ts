@@ -5,13 +5,13 @@ import type { DataSource } from '../../core/data/dataSources'
 import type { RelationTemplate } from '../../core/data/relations'
 import { collectDataSources } from '../../export/usedSources'
 import { collectRelation } from '../../export/usedRelations'
-import { writeFile } from './fileOnDisk'
+import { writeFile, type FileOnDisk } from './fileOnDisk'
 import { canPickFolder, reasonOf } from './folderOnDisk'
-import type { EditorStore } from './EditorStore'
+import type { Deed, SideTab } from './editorStore/viewState'
 import { EDITOR_VERSION, newerEditor } from './editorVersion'
 import { leftoverForFile, NO_LEFTOVER, treeForFile, type Leftover } from './leftover'
 import { LIBRARY_FILE_KIND } from './libraryFile'
-import type { MaskEntry } from './maskFolder'
+import type { MaskEntry, MaskFolder } from './maskFolder'
 import { CURRENT_SCHEMA_VERSION } from './maskSchema'
 import { readMask } from './readMask'
 import type { NoticeLine, NoticeText } from '../widgets/Notice'
@@ -44,6 +44,26 @@ type EntryRead = { ok: true; content: MaskContent; note: ReadNote; modified: num
 
 const NO_MASK = 'ist keine Maske des Editors.'
 
+// What saving and opening a mask need from the editor.
+export interface MaskEditor {
+  readonly tree: Readonly<MaskTree>
+  readonly leftover: Leftover
+  readonly dataSources: { readonly list: readonly DataSource[] }
+  readonly relation: { readonly list: readonly RelationTemplate[] }
+  readonly maskOnDisk: FileOnDisk
+  readonly maskFolder: MaskFolder
+  readonly saveWaits: boolean
+  showNotice(notice: NoticeText | null): void
+  replaceMask(content: MaskContent, from?: MaskFileAt | null, locked?: boolean): void
+  unlockMask(): void
+  keepIn(at: Omit<MaskFileAt, 'modified'>, holds: string | null, created?: boolean): void
+  showSide(tab: SideTab): void
+  waitToSave(on: boolean): void
+  markDone(deed: Deed): void
+  folderReady(): Promise<boolean>
+  pickMaskFolder(): Promise<void>
+}
+
 export function packMask(
   tree: MaskTree,
   sources: readonly DataSource[],
@@ -74,7 +94,7 @@ function maskFileName(): string {
   return `aufbau-maske-${new Date().toISOString().slice(0, 10)}.json`
 }
 
-function packed(editor: EditorStore, tree: MaskTree = editor.tree): string {
+function packed(editor: MaskEditor, tree: MaskTree = editor.tree): string {
   return packMask(tree, editor.dataSources.list, editor.relation.list, editor.leftover)
 }
 
@@ -85,7 +105,7 @@ function treeWithout(tree: MaskTree, names: readonly string[]): MaskTree {
   return { ...tree, [ROOT_ID]: { ...root, values } }
 }
 
-async function saveMask(editor: EditorStore): Promise<void> {
+async function saveMask(editor: MaskEditor): Promise<void> {
   const disk = editor.maskOnDisk
   if (disk.attached && disk.locked) {
     editor.showNotice({
@@ -137,7 +157,7 @@ async function saveMask(editor: EditorStore): Promise<void> {
   editor.markDone('saved')
 }
 
-export async function saveOrAsk(editor: EditorStore): Promise<void> {
+export async function saveOrAsk(editor: MaskEditor): Promise<void> {
   if (!editor.maskOnDisk.attached && canPickFolder() && editor.maskFolder.state === 'none') {
     editor.showSide('masks')
     editor.waitToSave(true)
@@ -146,14 +166,14 @@ export async function saveOrAsk(editor: EditorStore): Promise<void> {
   await saveMask(editor)
 }
 
-export async function chooseMaskFolder(editor: EditorStore): Promise<void> {
+export async function chooseMaskFolder(editor: MaskEditor): Promise<void> {
   await editor.pickMaskFolder()
   if (!editor.saveWaits) return
   editor.waitToSave(false)
   await saveMask(editor)
 }
 
-export async function saveAsTemplate(editor: EditorStore): Promise<void> {
+export async function saveAsTemplate(editor: MaskEditor): Promise<void> {
   try {
     if (!(await editor.folderReady())) return
     await editor.maskFolder.saveTemplate(
@@ -185,7 +205,7 @@ export function mustGuard(note: ReadNote): boolean {
   return note.newer !== null || note.lines.length > 0
 }
 
-export function readNotice(editor: EditorStore, name: string, note: ReadNote, locked: boolean): NoticeText | null {
+export function readNotice(editor: MaskEditor, name: string, note: ReadNote, locked: boolean): NoticeText | null {
   if (!mustGuard(note)) return null
   const lead = [
     note.newer === null
@@ -210,12 +230,12 @@ export function readNotice(editor: EditorStore, name: string, note: ReadNote, lo
   }
 }
 
-function tellRead(editor: EditorStore, name: string, note: ReadNote, locked: boolean): void {
+function tellRead(editor: MaskEditor, name: string, note: ReadNote, locked: boolean): void {
   const notice = readNotice(editor, name, note, locked)
   if (notice !== null) editor.showNotice(notice)
 }
 
-export async function openMaskFile(editor: EditorStore, entry: MaskEntry): Promise<string | null> {
+export async function openMaskFile(editor: MaskEditor, entry: MaskEntry): Promise<string | null> {
   const result = await readEntry(entry)
   if (!result.ok) return result.why
   const locked = mustGuard(result.note)
@@ -224,7 +244,7 @@ export async function openMaskFile(editor: EditorStore, entry: MaskEntry): Promi
   return null
 }
 
-export async function newMaskFrom(editor: EditorStore, entry: MaskEntry): Promise<string | null> {
+export async function newMaskFrom(editor: MaskEditor, entry: MaskEntry): Promise<string | null> {
   const result = await readEntry(entry)
   if (!result.ok) return result.why
   editor.replaceMask({
@@ -235,7 +255,7 @@ export async function newMaskFrom(editor: EditorStore, entry: MaskEntry): Promis
   return null
 }
 
-export async function loadMaskFromFile(editor: EditorStore, file: File): Promise<string | null> {
+export async function loadMaskFromFile(editor: MaskEditor, file: File): Promise<string | null> {
   let text: string
   try {
     text = await file.text()

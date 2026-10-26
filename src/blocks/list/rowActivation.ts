@@ -1,4 +1,4 @@
-import { chainsRead } from '../../core/data/steps/chains'
+import { chainsRead } from '../../core/data/steps/chainsRead'
 import { selectionFor, giverIdOf, chooseSelection, setSelection } from '../../runtime/selection'
 import { runEvent, type ActionResult } from '../../runtime/events'
 import { rowsIndexOf, rowsTraitOf } from './sourceRows'
