@@ -1,7 +1,6 @@
 import { css, html, nothing, type TemplateResult } from 'lit'
 import { fieldProperty, type Property } from '../../core/block/property'
 import type { BlockElement } from '../base/BlockElement'
-import { animalOf, animalOutline, type Animal } from './animal'
 
 export function spotBinding(label: string, attribute: string): Property<string> {
   return fieldProperty({
@@ -14,6 +13,7 @@ export function spotBinding(label: string, attribute: string): Property<string> 
 
 export const AVATAR_SPOT = { prop: 'avatar', name: 'Avatar' } as const
 
+// The first letter of the value on a soft circle, whatever the value.
 export const avatarStyle = css`
   .avatar {
     box-sizing: border-box;
@@ -23,34 +23,19 @@ export const avatarStyle = css`
     display: grid;
     place-items: center;
     border-radius: 50%;
-    background: var(--animal-soft, var(--se-neutral-soft));
-    color: var(--animal, var(--se-ink-2));
-  }
-  .avatar svg { width: 56%; height: 56%; }
-  .avatar.letter {
+    background: var(--se-neutral-soft);
+    color: var(--se-ink-2);
     font-size: var(--se-fs-lg);
     font-weight: 700;
     line-height: 1;
   }
 `
 
-function animalAvatarTpl(animal: Animal): TemplateResult {
-  return html`<span
-    class="avatar"
-    style="--animal:var(--se-animal-${animal});--animal-soft:var(--se-animal-${animal}-soft)"
-  >${animalOutline(animal)}</span>`
-}
-
 const initial = (text: string): string => (Array.from(text.trim())[0] ?? '').toUpperCase()
-
-function letterAvatarTpl(text: string): TemplateResult {
-  return html`<span class="avatar letter" aria-hidden="true">${initial(text)}</span>`
-}
 
 function avatarTpl(value: string): TemplateResult | typeof nothing {
   if (value.trim() === '') return nothing
-  const animal = animalOf(value)
-  return animal === undefined ? letterAvatarTpl(value) : animalAvatarTpl(animal)
+  return html`<span class="avatar" aria-hidden="true">${initial(value)}</span>`
 }
 
 export const cardSpotStyle = css`
@@ -66,8 +51,8 @@ export interface Card<P extends string> {
 }
 
 /* Mask and editor draw a card or row with this one template, so that the
-   editor shows where each field lands and how it looks (21.10.). The name
-   of an unbound spot is no data. */
+   editor shows where each field lands and how it looks. The name of an
+   unbound spot is no data. */
 export function cardOf<P extends string>(
   el: BlockElement,
   spots: readonly { prop: P; name: string }[],
@@ -99,7 +84,7 @@ export function cardOf<P extends string>(
     if (values !== null) return avatarTpl(values.avatar ?? '')
     const text = el.spotTexts.avatar ?? ''
     return html`<span
-      class="avatar letter"
+      class="avatar"
       data-ff-spot="avatar"
       data-ff-in-card
       ?data-ff-bound=${text !== ''}
