@@ -15,6 +15,7 @@ import { hasRecordNumber, LIST_GRID, listCapabilities, RecordList, tableStyle, t
 import { closeLookupFor, coerceLookupColumns } from '../lookup/lookup'
 import { alignSuggestionsFrom, suggestionStyle } from '../lookup/suggestionList'
 import { reportPendingMarks } from '../../runtime/pendingState'
+import { inOpenPopup } from '../../runtime/steps/popup'
 import { LEADS_TO_TYPING_ATTR } from '../../core/block/typingMarks'
 import { enterCell, cellsInputStyle, cellsFields } from './cells'
 import { captureDecoration, rowsBelow } from './body'
@@ -220,10 +221,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
 
   private readonly maskKey = (e: KeyboardEvent): void => {
     if (this.preview || keyIntent(e) !== 'insert') return
-    const all = Array.from(this.ownerDocument.querySelectorAll<Capture>(Capture.tag))
-    const path = e.composedPath()
-    const responsible = all.find((t) => path.includes(t)) ?? all[0]
-    if (responsible !== this) return
+    if (insertTaker(this.ownerDocument, e.composedPath()) !== this) return
     e.preventDefault()
     this.focusCaptureCell(firstCell(this._ledger.row))
   }
@@ -263,6 +261,16 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
   override render(): TemplateResult {
     return this._list.render()
   }
+}
+
+// The capture block Insert goes to: the one the focus is in, else the first
+// one shown, one in the open popup before those under it.
+function insertTaker(doc: Document, path: readonly EventTarget[]): Capture | undefined {
+  const all = Array.from(doc.querySelectorAll<Capture>(Capture.tag))
+  const focused = all.find((t) => path.includes(t))
+  if (focused) return focused
+  const shown = all.filter((t) => t.getClientRects().length > 0)
+  return shown.find((t) => inOpenPopup(t)) ?? shown[0]
 }
 
 defineBlock(Capture, {

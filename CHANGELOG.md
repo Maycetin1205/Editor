@@ -20,6 +20,7 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - Kanban, Spalte nach Uhrzeit: sind alle Zeiten vorbei, steht die Jetzt-Linie vor den Karten ohne Uhrzeit, nicht mehr dahinter.
 - Erfassung: nach dem Erfassen einer korrigierten Zeile gilt die Auswahl der Maske für diese Zeile, nicht mehr für die letzte erfasste Zeile.
 - Erfassung: wird eine zurückgeholte Zeile in der Tippzeile ganz geleert und mit Enter (oder Tab, Pfeil ab) abgeschlossen, fragt die Erfassung „Löschen / Abbrechen“, wie bei einer gebuchten Zeile. Vorher war die Zeile ohne Frage weg. Abbrechen lässt die Zeile in der Korrektur, Escape in der Tippzeile setzt sie wie bisher zurück.
+- Erfassung: Einfügen (Taste Einfg) ohne Fokus in einer Erfassung geht an die erste sichtbare Erfassung, bei offenem Popup an die im Popup. Vorher ging die Taste an die erste Erfassung im Dokument, auch wenn sie in einem geschlossenen Popup stand, und nichts geschah.
 
 ### Für Entwickler
 
