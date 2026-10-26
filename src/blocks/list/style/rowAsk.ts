@@ -1,4 +1,7 @@
 import { css } from 'lit'
+import { TABLE_PART_CSS } from '../parts'
+
+const { body, row } = TABLE_PART_CSS
 
 // A row that asks before it goes, and a row whose deletion is on its way.
 export const rowAskStyle = css`
@@ -7,9 +10,9 @@ export const rowAskStyle = css`
      carries the ring. The row stands above the capture row, which sticks to
      the bottom of the list one layer up; under the last record the window
      would hide behind it. */
-  .row.asking,
-  .body > .row.asking:hover,
-  .body > .row.asking:focus-visible {
+  .${row}.asking,
+  .${body} > .${row}.asking:hover,
+  .${body} > .${row}.asking:focus-visible {
     position: relative;
     z-index: 2;
     background: var(--se-danger-tint);
@@ -26,7 +29,7 @@ export const rowAskStyle = css`
     border-radius: var(--se-radius-xs);
     box-shadow: var(--se-ask-edge);
   }
-  .row.ask-above > .row-ask { top: auto; bottom: calc(100% + 2px); }
+  .${row}.ask-above > .row-ask { top: auto; bottom: calc(100% + 2px); }
   .row-ask > button {
     height: 24px;
     padding: 0 10px;
@@ -52,8 +55,8 @@ export const rowAskStyle = css`
 
   /* Struck through and faint, its note over the last column, until
      SoftEngine hands the rows over anew. */
-  .row.dropping { position: relative; }
-  .row.dropping > [role='cell'] {
+  .${row}.dropping { position: relative; }
+  .${row}.dropping > [role='cell'] {
     color: var(--se-faint);
     text-decoration: line-through;
   }

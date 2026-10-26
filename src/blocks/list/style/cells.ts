@@ -1,9 +1,12 @@
 import { css } from 'lit'
+import { TABLE_PART_CSS } from '../parts'
+
+const { head, headText, row, subline, sub, right, hidden, typable, cellHolder, cellInput } = TABLE_PART_CSS
 
 // The cells of head and rows, and the grey line under a record.
 export const cellsStyle = css`
-  .head > div,
-  .row > div {
+  .${head} > div,
+  .${row} > div {
     padding: 0 var(--se-cell-x);
     line-height: calc(var(--row-height) - 1px);
     min-width: 0;
@@ -11,14 +14,14 @@ export const cellsStyle = css`
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .row > div { color: var(--se-ink); }
+  .${row} > div { color: var(--se-ink); }
 
   /* A column that stands right, with its sum: the figures line up. */
-  .row > div.right {
+  .${row} > div.${right} {
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
-  .head > div.right { justify-content: flex-end; text-align: right; }
+  .${head} > div.${right} { justify-content: flex-end; text-align: right; }
 
   /* A record with a grey line is two lines high: the row on top and,
      under a cell of it, the column anchored there, as wide as the cell.
@@ -26,12 +29,12 @@ export const cellsStyle = css`
      is grey: its value in the second ink, its name the head of its column
      and looking like one, small on the baseline of the value.
      A record without a value there stays one line high. */
-  .row.subline {
+  .${row}.${subline} {
     height: calc(var(--row-height) + var(--sub-height));
     grid-template-rows: calc(var(--row-height) - var(--se-border)) var(--sub-height);
   }
-  .row.subline > [role='cell']:not(.sub) { grid-row: 1; }
-  .row > .sub {
+  .${row}.${subline} > [role='cell']:not(.${sub}) { grid-row: 1; }
+  .${row} > .${sub} {
     grid-row: 2;
     display: flex;
     align-items: baseline;
@@ -39,14 +42,14 @@ export const cellsStyle = css`
     line-height: calc(var(--sub-height) - 4px);
     font-size: var(--se-fs-sm);
   }
-  .row > .sub.right { justify-content: flex-end; }
-  .sub > .head-text {
+  .${row} > .${sub}.${right} { justify-content: flex-end; }
+  .${sub} > .${headText} {
     flex: none;
     font-size: var(--se-fs-xs);
     font-weight: 600;
     color: var(--se-head-ink);
   }
-  .row > .sub > .sub-value {
+  .${row} > .${sub} > .sub-value {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -55,13 +58,13 @@ export const cellsStyle = css`
 
   /* A cell of the grey line that takes typing lets the suggestion list
      hang out; its input is as small as the line. */
-  .row > .sub.typable { overflow: visible; }
-  .sub > .cell-holder { flex: 1 1 0; }
-  .sub .cell-input {
+  .${row} > .${sub}.${typable} { overflow: visible; }
+  .${sub} > .${cellHolder} { flex: 1 1 0; }
+  .${sub} .${cellInput} {
     height: calc(var(--sub-height) - 4px);
     font-size: var(--se-fs-sm);
   }
 
   /* Only dimmed in the editor: it is a real column the builder still edits. */
-  :host([preview]) .hidden { opacity: 0.45; }
+  :host([preview]) .${hidden} { opacity: 0.45; }
 `

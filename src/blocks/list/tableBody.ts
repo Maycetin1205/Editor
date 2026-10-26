@@ -1,5 +1,6 @@
 import { html, nothing, type TemplateResult } from 'lit'
 import { columnsChoiceTpl, type ColumnsChoiceAct, type ColumnsChoicePlacement } from './columnPicker'
+import { TABLE_PART } from './parts'
 import { tableHead, type HeadAct, type HeadPlacement } from './tableHead'
 import { tableRows, tableRuler, type RowsAct, type RowsPlacement } from './tableRows'
 import { tableSearch } from './tableSearch'
@@ -24,7 +25,7 @@ export interface BodyAct extends HeadAct, RowsAct {
 export function tableBody(placement: BodyPlacement, act: BodyAct): TemplateResult {
   return html`
       ${tableSearch(placement, act)}
-      <div class="body" role="table" tabindex="-1">
+      <div class=${TABLE_PART.body} role="table" tabindex="-1">
       ${tableHead(placement, act)}
         ${tableRows(placement, act)}
         ${placement.bottom}

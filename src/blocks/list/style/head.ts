@@ -1,15 +1,18 @@
 import { css } from 'lit'
+import { TABLE_PART_CSS } from '../parts'
+
+const { head, headText } = TABLE_PART_CSS
 
 // The sticky head: titles, the required star, the sort arrow and the handles
 // that drag a column wider.
 export const headStyle = css`
-  .head {
+  .${head} {
     display: grid;
     min-height: var(--row-height);
     box-sizing: border-box;
   }
 
-  .head {
+  .${head} {
     position: sticky;
     top: 0;
     z-index: 1;
@@ -23,7 +26,7 @@ export const headStyle = css`
 
   /* Two title lines fit exactly one tick: the page count takes the head for
      one row, anything taller would scroll the body. */
-  .head > div {
+  .${head} > div {
     display: flex;
     align-items: center;
     line-height: calc((var(--tick) - var(--se-border)) / 2);
@@ -34,14 +37,14 @@ export const headStyle = css`
     position: relative;
   }
   /* The star of a required column, as the reception mask marks its fields. */
-  .head > div > .required {
+  .${head} > div > .required {
     flex: none;
     margin-left: 3px;
     color: var(--se-danger);
     font-style: normal;
   }
   /* Breaks only between words; a word too long for the column is cut off. */
-  .head .head-text {
+  .${head} .${headText} {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -52,9 +55,9 @@ export const headStyle = css`
   }
   /* A narrow column: its head keeps its words whole by going smaller and
      tighter instead of being cut off. */
-  .head > div { container-type: inline-size; }
+  .${head} > div { container-type: inline-size; }
   @container (max-width: 84px) {
-    .head-text { font-size: var(--se-fs-xs); }
+    .${headText} { font-size: var(--se-fs-xs); }
   }
 
   /* A grid child of its own that hangs over the column line, which alone is

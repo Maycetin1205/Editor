@@ -1,5 +1,6 @@
 import { TAKES_KEYS_ATTR } from '../../core/block/typingMarks'
 import type { RowAsk } from './rowAsk'
+import { TABLE_PART } from './parts'
 import { actionKeyAtRow, takesActionKey, type RowsChoice } from './rowActivation'
 
 interface KeysElement extends HTMLElement {
@@ -43,7 +44,7 @@ export class HostKeys {
 
   markTable(): void {
     this.el.shadowRoot
-      ?.querySelector('.table')
+      ?.querySelector(`.${TABLE_PART.table}`)
       ?.toggleAttribute(TAKES_KEYS_ATTR, !this.el.preview && takesActionKey(this.el))
   }
 

@@ -3,6 +3,7 @@ import { styleMap } from 'lit/directives/style-map.js'
 import type { Column } from '../parts/column'
 import { figureAt, type RowLayout } from '../parts/cell'
 import { widthsHandles, type ColumnsGrid, type WidthsHost } from './columnWidth'
+import { TABLE_PART } from './parts'
 
 export interface HeadPlacement {
   columns: readonly Column[]
@@ -39,9 +40,9 @@ function headCellTpl(placement: HeadPlacement, act: HeadAct, s: Column, slot: nu
   return html`<div
     class=${
       [
-        s.hidden === true ? 'hidden' : '',
-        figureAt(placement.layout, slot) !== null ? 'right' : '',
-        placement.held(slot) ? 'held' : '',
+        s.hidden === true ? TABLE_PART.hidden : '',
+        figureAt(placement.layout, slot) !== null ? TABLE_PART.right : '',
+        placement.held(slot) ? TABLE_PART.held : '',
       ]
         .filter((k) => k !== '')
         .join(' ') || nothing
@@ -52,7 +53,7 @@ function headCellTpl(placement: HeadPlacement, act: HeadAct, s: Column, slot: nu
     style="grid-row: 1; grid-column: ${i + 1}"
     @click=${() => act.clickHead(slot)}
     @contextmenu=${placement.columnPickerOn ? (e: MouseEvent) => act.openColumnPicker(e) : nothing}
-  ><span class="head-text">${s.title}</span>${placement.required(slot) ? html`<em class="required">*</em>` : nothing}${
+  ><span class=${TABLE_PART.headText}>${s.title}</span>${placement.required(slot) ? html`<em class="required">*</em>` : nothing}${
     !placement.editable && placement.sortColumn === slot
       ? html`<span class="sort-arrow">${placement.sortAscending ? ' ▲' : ' ▼'}</span>`
       : ''
@@ -60,7 +61,7 @@ function headCellTpl(placement: HeadPlacement, act: HeadAct, s: Column, slot: nu
 }
 
 export function tableHead(placement: HeadPlacement, act: HeadAct): TemplateResult {
-  return html`<div class="head" role="row" style=${styleMap(placement.cols)}>
+  return html`<div class=${TABLE_PART.head} role="row" style=${styleMap(placement.cols)}>
         ${placement.columns.map((s, i) => headCellTpl(placement, act, s, placement.slots[i], i))}
         ${widthsHandles(placement.columns.length, act.widths)}
       </div>`

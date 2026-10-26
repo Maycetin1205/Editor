@@ -4,6 +4,7 @@ import { styleMap } from 'lit/directives/style-map.js'
 import { markHit } from '../parts/cellSearch'
 import { shownValue, type Column } from '../parts/column'
 import type { ColumnsGrid } from './columnWidth'
+import { TABLE_PART } from './parts'
 import { figureAt, greyCellTpl, type GreyPart, type RowLayout } from '../parts/cell'
 import type { RowDecoration } from './listHooks'
 import { rowClicked, rowDoubleClicked, rowKeyDown } from './rowInput'
@@ -75,9 +76,9 @@ function cellTpl(
 ): TemplateResult {
   const main = partOf(placement, decoration, rawIndex, s, slot)
   const classes = [
-    s.hidden === true ? 'hidden' : '',
-    figureAt(placement.layout, slot) !== null ? 'right' : '',
-    main.typable ? 'typable' : '',
+    s.hidden === true ? TABLE_PART.hidden : '',
+    figureAt(placement.layout, slot) !== null ? TABLE_PART.right : '',
+    main.typable ? TABLE_PART.typable : '',
   ]
     .filter((k) => k !== '')
     .join(' ')
@@ -102,15 +103,25 @@ function greyParts(
   return parts.some((part) => part !== null) ? parts : null
 }
 
+function rowClass(placement: RowsPlacement, rawIndex: number | null, grey: boolean, decoration: RowDecoration): string {
+  return [
+    TABLE_PART.row,
+    rawIndex !== null && placement.showsRows ? 'selectable' : '',
+    rawIndex !== null && rawIndex === placement.selectionIndex ? TABLE_PART.selected : '',
+    grey ? TABLE_PART.subline : '',
+    decoration.className,
+  ]
+    .filter((k) => k !== '')
+    .join(' ')
+}
+
 function rowTpl(placement: RowsPlacement, act: RowsAct, rawIndex: number | null, viewIndex: number): TemplateResult {
   const activatable = rawIndex !== null
   const decoration = placement.decoration(rawIndex)
   const grey = greyParts(placement, decoration, rawIndex)
   const activate = (): void => act.activateRow(rawIndex, viewIndex)
   return html`<div
-    class="row${rawIndex !== null && placement.showsRows ? ' selectable' : ''}${
-      rawIndex !== null && rawIndex === placement.selectionIndex ? ' selected' : ''
-    }${grey !== null ? ' subline' : ''}${decoration.className === '' ? '' : ' ' + decoration.className}"
+    class=${rowClass(placement, rawIndex, grey !== null, decoration)}
     role="row"
     data-status=${decoration.status === '' ? nothing : decoration.status}
     data-ff-row=${rawIndex === null ? nothing : placement.keyOf(rawIndex)}
@@ -140,10 +151,10 @@ export function tableRows(placement: RowsPlacement, act: RowsAct): ReturnType<ty
 // Empty lines under the records, down to the foot.
 export function tableRuler(placement: RowsPlacement): TemplateResult {
   const ticks = placement.rulerTicks ?? 0
-  return html`<div class="ruler" role="presentation">${Array.from(
+  return html`<div class=${TABLE_PART.ruler} role="presentation">${Array.from(
     { length: ticks },
     () => html`<div
-    class="row"
+    class=${TABLE_PART.row}
     role="presentation"
     style=${styleMap(placement.cols)}
   >${placement.columns.map(() => html`<div role="cell"></div>`)}</div>`,

@@ -7,6 +7,7 @@ import { maskHost } from '../../runtime/host'
 import { moveRowsFocus, rowElement } from './rowFocus'
 import { rowsIndexOf, rowsTraitOf } from './sourceRows'
 import type { RowDecoration } from './listHooks'
+import { TABLE_PART } from './parts'
 
 interface AskElement extends HTMLElement {
   rawRows: unknown[]
@@ -94,7 +95,7 @@ export class RowAsk {
         : this.el.rawRows.findIndex((row) => rowsIndexOf(this.el, row) === detail.record)
     const row = rawIndex < 0 ? undefined : this.rowAt(rawIndex)
     if (row === undefined) return
-    const body = row.closest('.body')
+    const body = row.closest(`.${TABLE_PART.body}`)
     const frame = row.getBoundingClientRect()
     const name = row.querySelectorAll<HTMLElement>(':scope > [role="cell"]')[1]?.getBoundingClientRect()
     const zoom = row.offsetWidth > 0 ? frame.width / row.offsetWidth : 1

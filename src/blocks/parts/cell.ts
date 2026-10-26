@@ -1,5 +1,6 @@
 import { html, nothing, type TemplateResult } from 'lit'
 import type { Column, ColumnView, Figure } from './column'
+import { TABLE_PART } from '../list/parts'
 
 export interface RowLayout {
   main: ColumnView
@@ -50,11 +51,11 @@ export interface GreyPart {
 
 export function greyCellTpl(at: number, part: GreyPart | null, spot?: number): TemplateResult {
   const classes = [
-    'sub',
-    part !== null && part.figure !== null ? 'right' : '',
-    part?.column.hidden === true ? 'hidden' : '',
-    part?.typable === true ? 'typable' : '',
-    part?.held === true ? 'held' : '',
+    TABLE_PART.sub,
+    part !== null && part.figure !== null ? TABLE_PART.right : '',
+    part?.column.hidden === true ? TABLE_PART.hidden : '',
+    part?.typable === true ? TABLE_PART.typable : '',
+    part?.held === true ? TABLE_PART.held : '',
   ]
     .filter((k) => k !== '')
     .join(' ')
@@ -68,7 +69,7 @@ export function greyCellTpl(at: number, part: GreyPart | null, spot?: number): T
   >${
     part === null
       ? nothing
-      : html`<span class="head-text">${part.column.title}</span>${
+      : html`<span class=${TABLE_PART.headText}>${part.column.title}</span>${
           part.typable
             ? part.content
             : part.content === ''

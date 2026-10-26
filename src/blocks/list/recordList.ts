@@ -14,6 +14,7 @@ import { WidthsState } from './columnWidth'
 import { ColumnsChoiceState } from './columnPicker'
 import { tableRenderModel, type TableRenderModel } from './tableModel'
 import type { ListSettings } from './listDeclaration'
+import { TABLE_PART } from './parts'
 import { columnsView, listEmptyState, rowLayoutOf } from './listLayout'
 import { WITHOUT_DECORATION, type ListHooks, type RowDecoration, type RowsBelow } from './listHooks'
 import { tableBody, type BodyAct, type BodyPlacement } from './tableBody'
@@ -186,7 +187,7 @@ export class RecordList implements ReactiveController {
   }
 
   private openColumnPicker(e: MouseEvent): void {
-    const frame = this.el.shadowRoot?.querySelector('.table')?.getBoundingClientRect()
+    const frame = this.el.shadowRoot?.querySelector(`.${TABLE_PART.table}`)?.getBoundingClientRect()
     if (!frame) return
     this._choice.openAt(e, frame)
   }
@@ -197,7 +198,7 @@ export class RecordList implements ReactiveController {
     const bottom = this.hooks?.bottom() ?? null
     const decoration = this.decoration()
     const view = this.renderModel(layout, bottom?.count ?? 0)
-    return html`<div class="table" style=${styleMap({
+    return html`<div class=${TABLE_PART.table} style=${styleMap({
       '--tick': `${view.tick}px`,
       '--row-height': `${view.tick}px`,
       '--sub-height': `${subHeight}px`,
