@@ -6,7 +6,7 @@ import { warn } from '../../runtime/log'
 import { maskHost } from '../../runtime/host'
 import { moveRowsFocus, rowElement } from './rowFocus'
 import { rowsIndexOf, rowsTraitOf } from './sourceRows'
-import type { RowDecoration } from './tableBody'
+import type { RowDecoration } from './listHooks'
 
 interface AskElement extends HTMLElement {
   rawRows: unknown[]

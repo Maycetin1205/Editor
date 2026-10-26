@@ -15,7 +15,9 @@ import { ColumnsChoiceState } from './columnPicker'
 import { tableRenderModel } from './tableModel'
 import type { ListSettings } from './listDeclaration'
 import type { RowLayout } from '../parts/cell'
-import { WITHOUT_DECORATION, tableFoot, tableBody, type RowsBelow, type RowDecoration } from './tableBody'
+import { WITHOUT_DECORATION, type ListHooks, type RowDecoration } from './listHooks'
+import { tableBody } from './tableBody'
+import { tableFoot } from './tableFoot'
 import { activateRow, actionKeyAtRow, takesActionKey, RowsChoice, rowDouble } from './rowActivation'
 import {
   followSource,
@@ -32,20 +34,6 @@ interface ListElement extends RowsElement, ListSettings, MeasureTarget, Reactive
   readonly preview: boolean
   editable: boolean
   hasUpdated: boolean
-}
-
-interface ListHooks {
-  cellValue: (rawIndex: number, slot: number) => string
-
-  decoration: () => (rawIndex: number | null) => RowDecoration
-
-  required: (slot: number) => boolean
-
-  held: (slot: number) => boolean
-
-  greyLine: (shown: readonly number[]) => ReadonlyMap<number, number>
-
-  bottom: () => RowsBelow | null
 }
 
 interface ListShowQuestion {
