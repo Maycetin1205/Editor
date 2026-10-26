@@ -1,7 +1,12 @@
 import type { PendingKind, WrittenRow } from '../../../core/block/capability'
 import type { CaptureColumn } from '../column'
 import type { CaptureContext } from '../row/context'
-import type { CaptureRow, Helpers } from './captureRow'
+import { clearRow, type CaptureRow } from '../row/captureRow'
+import { touched, valueIn } from '../row/cellValues'
+import { computeCells } from '../row/computedCells'
+import { adoptRow, helpersNow, type Helpers } from '../row/rowHelpers'
+import { openSplit } from '../row/rowSplit'
+import { firstCell, holdBack } from '../row/typing'
 import type { SplitPick } from '../split/splitState'
 import type { RowState, RowsStatus } from './outbound'
 
@@ -98,7 +103,7 @@ export class CapturedRows {
     if (outcome === 'nothing') return false
     if (outcome === 'split') this.host.splitOpened()
     else if (outcome === 'captured') this.host.captured()
-    else if (outcome === 'waits') this.row.askCapture()
+    else if (outcome === 'waits') this.row.cells.captureAsked = true
     else {
       this.host.report()
       this.host.focusCell(outcome.missing)
@@ -107,32 +112,32 @@ export class CapturedRows {
   }
 
   private capture(context: CaptureContext): 'captured' | 'nothing' | 'waits' | 'split' | { missing: number } {
-    this.row.compute(context)
-    const values = context.columns.map((_, i) => this.row.valueIn(context, i))
+    computeCells(this.row, context)
+    const values = context.columns.map((_, i) => valueIn(this.row, context, i))
     const back = this.correction
     if (values.every((w) => w === '')) {
       if (!back) return 'nothing'
       this.correction = null
-      this.row.clear()
+      clearRow(this.row)
       return 'captured'
     }
-    const missing = this.row.holdBack()
+    const missing = holdBack(this.row)
     if (missing !== -1) return { missing }
-    if (this.row.waits) return 'waits'
-    if (this.row.openSplit(context) !== 'none') return 'split'
+    if (this.row.cells.waiting.size > 0) return 'waits'
+    if (openSplit(this.row, context) !== 'none') return 'split'
     if (back) {
       this.rows = [
         ...this.rows.slice(0, back.slot),
-        { key: this.topKey, values, ...this.row.helpersNow() },
+        { key: this.topKey, values, ...helpersNow(this.row) },
         ...this.rows.slice(back.slot),
       ]
       this.nextKey += 1
       this.correction = null
     } else {
-      this.rows = [...this.rows, { key: this.topKey, values, ...this.row.helpersNow() }]
+      this.rows = [...this.rows, { key: this.topKey, values, ...helpersNow(this.row) }]
       this.nextKey += 1
     }
-    this.row.clear()
+    clearRow(this.row)
     this.host.rowAdded()
     return 'captured'
   }
@@ -156,21 +161,21 @@ export class CapturedRows {
     if (now === -1) return
     this.rows = this.rows.filter((_, i) => i !== now)
     this.correction = { row, slot: now }
-    this.row.adoptRow(context, row.values, row)
+    adoptRow(this.row, context, row.values, row)
     this.host.report()
-    this.host.focusCell(this.row.firstCell)
+    this.host.focusCell(firstCell(this.row))
   }
 
   giveUp(): boolean {
     const back = this.correction
-    if (back === null && !this.row.touched) return false
+    if (back === null && !touched(this.row)) return false
     if (back !== null) {
       this.rows = [...this.rows.slice(0, back.slot), back.row, ...this.rows.slice(back.slot)]
       this.correction = null
     }
-    this.row.clear()
+    clearRow(this.row)
     this.host.report()
-    this.host.focusCell(this.row.firstCell)
+    this.host.focusCell(firstCell(this.row))
     return true
   }
 

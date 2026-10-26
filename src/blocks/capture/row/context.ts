@@ -66,19 +66,6 @@ export function targetIn(context: CaptureContext, index: number): CellTarget {
   return cellTargetOf(context.columns[index], context.sourceId)
 }
 
-export function neighbourSlot(shown: readonly number[], from: number, direction: 1 | -1): number {
-  const next = direction === 1 ? shown.find((slot) => slot > from) : shown.findLast((slot) => slot < from)
-  return next ?? -1
-}
-
-export function missingRequired(
-  columns: readonly CaptureColumn[],
-  values: readonly string[],
-  shown: readonly number[],
-): number {
-  return shown.find((slot) => columns[slot]?.required === true && (values[slot] ?? '').trim() === '') ?? -1
-}
-
 export function linkedSourcesIn(context: CaptureContext): string[] {
   const out: string[] = []
   for (const column of context.columns) {
