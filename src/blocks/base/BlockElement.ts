@@ -142,12 +142,12 @@ export abstract class BlockElement extends LitElement {
     [data-ff-editable] { cursor: text; }
     :host(:not([data-editable])) [data-ff-editable] { cursor: inherit; }
     /* In the editor a bound spot shows the names of its fields as a quiet
-       placeholder, in the second ink and plain, not as a value; the dotted
+       placeholder, in the second ink and plain, not as a value. The dotted
        line that says "bound, click to bind anew" shows only while the block
-       is marked or under the pointer (14.10.: under every value it made the
-       sheet look like a page of broken links). A spot of a card or row keeps
-       the look of its value, so that the card in the editor is the card of
-       the mask (21.10.). */
+       is marked or under the pointer: under every value it made the sheet
+       look like a page of broken links. A spot of a card or row keeps the
+       look of its value, so that the card in the editor is the card of the
+       mask. */
     :host([preview]) [data-ff-bound]:not([data-ff-in-card]) {
       color: var(--se-ink-2);
       font-weight: 400;

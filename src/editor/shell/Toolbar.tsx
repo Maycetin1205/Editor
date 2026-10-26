@@ -1,15 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Check, Database, Download, Eye, Redo2, Save, SquareDashed, Undo2 } from '@/editor/icons/icon'
-import { documentFileNames, frameNumberOf } from '../../core/block/documentFrame'
-import { exportTargetOf } from '../../core/block/exportTarget'
+import { frameNumberOf } from '../../core/block/documentFrame'
 import { maskNameOf } from '../../core/block/maskName'
-import { failedChecks, validateMaskHtml } from '../../export/validator'
-import { lostBindings } from '../../export/lostBindings'
-import { sourcesWithoutRelation } from '../../export/usedRelations'
 import { PageBar } from '../canvas/PageBar'
-import { downloadFile } from '../state/downloadFile'
-import { exportFolder, writeExport } from '../state/exportTarget'
-import { canPickFolder } from '../state/folderOnDisk'
+import { exportCurrentMask, exportTargetFolder } from '../commands/exportMask'
 import { leftoverLines } from '../state/leftoverLines'
 import { saveOrAsk } from '../state/maskFile'
 import { useEditor } from '../state/useEditor'
@@ -19,11 +13,6 @@ import { cn } from '@/editor/widgets/cn'
 import { DoneLabel } from '@/editor/widgets/DoneLabel'
 import { Notice } from '@/editor/widgets/Notice'
 import { Separator } from '@/editor/widgets/Separator'
-
-const MASK_NAMES = {
-  html: 'index.basis.source.html',
-  sevariablen: 'index.basis.SEvariablen.json',
-}
 
 const TIME = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' })
 
@@ -37,110 +26,7 @@ export function Toolbar() {
   const view = useView()
   const dataOpen = view.dataWindow
   const outlines = view.outlines
-  const frame = frameNumberOf(ed.tree)
-  const target = canPickFolder() ? exportTargetOf(ed.tree) : ''
-
-  const handleExport = async (withoutAside = false) => {
-    const orphans = sourcesWithoutRelation(ed.tree, ed.relation.list, ed.dataSources.list)
-    if (orphans.length > 0) {
-      ed.view.showNotice({
-        title: 'Export abgebrochen',
-        lead:
-          (orphans.length === 1
-            ? 'Nichts exportiert. Diese Quelle fragt mit einer Relation, die es nicht mehr gibt, und bliebe in der Maske leer.'
-            : 'Nichts exportiert. Diese Quellen fragen mit einer Relation, die es nicht mehr gibt, und blieben in der Maske leer.') +
-          ' Im Datenfenster bei der Quelle „Liefert“ neu wählen:',
-        lines: orphans.map((name) => ({ name })),
-      })
-      return
-    }
-    // What this editor keeps aside is safe in the mask file, but the export
-    // would go out without it, and could replace an export that had it.
-    const aside = withoutAside ? [] : leftoverLines(ed.tree, ed.dataSources.list, ed.leftover)
-    if (aside.length > 0) {
-      ed.view.showNotice({
-        title: 'Export ohne einige Teile',
-        lead:
-          'Noch nichts exportiert. Diese Teile der Maske kann dieser Editor nicht lesen. In der Datei der Maske ' +
-          'bleiben sie erhalten, in den Export kommen sie aber nicht. Hat die Maske in SoftEngine sie schon, ' +
-          'fehlen sie dort nach dem Export:',
-        lines: aside,
-        action: { label: 'Trotzdem exportieren', run: () => void handleExport(true) },
-      })
-      return
-    }
-    const folder = target === '' ? null : await exportFolder(target)
-    let exported: { html: string; sevariablen: string }
-    try {
-      const { exportMask } = await import('../../export/exportMask')
-      exported = exportMask(ed.tree, maskNameOf(ed.tree), ed.dataSources.list, ed.relation.list)
-    } catch (error) {
-      ed.view.showNotice({
-        title: 'Export abgebrochen',
-        lead: 'Nichts exportiert. Beim Bauen der Maske ging etwas schief:',
-        lines: [{ name: error instanceof Error ? error.message : String(error) }],
-      })
-      return
-    }
-    const { html, sevariablen } = exported
-    const failed = failedChecks(validateMaskHtml(html))
-    if (failed.length > 0) {
-      ed.view.showNotice({
-        title: 'Export abgebrochen',
-        lead:
-          failed.length === 1
-            ? 'Nichts exportiert. Diese Prüfung der fertigen Maske ist nicht bestanden:'
-            : 'Nichts exportiert. Diese Prüfungen der fertigen Maske sind nicht bestanden:',
-        lines: failed.map((c) => ({ name: c.name, detail: c.detail })),
-      })
-      return
-    }
-
-    const names = frame === '' ? MASK_NAMES : documentFileNames(frame)
-    const why =
-      folder === null
-        ? null
-        : folder.ok
-          ? await writeExport(folder.folder, [
-              { name: names.html, text: html },
-              { name: names.sevariablen, text: sevariablen },
-            ])
-          : folder.why
-    const written = folder !== null && why === null
-    if (!written) {
-      downloadFile(names.html, html, 'text/html')
-      downloadFile(names.sevariablen, sevariablen, 'application/json')
-    }
-
-    const lost = lostBindings(ed.tree, ed.dataSources.list)
-    const gaps =
-      lost.length === 0
-        ? ''
-        : lost.length === 1
-          ? ' Diese Stelle bleibt in der Maske leer, weil ihre Quelle das Feld nicht hat:'
-          : ' Diese Stellen bleiben in der Maske leer, weil ihre Quelle das Feld nicht hat:'
-    const lines = lost.map((l) => ({
-      name: l.blockName,
-      detail: l.sourceName === '' ? `Feld ${l.code}, ohne Quelle` : `Feld ${l.code} fehlt in „${l.sourceName}“`,
-    }))
-    if (why !== null) {
-      ed.view.showNotice({
-        title: 'Heruntergeladen statt in den Zielordner',
-        lead: `Der Zielordner „${target}“ ${why} Die Maske ist darum heruntergeladen.${gaps}`,
-        lines,
-      })
-      return
-    }
-    if (lost.length > 0) {
-      ed.view.showNotice({
-        title: 'Exportiert, mit Lücken',
-        lead: (written ? `Die Maske liegt im Ordner „${target}“.` : 'Die Maske ist heruntergeladen.') + gaps,
-        lines,
-      })
-      return
-    }
-    ed.view.markDone('exported')
-  }
+  const target = exportTargetFolder(ed)
 
   return (
     <header className="flex h-[44px] shrink-0 items-center border-b border-line bg-ground">
@@ -197,7 +83,7 @@ export function Toolbar() {
         <Button
           kind="primary"
           className="ml-[4px]"
-          onClick={() => void handleExport()}
+          onClick={() => void exportCurrentMask(ed)}
           disabled={ed.blockCount === 0}
           title={target === '' ? 'Lädt die Maske herunter' : `Schreibt die Maske in den Ordner „${target}“`}
         >

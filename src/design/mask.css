@@ -147,7 +147,7 @@
   /* The one shadow of the mask: a card of the board lifts while it is dragged. */
   --se-shadow-lift: 0 8px 24px rgba(0, 0, 0, .14), 0 2px 6px rgba(0, 0, 0, .10);
   /* The list that opens under a row to spread its amount: barely lifted,
-     with the hairline (user, 21.10.: "dezenter"). */
+     with the hairline, kept subtle. */
   --se-shadow-drop: 0 4px 12px rgba(0, 0, 0, .07), 0 0 0 var(--se-border) var(--se-line);
   --se-place-ground: rgba(255, 255, 255, .72);
   /* The edge of a place being typed into: the accent around it, its lower
