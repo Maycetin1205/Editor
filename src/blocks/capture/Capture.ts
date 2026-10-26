@@ -22,7 +22,7 @@ import { captureDecoration, rowsBelow } from './body'
 import { CAPTURE_COLUMNS_BINDING, greyLine, type CaptureColumn } from './column'
 import { keyIntent } from './keys'
 import { createLedger, type CaptureLedger } from './ledger'
-import { captureRow } from './ledger/capturing'
+import { captureWaited } from './ledger/capturing'
 import { runDone, writtenArrived } from './ledger/runReport'
 import { rowView, touched } from './row/cellValues'
 import { refreshRow } from './row/refresh'
@@ -241,7 +241,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
 
   protected override willUpdate(changed: PropertyValues): void {
     super.willUpdate(changed)
-    if (refreshRow(this._ledger.row)) captureRow(this._ledger)
+    if (refreshRow(this._ledger.row)) captureWaited(this._ledger)
   }
 
   protected override updated(): void {

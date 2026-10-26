@@ -33,6 +33,7 @@ function capture(ledger: CaptureLedger, context: CaptureContext): Capturing {
 
 // False where the row was empty and nothing happened.
 export function captureRow(ledger: CaptureLedger): boolean {
+  ledger.captured.wantBack(null)
   const host = ledger.host
   const outcome = capture(ledger, host.context())
   if (outcome === 'nothing') return false
@@ -47,11 +48,22 @@ export function captureRow(ledger: CaptureLedger): boolean {
   return true
 }
 
+// The typing row waited for a source that has come: it goes now, and a row
+// double-clicked while it waited comes back after it.
+export function captureWaited(ledger: CaptureLedger): void {
+  const { captured } = ledger
+  const wanted = captured.wantedBack
+  const index = wanted === null ? -1 : captured.indexOfKey(wanted)
+  if (index !== -1 && captured.correctable(index) !== undefined) bringBack(ledger, index)
+  else captureRow(ledger)
+}
+
 // Takes a captured row back into the typing row; what is typed there now is
-// captured first.
+// captured first. While that waits for a source, the row comes back after.
 export function bringBack(ledger: CaptureLedger, index: number): void {
   const { row: typing, captured, host } = ledger
   const context = host.context()
+  captured.wantBack(null)
   const taken = captured.correctable(index)
   if (taken === undefined) return
   const before = capture(ledger, context)
@@ -60,7 +72,11 @@ export function bringBack(ledger: CaptureLedger, index: number): void {
     host.focusCell(before.missing)
     return
   }
-  if (before === 'waits') return
+  if (before === 'waits') {
+    typing.cells.captureAsked = true
+    captured.wantBack(taken.key)
+    return
+  }
   if (before === 'asks') {
     host.dropAsked()
     return
@@ -95,6 +111,7 @@ export function answerDrop(ledger: CaptureLedger, drop: boolean, refocus: boolea
 export function giveUp(ledger: CaptureLedger): boolean {
   const { row, captured, host } = ledger
   if (!captured.correcting && !touched(row)) return false
+  captured.wantBack(null)
   captured.restoreCorrection()
   clearRow(row)
   host.report()

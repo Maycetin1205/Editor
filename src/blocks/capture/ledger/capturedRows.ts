@@ -41,6 +41,10 @@ export class CapturedRows {
   // The corrected row was emptied: it asks before it goes.
   private asked = false
 
+  // The key of a row double-clicked while the typing row waited for a
+  // source: it comes back once the typing row has gone.
+  private wanted: string | null = null
+
   constructor(report: () => void, status: Status) {
     this.report = report
     this.status = status
@@ -78,6 +82,18 @@ export class CapturedRows {
 
   keyAt(index: number): string {
     return this.rows[index]?.key ?? ''
+  }
+
+  indexOfKey(key: string): number {
+    return this.rows.findIndex((row) => row.key === key)
+  }
+
+  get wantedBack(): string | null {
+    return this.wanted
+  }
+
+  wantBack(key: string | null): void {
+    this.wanted = key
   }
 
   statusAt(index: number): RowState {

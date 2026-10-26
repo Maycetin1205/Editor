@@ -21,6 +21,7 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - Erfassung: nach dem Erfassen einer korrigierten Zeile gilt die Auswahl der Maske für diese Zeile, nicht mehr für die letzte erfasste Zeile.
 - Erfassung: wird eine zurückgeholte Zeile in der Tippzeile ganz geleert und mit Enter (oder Tab, Pfeil ab) abgeschlossen, fragt die Erfassung „Löschen / Abbrechen“, wie bei einer gebuchten Zeile. Vorher war die Zeile ohne Frage weg. Abbrechen lässt die Zeile in der Korrektur, Escape in der Tippzeile setzt sie wie bisher zurück.
 - Erfassung: Einfügen (Taste Einfg) ohne Fokus in einer Erfassung geht an die erste sichtbare Erfassung, bei offenem Popup an die im Popup. Vorher ging die Taste an die erste Erfassung im Dokument, auch wenn sie in einem geschlossenen Popup stand, und nichts geschah.
+- Erfassung: ein Doppelklick auf eine erfasste Zeile, während die Tippzeile auf eine Quelle wartet, wird nachgeholt: sobald die Quelle da ist, wird die Tippzeile erfasst und die Zeile kommt zur Korrektur zurück. Vorher ging der Doppelklick ohne Wort verloren. Tippen in der Tippzeile, Enter oder Escape heben die Bitte auf.
 
 ### Für Entwickler
 
