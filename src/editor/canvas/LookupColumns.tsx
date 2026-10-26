@@ -82,7 +82,7 @@ export function LookupColumns() {
   return <Heads key={`${open.blockId}:${open.slot}`} open={open} />
 }
 
-function HeadSpot({ head, chosen, onChoose }: { head: Head; chosen: boolean; onChoose: () => void }) {
+function HeadHandle({ head, chosen, onChoose }: { head: Head; chosen: boolean; onChoose: () => void }) {
   const left = head.left + HANDLE_EDGE
   const right = head.left + head.width - HANDLE_EDGE
   return (
@@ -197,7 +197,7 @@ function Heads({ open }: { open: OpenLookup }) {
         style={{ zIndex: LEVEL_OVER_MASK_WINDOW }}
       >
         {heads.map((head) => (
-          <HeadSpot
+          <HeadHandle
             key={head.slot}
             head={head}
             chosen={chosen === head.slot}

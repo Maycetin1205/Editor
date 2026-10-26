@@ -31,7 +31,7 @@ interface ColumnControlsProps {
 
 const HANDLE_EDGE = 6
 
-interface HeadSpotProps {
+interface HeadHandleProps {
   frame: Frame
   lit: boolean
   onPointerDown: (e: ReactPointerEvent<HTMLDivElement>) => void
@@ -39,7 +39,7 @@ interface HeadSpotProps {
   onRename: () => void
 }
 
-function HeadSpot({ frame, lit, onPointerDown, onClick, onRename }: HeadSpotProps) {
+function HeadHandle({ frame, lit, onPointerDown, onClick, onRename }: HeadHandleProps) {
   return (
     <div
       className={cn(
@@ -133,7 +133,7 @@ export function ColumnControls(props: ColumnControlsProps) {
   return (
     <div data-ff-editor-helper className="pointer-events-none absolute inset-0 z-10">
       {spots.map((s, i) => (
-        <HeadSpot
+        <HeadHandle
           key={i}
           frame={s}
           lit={shown?.from === i}

@@ -10,12 +10,12 @@ import { popupProperties, type PopupValues } from './properties'
 
 const FOCUSABLE = 'input,select,textarea,button,a[href],[tabindex]:not([tabindex="-1"])'
 
-function firstFocusSpot(root: ParentNode): HTMLElement | null {
+function firstFocusable(root: ParentNode): HTMLElement | null {
   for (const el of Array.from(root.querySelectorAll('*'))) {
     if (el instanceof HTMLElement && el.matches(FOCUSABLE) && !el.hasAttribute('disabled')) {
       return el
     }
-    const deeper = el.shadowRoot ? firstFocusSpot(el.shadowRoot) : null
+    const deeper = el.shadowRoot ? firstFocusable(el.shadowRoot) : null
     if (deeper) return deeper
   }
   return null
@@ -44,7 +44,7 @@ export class Popup extends BlockElement {
     if (!changed.has('open') || !this.open) return
     void this.updateComplete.then(() => {
       if (!this.open || !this.isConnected) return
-      const target = firstFocusSpot(this) ?? (this.shadowRoot ? firstFocusSpot(this.shadowRoot) : null)
+      const target = firstFocusable(this) ?? (this.shadowRoot ? firstFocusable(this.shadowRoot) : null)
       target?.focus()
     })
   }

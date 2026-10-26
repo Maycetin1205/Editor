@@ -79,10 +79,11 @@ Ein Wort je Ding, damit niemand raten muss:
 
 | Wort | heißt | nicht zu verwechseln mit |
 |---|---|---|
-| **Spot** (`BindableSpot`, `ValueSpot`, `SpotClick`) | eine Stelle in einem Baustein, an der ein Feldwert landet | der Platz auf dem Kanban-Brett (`BoardCell`), die Ankerstelle eines Nachschlagefelds (`InputAnchor`) |
+| **Spot** (`BindableSpot`, `ValueSpot`, `SpotClick`) | eine Stelle in einem Baustein, an der ein Feldwert landet | der Platz auf dem Kanban-Brett (`BoardCell`), die Ankerstelle eines Nachschlagefelds (`InputAnchor`), der Griff über einem Spaltenkopf im Editor (`HeadHandle`) |
 | **selected** (`selectedId`, `selectedNode`) | der Baustein, der im Editor markiert ist | |
-| **chosen** (`chosenRow`, `chosenDay`, `chooseSelection`) | die Zeile oder der Tag, den der Nutzer in der laufenden Maske gewählt hat | |
-| **pick** (`CapturedPick`, `picks`) | ein Betrag, den die Erfassung aus einem Satz nimmt (Verteilen) | |
+| **chosen** (`chosenRow`, `chosenDay`, `chooseSelection`, `TABLE_PART.chosen`, `recordChoice`) | die Zeile oder der Tag, den der Nutzer in der laufenden Maske gewählt hat | |
+| **pick** (`CapturedPick`, `picks`) | ein Betrag, den die Erfassung aus einem Satz nimmt (Verteilen) | die Eigenschaft `pick` der Datenliste (steht so in Dateien) |
+| **kind** (`kindOf`, `kindChoice`) | der Typ einer Spalte oder Zeile: Text, Zahl, Betrag | **held**: eine Zelle der Erfassung, die die Zeile zurückhält |
 | **source** / Quelle | eine Datenquelle (`DataSource`) | `origin`: der Baustein, von dem eine Aktion ausgeht |
 | **binding** | `Quelle::Feldcode`, an einer Stelle gespeichert | |
 | **chain** / Kette | die Schritte zu einem Ereignis eines Bausteins | |

@@ -32,6 +32,7 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 | React sprach über das DOM-Ereignis `ff-list-bind` mit React | ein Rückruf `onPick` |
 | `SplitWindow.tsx` (378), `ColumnControls.tsx` (363), `Places.tsx` (357), `Grid.tsx` (350), `SourceSettings.tsx` (316) | je in Rahmen, Liste, Zeile, Einstellungen geteilt; größte Datei 246 Zeilen |
 | Hörer und Stilobjekte, die bei jedem Zeichnen neu entstanden | behoben in ColumnPlus, BlockHost, Canvas, useView |
+| Namen: `Piece`, `holding`, `Spot` in fremden Bedeutungen, `selected` für die gewählte Zeile der Maske | Zusammenfassung/Reiter, `kind`, `HeadHandle`/`firstFocusable`, `chosen`/`recordChoice`; Wörter in `docs/ARCHITEKTUR.md`. Nichts davon stand in Dateien, Aliasse waren nicht nötig |
 | Beim Ziehen zeichnete die ganze Fläche bei jeder Zeigerbewegung (gemessen: 51 Komponenten je Bewegung, darunter alle 12 Bausteine) | Zieh-Zustand als eigener Speicher (`DndState`, `useDndSelect`), Baustein und Platz getrennt (`CanvasNode`, `CanvasBlock`); 2,5 Komponenten je Bewegung, Skriptzeit 62 statt rund 220 ms auf 40 Bewegungen |
 | Feine Abos für die Fläche (`useEditorSelect` mit Vergleich) | Ändern einer Eigenschaft zeichnete alle Bausteine der Fläche neu (12 von 12), jetzt nur den geänderten; je Änderung 54 statt 101 Komponenten |
 | Escape beim Größenändern behielt die erreichte Größe | `GestureBracket.cancel()` rollt über `History.abandon()` auf den Stand beim Öffnen zurück, ohne Rückgängig-Schritt, Wiederholen bleibt; gilt für Baustein, Popup-Seite und Nachschlagefenster |
@@ -40,7 +41,7 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 
 ## Offen
 
-1. **Namen**: `Piece` (Schritt-Teile im Editor), `holding` (Spalten), `Spot` mit mehreren Bedeutungen, `selected`/`chosen`/`picked` für die Auswahl. Ein Begriff je Ding, Aliasse für alles, was in Dateien steht.
+1. **Namen**: erledigt, siehe oben.
 2. **Feine Abos im Editor**: für die Fläche erledigt, siehe oben. Offen: Seitenleiste (`BlockPalette`), Werkzeugleiste (`PageBar`, `SaveState`, `MaskWho`) und Inspektor zeichnen weiter bei jeder Änderung (gemessen 54 Komponenten je Eigenschaftsänderung).
 3. **Größenbremse scharf schalten**: `max-lines` 300 und `max-lines-per-function` 80 von Warnung auf Fehler, sobald die laufenden Umbauten drin sind. Für React-Komponenten ist 80 Zeilen zu knapp; Vorschlag 120 für `.tsx`.
 4. **Erfassung und Kanban**: beide bleiben (Belegpositionen sind Kern, das Brett ist allgemein brauchbar). Beide brauchen nach dem Umbau eine zweite Lesung auf Verständlichkeit.
