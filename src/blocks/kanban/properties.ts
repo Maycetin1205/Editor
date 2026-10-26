@@ -40,7 +40,7 @@ export const kanbanProperties = {
   dateField: spotBinding('Datum', 'datefield'),
   sublineField: spotBinding('Unterzeile', 'sublinefield'),
   textField: spotBinding('Textzeile', 'textfield'),
-  sinceField: spotBinding('Wartet seit', 'sincefield'),
+  sinceField: spotBinding('Seit', 'sincefield'),
   amountField: spotBinding('Betrag', 'amountfield'),
   noteField: spotBinding('Notiz', 'notefield'),
 }
@@ -54,7 +54,7 @@ export const CARD_SPOTS = [
   { prop: 'heading2', name: 'Titel 2', several: true },
   { prop: 'subline', name: 'Unterzeile', several: true },
   { prop: 'text', name: 'Textzeile', several: true },
-  { prop: 'since', name: 'Wartet seit' },
+  { prop: 'since', name: 'Seit' },
   { prop: 'amount', name: 'Betrag' },
   { prop: 'note', name: 'Notiz', several: true },
 ] as const

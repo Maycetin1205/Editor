@@ -157,7 +157,7 @@ export class Board {
     void this.move(card, { column, place: 0 })
   }
 
-  // A place chosen on the card, as the room picked in the waiting room.
+  // A place of the next column, chosen on the card.
   pick(card: CardData, spot: Spot): void {
     void this.move(card, spot)
   }
