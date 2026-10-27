@@ -4,7 +4,7 @@ import * as seam from './seam.mjs'
 import { SOURCE } from './fixture.mjs'
 import { choose } from './canvas.mjs'
 
-export const INSPECTOR_PLACES = ['bar', 'font', 'source', 'display', 'lookup']
+export const INSPECTOR_PLACES = ['content', 'data', 'lookup', 'look']
 
 const panel = (page) => page.locator('[data-ff-inspector]')
 

@@ -8,9 +8,9 @@ export const buttonProperties = {
     place: 'block',
     attribute: 'label',
   }),
-  tone: toneProperty({ default: 'neutral' }),
-  emphasis: emphasisProperty(),
-  size: sizeProperty(),
+  tone: toneProperty({ default: 'neutral', place: 'look' }),
+  emphasis: emphasisProperty({ place: 'look' }),
+  size: sizeProperty({ place: 'look' }),
 }
 
 export type ButtonValues = ValuesOf<typeof buttonProperties>

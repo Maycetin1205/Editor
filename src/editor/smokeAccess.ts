@@ -9,7 +9,7 @@ import { deepClone } from '../core/deepClone'
 import { controlShown } from './bar/controlShown'
 import type { EditorStore } from './state/EditorStore'
 
-const INSPECTOR_PLACES: readonly PropertyPlace[] = ['bar', 'font', 'source', 'display', 'lookup']
+const INSPECTOR_PLACES: readonly PropertyPlace[] = ['content', 'data', 'lookup', 'look']
 
 // What a block declares, as plain data.
 function described(type: string) {

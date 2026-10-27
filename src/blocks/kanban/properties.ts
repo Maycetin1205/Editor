@@ -7,7 +7,7 @@ export const kanbanProperties = {
   columnsField: fieldProperty({
     default: '',
     label: 'Einsortieren nach',
-    place: 'source',
+    place: 'data',
     attribute: 'columnsfield',
   }),
   // A value no column and no place takes: into the catch-all column, or the
@@ -21,7 +21,7 @@ export const kanbanProperties = {
     {
       default: 'catch',
       label: 'Anderer Wert',
-      place: 'source',
+      place: 'data',
       attribute: 'others',
       needsSource: true,
     },

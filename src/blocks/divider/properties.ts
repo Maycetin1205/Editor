@@ -14,6 +14,7 @@ export const dividerProperties = {
     {
       default: 'horizontal',
       label: 'Richtung',
+      place: 'look',
       attribute: 'direction',
     },
   ),
@@ -23,7 +24,7 @@ export const dividerProperties = {
     max: 8,
     unit: 'px',
     label: 'Dicke',
-    place: 'bar',
+    place: 'look',
     attribute: 'thickness',
   }),
 }

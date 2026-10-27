@@ -60,9 +60,10 @@ export const formFieldProperties = {
   showLabel: booleanProperty({
     default: true,
     label: 'Beschriftung',
+    place: 'look',
     attribute: 'showlabel',
   }),
-  symbol: symbolProperty({ when: NOT_CHECKBOX }),
+  symbol: symbolProperty({ place: 'look', when: NOT_CHECKBOX }),
   label: textProperty({
     default: 'Feldname',
     label: 'Beschriftung',
@@ -92,7 +93,7 @@ export const formFieldProperties = {
   valueField: fieldProperty({
     default: '',
     label: 'Feld',
-    place: 'source',
+    place: 'data',
     attribute: 'valuefield',
     when: WITH_VALUE,
   }),
@@ -147,7 +148,7 @@ export const formFieldProperties = {
   required: booleanProperty({
     default: false,
     label: 'Pflicht',
-    place: 'display',
+    place: 'content',
     attribute: 'required',
     when: NOT_CHECKBOX,
   }),

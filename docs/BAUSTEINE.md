@@ -40,13 +40,13 @@ Reihenfolge nach Nutzen: 1, 2, 4, 3, dann 5 bis 8.
 
 ## Einstellungen: was nicht passt
 
-**Das Feld hat 16 Einstellungen in einer Liste**, davon sieben nur fürs Nachschlagen (Fenster, Spalten, Breite, Höhe, einzigen Treffer übernehmen, Klarname). Das gehört in eine eigene Gruppe „Nachschlagen“, die nur erscheint, wenn Nachschlagen an ist; heute steuert das `when` einzelne Zeilen, die Liste bleibt lang.
+**Das Feld hat 16 Einstellungen**, davon sieben nur fürs Nachschlagen. Erledigt: sie stehen in der Gruppe „Nachschlagen“, die nur erscheint, wenn Nachschlagen an ist (Quelle, Gespeichert wird, einzigen Treffer übernehmen, das Fenster mit seinen Spalten, Breite und Höhe).
 
 **Zwei Beschriftungen** heißen gleich (Feld, Text): „Beschriftung“ für das Wort über dem Feld und „Beschriftung“ für den Text davor. Eins davon muss „Überschrift“ oder „Wort davor“ heißen.
 
 **Die Kanban-Spalte hat 18 Einstellungen**, alle in einer Ebene, von „Name“ bis „Meldung beim Ankommen“. Gruppen: Spalte (Name, Wert, Zusatz, Auffangspalte), Karte (Titel, Unterzeile, Ecke, Fuß), Knopf, Plätze, Meldung.
 
-**Der Inspektor sortiert nach Technik, nicht nach Frage.** Die Gruppen heißen intern `bar`, `display`, `font`, `source`, `lookup`, `block`. Der Nutzer fragt: Was zeigt der Baustein? Woher kommen die Daten? Wie sieht er aus? Was passiert beim Klick? Das sind vier Gruppen, in dieser Reihenfolge, für jeden Baustein gleich.
+**Der Inspektor sortiert nach den Fragen des Nutzers.** Erledigt: vier Gruppen, für jeden Baustein gleich und in dieser Reihenfolge: Inhalt (was zeigt er), Daten (woher kommen sie, mit Quelle, Hilfsquellen und „Folgt der Auswahl“), Aussehen (wie sieht er aus), Aktionen (was passiert beim Klick). Dazwischen „Nachschlagen“, nur am Feld mit Nachschlagen. Intern sind das die Orte `content`, `data`, `look`, `lookup`; `block` steht auf der Fläche, `none` anderswo.
 
 ## Einstellungen: was fehlt
 

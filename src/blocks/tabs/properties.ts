@@ -9,6 +9,7 @@ export const tabsProperties = {
     {
       default: 'box',
       label: 'Form',
+      place: 'look',
       attribute: 'appearance',
     },
   ),
