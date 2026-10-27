@@ -184,7 +184,7 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
 
   private focusDropAsk(): void {
     void this.updateComplete.then(() => {
-      this.shadowRoot?.querySelector<HTMLElement>('.row.capture > .row-ask > .ask-drop')?.focus({ preventScroll: true })
+      this.shadowRoot?.querySelector<HTMLElement>('.row.capture > .row-ask > .ask-keep')?.focus({ preventScroll: true })
     })
   }
 

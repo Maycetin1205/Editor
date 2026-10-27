@@ -110,7 +110,7 @@ export class RowAsk {
     this.el.requestUpdate()
     this.el.updateComplete
       .then(() =>
-        this.el.shadowRoot?.querySelector<HTMLElement>('.row-ask > .ask-drop')?.focus({ preventScroll: true }),
+        this.el.shadowRoot?.querySelector<HTMLElement>('.row-ask > .ask-keep')?.focus({ preventScroll: true }),
       )
       .catch((error: unknown) => {
         warn('Rückfrage nicht gezeichnet', error)
@@ -182,6 +182,7 @@ export class RowAsk {
     this.answer(false)
   }
 
+  // The focus starts on Abbrechen: a second Enter must not delete.
   private askTpl(asking: Asking): TemplateResult {
     return html`<span
       class="row-ask"
