@@ -2,12 +2,17 @@
 // (basisHTML_REGISTER, basisHTML_SND_MSG): it hands over the rows of the data
 // source in the form the mask reads them (src/softengine/data.ts) and records
 // what the mask sends. That checks the mask's code, not SoftEngine.
-import { rows, SOURCE } from './fixture.mjs'
+import { EMPTY_SOURCE, rows, SOURCE } from './fixture.mjs'
 
 export function bridgeScript(status) {
   return `
     window.__smokeSent = []
-    window.__smokeData = ${JSON.stringify({ SEFileLoop: [{ ALIAS: SOURCE.name, Zeilen: rows(status) }] })}
+    window.__smokeData = ${JSON.stringify({
+      SEFileLoop: [
+        { ALIAS: SOURCE.name, Zeilen: rows(status) },
+        { ALIAS: EMPTY_SOURCE.name, Zeilen: [] },
+      ],
+    })}
     window.basisHTML_REGISTER = function (callback) {
       setTimeout(function () { callback({ Daten: window.__smokeData }) }, 50)
     }

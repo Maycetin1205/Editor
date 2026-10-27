@@ -141,14 +141,14 @@ export async function satisfy(page, id, def, cond, depth = 0) {
   return satisfy(page, id, def, cond.and, depth + 1)
 }
 
-export async function chooseOwnSource(page, id) {
+export async function chooseOwnSource(page, id, source = SOURCE) {
   await choose(page, id)
   await openSections(page)
   const picker = panel(page).locator('button[aria-label^="Datenquelle: "]').first()
   if ((await picker.count()) === 0) return false
   await picker.click()
-  await pickEntry(page, 'Datenquelle', SOURCE.name)
-  return (await seam.node(page, id)).values.source === SOURCE.id
+  await pickEntry(page, 'Datenquelle', source.name)
+  return (await seam.node(page, id)).values.source === source.id
 }
 
 const ORDER = ['source', 'choice', 'segment', 'boolean', 'ladder', 'number', 'text', 'field']

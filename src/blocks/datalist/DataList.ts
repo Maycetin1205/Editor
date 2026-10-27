@@ -32,6 +32,11 @@ export class DataList extends BlockElement {
 
   @property({ attribute: false }) rawRows: unknown[] = []
 
+  // How many rows the list holds, for an area that counts them in its head.
+  get rowCount(): number {
+    return this.rawRows.length
+  }
+
   readonly search = false
   readonly paging = false
   readonly sortByClick = false

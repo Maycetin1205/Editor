@@ -9,7 +9,7 @@ import type { RuntimeSource } from '../core/data/dataSources'
 import { DELIVERY_KINDS, deliveryAdapter } from '../core/data/deliveries/deliveries'
 import { extraSourcesOf } from './foreignSources'
 import { warn } from './log'
-import { loadEnded, loadStarted } from './notice'
+import { loadEnded, loadFailed, loadStarted } from './notice'
 import { onSelectionList, selectionFor, selectionGiverOf, selectionNumber, traitOf } from './selection'
 import { maskHost } from './host'
 
@@ -134,6 +134,7 @@ function load(source: RuntimeSource, giverRow: unknown): void {
     .fetchRows(source, giverRow, selectionFor)
     .then(ended, (error: unknown) => {
       warn(`Quelle "${source.name}" nicht geladen`, error)
+      showing.forEach((el) => loadFailed(el, `Quelle „${source.name}“ nicht geladen.`))
       ended()
     })
   state.running.set(source.id, running)

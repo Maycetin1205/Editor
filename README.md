@@ -68,7 +68,7 @@ Die Importregeln zwischen den Schichten stehen in `eslint.config.js` und werden 
 
 ## Masken und Dateien
 
-- Eine Maske ist eine JSON-Datei (`kind: "aufbau-editor-maske"`, `schemaVersion`). Der Editor liest nur die Stufe 39 (`src/editor/state/maskSchema.ts`); eine ältere Maske lehnt er mit „zu alte Fassung“ ab, eine neuere mit dem Hinweis, den Editor zu erneuern. Was der Editor in einer Maske der Stufe 39 nicht lesen kann, bleibt in der Datei erhalten (`leftover`).
+- Eine Maske ist eine JSON-Datei (`kind: "aufbau-editor-maske"`, `schemaVersion`). Der Editor liest die Stufe 40 und hebt die Stufe 39 beim Öffnen (`src/editor/state/maskSchema.ts`); eine ältere Maske lehnt er mit „zu alte Fassung“ ab, eine neuere mit dem Hinweis, den Editor zu erneuern. Was der Editor in einer Maske nicht lesen kann, bleibt in der Datei erhalten (`leftover`).
 - Die Bibliothek mit Datenquellen und Relationen ist eine eigene JSON-Datei (`kind: "aufbau-editor-bibliothek"`).
 - Der Export schreibt `index.basis.source.html` und `index.basis.SEvariablen.json`, bei gesetztem Rahmen mit dem Rahmen im Namen.
 

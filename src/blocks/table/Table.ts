@@ -20,6 +20,11 @@ export class Table extends BlockElement {
 
   @property({ attribute: false }) rawRows: unknown[] = []
 
+  // How many rows the table holds, for an area that counts them in its head.
+  get rowCount(): number {
+    return this.rawRows.length
+  }
+
   private readonly _list = new RecordList(this)
 
   listColumns(): readonly Column[] {

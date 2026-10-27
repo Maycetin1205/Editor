@@ -15,7 +15,7 @@ import { closeFailure, showFailure } from './infoBar'
 export type NoticeState = 'quiet' | 'loading' | 'writing' | 'saved' | 'sent' | 'failed'
 
 export const NOTICE_ATTR = 'data-ff-notice'
-const NOTICE_REASON_ATTR = 'data-ff-notice-reason'
+export const NOTICE_REASON_ATTR = 'data-ff-notice-reason'
 
 const SHOWN: readonly NoticeState[] = ['loading', 'writing', 'saved', 'sent', 'failed']
 
@@ -123,6 +123,16 @@ export function loadStarted(el: HTMLElement): void {
   const watch = watchOf(el)
   if (!watch) return
   watch.loading += 1
+  watch.failure = undefined
+  show(el, watch)
+}
+
+// A source that did not come: the block that shows it says so at its place
+// (an area in its body); the bar below stays for the connection of the mask.
+export function loadFailed(el: HTMLElement, sentence: string): void {
+  const watch = watchOf(el)
+  if (!watch) return
+  watch.failure = sentence
   show(el, watch)
 }
 

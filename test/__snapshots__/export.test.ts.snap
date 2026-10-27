@@ -12,29 +12,30 @@ exports[`exportMask > matches the stored shape of the mask markup (runtime chunk
 :root {
   color-scheme: light;
 
-  --se-bg:        #F3F3F3;
+  --se-bg:        #F4F5F7;
   --se-panel:     #FFFFFF;
-  --se-panel-2:   #FAFAFA;
+  --se-panel-2:   #F7F8FA;
 
-  --se-ink:       #1B1B1B;
-  --se-ink-2:     #5C5C5C;
-  --se-faint:     #8A8A8A;
+  --se-ink:       #1A1D21;
+  --se-ink-2:     #5B616B;
+  --se-faint:     #8B919B;
 
-  --se-line:        #E3E3E3;
-  --se-line-soft:   #EDEDED;
-  --se-line-strong: #C8C8C8;
-  --se-box-bottom:  #8A8A8A;
-  --se-box-line:    #8A8A8A;
+  --se-line:        #E4E6EA;
+  --se-line-soft:   #EEF0F3;
+  --se-line-strong: #C9CDD3;
+  --se-box-bottom:  #8B919B;
+  --se-box-line:    #8B919B;
 
   --se-accent:       #0067C0;
   --se-accent-dark:  #005A9E;
   --se-accent-soft:  #EAF3FB;
+  --se-accent-line:  #C9DDF0;
 
-  --se-hover:        #F2F2F2;
-  --se-hover-strong: #E6E6E6;
+  --se-hover:        #F0F2F5;
+  --se-hover-strong: #E4E6EA;
 
-  --se-read-ground:  #F7F7F7;
-  --se-row-hover:    #F6F9FC;
+  --se-read-ground:  #F7F8FA;
+  --se-row-hover:    #F5F8FB;
 
   --se-selection:    var(--se-accent-soft);
   --se-mark-bar: inset 3px 0 0 var(--se-accent);
@@ -45,12 +46,12 @@ exports[`exportMask > matches the stored shape of the mask markup (runtime chunk
 
   --se-card-bg:    #FFFFFF;
 
-  --se-neutral:       #5C5C5C;
-  --se-neutral-ink:   #1B1B1B;
-  --se-neutral-tint:  #F3F3F3;
-  --se-neutral-shell: #FAFAFA;
-  --se-neutral-line:  #C8C8C8;
-  --se-neutral-soft:  #EBEBEB;
+  --se-neutral:       #5B616B;
+  --se-neutral-ink:   #1A1D21;
+  --se-neutral-tint:  #F4F5F7;
+  --se-neutral-shell: #F7F8FA;
+  --se-neutral-line:  #C9CDD3;
+  --se-neutral-soft:  #EBEDF0;
 
   --se-info:          #0067C0;
   --se-info-ink:      #005A9E;
@@ -59,7 +60,7 @@ exports[`exportMask > matches the stored shape of the mask markup (runtime chunk
   --se-info-line:     #C9DDF0;
   --se-info-soft:     #EAF3FB;
 
-  --se-success:       #0F7B0F;
+  --se-success:       #107C10;
   --se-success-ink:   #0B5A0B;
   --se-success-tint:  #DFF6DD;
   --se-success-shell: #F3FBF2;
@@ -85,13 +86,17 @@ exports[`exportMask > matches the stored shape of the mask markup (runtime chunk
   --se-radius-sm: 4px;
   --se-radius-card: 8px;
   --se-radius-xs: 2px;
+  --se-radius-chip: 10px;
+
+  --se-control: 32px;
+  --se-head: 36px;
 
   --se-hair: var(--se-border) solid var(--se-line);
 
   --se-sheet-top: 20px;
   --se-sheet-x: 24px;
   --se-sheet-bottom: 20px;
-  --se-scrollbar: #C8C8C8;
+  --se-scrollbar: #C9CDD3;
 
   --se-head-ground: var(--se-accent-soft);
   --se-head-ink: #2B4E6E;
@@ -114,6 +119,7 @@ exports[`exportMask > matches the stored shape of the mask markup (runtime chunk
   --se-column-edge: inset 0 0 0 var(--se-border) var(--se-line);
 
   --se-edge: inset 0 0 0 var(--se-border) var(--se-line);
+  --se-alert-edge: inset 0 0 0 var(--se-border) var(--se-danger-line);
 
   --se-shadow-lift: 0 8px 24px rgba(0, 0, 0, .14), 0 2px 6px rgba(0, 0, 0, .10);
 
@@ -141,6 +147,7 @@ exports[`exportMask > matches the stored shape of the mask markup (runtime chunk
   --se-gap-lg: 12px;
 
   --se-move: 120ms;
+  --se-fold: 200ms cubic-bezier(.2, 0, 0, 1);
 
   --se-notice-ring: 16px;
   --se-notice-ring-line: 2px;

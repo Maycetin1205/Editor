@@ -6,7 +6,7 @@ Stand 26.10.2026. Eine Bewertung, keine Entscheidung. Die Entscheidung trifft da
 
 | Baustein | Tag | Was er tut | Eigene Einstellungen | Urteil |
 |---|---|---|---|---|
-| Bereich | `ff-area` | Gruppe mit Titel, Rahmen oder Band; kann einklappen | 3 | bleibt |
+| Bereich | `ff-area` | Frei, Karte oder Karte mit Kopf; rechts im Kopf ein Text, ein Feldwert oder der Zähler der Liste darin; klappbar, Klappzustand merkbar; mit eigener Quelle ein leerer Zustand (Satz, Hinweis, Knopf mit Ereignis), ausblendbar, und eine Fehlerzeile mit „Erneut laden“ | 15 | neu gebaut (26.10., Stufe 40) |
 | Trennlinie | `ff-divider` | Linie mit optionalem Wort | 3 | bleibt |
 | Reiter | `ff-tabs` | Seiten (`ff-tab`, je ein Raster wie der Bereich) unter einer Leiste von Titeln; eine Seite offen | 2, je Seite 1 | neu |
 | Knopf | `ff-button` | löst eine Aktionskette aus | 4 | bleibt |

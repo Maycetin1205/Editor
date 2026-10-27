@@ -113,7 +113,7 @@ describe('currentState', () => {
     for (const step of [19, 20, 27, 38]) expect(currentState({ ...file, schemaVersion: step })).toBeNull()
   })
 
-  it('refuses a mask below the current stage as too old and names its stage', () => {
+  it('refuses a mask below the stage before the current one as too old and names its stage', () => {
     const file = JSON.parse(packMask(treeWithEveryBlock(), [], [])) as Record<string, unknown>
     for (const step of [20, 38]) {
       const result = packMaskFrom(JSON.stringify({ ...file, schemaVersion: step }))
@@ -121,5 +121,66 @@ describe('currentState', () => {
       expect(result).toMatchObject({ why: expect.stringContaining(`Stufe ${step}`) })
     }
     expect(readMask({ ...file, schemaVersion: 38 })).toEqual({ ok: false, why: 'stage' })
+  })
+})
+
+describe('stage 40', () => {
+  // Areas as stage 39 wrote them: each of the five forms, one without a form
+  // (the default, Kasten), and one saved by the area of 26.10. that carries
+  // its kind without its stage.
+  function stage39(): Record<string, unknown> {
+    const file = JSON.parse(packMask(emptyTree(), [], [])) as { tree: MaskTree } & Record<string, unknown>
+    const areas: Record<string, Record<string, unknown>> = {
+      plain: { appearance: 'plain' },
+      box: { appearance: 'box', heading: 'Kunde' },
+      headed: { appearance: 'headed', heading: 'Adresse' },
+      fold: { appearance: 'fold', startFolded: true },
+      band: { appearance: 'band' },
+      none: {},
+      kept: { kind: 'card', meta: 'count', countWord: 'Posten', foldable: false },
+    }
+    for (const [id, values] of Object.entries(areas)) {
+      file.tree[id] = {
+        id,
+        type: 'area',
+        values: { gridX: 0, gridY: 0, gridW: 12, gridH: 4, ...values },
+        parentId: ROOT_ID,
+        childIds: [],
+      }
+      file.tree[ROOT_ID].childIds.push(id)
+    }
+    return { ...file, schemaVersion: 39 }
+  }
+
+  it('lifts the areas of stage 39 to kinds and keeps everything else', () => {
+    const before = stage39()
+    const read = currentState(before) as { schemaVersion: number; tree: MaskTree }
+    expect(read.schemaVersion).toBe(40)
+    const kind = (id: string) => read.tree[id].values
+    expect(kind('plain')).toMatchObject({ kind: 'plain' })
+    expect(kind('box')).toMatchObject({ kind: 'card', heading: 'Kunde' })
+    expect(kind('headed')).toMatchObject({ kind: 'headed', heading: 'Adresse' })
+    expect(kind('fold')).toMatchObject({ kind: 'headed', foldable: true, startFolded: true })
+    expect(kind('band')).toMatchObject({ kind: 'card' })
+    expect(kind('none')).toMatchObject({ kind: 'card' })
+    for (const id of ['plain', 'box', 'headed', 'fold', 'band', 'none'])
+      expect(kind(id)).not.toHaveProperty('appearance')
+    expect(kind('kept')).toEqual((before.tree as MaskTree).kept.values)
+    expect(read.tree[ROOT_ID]).toEqual((before.tree as MaskTree)[ROOT_ID])
+    expect((before.tree as MaskTree).box.values).toHaveProperty('appearance', 'box')
+  })
+
+  it('lifts once: a lifted mask read again stays the same', () => {
+    const once = currentState(stage39())!
+    expect(currentState(once)).toEqual(once)
+    expect(currentState({ ...once, schemaVersion: 39 })).toEqual(once)
+  })
+
+  it('opens a mask of stage 39 without a note on the lifted areas', () => {
+    const result = packMaskFrom(JSON.stringify(stage39()))
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.note.lines).toEqual([])
+    expect(result.content.tree.kept.values).toMatchObject({ kind: 'card', meta: 'count', countWord: 'Posten' })
   })
 })

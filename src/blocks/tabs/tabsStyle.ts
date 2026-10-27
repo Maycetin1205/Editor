@@ -4,7 +4,6 @@ import { CARD_HEAD_PX } from '../area/areaStyle'
 
 const PITCH = GRID.rowPx + GRID.gapPx
 const ROOM = 12
-const SIDE = 16
 
 // The Reiter: the card of a Bereich with a strip of titles as its head. The
 // pages lie on top of each other in the body; only the open one shows. What
@@ -28,7 +27,7 @@ export const tabsStyle = css`
   .appearance-box {
     background: var(--se-panel);
     box-shadow: var(--se-edge);
-    --ff-tab-room: 0 ${unsafeCSS(SIDE)}px ${unsafeCSS(ROOM)}px;
+    --ff-tab-room: ${unsafeCSS(ROOM)}px;
   }
   .appearance-plain { --ff-tab-room: 0; }
 
@@ -42,7 +41,7 @@ export const tabsStyle = css`
     border-bottom: var(--se-hair);
     overflow: hidden;
   }
-  .appearance-box .strip { margin: 0 ${unsafeCSS(SIDE)}px; }
+  .appearance-box .strip { margin: 0 ${unsafeCSS(ROOM)}px; }
 
   .tab,
   .add {

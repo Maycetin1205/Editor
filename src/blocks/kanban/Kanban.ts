@@ -53,6 +53,11 @@ export class Kanban extends BlockElement {
 
   readonly board = new Board(this)
 
+  // How many cards the board holds, for an area that counts them in its head.
+  get rowCount(): number {
+    return this.board.cards.length
+  }
+
   private clock: ReturnType<typeof setInterval> | null = null
 
   private unlistenSearch: (() => void) | null = null

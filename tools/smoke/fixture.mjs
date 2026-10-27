@@ -18,6 +18,16 @@ export const SOURCE = {
   ],
 }
 
+// A source that answers without rows: a block that shows it shows its empty
+// state.
+export const EMPTY_SOURCE = {
+  id: 'smoke-empty',
+  name: 'Leer',
+  preset: 'file',
+  tableId: 'LE',
+  fields: [{ code: 'NAME', name: 'Name' }],
+}
+
 // Every field shows a value of its own, so a check can tell which field a
 // place shows.
 export function rows(status) {

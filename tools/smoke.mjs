@@ -37,9 +37,10 @@ import {
 } from './smoke/inspector.mjs'
 import { bindFirstEntry, bindSpots, setEntryChoice } from './smoke/binding.mjs'
 import { addEntryToolStep, addToolStep } from './smoke/events.mjs'
-import { firstValue, SOURCE } from './smoke/fixture.mjs'
+import { EMPTY_SOURCE, firstValue, SOURCE } from './smoke/fixture.mjs'
 import { attributesOf, bridgeScript, nth, onPage, sent, shown } from './smoke/mask.mjs'
 import { pagesInMask, pagesWork, rememberInMask } from './smoke/tabs.mjs'
+import { emptyInMask, hiddenInMask } from './smoke/area.mjs'
 import { linesKeys, trigger } from './smoke/triggers.mjs'
 
 const require = createRequire(import.meta.url)
@@ -94,6 +95,14 @@ const VARIANTS = {
       checks: [{ what: 'Tasten', run: linesKeys }],
     },
   ],
+  area: [
+    {
+      name: 'Ausblenden',
+      settings: [['hideWhenEmpty', true]],
+      events: false,
+      checks: [{ what: 'leer ausgeblendet', run: hiddenInMask }],
+    },
+  ],
   tabs: [
     {
       name: 'Merken',
@@ -110,6 +119,11 @@ const SHOWN_OTHERWISE = { since: 'die Wartezeit seit der Uhrzeit' }
 // show rows in the mask, and what it is put through beyond what every block
 // gets: work on the canvas, checks in the mask.
 const FUNCTION_SETUP = {
+  area: {
+    source: EMPTY_SOURCE,
+    settings: [['emptyButton', 'Neu anlegen']],
+    checks: [{ what: 'leerer Zustand', run: emptyInMask }],
+  },
   kanban: {
     field: { key: 'columnsField', code: 'STATUS' },
     entryChoices: [['Knopf', 'Aktion']],
@@ -138,6 +152,7 @@ await page.reload({ waitUntil: 'networkidle' })
 await page.waitForTimeout(500)
 await seam.ready(page)
 await seam.addSource(page, SOURCE)
+await seam.addSource(page, EMPTY_SOURCE)
 
 const declared = (await seam.blocks(page)).filter((d) => d !== null)
 const palette = declared.filter((d) => d.inPalette)
@@ -207,9 +222,11 @@ async function wire(def, variant) {
     return null
   }
   await choose(page, b)
-  if (def.source && !(await chooseOwnSource(page, b))) fail(`${label}: eigene Quelle ließ sich nicht wählen`)
+  const setup = FUNCTION_SETUP[def.type]
+  if (def.source && !(await chooseOwnSource(page, b, setup?.source)))
+    fail(`${label}: eigene Quelle ließ sich nicht wählen`)
   const settings = []
-  for (const [key, value] of variant?.settings ?? []) {
+  for (const [key, value] of [...(setup?.settings ?? []), ...(variant?.settings ?? [])]) {
     await openSections(page)
     const prop = def.properties.find((p) => p.key === key)
     const now = await setByUi(page, b, prop, value).catch(() => undefined)
@@ -223,7 +240,6 @@ async function wire(def, variant) {
   const entryField = listed && !def.fieldless
   if (entryField)
     check('erster Eintrag der Liste gebunden', (await bindFirstEntry(page, b, def, SOURCE.fields[0])).wrong)
-  const setup = FUNCTION_SETUP[def.type]
   if (setup?.field) {
     await choose(page, b)
     await openSections(page)
@@ -246,14 +262,16 @@ async function wire(def, variant) {
     if ((await place.count()) > 0 && (await place.isVisible())) showing.add(spot.prop)
   }
   const events = []
-  for (const event of def.events.filter((e) => !e.entry)) {
+  // A variant whose block does not show in the mask has no event to set off.
+  const evented = variant?.events !== false
+  for (const event of def.events.filter((e) => evented && !e.entry)) {
     await choose(page, b)
     const nr = nextTool()
     const missedStep = await addToolStep(page, b, event, nr)
     missedStep.forEach((w) => fail(w))
     if (missedStep.length === 0) events.push({ event, nr })
   }
-  if (def.events.some((e) => e.entry)) {
+  if (evented && def.events.some((e) => e.entry)) {
     await choose(page, b)
     const nr = nextTool()
     const entry = await addEntryToolStep(page, b, nr)
@@ -264,7 +282,8 @@ async function wire(def, variant) {
   return {
     id: b,
     label,
-    checks: [...(variant?.checks ?? []), ...(setup?.checks ?? [])],
+    // A variant checks what it changes, in place of the checks of the plain one.
+    checks: variant?.checks ?? setup?.checks ?? [],
     settings,
     spots: spots.bound.filter((x) => showing.has(x.spot)),
     hidden: spots.bound.filter((x) => !showing.has(x.spot)).map((x) => x.spot),
