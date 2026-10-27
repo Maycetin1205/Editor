@@ -1,17 +1,16 @@
-import type { DataSource } from '../dataSources'
-import type { Order, OrderKind } from './orders'
+import type { SourceFacts } from '../sourceFacts'
 import type { SheetPart } from './sheet'
 import type { Unread } from '../../unread'
 
-type OrderOf<K extends OrderKind> = Order & { kind: K }
+export type OrderedSource<O> = SourceFacts & { order: O }
 
-export type OrderedSource<K extends OrderKind> = DataSource & { order: OrderOf<K> }
+// The field list of a source for the sheet, as the export computes it from
+// what the mask uses; wildcard asks for '*' where the order allows it.
+export type SheetFields<O> = (source: OrderedSource<O>, wildcard: boolean) => string
 
-type SheetFields = (source: DataSource, wildcard: boolean) => string
-
-export interface OrderAdapter<K extends OrderKind> {
-  kind: K
-  read(raw: Unread<OrderOf<K>>): OrderOf<K> | null
+export interface OrderAdapter<O extends { kind: string }> {
+  kind: O['kind']
+  read(raw: Unread<O>): O | null
   needsTable: boolean
-  sheet(sources: readonly OrderedSource<K>[], fields: SheetFields): SheetPart
+  sheet(sources: readonly OrderedSource<O>[], fields: SheetFields<O>): SheetPart
 }

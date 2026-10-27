@@ -1,21 +1,28 @@
 import { html, nothing, type TemplateResult } from 'lit'
 import { repeat } from 'lit/directives/repeat.js'
 import { styleMap } from 'lit/directives/style-map.js'
-import { inputSpotTpl } from '../lookup/inputSpot'
+import { inputAnchorTpl } from '../lookup/inputAnchor'
 import { cellsClass } from './cells'
-import { columnEditable } from './column'
+import { columnEditable, type CaptureColumn } from './column'
 import { shownValue, type Column } from '../parts/column'
 import { figureAt, greyCellTpl, type GreyPart, type RowLayout } from '../parts/cell'
-import { WITHOUT_DECORATION, type RowDecoration } from '../list'
-import type { CaptureLedger, RowState } from './ledger'
+import { WITHOUT_DECORATION, type RowDecoration, type RowsBelow } from '../list'
+import { TABLE_PART } from '../list/parts'
+import { captureRowFor } from './controls'
+import type { CaptureLedger } from './ledger'
+import { keyCell } from './ledger/bookedKeys'
+import { bringBack } from './ledger/capturing'
+import type { RowState } from './ledger/outbound'
+import type { WorkingRow } from './workingRow'
 
 function typingCellTpl(ledger: CaptureLedger, rawIndex: number, slot: number, column: Column): TemplateResult {
-  return inputSpotTpl(
+  const booked = ledger.booked
+  return inputAnchorTpl(
     {
-      value: ledger.cellValue(rawIndex, slot),
+      value: booked.cellValue(rawIndex, slot),
       title: column.title,
       placeholder: '',
-      inputClass: cellsClass(ledger.isChanged(rawIndex, slot) ? 'changed' : 'quiet'),
+      inputClass: cellsClass(booked.isChanged(rawIndex, slot) ? 'changed' : 'quiet'),
       holderClass: 'cell-holder',
       marksOnEntering: true,
       keepsTyping: true,
@@ -26,9 +33,9 @@ function typingCellTpl(ledger: CaptureLedger, rawIndex: number, slot: number, co
       mark: 0,
     },
     {
-      typing: (text) => ledger.typeCell(rawIndex, slot, text),
-      key: (e) => ledger.keyCell(rawIndex, slot, e),
-      leave: (text) => ledger.leaveCell(rawIndex, slot, text),
+      typing: (text) => booked.typeCell(rawIndex, slot, text),
+      key: (e) => keyCell(ledger, rawIndex, slot, e),
+      leave: (text) => booked.leaveCell(rawIndex, slot, text),
       chooseSuggestion: () => {},
       setMark: () => {},
     },
@@ -87,7 +94,7 @@ function capturedRowTpl(placement: CapturedPlacement, act: CapturedAct, rowsInde
     return html`<div class=${figure !== null ? 'right' : nothing} role="cell">${shownValue(figure, values[slot] ?? '')}</div>`
   }
   return html`<div
-    class="row captured${grey !== null ? ' subline' : ''}${placement.chosen(rowsIndex) ? ' selected' : ''}"
+    class="row captured${grey !== null ? ' subline' : ''}${placement.chosen(rowsIndex) ? ` ${TABLE_PART.chosen}` : ''}"
     role="row"
     data-ff-leads-to-typing
     data-status=${state.status}
@@ -110,7 +117,7 @@ function capturedRowTpl(placement: CapturedPlacement, act: CapturedAct, rowsInde
   </div>`
 }
 
-export function capturedRowsTpl(placement: CapturedPlacement, act: CapturedAct): TemplateResult {
+function capturedRowsTpl(placement: CapturedPlacement, act: CapturedAct): TemplateResult {
   const lines = placement.captured.map((_, rowsIndex) => rowsIndex)
   const typingAt = placement.correctionSlot === null ? lines.length : Math.min(placement.correctionSlot, lines.length)
   lines.splice(typingAt, 0, TYPING)
@@ -121,16 +128,85 @@ export function capturedRowsTpl(placement: CapturedPlacement, act: CapturedAct):
   )}`
 }
 
+interface BelowHost {
+  ledger: CaptureLedger
+
+  working: WorkingRow
+
+  block: HTMLElement
+
+  preview: boolean
+
+  sourceId: string
+
+  dropAskAbove: boolean
+
+  columns: () => readonly CaptureColumn[]
+
+  backToTyping: () => void
+
+  report: () => void
+}
+
+// Below the booked rows: the captured rows, and the typing row after them or
+// in the gap of the row being corrected.
+export function rowsBelow(host: BelowHost): RowsBelow {
+  const { ledger, working } = host
+  const captured = ledger.captured.values
+  return {
+    count: 1 + captured.length,
+    render: ({ view, cols, layout, rulerTicks }) => {
+      const correctionSlot = ledger.captured.correctionSlot
+      return capturedRowsTpl(
+        {
+          slots: view.slots,
+          cols,
+          layout,
+          captured,
+          keyAt: (index) => ledger.captured.keyAt(index),
+          capturedState: (index) => ledger.captured.statusAt(index),
+          chosen: (index) => working.chosen(ledger.captured.keyAt(index)),
+          correctionSlot,
+          capture: captureRowFor(
+            {
+              ledger,
+              block: host.block,
+              preview: host.preview,
+              sourceId: host.sourceId,
+              dropAskAbove: host.dropAskAbove,
+            },
+            view,
+            cols,
+            layout,
+            correctionSlot === null && (rulerTicks ?? 1) <= 0,
+          ),
+        },
+        {
+          takeCapturedRow: (index) => {
+            ledger.captured.remove(index)
+            host.backToTyping()
+          },
+          bringBackCapturedRow: (index) => bringBack(ledger, index),
+          chooseCapturedRow: (index) => {
+            working.toggleCaptured(ledger.captured.keyAt(index), host.columns(), captured[index] ?? [])
+            host.report()
+            host.backToTyping()
+          },
+        },
+      )
+    },
+  }
+}
+
 interface DecorationPlacement {
   typable: boolean
 
   ledger: CaptureLedger
 }
 
-export function captureDecoration(placement: DecorationPlacement): (rawIndex: number | null) => RowDecoration {
+export function captureDecoration(placement: DecorationPlacement): (rawIndex: number) => RowDecoration {
   return (rawIndex) => {
-    if (rawIndex === null) return WITHOUT_DECORATION
-    const state = placement.ledger.statusOf(rawIndex)
+    const state = placement.ledger.booked.statusOf(rawIndex)
     return {
       ...WITHOUT_DECORATION,
       status: state.status === 'booked' ? '' : state.status,

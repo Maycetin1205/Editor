@@ -1,8 +1,10 @@
 import { css, html, LitElement, type PropertyValues, type TemplateResult } from 'lit'
 import { property } from 'lit/decorators.js'
-import { maskState } from '../../runtime/maskState'
 import { icon } from '../parts/icons'
 import { CARD_HEAD_PX } from '../area/areaStyle'
+
+// The open frames that take Escape, the topmost last.
+const catchingFrames: { readonly isConnected: boolean; close(): void }[] = []
 
 export const DIALOG_FRAME_TAG = 'ff-dialog'
 export const DIALOG_CLOSE_EVENT = 'ff-dialog-close'
@@ -22,14 +24,13 @@ function pixel(value: unknown, replacement: number): number {
 
 function onEscape(event: KeyboardEvent): void {
   if (event.key !== 'Escape') return
-  const topmost = maskState.catchingFrames.filter((f) => f.isConnected).pop()
+  const topmost = catchingFrames.filter((f) => f.isConnected).pop()
   if (!topmost) return
   event.stopPropagation()
   topmost.close()
 }
 
 function catchesEscape(frame: DialogFrame, catches: boolean): void {
-  const catchingFrames = maskState.catchingFrames
   const slot = catchingFrames.indexOf(frame)
   if (catches && slot < 0) {
     catchingFrames.push(frame)

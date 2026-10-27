@@ -62,7 +62,9 @@ export function cardsByClock(
   let hour = -1
   let nowShown = !today
   for (const { card, minute } of timed) {
-    if (!nowShown && minute !== null && minute > nowMinute) {
+    // Cards without a time sort last: when every time has passed, they still
+    // come after the now line, not before it.
+    if (!nowShown && (minute === null || minute > nowMinute)) {
       out.push(nowLine(now))
       nowShown = true
     }

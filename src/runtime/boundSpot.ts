@@ -1,7 +1,7 @@
 import { sourceIdOf } from './source'
 import { splitBinding } from '../core/block/blockType'
 import type { RuntimeSource } from '../core/data/dataSources'
-import { maskState } from './maskState'
+import { maskHost } from './host'
 import { firstRowToSelection } from './selection'
 import { makeFieldReader } from './foreignSources'
 
@@ -24,7 +24,7 @@ export function readBoundSpot(el: HTMLElement, bindingAttr: string): BoundSpot {
   const code = el.getAttribute(bindingAttr) ?? ''
   if (ownSource === '' || code === '') return { kind: 'unbound' }
 
-  const host = maskState.host
+  const host = maskHost()
   const source = host.source(ownSource)
   if (!source) return { kind: 'withoutSource' }
 

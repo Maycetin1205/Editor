@@ -1,10 +1,7 @@
-import type { Write, WriteKind } from './writes'
 import type { Unread } from '../../unread'
 
-type WriteOf<K extends WriteKind> = Write & { kind: K }
-
-export interface WriteAdapter<K extends WriteKind> {
-  kind: K
-  read(raw: Unread<WriteOf<K>>): WriteOf<K> | null
-  recordField(write: WriteOf<K>): string
+export interface WriteAdapter<W extends { kind: string }> {
+  kind: W['kind']
+  read(raw: Unread<W>): W | null
+  recordField(write: W): string
 }

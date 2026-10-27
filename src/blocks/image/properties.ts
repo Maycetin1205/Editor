@@ -30,6 +30,7 @@ export const pictureProperties = {
     {
       default: 'contain',
       label: 'Größe',
+      place: 'look',
       attribute: 'fit',
     },
   ),
@@ -42,12 +43,14 @@ export const pictureProperties = {
     {
       default: 'center',
       label: 'Ausrichtung',
+      place: 'look',
       attribute: 'align',
     },
   ),
   rounded: booleanProperty({
     default: false,
     label: 'Runde Ecken',
+    place: 'look',
     attribute: 'rounded',
   }),
   description: textProperty({
@@ -73,7 +76,7 @@ export const pictureProperties = {
     {
       default: 'field',
       label: 'Bild holen',
-      place: 'source',
+      place: 'data',
       attribute: 'fetch',
       when: BOUND,
     },
@@ -81,14 +84,14 @@ export const pictureProperties = {
   relationNr: textProperty({
     default: '',
     label: 'Relation',
-    place: 'source',
+    place: 'data',
     attribute: 'relationnr',
     when: OTHER_RELATION,
   }),
   moreValues: textProperty({
     default: '',
     label: 'Weitere Werte',
-    place: 'source',
+    place: 'data',
     attribute: 'morevalues',
     when: OTHER_RELATION,
   }),

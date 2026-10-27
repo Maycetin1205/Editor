@@ -1,4 +1,3 @@
-import { blockType } from '../../block/registry'
 import type { Unread } from '../../unread'
 
 export function popupIdRead(raw: Unread<{ popupId: string }>): string | null {
@@ -8,29 +7,6 @@ export function popupIdRead(raw: Unread<{ popupId: string }>): string | null {
 export function popupNameRead(raw: Unread<{ popup: string; popupId: string }>): string | null {
   if (typeof raw.popup === 'string') return raw.popup
   return typeof raw.popupId === 'string' ? '' : null
-}
-
-export function inOpenPopup(el: Element): boolean {
-  const tag = blockType('popup')?.tag
-  return tag !== undefined && el.closest(`${tag}[open]`) !== null
-}
-
-export function applyPopupStep(root: ParentNode, name: string, open: boolean): void {
-  if (name.trim() === '') return
-
-  const popupType = blockType('popup')
-  const all = popupType === undefined ? [] : Array.from(root.querySelectorAll(popupType.tag))
-  const hit = all.filter((el) => (el.getAttribute('name') ?? popupType?.properties.name?.default) === name)
-  if (hit.length !== 1) return
-  const target = hit[0]
-  if (!open) {
-    target.removeAttribute('open')
-    return
-  }
-  for (const el of all) {
-    if (el !== target) el.removeAttribute('open')
-  }
-  target.setAttribute('open', '')
 }
 
 export function popupIdMoved(popupId: string, newId: (oldId: string) => string | undefined): string | undefined {

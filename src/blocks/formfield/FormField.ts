@@ -1,16 +1,16 @@
 import { html, nothing, type CSSResultGroup, type PropertyValues, type TemplateResult } from 'lit'
 import { classMap } from 'lit/directives/class-map.js'
 import { live } from 'lit/directives/live.js'
+import { LIST_INSIDE_ATTR } from '../area/areaStyle'
 import { BlockElement, defineBlock } from '../base/BlockElement'
 import { noticeSignTpl } from '../base/notice'
 import { reportsHeight } from '../base/heightReport'
 import { actionValue, bindable, type ValueCarrier } from '../../core/block/capability'
 import { propertyVisible } from '../../core/block/property'
 import { LOOKUP_COLUMNS_BINDING } from '../lookup/lookup'
-import { dayKey } from '../../runtime/chosenDay'
 import { focusNextField } from '../../runtime/nextField'
+import { revealSelf } from '../../runtime/reveal'
 import { setSearchText } from '../../runtime/searchText'
-import { asNumber } from '../../core/data/number'
 import { suggestionStyle } from '../lookup/suggestionList'
 import { LookupControl } from '../lookup/lookupControl'
 import { icon, type IconName } from '../parts/icons'
@@ -19,8 +19,8 @@ import { symbolTpl } from '../look/symbol'
 import '../table/Table'
 import { disconnectValue, connectValue } from './valueBinding'
 import { fieldStyle } from './formFieldStyle'
+import { fieldTypeOf, forInput, fromInput } from './inputValue'
 import {
-  FIELD_TYPES,
   NOT_CHECKBOX,
   ONLY_LOOKUP,
   TICKED,
@@ -30,39 +30,6 @@ import {
   type FieldType,
   type FormFieldValues,
 } from './properties'
-
-function fieldTypeOf(v: unknown): FieldType {
-  return FIELD_TYPES.includes(v as FieldType) ? (v as FieldType) : 'text'
-}
-
-function dateFromInput(value: string): string {
-  const iso = /^(\d{4,})-(\d{2})-(\d{2})$/.exec(value)
-  return iso ? `${iso[3]}.${iso[2]}.${iso[1]}` : value
-}
-
-function dateForInput(value: string): string {
-  const german = /^(\d{2})\.(\d{2})\.(\d{4,})$/.exec(value)
-  return german ? `${german[3]}-${german[2]}-${german[1]}` : dayKey(value) || value
-}
-
-function numberFromInput(value: string): string {
-  return value.replace('.', ',')
-}
-
-function numberForInput(value: string): string {
-  const number = asNumber(value)
-  return number === null ? '' : String(number)
-}
-
-function forInput(kind: FieldType, value: string): string {
-  if (kind === 'date') return dateForInput(value)
-  return kind === 'number' ? numberForInput(value) : value
-}
-
-function fromInput(kind: FieldType, value: string): string {
-  if (kind === 'date') return dateFromInput(value)
-  return kind === 'number' ? numberFromInput(value) : value
-}
 
 const SIGNS: Partial<Record<FieldType, IconName>> = {
   select: 'caretDown',
@@ -118,7 +85,8 @@ export class FormField extends BlockElement implements ValueCarrier {
   }
 
   focusValue(): void {
-    this.renderRoot.querySelector<HTMLElement>('input, select')?.focus()
+    revealSelf(this)
+    this.renderRoot.querySelector<HTMLElement>('input, select, textarea')?.focus()
   }
 
   private onInput(e: Event): void {
@@ -147,8 +115,11 @@ export class FormField extends BlockElement implements ValueCarrier {
     this.onFocus()
   }
 
+  // Enter goes on to the next field. In a field of several lines Enter
+  // starts a new line and Ctrl+Enter goes on; Tab goes on as anywhere.
   private onKey(e: KeyboardEvent): void {
-    if (e.key !== 'Enter' || this.preview) return
+    const lines = fieldTypeOf(this.fieldType) === 'multiline'
+    if (e.key !== 'Enter' || (lines && !(e.ctrlKey || e.metaKey)) || this.preview) return
     e.preventDefault()
     this.takeTyped()
     focusNextField(this)
@@ -156,7 +127,7 @@ export class FormField extends BlockElement implements ValueCarrier {
 
   private onFieldClick(e: MouseEvent): void {
     if (this.preview) return
-    const control = this.renderRoot.querySelector<HTMLElement>('input, select')
+    const control = this.renderRoot.querySelector<HTMLElement>('input, select, textarea')
     if (!control || e.composedPath().includes(control)) return
     if (e.composedPath().some((at) => at instanceof HTMLButtonElement)) return
     control.focus()
@@ -206,6 +177,17 @@ export class FormField extends BlockElement implements ValueCarrier {
         ${entries.map((o) => html`<option value=${o} ?selected=${o === this.value}>${o}</option>`)}
       </select>`
     }
+    if (kind === 'multiline') {
+      return html`<textarea
+        class="ctrl"
+        aria-label=${this.label}
+        .value=${live(this.value)}
+        @input=${this.onInput}
+        @focus=${this.onFocus}
+        @blur=${this.takeTyped}
+        @keydown=${this.onKey}
+      ></textarea>`
+    }
     return html`<input
       class="ctrl"
       type=${kind}
@@ -227,7 +209,11 @@ export class FormField extends BlockElement implements ValueCarrier {
   protected override updated(changed: PropertyValues): void {
     super.updated(changed)
 
-    this.toggleAttribute('data-ff-list', this._lookup.hangsBelow)
+    const open = this._lookup.hangsBelow
+    if (open === this.hasAttribute('data-ff-list')) return
+    this.toggleAttribute('data-ff-list', open)
+    // The areas around stop cutting at their edge while the list hangs out.
+    for (let at = this.parentElement; at; at = at.parentElement) at.toggleAttribute(LIST_INSIDE_ATTR, open)
   }
 
   private checkboxTpl(bound: boolean): TemplateResult {
@@ -275,6 +261,7 @@ export class FormField extends BlockElement implements ValueCarrier {
     const noticed = notice !== nothing
     return html`<div
       class=${classMap({ field: true, labelled: this.showLabel, [`kind-${kind}`]: true, lookup: this.lookup, noticed })}
+      style=${kind === 'multiline' ? `--lines: ${this.lines}` : nothing}
       @click=${this.onFieldClick}
     >
       ${this.symbol !== '' ? html`<span class="symbol">${symbolTpl(this.symbol)}</span>` : nothing}
@@ -318,7 +305,7 @@ defineBlock(FormField, {
   capabilities: [
     { kind: 'source', when: WITH_VALUE, after: 'options' },
     { kind: 'followsSelection' },
-    { kind: 'recordPick', sourceProp: 'lookupSource', when: ONLY_LOOKUP },
+    { kind: 'recordChoice', sourceProp: 'lookupSource', when: ONLY_LOOKUP },
     { kind: 'list', binding: LOOKUP_COLUMNS_BINDING },
     {
       kind: 'lookupWindow',

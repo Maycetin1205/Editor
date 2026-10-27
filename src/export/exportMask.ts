@@ -114,7 +114,7 @@ function nodeToHtml(
   const pagesAttr = node.parentId === ROOT_ID && !def.page ? ' data-ff-main' : ''
   const alias = pictureAlias(node)
   const aliasAttr = alias === '' ? '' : htmlAttr(PICTURE_ALIAS_ATTR, alias)
-  const open = `${pad}<${def.tag}${attrs}${actionsAttr}${keyAttr}${aliasAttr}${pagesAttr}${fillsAttr}${styleAttr(node, def.page === true)}>`
+  const open = `${pad}<${def.tag}${attrs}${actionsAttr}${keyAttr}${aliasAttr}${pagesAttr}${fillsAttr}${styleAttr(node, def.page === true || def.fillsParent === true)}>`
   if (!def.takesChildren || node.childIds.length === 0) {
     return `${open}</${def.tag}>`
   }
@@ -159,6 +159,55 @@ function originComment(title: string, frame: string): string {
   )
 }
 
+function sourcesScript(
+  used: readonly DataSource[],
+  usedFields: ReadonlyMap<string, ReadonlySet<string>>,
+  getKey: ReadonlyMap<string, string[]>,
+  relation: readonly RelationTemplate[],
+): string {
+  const entries = used.map((s) => ({
+    id: s.id,
+    name: s.name,
+    tableId: s.tableId,
+    recordField: recordNumberOf(s),
+    ...deliveryAdapter(s.delivery.kind).export(s.delivery, s, {
+      usedFields: usedFields.get(s.id),
+      orderedFields: (facts) => {
+        const source = used.find((u) => u.id === facts.id)
+        return source === undefined
+          ? ''
+          : orderedFields(source, usedFields.get(source.id), getKey.get(source.id) ?? [], false)
+      },
+      relations: relation,
+    }),
+  }))
+  return guardJsonScript(escapeNonAsciiJs('window.FF_DATA_SOURCES = ' + JSON.stringify(entries) + ';'))
+}
+
+function relationScript(usedRelation: readonly RelationTemplate[]): string {
+  const entries = usedRelation.map((r) => ({
+    id: r.id,
+    verb: r.verb,
+    nr: r.nr,
+    parameter: r.parameter,
+    extraParameterAllowed: r.extraParameterAllowed === true,
+    ...(r.positions ? { positions: r.positions } : {}),
+  }))
+  return guardJsonScript(escapeNonAsciiJs('window.FF_RELATIONS = ' + JSON.stringify(entries) + ';'))
+}
+
+function sheetCss(rows: string | null): string {
+  return (
+    `.${MASK_ROOT_CLASS} { box-sizing: border-box; width: 100%; height: 100%; overflow: auto;` +
+    ` background: var(--se-bg);` +
+    ` font-family: var(--se-font); font-size: var(--se-fs); line-height: var(--se-lh); color: var(--se-ink);` +
+    ` font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; caret-color: var(--se-accent);` +
+    ` scrollbar-width: thin; scrollbar-color: var(--se-scrollbar) transparent;` +
+    ` ${gridAreaCss()};${rows ? ` grid-template-rows: ${rows};` : ''}` +
+    ` padding: var(--se-sheet-top) var(--se-sheet-x) var(--se-sheet-bottom); }`
+  )
+}
+
 export function exportMask(
   tree: MaskTree,
   title = 'Maske',
@@ -192,45 +241,8 @@ export function exportMask(
 
   const runtimeJs = guardScriptContent(escapeNonAsciiJs(runtimeFor(types)))
 
-  const sourcesJs = guardJsonScript(
-    escapeNonAsciiJs(
-      'window.FF_DATA_SOURCES = ' +
-        JSON.stringify(
-          used.map((s) => ({
-            id: s.id,
-            name: s.name,
-            tableId: s.tableId,
-            recordField: recordNumberOf(s),
-            ...deliveryAdapter(s.delivery.kind).export(s.delivery, s, {
-              usedFields: usedFields.get(s.id),
-              orderedFields: (source) =>
-                orderedFields(source, usedFields.get(source.id), getKey.get(source.id) ?? [], false),
-              relations: relation,
-            }),
-          })),
-        ) +
-        ';',
-    ),
-  )
-
-  const relationJs = guardJsonScript(
-    escapeNonAsciiJs(
-      'window.FF_RELATIONS = ' +
-        JSON.stringify(
-          usedRelation.map((r) => ({
-            id: r.id,
-            verb: r.verb,
-            nr: r.nr,
-            parameter: r.parameter,
-            extraParameterAllowed: r.extraParameterAllowed === true,
-            ...(r.positions ? { positions: r.positions } : {}),
-          })),
-        ) +
-        ';',
-    ),
-  )
-
-  const rows = pageRowsTemplate(tree)
+  const sourcesJs = sourcesScript(used, usedFields, getKey, relation)
+  const relationJs = relationScript(usedRelation)
 
   const html = [
     '<!DOCTYPE html>',
@@ -246,14 +258,7 @@ export function exportMask(
     '',
     "/* The sheet is paper to the window's edges; its grid as on the editor canvas. */",
     'html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--se-bg); }',
-
-    `.${MASK_ROOT_CLASS} { box-sizing: border-box; width: 100%; height: 100%; overflow: auto;` +
-      ` background: var(--se-bg);` +
-      ` font-family: var(--se-font); font-size: var(--se-fs); line-height: var(--se-lh); color: var(--se-ink);` +
-      ` font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; caret-color: var(--se-accent);` +
-      ` scrollbar-width: thin; scrollbar-color: var(--se-scrollbar) transparent;` +
-      ` ${gridAreaCss()};${rows ? ` grid-template-rows: ${rows};` : ''}` +
-      ` padding: var(--se-sheet-top) var(--se-sheet-x) var(--se-sheet-bottom); }`,
+    sheetCss(pageRowsTemplate(tree)),
     `.${MASK_ROOT_CLASS} * { font-family: inherit; font-size: inherit; }`,
     `.${MASK_ROOT_CLASS} ::selection { background: var(--se-selection-ground); color: var(--se-ink); }`,
     '</style>',

@@ -14,14 +14,17 @@ const LOADER =
   'function __ff(e,o){for(var k in o)Object.defineProperty(e,k,{enumerable:!0,get:o[k]})}' +
   'function r(n){var m=c[n];if(!m){m=c[n]={exports:{}};d[n](r,m,m.exports)}return m.exports}'
 
+// The part that installs SoftEngine as the host; it runs before any block.
+const HOST = 'softengine-host'
+
 export function runtimeFor(types: Iterable<string>): string {
   const wanted = new Set(types)
-  const starts = PARTS.order.filter((type) => wanted.has(type))
+  const starts = PARTS.order.filter((type) => type === HOST || wanted.has(type))
   const unknown = [...wanted].filter((type) => PARTS.blocks[type] === undefined)
   if (unknown.length > 0) {
     throw new Error(`Für ${unknown.map((t) => `"${t}"`).join(', ')} fehlt die Laufzeit (npm run build:runtime)`)
   }
-  if (starts.length === 0) return ''
+  if (!starts.some((type) => type !== HOST)) return ''
 
   const needed = new Set<number>()
   const visit = (id: number) => {

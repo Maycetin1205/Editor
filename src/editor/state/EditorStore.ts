@@ -7,10 +7,9 @@ import { type SourceInReach } from '../../core/data/extraSources'
 import { DataSourceStore } from './DataSourceStore'
 import { firstSourceInReach, sourcesInReach } from '../../core/block/sourcesInReach'
 import { gestureBracket, History, type EditorSnapshot, type GestureBracket } from './history'
-import { mustGuard, packMask, packMaskFrom, readNotice, type MaskContent, type MaskFileAt } from './maskFile'
+import { packMask, type MaskContent, type MaskFileAt } from './maskFile'
+import { storedMaskRefused } from './stageNotice'
 import { NO_LEFTOVER, type Leftover } from './leftover'
-import type { MaskFolder } from './maskFolder'
-import type { NoticeText } from '../widgets/Notice'
 import { missingOn } from './libraryFile'
 import { RelationStore } from './RelationStore'
 import { Subject } from './Subject'
@@ -27,19 +26,10 @@ import {
 import { newBlockOnCell, cellMoveIn, slotGrownPushing, slotResize } from '../../core/block/gridArea'
 import { selectionOnPage, selectionTarget } from '../../core/block/selection'
 import { deepClone } from '../../core/deepClone'
+import { EditorFiles } from './editorStore/files'
 import { EditorPersistence } from './editorStore/persistence'
 import { blockAdded, blockRemoved, eventsUpdated, inSubtree, propertyUpdated } from './editorStore/treeEdits'
-import {
-  EditorView,
-  type Deed,
-  type OpenCalculation,
-  type OpenLookup,
-  type OpenStep,
-  type SideTab,
-} from './editorStore/viewState'
-import type { Column } from './maskStorage'
-
-export type { OpenLookup } from './editorStore/viewState'
+import { EditorView } from './editorStore/viewState'
 
 export class EditorStore extends Subject<EditorStore> {
   readonly dataSources: DataSourceStore
@@ -55,28 +45,27 @@ export class EditorStore extends Subject<EditorStore> {
   private _version = 0
   private _history = new History()
 
-  readonly view = new Subject<EditorStore>()
-  private _viewVersion = 0
-  private readonly _shows = new EditorView(() => this.viewChanged())
+  readonly view = new EditorView()
 
-  private readonly _kept = new EditorPersistence(() => this.snapshot())
+  private readonly persistence = new EditorPersistence(() => this.snapshot())
+
+  readonly files: EditorFiles = new EditorFiles(this, this.persistence)
   private _hydrated = false
 
   private _restoring = false
 
-  private _reopening: Promise<void> | null = null
-
   constructor() {
     super()
-    const { library, mask } = EditorPersistence.load()
+    const { library, mask, refusedStage } = EditorPersistence.load()
     this.dataSources = new DataSourceStore(library.dataSources)
     this.relation = new RelationStore(library.relation)
     this._tree = mask.tree
     this._leftover = mask.leftover
     this._activePageId = mask.activePageId
     this._selectedId = this.selectionOnActivePage(mask.selectedId)
-    this._kept.started(mask, library)
+    this.persistence.started(mask, library)
     this._hydrated = true
+    if (refusedStage !== null) this.view.showNotice(storedMaskRefused(refusedStage))
 
     for (const store of [this.dataSources, this.relation]) {
       store.observeBeforeChange(() => {
@@ -148,7 +137,7 @@ export class EditorStore extends Subject<EditorStore> {
   selectBlock(id: string | null): void {
     if (this._selectedId === id) return
     this._selectedId = id
-    this.pickFollowFor(null)
+    this.view.pickFollowFor(null)
     this.notify(this)
   }
 
@@ -180,7 +169,7 @@ export class EditorStore extends Subject<EditorStore> {
     try {
       super.notify(data)
     } finally {
-      if (this._hydrated) this._kept.plan()
+      if (this._hydrated) this.persistence.plan()
     }
   }
 
@@ -191,7 +180,7 @@ export class EditorStore extends Subject<EditorStore> {
       activePageId: this.activePageId,
       dataSources: this.dataSources.list,
       relation: this.relation.list,
-      file: this.maskOnDisk.place,
+      file: this.files.maskOnDisk.place,
       leftover: this._leftover,
     }
   }
@@ -208,7 +197,7 @@ export class EditorStore extends Subject<EditorStore> {
 
   private pushHistory(): void {
     this._history.record(() => this.snapshot())
-    this.maskOnDisk.stir()
+    this.files.maskOnDisk.stir()
   }
 
   beginTransaction(): void {
@@ -223,10 +212,16 @@ export class EditorStore extends Subject<EditorStore> {
     return this._history.transaction(() => this.snapshot(), run)
   }
 
+  // One undo step for a gesture; cancel puts the mask back as it was when
+  // the gesture began.
   openGesture(): GestureBracket {
     return gestureBracket(
       () => this.beginTransaction(),
       () => this.endTransaction(),
+      () => {
+        const start = this._history.abandon()
+        if (start) this.restoreFrom(start)
+      },
     )
   }
 
@@ -244,7 +239,7 @@ export class EditorStore extends Subject<EditorStore> {
 
   private restoreFrom(state: EditorSnapshot): void {
     this.setLibraries(state)
-    if (state.file) this.maskOnDisk.restore(state.file)
+    if (state.file) this.files.maskOnDisk.restore(state.file)
     this._tree = state.tree
     this._leftover = state.leftover ?? NO_LEFTOVER
     this._activePageId = state.activePageId ?? ROOT_ID
@@ -348,10 +343,10 @@ export class EditorStore extends Subject<EditorStore> {
   }
 
   newMask(): void {
-    if (!this.maskOnDisk.attached && JSON.stringify(this._tree) === JSON.stringify(emptyTree())) return
+    if (!this.files.maskOnDisk.attached && JSON.stringify(this._tree) === JSON.stringify(emptyTree())) return
     this.pushHistory()
-    this.maskOnDisk.forget()
-    this._kept.restarted(null, 0)
+    this.files.maskOnDisk.forget()
+    this.persistence.restarted(null, 0)
     this._tree = emptyTree()
     this._leftover = NO_LEFTOVER
     this._selectedId = null
@@ -361,7 +356,7 @@ export class EditorStore extends Subject<EditorStore> {
 
   replaceMask(content: MaskContent, from: MaskFileAt | null = null, locked = false): void {
     this.pushHistory()
-    this.maskOnDisk.forget()
+    this.files.maskOnDisk.forget()
     this.setLibraries({
       dataSources: missingOn(this.dataSources.list, content.dataSources),
       relation: missingOn(this.relation.list, content.relation),
@@ -371,215 +366,23 @@ export class EditorStore extends Subject<EditorStore> {
     this._selectedId = null
     this._activePageId = ROOT_ID
     if (from === null) {
-      this._kept.restarted(null, 0)
+      this.persistence.restarted(null, 0)
     } else {
       const text = packMask(this._tree, this.dataSources.list, this.relation.list, this._leftover)
-      this.maskOnDisk.remember(from.file, from.path, text)
-      this.maskOnDisk.lock(locked)
-      this._kept.restarted(text, from.modified)
+      this.files.maskOnDisk.remember(from.file, from.path, text)
+      this.files.maskOnDisk.lock(locked)
+      this.persistence.restarted(text, from.modified)
     }
     this.notify(this)
   }
 
   get maskLocked(): boolean {
-    return this.maskOnDisk.locked
+    return this.files.maskOnDisk.locked
   }
 
   unlockMask(): void {
-    if (!this.maskOnDisk.locked) return
-    this.maskOnDisk.lock(false)
+    if (!this.files.maskOnDisk.locked) return
+    this.files.maskOnDisk.lock(false)
     this.notify(this)
-  }
-
-  keepIn(at: Omit<MaskFileAt, 'modified'>, holds: string | null, created = false): void {
-    this.maskOnDisk.remember(at.file, at.path, holds, created)
-    this._kept.plan()
-  }
-
-  get viewVersion(): number {
-    return this._viewVersion
-  }
-
-  private viewChanged(): void {
-    this._viewVersion++
-    this.view.notify(this)
-  }
-
-  get stepWindow(): OpenStep | null {
-    return this._shows.stepWindow
-  }
-
-  openStep(open: OpenStep | null): void {
-    this._shows.openStep(open)
-  }
-
-  get calculationWindow(): OpenCalculation | null {
-    return this._shows.calculationWindow
-  }
-
-  openCalculation(open: OpenCalculation | null): void {
-    this._shows.openCalculation(open)
-  }
-
-  get splitWindow(): string | null {
-    return this._shows.splitWindow
-  }
-
-  openSplit(blockId: string | null): void {
-    this._shows.openSplit(blockId)
-  }
-
-  get lookupWindow(): OpenLookup | null {
-    return this._shows.lookupWindow
-  }
-
-  setLookupWindow(open: OpenLookup | null): void {
-    this._shows.setLookupWindow(open)
-  }
-
-  get followPickFor(): string | null {
-    return this._shows.followPickFor
-  }
-
-  pickFollowFor(blockId: string | null): void {
-    this._shows.pickFollowFor(blockId)
-  }
-
-  get dataWindow(): boolean {
-    return this._shows.dataWindow
-  }
-
-  get startsNewSource(): boolean {
-    return this._shows.startsNewSource
-  }
-
-  showData(open: boolean): void {
-    this._shows.showData(open)
-  }
-
-  startNewSource(): void {
-    this._shows.startNewSource()
-  }
-
-  get outlines(): boolean {
-    return this._shows.outlines
-  }
-
-  showOutlines(on: boolean): void {
-    this._shows.showOutlines(on)
-  }
-
-  get sideTab(): SideTab {
-    return this._shows.sideTab
-  }
-
-  showSide(tab: SideTab): void {
-    this._shows.showSide(tab)
-  }
-
-  get saveWaits(): boolean {
-    return this._shows.saveWaits
-  }
-
-  waitToSave(on: boolean): void {
-    this._shows.waitToSave(on)
-  }
-
-  isShut(column: Column): boolean {
-    return this._shows.isShut(column)
-  }
-
-  shutColumn(column: Column, shut: boolean): void {
-    this._shows.shutColumn(column, shut)
-  }
-
-  get notice(): NoticeText | null {
-    return this._shows.notice
-  }
-
-  showNotice(notice: NoticeText | null): void {
-    this._shows.showNotice(notice)
-  }
-
-  get done(): Deed | null {
-    return this._shows.done
-  }
-
-  markDone(deed: Deed): void {
-    this._shows.markDone(deed)
-  }
-
-  get maskOnDisk() {
-    return this._kept.maskOnDisk
-  }
-
-  get libraryOnDisk() {
-    return this._kept.libraryOnDisk
-  }
-
-  get maskFolder(): MaskFolder {
-    return this._kept.folder
-  }
-
-  get keptAt(): number {
-    return this._kept.keptAt
-  }
-
-  saveNow(): void {
-    this._kept.now()
-  }
-
-  reopenFolder(): Promise<void> {
-    this._reopening ??= (async () => {
-      await this.maskFolder.restore()
-      await this.rejoin()
-    })()
-    return this._reopening
-  }
-
-  async folderReady(): Promise<boolean> {
-    if (!(await this.maskFolder.ready())) return false
-    await this.rejoin()
-    return true
-  }
-
-  async pickMaskFolder(): Promise<void> {
-    const picked = await this.maskFolder.pick()
-    if (picked === 'switched' && !this.maskOnDisk.attached) this.maskOnDisk.forget()
-    if (picked !== 'closed') await this.rejoin()
-  }
-
-  private async rejoin(): Promise<void> {
-    const disk = this.maskOnDisk
-    const path = disk.path
-    if (path === null || disk.attached || this.maskFolder.state !== 'open') return
-    const file = await this.maskFolder.fileAt(path)
-    let data: { text: string; modified: number } | null = null
-    if (file !== null) {
-      try {
-        const read = await file.getFile()
-        data = { text: await read.text(), modified: read.lastModified }
-      } catch {
-        data = null
-      }
-    }
-    if (disk.path !== path || disk.attached) return
-    if (file === null || data === null) {
-      disk.forget()
-      return
-    }
-    if (data.text === packMask(this._tree, this.dataSources.list, this.relation.list, this._leftover)) {
-      disk.remember(file, path, data.text)
-      return
-    }
-    const read = data.modified > this._kept.keptAt ? packMaskFrom(data.text) : null
-    if (read?.ok) {
-      const locked = mustGuard(read.note)
-      this.replaceMask(read.content, { file, path, modified: data.modified }, locked)
-      const notice = readNotice(this, path, read.note, locked)
-      if (notice !== null) this.showNotice(notice)
-      return
-    }
-    this.keepIn({ file, path }, null)
   }
 }

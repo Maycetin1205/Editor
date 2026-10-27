@@ -1,17 +1,6 @@
+import type { NoticeText } from '../state/noticeText'
 import { Button } from './Button'
 import { Window } from './Window'
-
-export interface NoticeLine {
-  name: string
-  detail?: string
-}
-
-export interface NoticeText {
-  title: string
-  lead: string
-  lines?: readonly NoticeLine[]
-  action?: { label: string; run: () => void }
-}
 
 export function Notice({ notice, onClose }: { notice: NoticeText; onClose: () => void }) {
   const action = notice.action

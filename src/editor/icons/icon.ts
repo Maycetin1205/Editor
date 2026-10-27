@@ -74,6 +74,7 @@ export const SeparatorHorizontal = iconFactory('separator-horizontal', NODE.Sepa
 export const SquareDashed = iconFactory('square-dashed', NODE.SquareDashed)
 export const SquareKanban = iconFactory('square-kanban', NODE.SquareKanban)
 export const Table = iconFactory('table', NODE.Table)
+export const Tabs = iconFactory('tabs', NODE.Tabs)
 export const TextCursorInput = iconFactory('text-cursor-input', NODE.TextCursorInput)
 export const Trash = iconFactory('trash', NODE.Trash)
 export const Trash2 = iconFactory('trash-2', NODE.Trash2)

@@ -1,12 +1,11 @@
-import { useSyncExternalStore } from 'react'
+import { useCallback, useSyncExternalStore } from 'react'
 import { useEditorInstance } from './EditorContext'
-import type { EditorStore } from './EditorStore'
+import type { EditorView } from './editorStore/viewState'
 
-export function useView(): EditorStore {
-  const editor = useEditorInstance()
-  useSyncExternalStore(
-    (cb) => editor.view.subscribe(cb),
-    () => editor.viewVersion,
-  )
-  return editor
+export function useView(): EditorView {
+  const view = useEditorInstance().view
+  const subscribe = useCallback((cb: () => void) => view.subscribe(cb), [view])
+  const version = useCallback(() => view.version, [view])
+  useSyncExternalStore(subscribe, version)
+  return view
 }

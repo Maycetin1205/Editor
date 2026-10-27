@@ -5,7 +5,7 @@ import { SOURCE_PROPERTY } from '../core/block/sourceProperty'
 import { BLOCK_ID_ATTR } from '../core/data/actions'
 import type { RuntimeSource } from '../core/data/dataSources'
 import { positionIdentity } from '../core/data/positions'
-import { maskState } from './maskState'
+import { maskHost } from './host'
 import { followsFormField, onSelectionList, traitOf } from './selection'
 import { keyedByFormField, makeFieldReader, type FieldReader } from './foreignSources'
 import { onChosenDay, chosenDay, dayKey } from './chosenDay'
@@ -16,17 +16,17 @@ export function sourceIdOf(el: Element): string {
 }
 
 export function recordOf(source: RuntimeSource, row: unknown): string {
-  return source.recordField === '' ? '' : maskState.host.readField(row, source.recordField)
+  return source.recordField === '' ? '' : maskHost().readField(row, source.recordField)
 }
 
 export function identityOf(source: RuntimeSource | undefined, row: unknown): string {
   if (!source) return ''
-  return positionIdentity(source.tableId, row, maskState.host.readField) || recordOf(source, row)
+  return positionIdentity(source.tableId, row, maskHost().readField) || recordOf(source, row)
 }
 
 function rowsAtDay(rows: readonly unknown[], dayCode: string, day: string): unknown[] {
   if (dayCode === '' || day === '') return [...rows]
-  return rows.filter((row) => dayKey(maskState.host.readField(row, dayCode)) === day)
+  return rows.filter((row) => dayKey(maskHost().readField(row, dayCode)) === day)
 }
 
 export interface DataPreamble {
@@ -40,9 +40,9 @@ export interface DataPreamble {
 export function readDataPreamble(el: HTMLElement): DataPreamble | null {
   const sourceId = sourceIdOf(el)
   if (sourceId === '') return null
-  const source = maskState.host.source(sourceId)
+  const source = maskHost().source(sourceId)
   if (!source) return null
-  const rows = rowsAtDay(maskState.host.rows(source), readDeclared(el, DAY_FIELD_PROPERTY) ?? '', chosenDay())
+  const rows = rowsAtDay(maskHost().rows(source), readDeclared(el, DAY_FIELD_PROPERTY) ?? '', chosenDay())
   return { source, rows, read: makeFieldReader(el) }
 }
 
@@ -86,7 +86,7 @@ export function makeDataLink<T extends HTMLElement>(opts: {
   let registered = false
 
   const hydrateAll = (delivery: boolean): void => {
-    if (!maskState.host.hasData()) return
+    if (!maskHost().hasData()) return
     elements.forEach((el) => {
       opts.hydrate(el, delivery)
     })
@@ -98,7 +98,7 @@ export function makeDataLink<T extends HTMLElement>(opts: {
 
     if (!registered) {
       registered = true
-      maskState.host.onData(hydrateAll)
+      maskHost().onData(hydrateAll)
 
       onChosenDay(() => {
         hydrateAll(false)
@@ -112,7 +112,7 @@ export function makeDataLink<T extends HTMLElement>(opts: {
         'change',
         (e) => {
           const blockId = e.target instanceof Element ? e.target.getAttribute(BLOCK_ID_ATTR) : null
-          if (blockId === null || !maskState.host.hasData()) return
+          if (blockId === null || !maskHost().hasData()) return
           elements.forEach((other) => {
             if (keyedByFormField(other, blockId) || followsFormField(other, blockId)) opts.hydrate(other, false)
           })
@@ -122,9 +122,9 @@ export function makeDataLink<T extends HTMLElement>(opts: {
 
       wireFetchingSources()
     }
-    maskState.host.start()
+    maskHost().start()
 
-    if (maskState.host.hasData()) opts.hydrate(el, false)
+    if (maskHost().hasData()) opts.hydrate(el, false)
   }
 
   const disconnect = (el: T): void => {

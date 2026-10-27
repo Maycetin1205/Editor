@@ -5,20 +5,22 @@ import type { BlockNode } from '../../core/block/tree'
 import { SELECTION_FOLLOW_PROP } from '../../core/data/selectionFollow'
 import { openDocumentOf } from '../origin/reach'
 import { useDataSources } from '../state/useDataSources'
+import { useEditor } from '../state/useEditor'
 import { useView } from '../state/useView'
 import { followOnDocument } from './followOffer'
 
 export function FollowPick({ block }: { block: BlockNode }) {
-  const ed = useView()
+  const ed = useEditor()
+  const view = useView()
   const openDocument = openDocumentOf(useDataSources().list)
-  const waiting = ed.followPickFor === block.id
+  const waiting = view.followPickFor === block.id
   return (
     <div className="flex flex-col items-start gap-[2px]">
       <Button
         kind="command"
         aria-pressed={waiting}
         className={waiting ? PRESSED : '-ml-[10px]'}
-        onClick={() => ed.pickFollowFor(waiting ? null : block.id)}
+        onClick={() => view.pickFollowFor(waiting ? null : block.id)}
       >
         <Link2 size={14} /> {waiting ? 'Geber auf der Leinwand anklicken …' : 'Geber auf der Leinwand anklicken'}
       </Button>
@@ -28,13 +30,13 @@ export function FollowPick({ block }: { block: BlockNode }) {
           className="-ml-[10px]"
           onClick={() => {
             ed.updateProperty(block.id, SELECTION_FOLLOW_PROP, followOnDocument(block, openDocument.id))
-            ed.pickFollowFor(null)
+            view.pickFollowFor(null)
           }}
         >
           <FileText size={14} /> {openDocument.name}
         </Button>
       )}
-      {waiting && <EscapeEnds onEscape={() => ed.pickFollowFor(null)} />}
+      {waiting && <EscapeEnds onEscape={() => view.pickFollowFor(null)} />}
     </div>
   )
 }

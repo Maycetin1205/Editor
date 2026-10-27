@@ -1,121 +1,124 @@
 import { html, nothing, type CSSResultGroup, type TemplateResult } from 'lit'
-import { state } from 'lit/decorators.js'
+import { property } from 'lit/decorators.js'
+import { styleMap } from 'lit/directives/style-map.js'
 import { BlockElement, defineBlock } from '../base/BlockElement'
 import { bindable } from '../../core/block/capability'
-import { chooseSelection, giverIdOf, relocateSelection, rowsToSelection } from '../../runtime/selection'
-import { makeDataLink, readDataPreamble, rowKeys, spotValue } from '../../runtime/source'
-import { AVATAR_SPOT, avatarStyle, cardOf, cardSpotStyle } from '../parts/card'
+import type { Calculation } from '../../core/data/calculation'
+import { makeFieldReader } from '../../runtime/foreignSources'
+import { spotValue } from '../../runtime/source'
+import { AVATAR_SPOT, avatarStyle, cardOf, cardSpotStyle, type CardValues } from '../parts/card'
+import type { Column } from '../parts/column'
+import { LIST_EVENTS, RecordList, tableStyle, WITHOUT_DECORATION, type RowsBelow } from '../list'
+import { TABLE_PART } from '../list/parts'
 import { dataListStyle } from './dataListStyle'
 import { dataListProperties, PICK_ONE, ROW_SPOTS, type DataListValues } from './properties'
 
-interface Item {
-  key: string
-  row: unknown
-
-  values: Readonly<Record<string, string>>
-}
+const CARD_SPOTS = [...ROW_SPOTS, AVATAR_SPOT]
 
 export interface DataList extends DataListValues {}
 
+// The table drawn as a plain list: no head, no foot, one column whose cell
+// is the card of a record (avatar, title, the line under it, the value on
+// the right). Rows, choice, keys and loading are the table's.
 export class DataList extends BlockElement {
   static readonly type = 'datalist'
   static readonly tag = 'ff-datalist'
 
-  static override styles: CSSResultGroup = [BlockElement.styles, avatarStyle, cardSpotStyle, dataListStyle]
+  static override styles: CSSResultGroup = [BlockElement.styles, tableStyle, avatarStyle, cardSpotStyle, dataListStyle]
 
   static override busyLine = true
 
-  @state() private items: readonly Item[] = []
+  @property({ attribute: false }) dataRows: string[][] = []
 
-  @state() private chosen: ReadonlySet<string> = new Set()
+  @property({ attribute: false }) rawRows: unknown[] = []
 
-  hydrate(): void {
-    const preamble = readDataPreamble(this)
-    const rows = preamble ? rowsToSelection(this, preamble.rows) : []
-    const keys = preamble ? rowKeys(preamble.source, rows) : []
-    this.items = preamble
-      ? rows.map((row, i) => ({
-          key: keys[i],
-          row,
-          values: Object.fromEntries(
-            [...ROW_SPOTS, AVATAR_SPOT].map(({ prop }) => [
-              prop,
-              spotValue('', this[`${prop}Field`], row, preamble.read),
-            ]),
-          ),
-        }))
-      : []
-    const hit =
-      this.pick === 'one'
-        ? relocateSelection(
-            giverIdOf(this),
-            this.items,
-            (item) => item.row,
-            (item) => item.key,
-          )
-        : []
-    this.chosen = new Set(hit.slice(0, 1).map((i) => this.items[i].key))
+  // How many rows the list holds, for an area that counts them in its head.
+  get rowCount(): number {
+    return this.rawRows.length
   }
 
-  private choose(item: Item): void {
-    chooseSelection(giverIdOf(this), item.row, item.key)
+  readonly search = false
+  readonly paging = false
+  readonly sortByClick = false
+  readonly columnPicker = false
+  readonly dayField = ''
+
+  private _column: { field: string; columns: readonly Column[] } = { field: '', columns: [] }
+
+  private _cards: { rows: readonly unknown[]; values: Map<number, Record<string, string>> } = {
+    rows: [],
+    values: new Map(),
   }
 
-  private row(item: Item | null): TemplateResult {
-    const { shows, spot, avatar } = cardOf(
-      this,
-      ROW_SPOTS,
-      (prop) => this[`${prop}Field`],
-      this.reportSpot,
-      item?.values ?? null,
+  private readonly _list = new RecordList(
+    this,
+    {
+      cellValue: (rawIndex) => this.cardAt(rawIndex).heading ?? '',
+      decoration: () => (rawIndex) => ({ ...WITHOUT_DECORATION, cell: () => this.cardTpl(this.cardAt(rawIndex)) }),
+      required: () => false,
+      held: () => false,
+      greyLine: () => new Map(),
+      bottom: () => (this.preview ? this.sampleRow() : null),
+    },
+    { plain: true, picks: () => this.pick === 'one' },
+  )
+
+  // The one column, bound to the first bound spot: without one the list has
+  // nothing to show, as a table without a bound column.
+  get columns(): readonly Column[] {
+    const field = CARD_SPOTS.map(({ prop }) => this[`${prop}Field`]).find((f) => f !== '') ?? ''
+    if (this._column.columns.length === 0 || this._column.field !== field) {
+      this._column = { field, columns: [{ key: 'card', title: '', field }] }
+    }
+    return this._column.columns
+  }
+
+  listColumns(): readonly Column[] {
+    return this.columns
+  }
+
+  listCalculations(): readonly Calculation[] {
+    return []
+  }
+
+  private cardAt(rawIndex: number): Record<string, string> {
+    if (this._cards.rows !== this.rawRows) this._cards = { rows: this.rawRows, values: new Map() }
+    const known = this._cards.values.get(rawIndex)
+    if (known) return known
+    const row = this.rawRows[rawIndex]
+    const read = makeFieldReader(this)
+    const values = Object.fromEntries(
+      CARD_SPOTS.map(({ prop }) => [prop, spotValue('', this[`${prop}Field`], row, read)]),
     )
-    const content = html`${avatar()}
+    this._cards.values.set(rawIndex, values)
+    return values
+  }
+
+  private cardTpl(values: CardValues): TemplateResult {
+    const { shows, spot, avatar } = cardOf(this, ROW_SPOTS, (prop) => this[`${prop}Field`], this.reportSpot, values)
+    return html`${avatar()}
       <span class="ident">
         ${shows('heading') ? spot('heading', 'name') : nothing}
         ${shows('subline') ? spot('subline', 'meta') : nothing}
       </span>
       ${shows('aside') ? spot('aside', 'aside') : nothing}`
-    if (item === null || this.pick !== 'one') return html`<div class="row">${content}</div>`
-    const chosen = this.chosen.has(item.key)
-    const pick = (): void => {
-      this.choose(item)
+  }
+
+  // In the editor one row with the names of the spots, to bind them.
+  private sampleRow(): RowsBelow {
+    return {
+      count: 1,
+      render: ({ cols }) =>
+        html`<div class=${TABLE_PART.row} role="row" style=${styleMap(cols)}><div role="cell">${this.cardTpl(
+          null,
+        )}</div></div>`,
     }
-    return html`<div
-      class="row${chosen ? ' chosen' : ''}"
-      role="button"
-      tabindex="0"
-      aria-pressed=${String(chosen)}
-      @click=${pick}
-      @keydown=${(e: KeyboardEvent) => {
-        if ((e.key !== 'Enter' && e.key !== ' ') || e.target !== e.currentTarget) return
-        e.preventDefault()
-        pick()
-      }}
-    >${content}</div>`
   }
 
   override render(): TemplateResult {
-    return html`<div class="list pick-${this.pick}">
-      ${this.preview ? this.row(null) : this.items.map((item) => this.row(item))}
-    </div>`
-  }
-
-  override connectedCallback(): void {
-    super.connectedCallback()
-    link.connect(this)
-  }
-
-  override disconnectedCallback(): void {
-    super.disconnectedCallback()
-    link.disconnect(this)
+    return html`<div class="list pick-${this.pick}">${this._list.render()}</div>`
   }
 }
-
-const link = makeDataLink<DataList>({
-  hydrate: (el) => {
-    el.hydrate()
-  },
-})
 
 defineBlock(DataList, {
   name: 'Datenliste',
@@ -123,9 +126,10 @@ defineBlock(DataList, {
   properties: dataListProperties,
   capabilities: [
     { kind: 'source' },
-    { kind: 'recordPick', gives: PICK_ONE },
+    { kind: 'recordChoice', gives: PICK_ONE },
     { kind: 'followsSelection' },
     bindable<typeof dataListProperties>([...ROW_SPOTS, AVATAR_SPOT]),
+    { kind: 'events', list: [...LIST_EVENTS] },
   ],
   grid: { startWidth: 24, startHeight: 10, minWidth: 8, minHeight: 3 },
 })

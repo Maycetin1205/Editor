@@ -9,20 +9,28 @@ import type { RuntimeSource } from '../core/data/dataSources'
 import { DELIVERY_KINDS, deliveryAdapter } from '../core/data/deliveries/deliveries'
 import { extraSourcesOf } from './foreignSources'
 import { warn } from './log'
-import { loadEnded, loadStarted } from './notice'
+import { loadEnded, loadFailed, loadStarted } from './notice'
 import { onSelectionList, selectionFor, selectionGiverOf, selectionNumber, traitOf } from './selection'
-import { maskState } from './maskState'
+import { maskHost } from './host'
+
+// What was fetched with which parameters, what loads silently, what runs.
+const state = {
+  lastPrint: new Map<string, string>(),
+  silentLoaded: new Map<string, Set<string>>(),
+  running: new Map<string, Promise<void>>(),
+  wired: false,
+}
 
 function defsWithRecordChoice(): Map<string, BlockType> {
   const map = new Map<string, BlockType>()
   for (const def of allBlockTypes()) {
-    if (hasCapability(def, 'recordPick')) map.set(def.tag.toLowerCase(), def)
+    if (hasCapability(def, 'recordChoice')) map.set(def.tag.toLowerCase(), def)
   }
   return map
 }
 
 function sourcesAttrFor(el: Element, def: BlockType): string {
-  const choice = capability(def, 'recordPick')
+  const choice = capability(def, 'recordChoice')
   if (!choice) return ''
   let active = true
   if (choice.when) {
@@ -60,7 +68,7 @@ function chosenRowOfSource(
 }
 
 function mayLoad(sourceId: string, print: string, byControls: boolean): boolean {
-  const { lastPrint, silentLoaded } = maskState.fetchingSources
+  const { lastPrint, silentLoaded } = state
   if (lastPrint.get(sourceId) === print) return false
   if (byControls) {
     silentLoaded.set(sourceId, new Set([print]))
@@ -78,25 +86,25 @@ function choicePrint(source: RuntimeSource): string | null {
   const parameter = source.delivery.kind === 'relationValue' ? source.delivery.get.parameter : []
   if (!parameter.some((binding) => binding.source === 'chosenRow')) return null
   const values = { context: {}, previousResult: '', chosenRow: selectionFor }
-  return JSON.stringify(parameter.map((binding) => maskState.host.resolveParameter(binding, values)))
+  return JSON.stringify(parameter.map((binding) => maskHost().resolveParameter(binding, values)))
 }
 
 function loadOnChoice(source: RuntimeSource): void {
   const print = choicePrint(source)
-  if (print === null || maskState.fetchingSources.lastPrint.get(source.id) === print) return
-  maskState.fetchingSources.lastPrint.set(source.id, print)
+  if (print === null || state.lastPrint.get(source.id) === print) return
+  state.lastPrint.set(source.id, print)
   load(source, undefined)
 }
 
 export function sourceSettled(sourceId: string): Promise<void> {
-  const source = maskState.host.source(sourceId)
+  const source = maskHost().source(sourceId)
   if (source) loadOnChoice(source)
-  return maskState.fetchingSources.running.get(sourceId) ?? Promise.resolve()
+  return state.running.get(sourceId) ?? Promise.resolve()
 }
 
 function checkFetchingSources(byControls: boolean): void {
   const defsPerTag = defsWithRecordChoice()
-  const host = maskState.host
+  const host = maskHost()
   for (const source of host.sources()) {
     loadOnChoice(source)
     if (deliveryAdapter(source.delivery.kind).fetchOn !== 'selection') continue
@@ -122,15 +130,18 @@ function load(source: RuntimeSource, giverRow: unknown): void {
   const ended = (): void => {
     showing.forEach(loadEnded)
   }
-  const running = maskState.host.fetchRows(source, giverRow, selectionFor).then(ended, (error: unknown) => {
-    warn(`Quelle "${source.name}" nicht geladen`, error)
-    ended()
-  })
-  maskState.fetchingSources.running.set(source.id, running)
+  const running = maskHost()
+    .fetchRows(source, giverRow, selectionFor)
+    .then(ended, (error: unknown) => {
+      warn(`Quelle "${source.name}" nicht geladen`, error)
+      showing.forEach((el) => loadFailed(el, `Quelle „${source.name}“ nicht geladen.`))
+      ended()
+    })
+  state.running.set(source.id, running)
 }
 
 function fetchAfterDelivery(): void {
-  const sources = maskState.host.sources()
+  const sources = maskHost().sources()
   for (const kind of DELIVERY_KINDS) {
     if (deliveryAdapter(kind).fetchOn !== 'delivery') continue
     for (const source of sources) {
@@ -140,13 +151,13 @@ function fetchAfterDelivery(): void {
 }
 
 export function wireFetchingSources(): void {
-  if (maskState.fetchingSources.wired) return
-  maskState.fetchingSources.wired = true
+  if (state.wired) return
+  state.wired = true
   onSelectionList(checkFetchingSources)
 
-  maskState.host.onData((delivery) => {
+  maskHost().onData((delivery) => {
     if (delivery) fetchAfterDelivery()
   })
 
-  if (maskState.host.hasData()) fetchAfterDelivery()
+  if (maskHost().hasData()) fetchAfterDelivery()
 }

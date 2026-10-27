@@ -24,11 +24,11 @@ export const textProperties = {
       min: 8,
       max: 96,
       label: 'Größe',
-      place: 'font',
+      place: 'look',
       attribute: 'size',
     },
   ),
-  symbol: symbolProperty(),
+  symbol: symbolProperty({ place: 'look' }),
   align: segmentProperty(
     [
       { value: 'left', name: 'Links' },
@@ -38,6 +38,7 @@ export const textProperties = {
     {
       default: 'left',
       label: 'Ausrichtung',
+      place: 'look',
       attribute: 'align',
     },
   ),
@@ -50,6 +51,7 @@ export const textProperties = {
     {
       default: 'none',
       label: 'Rahmen',
+      place: 'look',
       attribute: 'border',
     },
   ),
@@ -62,6 +64,7 @@ export const textProperties = {
   showLabel: booleanProperty({
     default: false,
     label: 'Beschriftung',
+    place: 'look',
     attribute: 'showlabel',
   }),
   label: textProperty({
@@ -74,6 +77,7 @@ export const textProperties = {
   bold: booleanProperty({
     default: false,
     label: 'Fett',
+    place: 'look',
     attribute: 'bold',
   }),
   textField: fieldProperty({
@@ -93,14 +97,14 @@ export const textProperties = {
   emptyText: textProperty({
     default: '',
     label: 'Wenn leer',
-    place: 'display',
+    place: 'content',
     attribute: 'emptytext',
     when: BOUND,
   }),
   replace: textProperty({
     default: '',
     label: 'Werte ersetzen',
-    place: 'display',
+    place: 'content',
     attribute: 'replace',
     when: BOUND,
   }),

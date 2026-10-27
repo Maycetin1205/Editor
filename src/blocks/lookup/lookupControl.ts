@@ -5,9 +5,9 @@ import { automaticColumns, fetchEntries, openLookup, closeLookupFor, type Entry 
 import type { Column } from '../parts/column'
 import { keyOf, SuggestionState } from './suggestionState'
 import { orderedSuggestions } from './suggestionList'
-import { inputSpotTpl } from './inputSpot'
+import { inputAnchorTpl } from './inputAnchor'
 import { rowFits } from '../parts/cellSearch'
-import { maskState } from '../../runtime/maskState'
+import { maskHost } from '../../runtime/host'
 import { focusNextField } from '../../runtime/nextField'
 import { icon } from '../parts/icons'
 
@@ -80,7 +80,7 @@ export class LookupControl implements ReactiveController {
   }
 
   render(inputClass: string, title: string): TemplateResult {
-    return html`${inputSpotTpl(
+    return html`${inputAnchorTpl(
       {
         value: this.inField,
         title,
@@ -154,7 +154,7 @@ export class LookupControl implements ReactiveController {
     const texts = (e: Entry): string[] => [
       e.display,
       e.value,
-      ...columns.map((s) => (s.field === '' ? '' : maskState.host.readField(e.record, s.field))),
+      ...columns.map((s) => (s.field === '' ? '' : maskHost().readField(e.record, s.field))),
     ]
     const hit = typed.trim() === '' ? result.entries : result.entries.filter((e) => rowFits(texts(e), typed))
     return orderedSuggestions(hit, typed, texts)

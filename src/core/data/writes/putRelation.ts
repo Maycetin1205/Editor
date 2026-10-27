@@ -5,7 +5,7 @@ export interface PutRelationWrite {
   recordField: string
 }
 
-export const putRelation: WriteAdapter<'putRelation'> = {
+export const putRelation: WriteAdapter<PutRelationWrite> = {
   kind: 'putRelation',
   read(raw) {
     const recordField = typeof raw.recordField === 'string' ? raw.recordField.trim() : ''

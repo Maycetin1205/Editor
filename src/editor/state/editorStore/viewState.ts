@@ -1,6 +1,7 @@
 import type { LookupWindow } from '../../../core/block/capability'
-import type { StepTab } from '../../actions/stepPiece'
-import type { NoticeText } from '../../widgets/Notice'
+import type { StepTab } from '../../actions/stepRegistry'
+import type { NoticeText } from '../noticeText'
+import { Subject } from '../Subject'
 import {
   loadOutlines,
   loadShutColumns,
@@ -14,18 +15,19 @@ import {
 
 export type { SideTab } from '../maskStorage'
 
-export type Deed = 'saved' | 'exported' | 'template'
+// What the toolbar just finished, shown for a moment as a tick.
+type Finished = 'saved' | 'exported' | 'template'
 
 const DONE_MS = 1600
 
-export interface OpenStep {
+interface OpenStep {
   blockId: string
   eventKey: string
   stepId: string | null
   tab: StepTab
 }
 
-export interface OpenCalculation {
+interface OpenCalculation {
   blockId: string
   column: string
 }
@@ -36,8 +38,12 @@ export interface OpenLookup {
   slot: number
 }
 
+// What the editor shows beside the mask: open windows, panels, notices. It
+// changes without touching the mask and tells its own listeners.
 export class EditorView {
-  private readonly changed: () => void
+  private readonly subject = new Subject<void>()
+
+  private _version = 0
 
   private _stepWindow: OpenStep | null = null
 
@@ -59,14 +65,23 @@ export class EditorView {
 
   private _notice: NoticeText | null = null
 
-  private _done: Deed | null = null
+  private _done: Finished | null = null
 
   private doneTimer: ReturnType<typeof setTimeout> | null = null
 
   private _outlines = loadOutlines()
 
-  constructor(changed: () => void) {
-    this.changed = changed
+  subscribe(listener: () => void): () => void {
+    return this.subject.subscribe(listener)
+  }
+
+  get version(): number {
+    return this._version
+  }
+
+  private changed(): void {
+    this._version++
+    this.subject.notify()
   }
 
   get dataWindow(): boolean {
@@ -135,13 +150,13 @@ export class EditorView {
     this.changed()
   }
 
-  get done(): Deed | null {
+  get done(): Finished | null {
     return this._done
   }
 
-  markDone(deed: Deed): void {
+  markDone(finished: Finished): void {
     if (this.doneTimer !== null) clearTimeout(this.doneTimer)
-    this._done = deed
+    this._done = finished
     this.changed()
     this.doneTimer = setTimeout(() => {
       this.doneTimer = null

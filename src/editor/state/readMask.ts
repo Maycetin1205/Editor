@@ -3,10 +3,10 @@ import { blockType } from '../../core/block/registry'
 import type { MaskTree } from '../../core/block/tree'
 import { checkDataSources, type DataSource } from '../../core/data/dataSources'
 import { checkRelationTemplates, type RelationTemplate } from '../../core/data/relations'
-import type { NoticeLine } from '../widgets/Notice'
+import type { NoticeLine } from './noticeText'
 import { checkTreeState, type Missed } from './checkTreeState'
 import { chainKey, idOf, withLeftover, type Known, type Leftover, type SourceLeft } from './leftover'
-import { liftState } from './maskSchema'
+import { currentState } from './maskSchema'
 
 interface MaskRead {
   tree: MaskTree
@@ -18,15 +18,15 @@ interface MaskRead {
   lines: NoticeLine[]
 }
 
-type MaskReadResult = { ok: true; read: MaskRead } | { ok: false; why: 'lift' | 'root' }
+type MaskReadResult = { ok: true; read: MaskRead } | { ok: false; why: 'stage' | 'root' }
 
 // Reads the state of a mask as a file or the browser holds it. Whatever this
 // editor cannot read goes into the leftover; lines name what of it is new,
 // that is not already kept aside by an earlier save.
-export function readMask(raw: Record<string, unknown>, knownSources: readonly unknown[] = []): MaskReadResult {
+export function readMask(raw: Record<string, unknown>): MaskReadResult {
   const { state, known } = withLeftover(raw, raw.leftover)
-  const o = liftState(state, knownSources)
-  if (o === null) return { ok: false, why: 'lift' }
+  const o = currentState(state)
+  if (o === null) return { ok: false, why: 'stage' }
 
   const t = checkTreeState({ tree: o.tree, selectedId: o.selectedId })
   if (t === null) return { ok: false, why: 'root' }

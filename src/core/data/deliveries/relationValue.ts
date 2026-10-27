@@ -39,7 +39,7 @@ export function checkGetValue(raw: unknown): GetValue | null {
   return { relationId, parameter: params }
 }
 
-export const relationValue: DeliveryAdapter<'relationValue'> = {
+export const relationValue: DeliveryAdapter<RelationValueDelivery, RuntimeRelationValueDelivery> = {
   kind: 'relationValue',
   read(raw) {
     const get = checkGetValue(raw)

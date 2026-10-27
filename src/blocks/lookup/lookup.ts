@@ -4,12 +4,20 @@ import type { ListBinding } from '../../core/block/listBinding'
 import { deliveryAdapter } from '../../core/data/deliveries/deliveries'
 import { blockType } from '../../core/block/registry'
 import { rowsToSelection } from '../../runtime/selection'
-import { maskState } from '../../runtime/maskState'
+import { maskHost } from '../../runtime/host'
 import { DIALOG_FRAME_TAG, WINDOW_HEIGHT, WINDOW_WIDTH, type DialogFrame } from '../dialog/DialogFrame'
 import { LOOKUP_KEY_PART } from '../list/operatorState'
 import { coerceColumns, COLUMN_ACCESS, DEFAULT_TITLE, FIELD_KEY_PREFIX, type Column } from '../parts/column'
 import { ROW_ACTIVATED_EVENT, type RowActivatedDetail } from '../list/rowActivation'
 import type { HandedRow, RowsFrom } from '../list/sourceRows'
+
+// The one lookup window of the mask: its element, the field it serves and
+// where the focus goes back to when it closes.
+const lookupWindowState: {
+  open: HTMLElement | null
+  openFor: HTMLElement | null
+  backFocus: HTMLElement | (() => void) | null
+} = { open: null, openFor: null, backFocus: null }
 
 const WINDOW_TABLE_TYPE = 'table'
 
@@ -127,8 +135,8 @@ export function lookupEntries(rows: readonly unknown[], displayField: string, st
   const singleColumn = onlyOneColumn(displayField, storageField)
   const seen = new Set<string>()
   for (const row of rows) {
-    const value = maskState.host.readField(row, storageField).trim()
-    const display = displayCode === '' ? value : maskState.host.readField(row, displayCode).trim()
+    const value = maskHost().readField(row, storageField).trim()
+    const display = displayCode === '' ? value : maskHost().readField(row, displayCode).trim()
     if (display === '' && value === '') continue
     if (singleColumn) {
       if (seen.has(value)) continue
@@ -146,16 +154,16 @@ function windowEntries(el: HTMLElement, rows: unknown[], displayField: string, s
 type EntriesResult = { ok: true; entries: Entry[] } | { ok: false }
 
 export function sourcesRows(sourceId: string): unknown[] | null {
-  const source = maskState.host.source(sourceId)
+  const source = maskHost().source(sourceId)
   if (!source) return null
-  return maskState.host.rows(source)
+  return maskHost().rows(source)
 }
 
 export function sourceCame(sourceId: string): boolean {
-  const source = maskState.host.source(sourceId)
+  const source = maskHost().source(sourceId)
   if (!source) return true
-  if (deliveryAdapter(source.delivery.kind).fetchOn === 'never') return maskState.host.hasData()
-  return maskState.host.rows(source).length > 0
+  if (deliveryAdapter(source.delivery.kind).fetchOn === 'never') return maskHost().hasData()
+  return maskHost().rows(source).length > 0
 }
 
 export function fetchEntries(e: LookupSetting): EntriesResult {
@@ -171,7 +179,7 @@ function magnifierOf(el: HTMLElement): HTMLElement | null {
 }
 
 function close(withFocus = true): void {
-  const lookupWindow = maskState.lookupWindow
+  const lookupWindow = lookupWindowState
   const target = withFocus ? lookupWindow.backFocus : null
   lookupWindow.backFocus = null
   lookupWindow.open?.remove()
@@ -182,7 +190,7 @@ function close(withFocus = true): void {
 }
 
 export function closeLookupFor(el: HTMLElement): void {
-  if (maskState.lookupWindow.openFor === el) close(false)
+  if (lookupWindowState.openFor === el) close(false)
 }
 
 type ColumnsSource = Pick<LookupArgs, 'storageField' | 'storageTitle'>
@@ -210,7 +218,7 @@ function windowTable(tag: string, args: LookupArgs, entries: readonly Entry[]): 
     rawRow: e.record,
     cells:
       own.length > 0
-        ? own.map((s) => (s.field === '' ? '' : maskState.host.readField(e.record, s.field)))
+        ? own.map((s) => (s.field === '' ? '' : maskHost().readField(e.record, s.field)))
         : singleColumn
           ? [e.value]
           : [e.display, e.value],
@@ -260,7 +268,7 @@ export function openLookup(args: LookupArgs): void {
     args.onAdopt(entry.display, entry.value, entry.record)
   })
 
-  const lookupWindow = maskState.lookupWindow
+  const lookupWindow = lookupWindowState
   lookupWindow.backFocus = args.backFocus ?? magnifierOf(args.el)
   document.body.appendChild(holder)
   lookupWindow.open = holder

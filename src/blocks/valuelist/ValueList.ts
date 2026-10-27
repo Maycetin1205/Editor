@@ -3,13 +3,13 @@ import { state } from 'lit/decorators.js'
 import { BlockElement, defineBlock } from '../base/BlockElement'
 import { reportsHeads } from '../base/headsReport'
 import { reportsHeight } from '../base/heightReport'
-import { chainsRead } from '../../core/data/steps/chains'
+import { chainsRead } from '../../core/data/steps/chainsRead'
 import { stepAdapter, type RuntimeStep } from '../../core/data/steps/steps'
 import { makeDataLink, readDataPreamble } from '../../runtime/source'
 import { firstRowToSelection } from '../../runtime/selection'
-import { runEvent } from '../../runtime/events'
-import { maskState } from '../../runtime/maskState'
-import { holdsNumbers, shownHeld } from '../parts/column'
+import { runEvent } from '../../runtime/actions/runEvent'
+import { maskHost } from '../../runtime/host'
+import { holdsNumbers, shownByKind } from '../parts/column'
 import { icon } from '../parts/icons'
 import { LINE_CLICK_EVENTS, LINE_CLICKS, LINES_BINDING, type ValueLine } from './lines'
 import { valueListProperties, type ValueListValues } from './properties'
@@ -67,7 +67,7 @@ export class ValueList extends BlockElement {
   private lineTpl(line: ValueLine, i: number, kind: 'line' | 'sum'): TemplateResult {
     const value = this.preview
       ? (this.spotTexts[`${LINES_BINDING.prop}.${i}`] ?? '')
-      : shownHeld(line, this.lineValues[i] ?? '')
+      : shownByKind(line, this.lineValues[i] ?? '')
     const click = this.clickOf(line)
     const live = click !== undefined && !this.preview
     const run = (): void => {
@@ -109,8 +109,7 @@ export class ValueList extends BlockElement {
 
   private readChains(): void {
     this.chains = chainsRead(this.getAttribute(CHAINS_ATTR))
-    if (Object.values(this.chains).some((chain) => chain.some((s) => stepAdapter(s.kind).answers)))
-      maskState.host.start()
+    if (Object.values(this.chains).some((chain) => chain.some((s) => stepAdapter(s.kind).answers))) maskHost().start()
     this.requestUpdate()
   }
 }

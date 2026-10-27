@@ -1,18 +1,17 @@
-import type { StepAdapter, StepBase } from './stepAdapter'
-import { applyPopupStep, popupIdMoved, popupIdRead, popupNameRead } from './popupStep'
+import type { RuntimeStepBase, StepAdapter, StepBase } from './stepAdapter'
+import { popupIdMoved, popupIdRead, popupNameRead } from './popupStep'
 
 export interface PopupCloseStep extends StepBase {
   kind: 'POPUP_CLOSE'
   popupId: string
 }
 
-export interface RuntimePopupCloseStep {
+export interface RuntimePopupCloseStep extends RuntimeStepBase {
   kind: 'POPUP_CLOSE'
-  resultName: string
   popup: string
 }
 
-export const popupClose: StepAdapter<'POPUP_CLOSE'> = {
+export const popupClose: StepAdapter<PopupCloseStep, RuntimePopupCloseStep> = {
   kind: 'POPUP_CLOSE',
   answers: false,
   read(raw, base) {
@@ -25,10 +24,6 @@ export const popupClose: StepAdapter<'POPUP_CLOSE'> = {
   },
   export(step, refs) {
     return { kind: step.kind, resultName: step.resultName, popup: refs.popupName(step.popupId) }
-  },
-  run(step, run) {
-    applyPopupStep(run.root, step.popup, false)
-    return Promise.resolve({ failed: false })
   },
   bindings: () => [],
   withBindings: (step) => step,

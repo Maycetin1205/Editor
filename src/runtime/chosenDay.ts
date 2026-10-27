@@ -1,4 +1,4 @@
-import { maskState } from './maskState'
+const state = { day: '', listeners: new Set<() => void>() }
 
 export function readDate(value: unknown): Date | null {
   const text = String(value ?? '').trim()
@@ -36,19 +36,19 @@ export function dayKey(value: unknown): string {
 }
 
 export function chosenDay(): string {
-  return maskState.chosenDay.day
+  return state.day
 }
 
 export function setChosenDay(value: unknown): void {
   const next = dayKey(value)
-  const chosen = maskState.chosenDay
+  const chosen = state
   if (next === chosen.day) return
   chosen.day = next
   chosen.listeners.forEach((cb) => cb())
 }
 
 export function onChosenDay(cb: () => void): () => void {
-  const listeners = maskState.chosenDay.listeners
+  const listeners = state.listeners
   listeners.add(cb)
   return () => {
     listeners.delete(cb)

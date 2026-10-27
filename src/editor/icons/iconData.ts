@@ -220,6 +220,12 @@ export const NODE = {
     ['path', { d: 'M12 7v4' }],
     ['path', { d: 'M16 7v9' }],
   ],
+  Tabs: [
+    ['rect', { width: '18', height: '18', x: '3', y: '3', rx: '2' }],
+    ['path', { d: 'M3 9h18' }],
+    ['path', { d: 'M9 3v6' }],
+    ['path', { d: 'M15 3v6' }],
+  ],
   Table: [
     ['path', { d: 'M12 3v18' }],
     ['rect', { width: '18', height: '18', x: '3', y: '3', rx: '2' }],

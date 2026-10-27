@@ -4,7 +4,7 @@ export interface ErpApiCallOrder {
   kind: 'erpapicall'
 }
 
-export const erpApiCall: OrderAdapter<'erpapicall'> = {
+export const erpApiCall: OrderAdapter<ErpApiCallOrder> = {
   kind: 'erpapicall',
   read: () => ({ kind: 'erpapicall' }),
   needsTable: true,

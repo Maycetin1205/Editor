@@ -48,7 +48,7 @@ function restrictionRead(raw: unknown): QueryRestriction | undefined {
 const withRestriction = (restriction: QueryRestriction | undefined): { restriction?: QueryRestriction } =>
   restricts(restriction) ? { restriction } : {}
 
-export const message: DeliveryAdapter<'message'> = {
+export const message: DeliveryAdapter<MessageDelivery, RuntimeMessageDelivery> = {
   kind: 'message',
   read: (raw) => ({ kind: 'message', ...withRestriction(restrictionRead(raw.restriction)) }),
   needsTable: true,

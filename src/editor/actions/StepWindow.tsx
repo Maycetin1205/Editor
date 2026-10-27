@@ -6,7 +6,7 @@ import type { Step } from '../../core/data/steps/steps'
 import type { StepCondition } from '../../core/data/steps/stepAdapter'
 import type { Reach } from '../origin/reach'
 import { ConditionLine } from './ConditionLine'
-import { STEP_TABS, stepPiece, stepTab, type StepContext, type StepTab } from './stepPiece'
+import { STEP_TABS, stepSummary, stepTab, type StepContext, type StepTab } from './stepRegistry'
 
 function firstTabOf(asked: StepTab, step: Step | undefined, context: StepContext): StepTab {
   const count = (key: StepTab): number | undefined => stepTab(key).count?.(context)
@@ -46,7 +46,7 @@ export function StepWindow({
 
   const shown = stepTab(tab)
   const draft = withCondition(drafts[tab] ?? shown.start(id, step, context), onlyIf)
-  const { words, short, known } = stepPiece(draft.kind).words(draft, context)
+  const { words, short, known } = stepSummary(draft.kind).words(draft, context)
 
   return (
     <Window

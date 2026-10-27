@@ -34,7 +34,13 @@ interface PropertyType<V> {
   options?: readonly ChoiceOption[]
 }
 
-export type PropertyPlace = 'bar' | 'display' | 'font' | 'source' | 'lookup' | 'block' | 'none'
+// Where the editor shows a property: the inspector groups by the four
+// questions of the user (what does it show, where do the data come from, how
+// does it look, what happens on a click; the last from the events), with
+// looking up as a group of its own; a block property is edited on the canvas
+// (a word, a list of entries), none nowhere (bound at a place, set in a
+// window).
+export type PropertyPlace = 'content' | 'data' | 'look' | 'lookup' | 'block' | 'none'
 
 interface Preset {
   by: string
@@ -110,7 +116,7 @@ function make<V>(type: PropertyType<V>, init: Init<V>, extra: Partial<Property<V
     type,
     default: init.default,
     label: init.label,
-    place: init.place ?? 'bar',
+    place: init.place ?? 'content',
     attribute: init.attribute ?? '',
     ...(init.when ? { when: init.when } : {}),
     ...(init.needsSource !== undefined ? { needsSource: init.needsSource } : {}),

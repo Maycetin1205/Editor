@@ -5,7 +5,7 @@ export interface MaskOrder {
   area: string
 }
 
-export const mask: OrderAdapter<'mask'> = {
+export const mask: OrderAdapter<MaskOrder> = {
   kind: 'mask',
   read(raw) {
     const area = typeof raw.area === 'string' ? raw.area.trim().toUpperCase() : ''

@@ -3,7 +3,8 @@ import { ref } from 'lit/directives/ref.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import type { Column } from '../parts/column'
 import { markHit, plainText } from '../parts/cellSearch'
-import { maskState } from '../../runtime/maskState'
+import { maskHost } from '../../runtime/host'
+import { TABLE_PART } from '../list/parts'
 
 const SUGGESTIONS_MAX = 50
 
@@ -46,7 +47,7 @@ function areaLimits(el: HTMLElement): { left: number; right: number } {
         ? document.documentElement.clientWidth
         : 10000
 
-  const table = el.closest?.('.table')
+  const table = el.closest?.(`.${TABLE_PART.table}`)
   if (table instanceof (globalThis.HTMLElement ?? Object) && typeof table.getBoundingClientRect === 'function') {
     const tRect = table.getBoundingClientRect()
     if (tRect.width > 0) {
@@ -109,7 +110,7 @@ export function alignSuggestionsFrom(el: HTMLElement): void {
 
 function cellText(entry: SuggestionRow, column: Column): string {
   if (column.field === '') return entry.display !== '' ? entry.display : entry.value
-  return maskState.host.readField(entry.record, column.field)
+  return maskHost().readField(entry.record, column.field)
 }
 
 function keepInSight(el: Element | undefined): void {

@@ -1,12 +1,13 @@
 import { html, type TemplateResult } from 'lit'
 import { styleMap } from 'lit/directives/style-map.js'
-import type { RowConfirm } from '../../core/data/steps/confirm'
-import type { ActionResult } from '../../runtime/events'
+import type { RowConfirm } from '../../runtime/steps/confirm'
+import type { ActionResult } from '../../runtime/actions/runEvent'
 import { warn } from '../../runtime/log'
-import { maskState } from '../../runtime/maskState'
-import { moveRowsFocus, rowElement } from './rowActivation'
+import { maskHost } from '../../runtime/host'
+import { moveRowsFocus, rowElement } from './rowFocus'
 import { rowsIndexOf, rowsTraitOf } from './sourceRows'
-import type { RowDecoration } from './tableBody'
+import type { RowDecoration } from './listHooks'
+import { TABLE_PART } from './parts'
 
 interface AskElement extends HTMLElement {
   rawRows: unknown[]
@@ -70,7 +71,7 @@ export class RowAsk {
   }
 
   connect(): void {
-    this.unfollow ??= maskState.host.onData((delivery) => {
+    this.unfollow ??= maskHost().onData((delivery) => {
       if (!delivery) return
       let ended = false
       for (const [trait, state] of this.dropping) {
@@ -94,7 +95,7 @@ export class RowAsk {
         : this.el.rawRows.findIndex((row) => rowsIndexOf(this.el, row) === detail.record)
     const row = rawIndex < 0 ? undefined : this.rowAt(rawIndex)
     if (row === undefined) return
-    const body = row.closest('.body')
+    const body = row.closest(`.${TABLE_PART.body}`)
     const frame = row.getBoundingClientRect()
     const name = row.querySelectorAll<HTMLElement>(':scope > [role="cell"]')[1]?.getBoundingClientRect()
     const zoom = row.offsetWidth > 0 ? frame.width / row.offsetWidth : 1
@@ -109,7 +110,7 @@ export class RowAsk {
     this.el.requestUpdate()
     this.el.updateComplete
       .then(() =>
-        this.el.shadowRoot?.querySelector<HTMLElement>('.row-ask > .ask-drop')?.focus({ preventScroll: true }),
+        this.el.shadowRoot?.querySelector<HTMLElement>('.row-ask > .ask-keep')?.focus({ preventScroll: true }),
       )
       .catch((error: unknown) => {
         warn('Rückfrage nicht gezeichnet', error)
@@ -120,8 +121,8 @@ export class RowAsk {
     if (this.asking !== null && !this.el.shadowRoot?.querySelector('.row-ask')) this.answer(false)
   }
 
-  decorate(own: RowDecoration, rawIndex: number | null): RowDecoration {
-    if (rawIndex === null || (this.asking === null && this.dropping.size === 0)) return own
+  decorate(own: RowDecoration, rawIndex: number): RowDecoration {
+    if (this.asking === null && this.dropping.size === 0) return own
     const trait = rowsTraitOf(this.el, this.el.rawRows[rawIndex])
     if (this.asking?.trait === trait) {
       return {
@@ -181,6 +182,7 @@ export class RowAsk {
     this.answer(false)
   }
 
+  // The focus starts on Abbrechen: a second Enter must not delete.
   private askTpl(asking: Asking): TemplateResult {
     return html`<span
       class="row-ask"

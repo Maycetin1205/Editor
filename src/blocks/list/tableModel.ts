@@ -1,7 +1,11 @@
 import { rulerTicks, WITHOUT_MEASUREMENT, scrollSplit, pagesSplit, ROWS_HEIGHT, type RowMetrics } from './pageSize'
 import { sortIndices, totalText } from './sorting'
-import { columnsTemplate, type Column, type ColumnsGrid, type Figure } from '../parts/column'
+import type { Column, Figure } from '../parts/column'
+import { columnsTemplate, type ColumnsGrid } from './columnWidth'
 import { rowFits } from '../parts/cellSearch'
+
+// What the table shows: the columns grid, the rows of the page after search
+// and sorting, the page count and the sums. No DOM here.
 
 interface ViewQuestion {
   columns: readonly Column[]
@@ -34,7 +38,7 @@ interface ViewQuestion {
   paging: boolean
 }
 
-interface TableRenderModel {
+export interface TableRenderModel {
   cols: ColumnsGrid
 
   tick: number
@@ -43,6 +47,9 @@ interface TableRenderModel {
   empty: boolean
 
   total: number
+  records: number
+  searchesActive: boolean
+  paging: boolean
   pageCount: number
   page: number
 
@@ -111,6 +118,9 @@ export function tableRenderModel(question: ViewQuestion): TableRenderModel {
     showsRows,
     empty,
     total: allVisible.length,
+    records: question.dataRows.length,
+    searchesActive: question.searchText.trim() !== '',
+    paging: question.paging,
     pageCount: pages,
     page,
     rows,
@@ -127,21 +137,4 @@ function fittingIndices(rows: readonly (readonly string[])[], searchText: string
     if (rowFits(z, searchText)) out.push(i)
   })
   return out
-}
-
-export function recordText(args: {
-  showsRows: boolean
-  visible: number
-  total: number
-  searchesActive: boolean
-}): string {
-  if (!args.showsRows) return '— Datensätze'
-
-  const word = (n: number): string => (n === 1 ? 'Datensatz' : 'Datensätze')
-  const wordDative = (n: number): string => (n === 1 ? 'Datensatz' : 'Datensätzen')
-  if (!args.searchesActive) {
-    return args.total === 0 ? 'Keine Datensätze' : `${args.total} ${word(args.total)}`
-  }
-  if (args.visible === 0) return `Kein Treffer von ${args.total} ${wordDative(args.total)}`
-  return `${args.visible} von ${args.total} ${wordDative(args.total)}`
 }

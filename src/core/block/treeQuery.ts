@@ -67,7 +67,7 @@ export function bindableSpotsOf(node: BlockNode | undefined): readonly BindableS
 
 export function selectionSourceIdOf(node: BlockNode | undefined): string {
   if (!node) return ''
-  const choice = capability(blockType(node.type), 'recordPick')
+  const choice = capability(blockType(node.type), 'recordChoice')
   const prop = choice && propertyVisible(choice.when, node.values) ? (choice.sourceProp ?? SOURCE_PROP) : SOURCE_PROP
   const value = node.values[prop]
   return typeof value === 'string' ? value : ''
@@ -75,7 +75,7 @@ export function selectionSourceIdOf(node: BlockNode | undefined): string {
 
 export function isSelectionGiver(node: BlockNode | undefined): boolean {
   if (!node) return false
-  const pick = capability(blockType(node.type), 'recordPick')
+  const pick = capability(blockType(node.type), 'recordChoice')
   if (!pick || !propertyVisible(pick.gives, node.values)) return false
   return selectionSourceIdOf(node) !== ''
 }

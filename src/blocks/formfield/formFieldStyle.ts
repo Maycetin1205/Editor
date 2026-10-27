@@ -191,6 +191,37 @@ export const fieldStyle = css`
   .magnifier:focus-visible { outline: none; box-shadow: var(--se-focus-ring); }
   .magnifier svg { width: 16px; height: 16px; }
 
+  /* Mehrzeilig: the box as high as its lines (--lines, set by the field),
+     the words wrap and scroll inside it; the box is not pulled by hand. The
+     symbol stands at the first line. */
+  .field.kind-multiline,
+  .field.kind-multiline.labelled {
+    --box: calc(var(--lines) * var(--se-fs) * var(--se-lh) + 12px + 2 * var(--se-border));
+    height: auto;
+    grid-template-rows: var(--box);
+  }
+  .field.kind-multiline.labelled { grid-template-rows: 14px var(--box); }
+  .kind-multiline .value {
+    height: var(--box);
+    align-items: start;
+    padding: 6px 10px;
+  }
+  .kind-multiline .ctrl,
+  .kind-multiline .shown {
+    height: 100%;
+    line-height: var(--se-lh);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+  }
+  textarea.ctrl {
+    resize: none;
+    overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--se-scrollbar) transparent;
+  }
+  .kind-multiline .symbol { align-self: start; margin-top: 6px; }
+
   /* The checkbox: the box (tickBoxStyle) and its text in the middle of the
      field; with its label on the line of the boxes beside it. */
   .field.check {

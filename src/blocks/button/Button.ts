@@ -3,11 +3,11 @@ import { state } from 'lit/decorators.js'
 import { BlockElement, defineBlock } from '../base/BlockElement'
 import { noticeSignTpl } from '../base/notice'
 import { reportsHeight } from '../base/heightReport'
-import { sectionsOf, chainsRead } from '../../core/data/steps/chains'
+import { sectionsOf, chainsRead } from '../../core/data/steps/chainsRead'
 import { stepAdapter } from '../../core/data/steps/steps'
-import { runEvent, searchCarrier } from '../../runtime/events'
+import { runEvent, searchCarrier } from '../../runtime/actions/runEvent'
 import { PENDING_EVENT, pendingRows } from '../../runtime/pendingState'
-import { maskState } from '../../runtime/maskState'
+import { maskHost } from '../../runtime/host'
 import { lookClass, lookStyle } from '../look/look'
 import { buttonStyle } from './buttonStyle'
 import { buttonProperties, type ButtonValues } from './properties'
@@ -58,7 +58,7 @@ export class Button extends BlockElement {
     const open = this.open
     return html`<button
       class=${lookClass(this)}
-      ?disabled=${this.notice === 'schreibt'}
+      ?disabled=${this.notice === 'writing'}
       data-ff-editable
       @dblclick=${(e: MouseEvent) => this.inlineEdit(e, 'label')}
     >${noticeSignTpl(this.notice)}<span class="text">${open ? `${this.label} (${open})` : this.label}</span></button>`
@@ -81,7 +81,7 @@ export class Button extends BlockElement {
     this.wired = true
     const chains = chainsRead(this.getAttribute(CHAINS_ATTR))
 
-    if (Object.values(chains).some((chain) => chain.some((s) => stepAdapter(s.kind).answers))) maskState.host.start()
+    if (Object.values(chains).some((chain) => chain.some((s) => stepAdapter(s.kind).answers))) maskHost().start()
     this.addEventListener('click', () => {
       void runEvent(this, CLICK, {})
     })

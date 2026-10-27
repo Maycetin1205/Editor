@@ -1,23 +1,21 @@
-import { useState, type ReactNode } from 'react'
-import { Button } from '@/editor/widgets/Button'
 import { cn } from '@/editor/widgets/cn'
-import { INPUT_EDGE } from '@/editor/widgets/Field'
-import { NAME, Strip } from '@/editor/widgets/Grid'
+import { Strip } from '@/editor/widgets/Grid'
+import type { ListGroup } from '@/editor/widgets/List'
 import { relationParameterDefault, type Parameter } from '../../core/data/actions'
 import { splitBinding } from '../../core/block/blockType'
 import { choiceOf, fieldPrefixFromInput, type DataSource } from '../../core/data/dataSources'
 import { getValueSourceAllowed } from '../../core/data/deliveries/relationValue'
-import { readMaskFields } from '../../core/data/maskFields'
 import { PRESET_IDS, sourcePreset, type PresetId } from '../../core/data/presets/presets'
 import { POSITIONS_RELATION, relationSyntaxAsText, type RelationTemplate } from '../../core/data/relations'
 import { selectionGiverInTree } from '../../core/block/treeQuery'
 import { giverGroup, sourceReach } from '../origin/reach'
 import { Places } from '../actions/Places'
 import { PickerControl } from '../controls/PickerControl'
-import type { ListGroup } from '@/editor/widgets/List'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
 import { useRelations } from '../state/useRelations'
+import { MaskFields } from './MaskFields'
+import { PICKER, Setting, TextCell } from './SettingCells'
 import {
   deliveries,
   deliveryOf,
@@ -30,7 +28,6 @@ import {
 } from './sourceEdit'
 
 const EMPTY: Parameter = { source: 'fixed', value: '' }
-const PICKER = 'h-[28px]'
 
 function useSource(source: DataSource) {
   const store = useDataSources()
@@ -60,14 +57,68 @@ function useSource(source: DataSource) {
   }
 }
 
-export function SourceSettings({ source }: { source: DataSource }) {
-  const { store, relationStore, relations, choice, listed, getters, getValue, valued, save, saveValue } =
-    useSource(source)
-  const preset = sourcePreset(source.preset)
-  const delivers = deliveries(source, relations)
-  const restriction = choice.restriction
+type SourceUse = ReturnType<typeof useSource>
+
+// What the source delivers, when its kind offers more than one thing.
+function DeliverySetting({ source, use }: { source: DataSource; use: SourceUse }) {
+  const delivers = deliveries(source, use.relations)
+  if (delivers.length <= 1) return null
+  return (
+    <Setting name="Liefert">
+      <PickerControl
+        name="Liefert"
+        className={cn(PICKER, 'w-auto min-w-[240px]')}
+        wrap
+        groups={[{ key: 'delivers', entries: delivers }]}
+        value={deliveryOf(source)}
+        onChoose={(v) => {
+          if (v === deliveryOf(source)) return
+          const value = v === NEW_POSITIONS ? `get:${use.relationStore.add(POSITIONS_RELATION).id}` : v
+          use.save(withDelivery(source, value))
+        }}
+      />
+    </Setting>
+  )
+}
+
+// A message source is narrowed to a kind of document and, if wanted, an address.
+function MessageSettings({ source, use }: { source: DataSource; use: SourceUse }) {
+  const restriction = use.choice.restriction
   const saveRestriction = (change: Partial<typeof restriction>) =>
-    save(withSettings(source, { choice: { restriction: { ...restriction, ...change } } }))
+    use.save(withSettings(source, { choice: { restriction: { ...restriction, ...change } } }))
+  return (
+    <>
+      <Setting name="Belegart">
+        <TextCell
+          name="Belegart"
+          value={restriction.documentKind}
+          valid={() => true}
+          onSave={(t) => saveRestriction({ documentKind: t.trim() })}
+        />
+      </Setting>
+      <Setting name="Adresse">
+        <PickerControl
+          name="Adresse"
+          className={cn(PICKER, 'w-auto min-w-[200px]')}
+          wrap
+          groups={openRecordFields(use.store.list, source.id)}
+          value={restriction.address ? `${restriction.address.sourceId}::${restriction.address.code}` : ''}
+          emptyText="alle"
+          onChoose={(v) => {
+            const { sourceId, code } = splitBinding(v)
+            saveRestriction({ address: v === '' ? null : { sourceId, code } })
+          }}
+        />
+      </Setting>
+    </>
+  )
+}
+
+// The bar over a source: its kind and what that kind asks for.
+export function SourceSettings({ source }: { source: DataSource }) {
+  const use = useSource(source)
+  const { choice, listed, getters, getValue, valued, save, saveValue } = use
+  const preset = sourcePreset(source.preset)
 
   return (
     <div className="flex min-h-[36px] shrink-0 flex-wrap items-center gap-x-[18px] gap-y-[4px] border-b border-line-soft bg-panel px-[12px] py-[4px]">
@@ -84,22 +135,7 @@ export function SourceSettings({ source }: { source: DataSource }) {
         />
       </Setting>
 
-      {delivers.length > 1 && (
-        <Setting name="Liefert">
-          <PickerControl
-            name="Liefert"
-            className={cn(PICKER, 'w-auto min-w-[240px]')}
-            wrap
-            groups={[{ key: 'delivers', entries: delivers }]}
-            value={deliveryOf(source)}
-            onChoose={(v) => {
-              if (v === deliveryOf(source)) return
-              const value = v === NEW_POSITIONS ? `get:${relationStore.add(POSITIONS_RELATION).id}` : v
-              save(withDelivery(source, value))
-            }}
-          />
-        </Setting>
-      )}
+      <DeliverySetting source={source} use={use} />
 
       {(preset.prefixed || (source.fieldPrefix ?? '') !== '') && (
         <Setting name="Feld-Vorsatz">
@@ -112,32 +148,7 @@ export function SourceSettings({ source }: { source: DataSource }) {
         </Setting>
       )}
 
-      {listed.delivery.kind === 'message' && (
-        <>
-          <Setting name="Belegart">
-            <TextCell
-              name="Belegart"
-              value={restriction.documentKind}
-              valid={() => true}
-              onSave={(t) => saveRestriction({ documentKind: t.trim() })}
-            />
-          </Setting>
-          <Setting name="Adresse">
-            <PickerControl
-              name="Adresse"
-              className={cn(PICKER, 'w-auto min-w-[200px]')}
-              wrap
-              groups={openRecordFields(store.list, source.id)}
-              value={restriction.address ? `${restriction.address.sourceId}::${restriction.address.code}` : ''}
-              emptyText="alle"
-              onChoose={(v) => {
-                const { sourceId, code } = splitBinding(v)
-                saveRestriction({ address: v === '' ? null : { sourceId, code } })
-              }}
-            />
-          </Setting>
-        </>
-      )}
+      {listed.delivery.kind === 'message' && <MessageSettings source={source} use={use} />}
 
       {listed.order.kind === 'mask' && (
         <Setting name="Bereich">
@@ -168,6 +179,7 @@ export function SourceSettings({ source }: { source: DataSource }) {
   )
 }
 
+// Under the source: the places of its relation, or the fields of its mask.
 export function SourceBelow({ source }: { source: DataSource }) {
   const { store, listed, getValue, template, saveValue } = useSource(source)
   const tree = useEditor().tree
@@ -231,86 +243,4 @@ function openRecordFields(sources: readonly DataSource[], ownId: string): ListGr
       name: s.name,
       entries: s.fields.map((f) => ({ value: `${s.id}::${f.code}`, name: f.name })),
     }))
-}
-
-function Setting({ name, children }: { name: string; children: ReactNode }) {
-  return (
-    <div className="flex min-w-0 items-center gap-[8px]">
-      <span className={cn(NAME, 'shrink-0')}>{name}</span>
-      {children}
-    </div>
-  )
-}
-
-function TextCell({
-  name,
-  value,
-  valid,
-  onSave,
-}: {
-  name: string
-  value: string
-  valid: (text: string) => boolean
-  onSave: (text: string) => void
-}) {
-  const [draft, setDraft] = useState<string | null>(null)
-  const text = draft ?? value
-  const ok = valid(text)
-  const commit = () => {
-    if (draft !== null && ok && draft !== value) onSave(draft)
-    setDraft(null)
-  }
-  return (
-    <input
-      aria-label={name}
-      value={text}
-      spellCheck={false}
-      onChange={(e) => setDraft(e.currentTarget.value)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          commit()
-          e.currentTarget.blur()
-        }
-      }}
-      onBlur={commit}
-      className={cn(INPUT_EDGE, PICKER, 'w-[110px] px-[8px] font-mono', ok ? 'text-ink' : 'text-error')}
-    />
-  )
-}
-
-function MaskFields({ source }: { source: DataSource }) {
-  const store = useDataSources()
-  const [text, setText] = useState('')
-  return (
-    <div className="flex shrink-0 flex-col border-t border-line-soft">
-      <Strip>Felder einlesen</Strip>
-      <div className="flex flex-col gap-[6px] p-[8px]">
-        <textarea
-          aria-label="Felder einlesen"
-          value={text}
-          rows={3}
-          onChange={(e) => setText(e.currentTarget.value)}
-          className={cn(INPUT_EDGE, 'p-[8px] font-mono text-dense')}
-        />
-        <Button
-          className="self-start"
-          disabled={text.trim() === ''}
-          onClick={() => {
-            const read = readMaskFields(text)
-            if (read === null) return
-            store.update(
-              source.id,
-              withSettings(source, {
-                fields: read.fields,
-                ...(read.prefix !== '' ? { fieldPrefix: read.prefix } : {}),
-              }),
-            )
-            setText('')
-          }}
-        >
-          Felder übernehmen
-        </Button>
-      </div>
-    </div>
-  )
 }

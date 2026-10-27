@@ -1,4 +1,4 @@
-import { createElement, useMemo, type ReactNode } from 'react'
+import { createElement, useMemo } from 'react'
 import { Component, Trash2 } from '@/editor/icons/icon'
 import { Button } from '@/editor/widgets/Button'
 import type { BlockNode } from '../../core/block/tree'
@@ -24,19 +24,6 @@ interface BlockPropertiesProps {
   folds: Folds
 
   onRemove?: () => void
-}
-
-function withFonts(
-  shown: ReactNode[],
-  choices: DeclaredProperty[],
-  fonts: DeclaredProperty[],
-  fontControls: ReactNode[],
-): ReactNode[] {
-  if (fonts.length === 0) return shown
-  const by = fonts.find((f) => f.property.preset)?.property.preset?.by
-  const after = choices.findIndex((c) => c.key === by)
-  const at = after < 0 ? shown.length : after + 1
-  return [...shown.slice(0, at), ...fontControls, ...shown.slice(at)]
 }
 
 export function BlockProperties({ block, def, folds, onRemove }: BlockPropertiesProps) {
@@ -68,8 +55,6 @@ export function BlockProperties({ block, def, folds, onRemove }: BlockProperties
       />
     ))
 
-  const choices = at('bar')
-  const fonts = at('font')
   const searchWindow = capability(def, 'lookupWindow')?.window
   const windowShown =
     searchWindow !== undefined &&
@@ -100,22 +85,17 @@ export function BlockProperties({ block, def, folds, onRemove }: BlockProperties
         )}
       </div>
 
-      {(choices.length > 0 || fonts.length > 0) && (
-        <div className="flex shrink-0 flex-wrap items-center gap-x-[16px] gap-y-[2px] px-[16px] pb-[12px] [&>:not([data-switch])]:basis-full">
-          {withFonts(controls(choices), choices, fonts, controls(fonts))}
-        </div>
-      )}
-
       <Sections
         block={block}
         controls={controls}
-        sourceProps={at('source')}
-        shows={at('display')}
+        contentProps={at('content')}
+        dataProps={at('data')}
+        lookProps={at('look')}
         lookupProps={at('lookup')}
         searchWindow={windowShown ? searchWindow : undefined}
         helpers={helpers === 'apart' && declaredValue(block, SOURCE_PROPERTY) === '' ? undefined : helpers}
         follows={follows}
-        waiting={ed.followPickFor === block.id}
+        waiting={ed.view.followPickFor === block.id}
         events={(capability(def, 'events')?.list ?? []).filter((ev) => !ev.entry)}
         folds={folds}
       />

@@ -11,7 +11,7 @@ import { useView } from '../state/useView'
 import { conditionWords } from './conditionWords'
 import { releaseEmptyEntryKeys } from './entryEvents'
 import type { EditorStore } from '../state/EditorStore'
-import { NEW_STEP_TAB, stepPiece, type StepContext } from './stepPiece'
+import { NEW_STEP_TAB, stepSummary, type StepContext } from './stepRegistry'
 import { StepWindow } from './StepWindow'
 import { useStepContext } from './useStepContext'
 
@@ -58,11 +58,11 @@ export function EventChain({ block, ev, context }: { block: BlockNode; ev: Event
             context={context}
             open={opened?.blockId === block.id && opened.stepId === step.id}
             onOpen={() =>
-              ed.openStep({
+              ed.view.openStep({
                 blockId: block.id,
                 eventKey: ev.key,
                 stepId: step.id,
-                tab: stepPiece(step.kind).tab(step, context),
+                tab: stepSummary(step.kind).tab(step, context),
               })
             }
             onUp={
@@ -79,7 +79,7 @@ export function EventChain({ block, ev, context }: { block: BlockNode; ev: Event
         ))}
         <button
           type="button"
-          onClick={() => ed.openStep({ blockId: block.id, eventKey: ev.key, stepId: null, tab: NEW_STEP_TAB })}
+          onClick={() => ed.view.openStep({ blockId: block.id, eventKey: ev.key, stepId: null, tab: NEW_STEP_TAB })}
           className={cn(
             'flex h-[30px] w-full items-center gap-[8px] px-[8px] text-left text-muted hover:text-ink',
             LINE_HOVER,
@@ -114,10 +114,10 @@ export function OpenStepWindow() {
           opened.eventKey,
           chain.some((s) => s.id === next.id) ? chain.map((s) => (s.id === next.id ? next : s)) : [...chain, next],
         )
-        ed.openStep(null)
+        ed.view.openStep(null)
       }}
       onClose={() => {
-        ed.openStep(null)
+        ed.view.openStep(null)
         releaseEmptyEntryKeys(ed, opened.blockId)
       }}
     />
@@ -173,7 +173,7 @@ function StepLine({
   )
   const number = <span className="w-[16px] shrink-0 text-right font-mono text-dense opacity-70">{nr}</span>
 
-  const { words, short, known } = stepPiece(step.kind).words(step, context)
+  const { words, short, known } = stepSummary(step.kind).words(step, context)
   const condition = conditionWords(step.onlyIf, context.reach.sources ?? [])
   return (
     <Clickable open={open} onClick={onOpen}>

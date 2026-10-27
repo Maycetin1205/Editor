@@ -1,7 +1,9 @@
-/* The tokens of the mask, after the target picture of the user (15.10.2026,
-   no longer in the repo): white cards with a hairline and round corners on
-   a light grey ground, the type of Windows, one blue accent, the value of a
-   field in a box, a label small and grey over it, no capitals. Light only. */
+/* The tokens of the mask, the one system every block draws from (26.10.2026,
+   entwuerfe/entwurf-bereich.html): white cards with a hairline and 8 px corners
+   on a light grey ground with a slight blue cast, the type of Windows, one
+   blue accent, four meaning colors used only as a dot, an edge, a chip or the
+   soft ground of a row. Light only. A block names a token; it never writes a
+   color, a radius, a font size or a shadow of its own (eslint checks that). */
 
 /* No font of its own: Segoe UI Variable lies on Windows 11, Segoe UI on every
    Windows before, so the mask still loads nothing. */
@@ -9,42 +11,43 @@
 :root {
   color-scheme: light;
 
-  /* The ground of the sheet; a card, a box and a list lie on it white. */
-  --se-bg:        #F3F3F3;
+  /* The ground of the sheet; a card, a box and a list lie on it white; the
+     inner ground for a chip, a read-only box and a skeleton. */
+  --se-bg:        #F4F5F7;
   --se-panel:     #FFFFFF;
-  --se-panel-2:   #FAFAFA;
+  --se-panel-2:   #F7F8FA;
 
   /* Ink in three steps: a value and a title, a label and a column head,
      what only shows the way (a symbol, a sign, an empty place). */
-  --se-ink:       #1B1B1B;
-  --se-ink-2:     #5C5C5C;
-  --se-faint:     #8A8A8A;
+  --se-ink:       #1A1D21;
+  --se-ink-2:     #5B616B;
+  --se-faint:     #8B919B;
 
   /* Lines, all 1 px: the edge of a card and between rows, the softer one
      inside a list of the board; the edge of a box and its darker lower
      edge, as a field of Windows has it. */
-  --se-line:        #E3E3E3;
-  --se-line-soft:   #EDEDED;
-  --se-line-strong: #C8C8C8;
-  --se-box-bottom:  #8A8A8A;
-  --se-box-line:    #8A8A8A;  /* the box of a checkbox */
+  --se-line:        #E4E6EA;
+  --se-line-soft:   #EEF0F3;
+  --se-line-strong: #C9CDD3;
+  --se-box-bottom:  #8B919B;
+  --se-box-line:    #8B919B;  /* the box of a checkbox */
 
-  /* The blue of Windows, the accent of the mask: the main button, the title
-     of an area, a bold text, the field being typed into, the chosen row and
-     the row being captured. Soft, the ground of a list head and of these
-     rows. */
+  /* The blue of Windows, the accent of the mask: the main button, the focus,
+     a link, the chosen row and the row being captured. Soft, the ground of a
+     list head and of these rows; line, the edge of a chip in the accent. */
   --se-accent:       #0067C0;
   --se-accent-dark:  #005A9E;
   --se-accent-soft:  #EAF3FB;
+  --se-accent-line:  #C9DDF0;
 
   /* The ground of a field under the pointer, and of a button on it; a row
      under the pointer lifts a little. */
-  --se-hover:        #F2F2F2;
-  --se-hover-strong: #E6E6E6;
+  --se-hover:        #F0F2F5;
+  --se-hover-strong: #E4E6EA;
   /* The ground of a box that only shows a value: a text with its label and
      a bound field. */
-  --se-read-ground:  #F7F7F7;
-  --se-row-hover:    #F6F9FC;
+  --se-read-ground:  #F7F8FA;
+  --se-row-hover:    #F5F8FB;
   /* The chosen row: the soft accent, the bar at its left edge. */
   --se-selection:    var(--se-accent-soft);
   --se-mark-bar: inset 3px 0 0 var(--se-accent);
@@ -58,12 +61,12 @@
   /* Tones: strong for a dot or a full ground, ink for text on the tint, tint
      for a head, shell for the ground of a column, line for its border, soft
      behind a chip. Akzent (info) is the blue of the accent. */
-  --se-neutral:       #5C5C5C;
-  --se-neutral-ink:   #1B1B1B;
-  --se-neutral-tint:  #F3F3F3;
-  --se-neutral-shell: #FAFAFA;
-  --se-neutral-line:  #C8C8C8;
-  --se-neutral-soft:  #EBEBEB;
+  --se-neutral:       #5B616B;
+  --se-neutral-ink:   #1A1D21;
+  --se-neutral-tint:  #F4F5F7;
+  --se-neutral-shell: #F7F8FA;
+  --se-neutral-line:  #C9CDD3;
+  --se-neutral-soft:  #EBEDF0;
 
   --se-info:          #0067C0;
   --se-info-ink:      #005A9E;
@@ -72,7 +75,7 @@
   --se-info-line:     #C9DDF0;
   --se-info-soft:     #EAF3FB;
 
-  --se-success:       #0F7B0F;
+  --se-success:       #107C10;
   --se-success-ink:   #0B5A0B;
   --se-success-tint:  #DFF6DD;
   --se-success-shell: #F3FBF2;
@@ -94,12 +97,18 @@
   --se-danger-soft:   #FDE7E9;
 
   /* Corners: 4 px at a box and a button, 8 px at a card and a window, 2 px at
-     the small window that asks at a row. */
+     the small window that asks at a row, half the height at a chip. */
   --se-border: 1px;
   --se-radius: 4px;
   --se-radius-sm: 4px;
   --se-radius-card: 8px;
   --se-radius-xs: 2px;
+  --se-radius-chip: 10px;
+
+  /* Heights from the 16 px step of the grid: a control 32, the head of a
+     card and a row of a list 36. Compact is the one density of the mask. */
+  --se-control: 32px;
+  --se-head: 36px;
 
   /* The hairline that closes a part. */
   --se-hair: var(--se-border) solid var(--se-line);
@@ -109,7 +118,7 @@
   --se-sheet-top: 20px;
   --se-sheet-x: 24px;
   --se-sheet-bottom: 20px;
-  --se-scrollbar: #C8C8C8;
+  --se-scrollbar: #C9CDD3;
 
   /* A table and the capture: the head grey-blue on the soft accent over a
      light blue line, the rows apart by the hairline, no lines between the
@@ -142,12 +151,14 @@
   --se-shadow-chosen: var(--se-mark-bar), 0 0 0 var(--se-border) var(--se-line);
   --se-column-edge: inset 0 0 0 var(--se-border) var(--se-line);
   /* The hairline drawn inside, so the element keeps its size: a card, a
-     list, a button of the board. */
+     list, a button of the board. The same in red around a row that reports
+     an error at its place. */
   --se-edge: inset 0 0 0 var(--se-border) var(--se-line);
+  --se-alert-edge: inset 0 0 0 var(--se-border) var(--se-danger-line);
   /* The one shadow of the mask: a card of the board lifts while it is dragged. */
   --se-shadow-lift: 0 8px 24px rgba(0, 0, 0, .14), 0 2px 6px rgba(0, 0, 0, .10);
   /* The list that opens under a row to spread its amount: barely lifted,
-     with the hairline (user, 21.10.: "dezenter"). */
+     with the hairline, kept subtle. */
   --se-shadow-drop: 0 4px 12px rgba(0, 0, 0, .07), 0 0 0 var(--se-border) var(--se-line);
   --se-place-ground: rgba(255, 255, 255, .72);
   /* The edge of a place being typed into: the accent around it, its lower
@@ -178,8 +189,9 @@
   --se-gap-lg: 12px;
 
   /* Ground and edge change under the pointer in this time; a focus ring
-     stands at once. */
+     stands at once; a card folds in this time and curve. */
   --se-move: 120ms;
+  --se-fold: 200ms cubic-bezier(.2, 0, 0, 1);
 
   /* Waiting and its end, as Windows shows them (src/blocks/base/notice.ts):
      in a button or a field the ring of the ProgressRing while it writes, its
@@ -271,29 +283,4 @@
   stroke: currentColor;
   stroke-width: 1px;
   stroke-linecap: round;
-}
-
-/* The outline of an animal in the color of its kind, on a circle of the same
-   color, soft (animalAvatarTpl() in src/blocks/parts/card.ts). Only the data
-   list and the board draw one, so the rule names their tags: the export takes
-   it only into a mask that carries one of them. */
-ff-datalist, ff-kanban {
-  --se-animal-dog:         #3B5BDB;
-  --se-animal-dog-soft:    #E9EDFB;
-  --se-animal-cat:         #B7791F;
-  --se-animal-cat-soft:    #FBF1DD;
-  --se-animal-rabbit:      #4F7C2C;
-  --se-animal-rabbit-soft: #ECF4E4;
-  --se-animal-bird:        #0E7C86;
-  --se-animal-bird-soft:   #E3F1F2;
-  --se-animal-rat:         #8E5A9B;
-  --se-animal-rat-soft:    #F4ECF6;
-  --se-animal-turtle:      #4B6068;
-  --se-animal-turtle-soft: #E8EDEF;
-  --se-animal-fish:        #2563EB;
-  --se-animal-fish-soft:   #E8F0FE;
-  --se-animal-horse:       #8B5E34;
-  --se-animal-horse-soft:  #F4ECE4;
-  --se-animal-paw:         #626974;
-  --se-animal-paw-soft:    #EEF1F4;
 }

@@ -43,23 +43,12 @@ function relationFrom(
 
 export function RelationsTab() {
   const store = useRelations()
-  const ed = useEditor()
-  const sources = useDataSources().list
   const [search, setSearch] = useState('')
   const [markedId, setMarkedId] = useState<string | null>(null)
 
   const hits = store.list.filter((r) => relationFitsToSearch(r, search))
   const marked = hits.find((r) => r.id === markedId)
-  const usage = marked
-    ? [
-        ...Object.values(ed.tree)
-          .filter((n) => relationIdsOf(n).includes(marked.id))
-          .map((n) => blockName(n, sources)),
-        ...sources
-          .filter((s) => deliveryAdapter(s.delivery.kind).relationIds(s.delivery).includes(marked.id))
-          .map((s) => `Quelle ${s.name}`),
-      ]
-    : []
+  const usage = useRelationUsage(marked)
 
   return (
     <>
@@ -102,37 +91,59 @@ export function RelationsTab() {
         </Grid>
       </div>
 
-      <div className="flex w-[300px] shrink-0 flex-col border-l border-line-soft">
-        <Strip wrap>{marked?.name ?? 'Relation'}</Strip>
-        {marked && (
-          <>
-            <div className="break-all border-b border-line-soft px-[12px] py-[8px] font-mono text-dense">
-              {relationSyntaxAsText(marked)}
-            </div>
-            <Strip right={marked.parameter.length}>Stellen</Strip>
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              <table className="w-full border-collapse">
-                <tbody>
-                  {marked.parameter.map((name, i) => (
-                    <tr key={i}>
-                      <td className={`${TD} w-[44px] px-[10px] text-right font-mono text-dense text-muted`}>{i + 1}</td>
-                      <td className={`${TD} px-[10px] font-mono text-dense`}>{name}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {usage.length > 0 && (
-              <>
-                <div className="border-t border-line-soft">
-                  <Strip>Benutzt von</Strip>
-                </div>
-                <div className="px-[12px] py-[8px] text-dense">{usage.join(', ')}</div>
-              </>
-            )}
-          </>
-        )}
-      </div>
+      <RelationDetail marked={marked} usage={usage} />
     </>
+  )
+}
+
+// Names of the blocks and sources that refer to the relation.
+function useRelationUsage(marked: RelationTemplate | undefined): string[] {
+  const ed = useEditor()
+  const sources = useDataSources().list
+  if (!marked) return []
+  return [
+    ...Object.values(ed.tree)
+      .filter((n) => relationIdsOf(n).includes(marked.id))
+      .map((n) => blockName(n, sources)),
+    ...sources
+      .filter((s) => deliveryAdapter(s.delivery.kind).relationIds(s.delivery).includes(marked.id))
+      .map((s) => `Quelle ${s.name}`),
+  ]
+}
+
+// Right column: syntax, places and users of the marked relation.
+function RelationDetail({ marked, usage }: { marked: RelationTemplate | undefined; usage: readonly string[] }) {
+  return (
+    <div className="flex w-[300px] shrink-0 flex-col border-l border-line-soft">
+      <Strip wrap>{marked?.name ?? 'Relation'}</Strip>
+      {marked && (
+        <>
+          <div className="break-all border-b border-line-soft px-[12px] py-[8px] font-mono text-dense">
+            {relationSyntaxAsText(marked)}
+          </div>
+          <Strip right={marked.parameter.length}>Stellen</Strip>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <table className="w-full border-collapse">
+              <tbody>
+                {marked.parameter.map((name, i) => (
+                  <tr key={i}>
+                    <td className={`${TD} w-[44px] px-[10px] text-right font-mono text-dense text-muted`}>{i + 1}</td>
+                    <td className={`${TD} px-[10px] font-mono text-dense`}>{name}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {usage.length > 0 && (
+            <>
+              <div className="border-t border-line-soft">
+                <Strip>Benutzt von</Strip>
+              </div>
+              <div className="px-[12px] py-[8px] text-dense">{usage.join(', ')}</div>
+            </>
+          )}
+        </>
+      )}
+    </div>
   )
 }

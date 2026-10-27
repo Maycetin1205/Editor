@@ -2,6 +2,20 @@ import { html, type TemplateResult } from 'lit'
 import { cssZoomOf } from '../base/cssZoom'
 import { COLUMNS_MIN_WIDTH, type Column } from '../parts/column'
 
+export type ColumnsGrid = { gridTemplateColumns: string }
+
+// The widths act as shares of the row; a column without its own width gets the
+// middle of the others.
+export function columnsTemplate(
+  columns: readonly Column[],
+  widths: (index: number) => number | undefined = () => undefined,
+): string {
+  const own = columns.map((s, i) => widths(i) ?? s.width)
+  const set = own.filter((w): w is number => w !== undefined)
+  const middle = set.length === 0 ? 1 : Math.max(1, Math.round(set.reduce((a, b) => a + b, 0) / set.length))
+  return own.map((w) => `minmax(0, ${w ?? middle}fr)`).join(' ')
+}
+
 interface WidthsChange {
   index: number
   width: number

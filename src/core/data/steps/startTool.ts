@@ -1,6 +1,6 @@
 import { COLUMN_PARAM_SOURCES, checkParameterBinding, type Parameter } from '../actions'
 import type { Unread } from '../../unread'
-import type { StepAdapter, StepBase } from './stepAdapter'
+import type { RuntimeStepBase, StepAdapter, StepBase } from './stepAdapter'
 
 export interface StartToolStep extends StepBase {
   kind: 'START_TOOL'
@@ -10,7 +10,11 @@ export interface StartToolStep extends StepBase {
   parameter: Parameter[]
 }
 
-export type RuntimeStartToolStep = Omit<StartToolStep, 'id'>
+export interface RuntimeStartToolStep extends RuntimeStepBase {
+  kind: 'START_TOOL'
+  toolNumber: string
+  parameter: Parameter[]
+}
 
 function parameterRead(raw: unknown): Parameter[] | null {
   if (!Array.isArray(raw)) return null
@@ -34,7 +38,7 @@ function withBindings(step: StartToolStep, map: (binding: Parameter) => Paramete
   return parameter.some((b, i) => b !== step.parameter[i]) ? { ...step, parameter } : step
 }
 
-export const startTool: StepAdapter<'START_TOOL'> = {
+export const startTool: StepAdapter<StartToolStep, RuntimeStartToolStep> = {
   kind: 'START_TOOL',
   answers: false,
   read(raw, base) {
@@ -59,12 +63,6 @@ export const startTool: StepAdapter<'START_TOOL'> = {
       toolNumber: step.toolNumber,
       parameter: step.parameter.map(binding),
     }
-  },
-  run(step, run) {
-    const toolNumber = step.toolNumber.trim()
-    if (toolNumber === '') return Promise.resolve({ failed: true })
-    const params = step.parameter.map((binding) => run.host.resolveParameter(binding, run.parameterValues))
-    return Promise.resolve({ failed: !run.host.startTool(toolNumber, params) })
   },
   bindings: (step) => step.parameter,
   withBindings,

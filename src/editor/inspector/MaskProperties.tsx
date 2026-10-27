@@ -89,7 +89,7 @@ function ExportTarget() {
     try {
       name = await pickExportTarget(target)
     } catch (error) {
-      ed.showNotice({ title: 'Kein Zielordner gewählt', lead: `${reasonOf(error)}.` })
+      ed.view.showNotice({ title: 'Kein Zielordner gewählt', lead: `${reasonOf(error)}.` })
       return
     }
     if (name === null) return

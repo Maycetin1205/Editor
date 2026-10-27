@@ -1,6 +1,6 @@
 import type { RuntimeQuery } from '../core/data/deliveries/message'
 import { reportTrigger } from './bridge'
-import { fieldRead } from './data'
+import { fieldRead } from './fields'
 import { setFetchedRows } from './fetchedRows'
 import { queryRun } from './relations'
 import { rowsOfSource, runtimeSource } from './runtimeSources'

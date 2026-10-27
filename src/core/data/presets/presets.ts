@@ -10,19 +10,7 @@ import { dataset } from './dataset'
 import { relationValue } from './relationValue'
 import { erpMask } from './erpMask'
 
-export type PresetId =
-  | 'idb'
-  | 'addressMaster'
-  | 'itemMaster'
-  | 'document'
-  | 'documentItem'
-  | 'file'
-  | 'erpQuery'
-  | 'dataset'
-  | 'relationValue'
-  | 'erpMask'
-
-const PRESETS: { [P in PresetId]: SourcePreset<P> } = {
+const PRESETS = {
   idb,
   addressMaster,
   itemMaster,
@@ -33,7 +21,9 @@ const PRESETS: { [P in PresetId]: SourcePreset<P> } = {
   dataset,
   relationValue,
   erpMask,
-}
+} satisfies Record<string, SourcePreset<string>>
+
+export type PresetId = keyof typeof PRESETS
 
 export const PRESET_IDS: readonly PresetId[] = Object.values(PRESETS).map((p) => p.id)
 

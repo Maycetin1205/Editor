@@ -3,7 +3,7 @@ import { NAME, Strip } from '@/editor/widgets/Grid'
 import type { RelationTemplate } from '../../core/data/relations'
 import type { StartToolStep } from '../../core/data/steps/startTool'
 import { Places } from './Places'
-import type { StepBodyProps } from './stepPiece'
+import type { StepBodyProps } from './stepTypes'
 
 function toolTemplate(step: StartToolStep): RelationTemplate {
   return {

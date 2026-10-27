@@ -7,9 +7,9 @@ import { packLibrary, packLibraryFrom } from './libraryFile'
 import { CURRENT_SCHEMA_VERSION } from './maskSchema'
 import { readMask } from './readMask'
 
-const STORAGE_KEY = 'aufbau_editor_mask'
+export const MASK_STORAGE_KEY = 'aufbau_editor_mask'
 
-const LIBRARY_KEY = 'aufbau_editor_library'
+export const LIBRARY_STORAGE_KEY = 'aufbau_editor_library'
 
 const FORMER_LIBRARY_KEY = 'aufbau_editor_datencenter'
 
@@ -88,8 +88,8 @@ class Slot {
   }
 }
 
-const maskSlot = new Slot(STORAGE_KEY)
-const librarySlot = new Slot(LIBRARY_KEY, FORMER_LIBRARY_KEY)
+const maskSlot = new Slot(MASK_STORAGE_KEY)
+const librarySlot = new Slot(LIBRARY_STORAGE_KEY, FORMER_LIBRARY_KEY)
 
 export function loadLibraryFromStorage(): StoredLibrary {
   return (
@@ -100,11 +100,23 @@ export function loadLibraryFromStorage(): StoredLibrary {
   )
 }
 
-export function loadFromStorage(knownSources: readonly DataSource[] = []): StoredMask | null {
-  return maskSlot.read((raw) => readState(raw, knownSources))
+// The mask in the browser. A mask of another stage stays there untouched;
+// stage names it.
+export function loadFromStorage(): { mask: StoredMask | null; stage: unknown } {
+  let stage: unknown = null
+  const mask = maskSlot.read((raw) =>
+    readState(raw, (step) => {
+      stage = step
+    }),
+  )
+  return { mask, stage }
 }
 
-function readState(raw: string, knownSources: readonly DataSource[]): StoredMask | null {
+export function storedMaskText(): string | null {
+  return read(MASK_STORAGE_KEY)
+}
+
+function readState(raw: string, otherStage: (step: unknown) => void): StoredMask | null {
   let parsed: unknown
   try {
     parsed = JSON.parse(raw)
@@ -113,8 +125,11 @@ function readState(raw: string, knownSources: readonly DataSource[]): StoredMask
   }
   try {
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null
-    const result = readMask(parsed as Record<string, unknown>, knownSources)
-    if (!result.ok) return null
+    const result = readMask(parsed as Record<string, unknown>)
+    if (!result.ok) {
+      if (result.why === 'stage') otherStage((parsed as { schemaVersion?: unknown }).schemaVersion)
+      return null
+    }
     const { read } = result
     const kept = parsed as { file?: unknown; savedAt?: unknown; locked?: unknown }
     return {
@@ -207,7 +222,7 @@ export function persistSourceTabs(tabs: readonly string[]): void {
   write(SOURCE_TABS_KEY, JSON.stringify(tabs))
 }
 
-export interface WindowSize {
+interface WindowSize {
   width: number
   height: number
 }

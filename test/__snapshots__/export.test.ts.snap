@@ -1,0 +1,286 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`exportMask > matches the stored shape of the mask markup (runtime chunk left out) 1`] = `
+"<!DOCTYPE html>
+<!-- Erzeugt vom Aufbau-Editor aus der Maske "Pr&#xFC;fmaske". Aendern im Editor und neu exportieren, nicht in dieser Datei. -->
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<title>Pr&#xFC;fmaske</title>
+<script src="<!--SOFTENGINE-VAR!EditorPfad-->/JS/JS/basis.html.interface.js"></script>
+<style>
+:root {
+  color-scheme: light;
+
+  --se-bg:        #F4F5F7;
+  --se-panel:     #FFFFFF;
+  --se-panel-2:   #F7F8FA;
+
+  --se-ink:       #1A1D21;
+  --se-ink-2:     #5B616B;
+  --se-faint:     #8B919B;
+
+  --se-line:        #E4E6EA;
+  --se-line-soft:   #EEF0F3;
+  --se-line-strong: #C9CDD3;
+  --se-box-bottom:  #8B919B;
+  --se-box-line:    #8B919B;
+
+  --se-accent:       #0067C0;
+  --se-accent-dark:  #005A9E;
+  --se-accent-soft:  #EAF3FB;
+  --se-accent-line:  #C9DDF0;
+
+  --se-hover:        #F0F2F5;
+  --se-hover-strong: #E4E6EA;
+
+  --se-read-ground:  #F7F8FA;
+  --se-row-hover:    #F5F8FB;
+
+  --se-selection:    var(--se-accent-soft);
+  --se-mark-bar: inset 3px 0 0 var(--se-accent);
+
+  --se-selection-ground: #CCE4F7;
+
+  --se-scrim: rgba(0, 0, 0, .3);
+
+  --se-card-bg:    #FFFFFF;
+
+  --se-neutral:       #5B616B;
+  --se-neutral-ink:   #1A1D21;
+  --se-neutral-tint:  #F4F5F7;
+  --se-neutral-shell: #F7F8FA;
+  --se-neutral-line:  #C9CDD3;
+  --se-neutral-soft:  #EBEDF0;
+
+  --se-info:          #0067C0;
+  --se-info-ink:      #005A9E;
+  --se-info-tint:     #EAF3FB;
+  --se-info-shell:    #F5F9FD;
+  --se-info-line:     #C9DDF0;
+  --se-info-soft:     #EAF3FB;
+
+  --se-success:       #107C10;
+  --se-success-ink:   #0B5A0B;
+  --se-success-tint:  #DFF6DD;
+  --se-success-shell: #F3FBF2;
+  --se-success-line:  #ACD8A7;
+  --se-success-soft:  #DFF6DD;
+
+  --se-warning:       #9D5D00;
+  --se-warning-ink:   #7A4800;
+  --se-warning-tint:  #FFF4CE;
+  --se-warning-shell: #FFFBEB;
+  --se-warning-line:  #F0D58C;
+  --se-warning-soft:  #FFF4CE;
+
+  --se-danger:        #C42B1C;
+  --se-danger-ink:    #A4262C;
+  --se-danger-tint:   #FDE7E9;
+  --se-danger-shell:  #FFFFFF;
+  --se-danger-line:   #F1BBBC;
+  --se-danger-soft:   #FDE7E9;
+
+  --se-border: 1px;
+  --se-radius: 4px;
+  --se-radius-sm: 4px;
+  --se-radius-card: 8px;
+  --se-radius-xs: 2px;
+  --se-radius-chip: 10px;
+
+  --se-control: 32px;
+  --se-head: 36px;
+
+  --se-hair: var(--se-border) solid var(--se-line);
+
+  --se-sheet-top: 20px;
+  --se-sheet-x: 24px;
+  --se-sheet-bottom: 20px;
+  --se-scrollbar: #C9CDD3;
+
+  --se-head-ground: var(--se-accent-soft);
+  --se-head-ink: #2B4E6E;
+  --se-head-rule: var(--se-border) solid #C9DDF0;
+  --se-capture-ground: var(--se-accent-soft);
+  --se-capture-edge: inset 3px 0 0 var(--se-accent);
+  --se-cell-focus: inset 0 -2px 0 var(--se-accent);
+  --se-cell-held: inset 0 -2px 0 var(--se-danger);
+  --se-placeholder: var(--se-faint);
+
+  --se-ask-bar: inset 3px 0 0 var(--se-danger);
+  --se-ask-edge: 0 0 0 var(--se-border) var(--se-line-strong);
+  --se-ask-ring: 0 0 0 1px var(--se-panel), 0 0 0 2px var(--se-ink);
+
+  --se-shadow-pop: 0 0 0 var(--se-border) var(--se-line);
+
+  --se-shadow-tile: 0 0 0 var(--se-border) var(--se-line);
+  --se-shadow-tile-hover: 0 0 0 var(--se-border) var(--se-line-strong);
+  --se-shadow-chosen: var(--se-mark-bar), 0 0 0 var(--se-border) var(--se-line);
+  --se-column-edge: inset 0 0 0 var(--se-border) var(--se-line);
+
+  --se-edge: inset 0 0 0 var(--se-border) var(--se-line);
+  --se-alert-edge: inset 0 0 0 var(--se-border) var(--se-danger-line);
+
+  --se-shadow-lift: 0 8px 24px rgba(0, 0, 0, .14), 0 2px 6px rgba(0, 0, 0, .10);
+
+  --se-shadow-drop: 0 4px 12px rgba(0, 0, 0, .07), 0 0 0 var(--se-border) var(--se-line);
+  --se-place-ground: rgba(255, 255, 255, .72);
+
+  --se-focus-ring: inset 0 0 0 var(--se-border) var(--se-accent), inset 0 -2px 0 var(--se-accent);
+
+  --se-box-focus: inset 0 calc(-1 * var(--se-border)) 0 var(--se-accent);
+
+  --se-font: "Segoe UI Variable Text", "Segoe UI", Arial, sans-serif;
+
+  --se-fs-xs:    11px;
+  --se-fs-sm:    12px;
+  --se-fs:       13px;
+  --se-fs-lg:    14px;
+  --se-fs-title: 20px;
+  --se-fs-xl:    22px;
+
+  --se-lh:       1.4;
+  --se-lh-tight: 1.25;
+
+  --se-gap-sm: 6px;
+  --se-gap:    8px;
+  --se-gap-lg: 12px;
+
+  --se-move: 120ms;
+  --se-fold: 200ms cubic-bezier(.2, 0, 0, 1);
+
+  --se-notice-ring: 16px;
+  --se-notice-ring-line: 2px;
+  --se-notice-turn: 2s;
+  --se-notice-bar: 2px;
+  --se-notice-segment: 40%;
+  --se-notice-pace: 1.5s;
+
+  --se-infobar-height: 40px;
+  --se-infobar-ground: color-mix(in srgb, var(--se-danger) 8%, var(--se-panel));
+}
+
+.ff-infobar {
+  position: fixed;
+  left: var(--se-sheet-x);
+  right: var(--se-sheet-x);
+  bottom: var(--se-sheet-bottom);
+  z-index: 20;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--se-gap-lg);
+  height: var(--se-infobar-height);
+  padding: 0 var(--se-gap-sm) 0 calc(var(--se-gap-lg) + 3px);
+  border-radius: var(--se-radius);
+  background: var(--se-infobar-ground);
+  box-shadow: var(--se-ask-bar), var(--se-edge);
+  color: var(--se-ink);
+  font-family: var(--se-font);
+  font-size: var(--se-fs);
+  line-height: var(--se-lh);
+}
+
+.ff-infobar[hidden] { display: none; }
+
+.ff-infobar .ff-infobar-sign {
+  flex: none;
+  width: var(--se-notice-ring);
+  height: var(--se-notice-ring);
+  color: var(--se-danger);
+}
+
+.ff-infobar .ff-infobar-sign circle { fill: currentColor; }
+
+.ff-infobar .ff-infobar-sign path {
+  fill: none;
+  stroke: var(--se-panel);
+  stroke-width: 1.5px;
+  stroke-linecap: round;
+}
+
+.ff-infobar .ff-infobar-sign .ff-infobar-dot { fill: var(--se-panel); }
+
+.ff-infobar .ff-infobar-text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--se-fs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ff-infobar .ff-infobar-name { font-weight: 600; }
+
+.ff-infobar .ff-infobar-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--se-radius);
+  background: none;
+  color: var(--se-ink-2);
+  cursor: pointer;
+  transition: background-color var(--se-move);
+}
+
+.ff-infobar .ff-infobar-close:hover { background: var(--se-hover-strong); color: var(--se-ink); }
+
+.ff-infobar .ff-infobar-close:focus-visible { outline: 2px solid var(--se-ink); outline-offset: -2px; }
+
+.ff-infobar .ff-infobar-close svg {
+  width: var(--se-notice-ring);
+  height: var(--se-notice-ring);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1px;
+  stroke-linecap: round;
+}
+
+/* The sheet is paper to the window's edges; its grid as on the editor canvas. */
+html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--se-bg); }
+.ff-root { box-sizing: border-box; width: 100%; height: 100%; overflow: auto; background: var(--se-bg); font-family: var(--se-font); font-size: var(--se-fs); line-height: var(--se-lh); color: var(--se-ink); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; caret-color: var(--se-accent); scrollbar-width: thin; scrollbar-color: var(--se-scrollbar) transparent; display:grid;grid-template-columns:repeat(48, 1fr);grid-auto-rows:12px;gap:4px;align-content:start; grid-template-rows: repeat(6, 12px) repeat(4, minmax(12px, 1fr)) repeat(6, 12px) repeat(2, minmax(12px, 1fr)) repeat(8, 12px); padding: var(--se-sheet-top) var(--se-sheet-x) var(--se-sheet-bottom); }
+.ff-root * { font-family: inherit; font-size: inherit; }
+.ff-root ::selection { background: var(--se-selection-ground); color: var(--se-ink); }
+</style>
+</head>
+<body>
+  <div class="ff-root">
+    <ff-area data-ff-main fills style="grid-column:1 / span 12;grid-row:1 / span 2;min-width:0;min-height:0;--area-columns:12"></ff-area>
+    <ff-button data-ff-main fills style="grid-column:1 / span 12;grid-row:3 / span 2;min-width:0;min-height:0"></ff-button>
+    <ff-date data-ff-main fills style="grid-column:1 / span 12;grid-row:5 / span 2;min-width:0;min-height:0"></ff-date>
+    <ff-table data-ff-main fills style="grid-column:1 / span 12;grid-row:7 / span 2;min-width:0;min-height:0"></ff-table>
+    <ff-capture data-ff-block-id="id-4" data-ff-main fills style="grid-column:1 / span 12;grid-row:9 / span 2;min-width:0;min-height:0"></ff-capture>
+    <ff-datalist data-ff-main fills style="grid-column:1 / span 12;grid-row:11 / span 2;min-width:0;min-height:0"></ff-datalist>
+    <ff-divider data-ff-main fills style="grid-column:1 / span 12;grid-row:13 / span 2;min-width:0;min-height:0"></ff-divider>
+    <ff-formfield data-ff-block-id="id-7" data-ff-main fills style="grid-column:1 / span 12;grid-row:15 / span 2;min-width:0;min-height:0"></ff-formfield>
+    <ff-kanban data-ff-main fills style="grid-column:1 / span 12;grid-row:17 / span 2;min-width:0;min-height:0"></ff-kanban>
+    <ff-tabs data-ff-main fills style="grid-column:1 / span 12;grid-row:19 / span 2;min-width:0;min-height:0;--area-columns:12">
+      <ff-tab name="Seite 1" fills></ff-tab>
+      <ff-tab name="Seite 2" fills></ff-tab>
+    </ff-tabs>
+    <ff-text data-ff-main fills style="grid-column:1 / span 12;grid-row:21 / span 2;min-width:0;min-height:0"></ff-text>
+    <ff-image data-ff-main fills style="grid-column:1 / span 12;grid-row:23 / span 2;min-width:0;min-height:0"></ff-image>
+    <ff-valuelist data-ff-main fills style="grid-column:1 / span 12;grid-row:25 / span 2;min-width:0;min-height:0"></ff-valuelist>
+  </div>
+<script>
+window.FF_DATA_SOURCES = [];
+window.FF_RELATIONS = [];
+</script>
+<script>
+<<RUNTIME>>
+</script>
+</body>
+</html>"
+`;
+
+exports[`exportMask > matches the stored shape of the mask markup (runtime chunk left out) 2`] = `
+"{
+  "SEFILELOOP": [],
+  "ERPAPICALL": []
+}
+"
+`;

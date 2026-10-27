@@ -1,7 +1,7 @@
 import { freshDataRequest, hasSeData, hostConsoleLog, onSeData, startSe } from '../softengine/bridge'
 import { sendStartTool } from '../softengine/commands'
 import { announceEditing } from '../softengine/editing'
-import { fieldRead, fieldWrite } from '../softengine/data'
+import { fieldRead, fieldWrite } from '../softengine/fields'
 import { fetchRows } from '../softengine/fetchRows'
 import { parameterResolve, relationRun, runtimeRelation, watchConnection, watchQueue } from '../softengine/relations'
 import { rowsOfSource, runtimeSource, runtimeSources } from '../softengine/runtimeSources'

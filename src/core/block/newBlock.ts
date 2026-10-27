@@ -29,6 +29,6 @@ export function newSubtree(type: string): { nodes: MaskTree; rootId: string } {
     node.childIds = children.map((child) => build(child, node.id))
     return node.id
   }
-  const rootId = build({ type: type }, null)
+  const rootId = build({ type: type, children: blockType(type)?.startChildren }, null)
   return { nodes, rootId }
 }

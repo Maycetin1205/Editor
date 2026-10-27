@@ -1,6 +1,7 @@
 import type { JobView } from '../core/data/jobs'
 import { warn } from './log'
-import { maskState } from './maskState'
+
+const state = { known: new Map<number, JobView>(), listeners: new Set<(job: JobView) => void>() }
 
 const ENDED_KEPT = 200
 
@@ -9,13 +10,13 @@ function ended(job: JobView): boolean {
 }
 
 export function noteJob(job: JobView): void {
-  const known = maskState.jobs.known
+  const known = state.known
   known.set(job.id, job)
   if (ended(job)) {
     const over = [...known.values()].filter(ended).length - ENDED_KEPT
     for (const old of [...known.values()].filter(ended).slice(0, Math.max(0, over))) known.delete(old.id)
   }
-  maskState.jobs.listeners.forEach((listener) => {
+  state.listeners.forEach((listener) => {
     try {
       listener(job)
     } catch (error) {
@@ -25,16 +26,16 @@ export function noteJob(job: JobView): void {
 }
 
 function subscribe(listener: (job: JobView) => void): () => void {
-  maskState.jobs.listeners.add(listener)
+  state.listeners.add(listener)
   return () => {
-    maskState.jobs.listeners.delete(listener)
+    state.listeners.delete(listener)
   }
 }
 
 // For the developer tools inside SoftEngine: ffAuftraege() lists what the mask
 // asked of SoftEngine and how each question ended.
 export function exposeJobLog(): void {
-  ;(globalThis as { ffAuftraege?: () => JobView[] }).ffAuftraege = () => [...maskState.jobs.known.values()]
+  ;(globalThis as { ffAuftraege?: () => JobView[] }).ffAuftraege = () => [...state.known.values()]
 }
 
 export function printEndedJobs(): void {

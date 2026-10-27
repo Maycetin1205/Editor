@@ -17,7 +17,7 @@ export const captureProperties = {
   rowHint: textProperty({
     default: '',
     label: 'Hinweis in der Tippzeile',
-    place: 'display',
+    place: 'content',
     attribute: 'rowhint',
   }),
 }

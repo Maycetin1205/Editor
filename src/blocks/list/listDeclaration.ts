@@ -13,25 +13,25 @@ export function listProperties(sortsByClick: boolean) {
     search: booleanProperty({
       default: false,
       label: 'Suchzeile',
-      place: 'display',
+      place: 'content',
       attribute: 'search',
     }),
     paging: booleanProperty({
       default: true,
       label: 'Blättern',
-      place: 'display',
+      place: 'content',
       attribute: 'paging',
     }),
     sortByClick: booleanProperty({
       default: sortsByClick,
       label: 'Sortieren per Klick',
-      place: 'display',
+      place: 'content',
       attribute: 'sortbyclick',
     }),
     columnPicker: booleanProperty({
       default: false,
       label: 'Spaltenwahl',
-      place: 'display',
+      place: 'content',
       attribute: 'columnpicker',
     }),
     dayField: DAY_FIELD_PROPERTY,
@@ -42,6 +42,14 @@ type ListValues = ValuesOf<ReturnType<typeof listProperties>>
 
 export type ListSettings = Omit<ListValues, 'columns'>
 
+// What a row of a list can start: the table, the capture block and the data
+// list offer the same.
+export const LIST_EVENTS: readonly EventDef[] = [
+  { key: ROW_CHOSEN, name: 'Zeile gewählt' },
+  { key: ROW_DOUBLE, name: 'Zeile doppelt geklickt' },
+  { key: KEY_F4, name: 'F4 – Aktion an der Zeile' },
+]
+
 export function listCapabilities<K extends string>(
   binding: ListBinding<unknown, K>,
   source: Capability<K> = { kind: 'source' },
@@ -49,17 +57,9 @@ export function listCapabilities<K extends string>(
 ): Capability<K>[] {
   return [
     source,
-    { kind: 'recordPick' },
+    { kind: 'recordChoice' },
     { kind: 'followsSelection' },
     { kind: 'list', binding },
-    {
-      kind: 'events',
-      list: [
-        { key: ROW_CHOSEN, name: 'Zeile gewählt' },
-        { key: ROW_DOUBLE, name: 'Zeile doppelt geklickt' },
-        { key: KEY_F4, name: 'F4 – Aktion an der Zeile' },
-        ...ownEvents,
-      ],
-    },
+    { kind: 'events', list: [...LIST_EVENTS, ...ownEvents] },
   ]
 }

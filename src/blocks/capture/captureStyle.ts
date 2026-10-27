@@ -23,6 +23,17 @@ export const captureStyle = css`
       }
       .row.capture > [role='cell']:focus-within { box-shadow: var(--se-cell-focus); }
 
+      /* An emptied corrected row asks before it goes: red with the red bar
+         like a booked row that asks (list/style/rowAsk.ts), the question
+         from its left edge. Not the class asking, which would
+         take the row out of its sticky place. */
+      .row.capture.drop-asked,
+      .body > .row.capture.drop-asked:hover {
+        background: var(--se-danger-tint);
+        box-shadow: var(--se-ask-bar);
+      }
+      .row.capture > .row-ask { left: 0; }
+
       /* A cell that holds the row back (its typed text names no record, or
          it is required and empty) stands on a red lower edge, also with the
          cursor, and its column says its name in red: the head, the name in
@@ -42,8 +53,8 @@ export const captureStyle = css`
       /* One sign per row state, the tone: the reception mask tones a table
          row on hover the same way and shows no dot inside a row. A row on its
          way out is grey, not of the accent, which only the chosen row wears. */
-      .row[data-status="captured"]:not(.selected),
-      .row[data-status="writes"]:not(.selected) { background: var(--se-neutral-tint); }
+      .row[data-status="captured"]:not(.chosen),
+      .row[data-status="writes"]:not(.chosen) { background: var(--se-neutral-tint); }
       .row[data-status="changed"] { background: var(--se-warning-soft); }
       .row[data-status="error"] { background: var(--se-danger-soft); }
       .row[data-status="writes"] { animation: se-writing 1.1s ease-in-out infinite; }
@@ -75,9 +86,9 @@ export const captureStyle = css`
       .row-remove:hover { color: var(--se-danger); background: var(--se-danger-soft); }
 
       /* The chosen row is tinted at most, never framed. */
-      .body > .row.selected,
+      .body > .row.chosen,
       .body > .row:focus,
-      .body > .row.selected:focus:not(:focus-visible) { outline: none; }
+      .body > .row.chosen:focus:not(:focus-visible) { outline: none; }
 
       /* A typable cell of the row hands its padding to its input, so the text
          keeps the edge of every other cell, and lets the suggestion list hang

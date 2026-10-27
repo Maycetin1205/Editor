@@ -16,6 +16,7 @@ import { followedName, followOf } from '../bar/followOffer'
 import { FollowPick } from '../bar/FollowPick'
 import { LookupWindowSection } from '../bar/LookupWindowSection'
 import { SelectionFollowSection } from '../bar/SelectionFollowSection'
+import { Labeled } from '../bar/Labeled'
 import { SourceList } from '../bar/SourceList'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
@@ -77,8 +78,9 @@ interface SectionsProps {
 
   controls: (props: DeclaredProperty[]) => ReactNode[]
 
-  sourceProps: DeclaredProperty[]
-  shows: DeclaredProperty[]
+  contentProps: DeclaredProperty[]
+  dataProps: DeclaredProperty[]
+  lookProps: DeclaredProperty[]
   lookupProps: DeclaredProperty[]
 
   searchWindow: LookupWindow | undefined
@@ -93,11 +95,16 @@ interface SectionsProps {
   folds: Folds
 }
 
+// The four questions of the user, in this order for every block: what does
+// it show, where do the data come from, how does it look, what happens on a
+// click. Looking up stands between data and look, only while a field looks
+// up.
 export function Sections({
   block,
   controls,
-  sourceProps,
-  shows,
+  contentProps,
+  dataProps,
+  lookProps,
   lookupProps,
   searchWindow,
   helpers,
@@ -110,7 +117,7 @@ export function Sections({
   const library = useDataSources().list
 
   const ownSource = carriesOwnSource(block)
-  const hasSource = ownSource || sourceProps.length > 0
+  const hasData = ownSource || dataProps.length > 0 || helpers === 'apart' || follows
   const hasSearch = searchWindow !== undefined || lookupProps.length > 0
   const follow = follows ? followOf(block) : undefined
   const extra = ownSource ? declaredValue(block, extraSourcesProperty) : []
@@ -119,43 +126,48 @@ export function Sections({
   const steps = events.reduce((n, ev) => n + (block.chains?.[ev.key]?.length ?? 0), 0) + entryStepCount(block)
   const computes = canCompute(block) && !hasCapability(blockType(block.type), 'list')
 
+  const dataSummary = [
+    ownSource ? sourceName : changedOf(block, dataProps),
+    helpers === 'apart' ? count(extra.length, 'Hilfsquelle', 'Hilfsquellen') : '',
+    follows ? `folgt ${follow ? followedName(follow, ed.tree, library) : 'nichts'}` : '',
+  ]
+    .filter((part) => part !== '')
+    .join(' · ')
+
   return (
     <>
-      {hasSource && (
-        <Section name="Quelle" summary={ownSource ? sourceName : changedOf(block, sourceProps)} folds={folds}>
-          {ownSource && <SourceList block={block} part={helpers === 'beside' ? 'all' : 'own'} />}
-          {controls(sourceProps)}
-        </Section>
-      )}
-      {helpers === 'apart' && (
-        <Section name="Hilfsquelle" summary={count(extra.length, 'Quelle', 'Quellen')} folds={folds}>
-          <SourceList block={block} part="helpers" />
-          {carriesSplit(block) && extra.length > 0 && <SplitRow block={block} />}
-        </Section>
-      )}
-      {(shows.length > 0 || computes) && (
-        <Section name="Anzeige" summary={changedOf(block, shows)} folds={folds}>
+      {(contentProps.length > 0 || computes) && (
+        <Section name="Inhalt" summary={changedOf(block, contentProps)} folds={folds}>
           {computes && <CalculationRow block={block} />}
-          {controls(shows)}
+          {controls(contentProps)}
+        </Section>
+      )}
+      {hasData && (
+        <Section name="Daten" summary={dataSummary} folds={folds}>
+          {ownSource && <SourceList block={block} part={helpers === 'beside' ? 'all' : 'own'} />}
+          {controls(dataProps)}
+          {helpers === 'apart' && <SourceList block={block} part="helpers" />}
+          {helpers === 'apart' && carriesSplit(block) && extra.length > 0 && <SplitRow block={block} />}
+          {follows && (
+            <Labeled label="Folgt der Auswahl">
+              {follow !== undefined && !waiting ? (
+                <SelectionFollowSection block={block} onPick={() => ed.view.pickFollowFor(block.id)} />
+              ) : (
+                <FollowPick block={block} />
+              )}
+            </Labeled>
+          )}
         </Section>
       )}
       {hasSearch && (
-        <Section name="Suchfenster" summary={changedOf(block, lookupProps)} folds={folds}>
+        <Section name="Nachschlagen" summary={changedOf(block, lookupProps)} folds={folds}>
           {controls(lookupProps)}
           {searchWindow && <LookupWindowSection block={block} window={searchWindow} />}
         </Section>
       )}
-      {follows && (
-        <Section
-          name="Folgt der Auswahl"
-          summary={follow ? followedName(follow, ed.tree, library) : 'nichts'}
-          folds={folds}
-        >
-          {follow !== undefined && !waiting ? (
-            <SelectionFollowSection block={block} onPick={() => ed.pickFollowFor(block.id)} />
-          ) : (
-            <FollowPick block={block} />
-          )}
+      {lookProps.length > 0 && (
+        <Section name="Aussehen" summary={changedOf(block, lookProps)} folds={folds}>
+          {controls(lookProps)}
         </Section>
       )}
       {(events.length > 0 || entries) && (

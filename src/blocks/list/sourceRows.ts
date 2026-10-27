@@ -1,6 +1,6 @@
 import { contractOf } from '../../core/block/registry'
-import { inOpenPopup } from '../../core/data/steps/popupStep'
-import { maskState } from '../../runtime/maskState'
+import { inOpenPopup } from '../../runtime/steps/popup'
+import { maskHost } from '../../runtime/host'
 import { relocateSelection, giverIdOf, traitOf, rowsToSelection } from '../../runtime/selection'
 import { readDataPreamble, makeDataLink, identityOf, recordOf, rowKeys, sourceIdOf } from '../../runtime/source'
 import { rowValues, type Calculation } from '../../core/data/calculation'
@@ -32,22 +32,22 @@ function rowComputed(
 }
 
 export function rowsIndexOf(el: HTMLElement, rawRow: unknown): string {
-  const source = maskState.host.source(sourceIdOf(el))
+  const source = maskHost().source(sourceIdOf(el))
   return source ? recordOf(source, rawRow) : ''
 }
 
 export function rowsTraitOf(el: HTMLElement, rawRow: unknown): string {
   if (rawRow == null) return ''
-  const identity = identityOf(maskState.host.source(sourceIdOf(el)), rawRow)
+  const identity = identityOf(maskHost().source(sourceIdOf(el)), rawRow)
   return identity === '' ? traitOf(rawRow) : JSON.stringify([sourceIdOf(el), identity])
 }
 
 export function rowsKeysOf(el: HTMLElement, rows: readonly unknown[]): string[] {
-  return rowKeys(maskState.host.source(sourceIdOf(el)), rows)
+  return rowKeys(maskHost().source(sourceIdOf(el)), rows)
 }
 
 export function hasRecordNumber(el: HTMLElement): boolean {
-  const source = maskState.host.source(sourceIdOf(el))
+  const source = maskHost().source(sourceIdOf(el))
   return source !== undefined && source.recordField !== ''
 }
 

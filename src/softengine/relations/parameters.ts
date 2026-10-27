@@ -1,7 +1,8 @@
 import { readActionValue } from '../../core/block/registry'
 import { BLOCK_ID_ATTR, type Parameter, type RuntimeValues } from '../../core/data/actions'
 import { seWindow } from '../bridge'
-import { fieldRead, isObject, rowsOfSource, sourceFromList } from '../data'
+import { isObject, rowsOfSource, sourceFromList } from '../data'
+import { fieldRead } from '../fields'
 import { overlaid } from '../positionsOverlay'
 import { fieldFromAnswer } from './answer'
 

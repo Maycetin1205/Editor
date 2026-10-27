@@ -15,7 +15,7 @@ export type StepKind = Step['kind']
 
 export type ActionChains = Record<string, Step[]>
 
-const STEP_ADAPTERS: { [K in StepKind]: StepAdapter<K> } = {
+const STEP_ADAPTERS: { [K in StepKind]: StepAdapter<Step & { kind: K }, RuntimeStep & { kind: K }> } = {
   RELATION: relation,
   POPUP_OPEN: popupOpen,
   POPUP_CLOSE: popupClose,
@@ -25,7 +25,7 @@ const STEP_ADAPTERS: { [K in StepKind]: StepAdapter<K> } = {
 
 const STEP_KINDS: readonly StepKind[] = Object.values(STEP_ADAPTERS).map((a) => a.kind)
 
-export function stepAdapter(kind: StepKind): StepAdapter<StepKind> {
+export function stepAdapter(kind: StepKind): StepAdapter<Step, RuntimeStep> {
   return STEP_ADAPTERS[kind]
 }
 
