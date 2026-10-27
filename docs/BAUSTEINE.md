@@ -9,7 +9,7 @@ Stand 26.10.2026. Eine Bewertung, keine Entscheidung. Die Entscheidung trifft da
 | Bereich | `ff-area` | Gruppe mit Titel, Rahmen oder Band; kann einklappen | 3 | bleibt |
 | Trennlinie | `ff-divider` | Linie mit optionalem Wort | 3 | bleibt |
 | Knopf | `ff-button` | löst eine Aktionskette aus | 4 | bleibt |
-| Feld | `ff-formfield` | Text, Zahl, Datum, Uhrzeit, Auswahl, Ankreuzfeld, Suche; nachschlagen in einer Quelle | 15 | bleibt, zu voll (siehe unten) |
+| Feld | `ff-formfield` | Text, mehrzeiliger Text, Zahl, Datum, Uhrzeit, Auswahl, Ankreuzfeld, Suche; nachschlagen in einer Quelle | 16 | bleibt, zu voll (siehe unten) |
 | Datum | `ff-date` | der gewählte Tag der Maske, mit Vor/Zurück | 0 | bleibt |
 | Text | `ff-text` | Wort, Wert eines Feldes, Text mit eingewebten Feldern, Berechnung | 12 | bleibt |
 | Bild | `ff-image` | Bild aus Datei, Feld oder Relation | 9 | bleibt |
@@ -27,7 +27,7 @@ Die Zahlen sind Eigenschaften aus `properties.ts`. Dazu kommen bei jedem Baustei
 Nach dem, was eine ERP-Karteikarte braucht, und was die vorhandenen Bausteine nicht können:
 
 1. **Reiter** innerhalb einer Maske. Heute gibt es nur Seiten über Popups. Eine Karteikarte mit „Adresse / Konditionen / Historie“ ist nicht baubar.
-2. **Mehrzeiliger Text**. Der Feldtyp `textarea` wurde in einer alten Umstellung zu `text` gemacht. Bemerkungen, Notizen, Lieferhinweise gehen nicht.
+2. **Mehrzeiliger Text**. Gebaut als Feldtyp „Mehrzeilig“ des Feldes (`multiline`) mit „Zeilen“ (2 bis 12, Vorgabe 3). Enter beginnt eine neue Zeile, Strg+Enter und Tab gehen zum nächsten Feld.
 3. **Auswahlgruppe** (Optionsfelder nebeneinander, Ankreuzfelder als Gruppe). Das Auswahlfeld ist ein Aufklapper, mehr nicht.
 4. **Status** (Badge, Ampel, Fortschritt) aus einem Feldwert mit Zuordnung Wert → Farbe und Wort. Heute nur über einen Text mit Ton.
 5. **Dokumente / Anhänge**: Liste der Dateien zu einem Satz, mit Öffnen. SoftEngine hat Dokumentverknüpfungen, die Maske kann sie nicht zeigen.
@@ -39,7 +39,7 @@ Reihenfolge nach Nutzen: 1, 2, 4, 3, dann 5 bis 8.
 
 ## Einstellungen: was nicht passt
 
-**Das Feld hat 15 Einstellungen in einer Liste**, davon sieben nur fürs Nachschlagen (Fenster, Spalten, Breite, Höhe, einzigen Treffer übernehmen, Klarname). Das gehört in eine eigene Gruppe „Nachschlagen“, die nur erscheint, wenn Nachschlagen an ist; heute steuert das `when` einzelne Zeilen, die Liste bleibt lang.
+**Das Feld hat 16 Einstellungen in einer Liste**, davon sieben nur fürs Nachschlagen (Fenster, Spalten, Breite, Höhe, einzigen Treffer übernehmen, Klarname). Das gehört in eine eigene Gruppe „Nachschlagen“, die nur erscheint, wenn Nachschlagen an ist; heute steuert das `when` einzelne Zeilen, die Liste bleibt lang.
 
 **Zwei Beschriftungen** heißen gleich (Feld, Text): „Beschriftung“ für das Wort über dem Feld und „Beschriftung“ für den Text davor. Eins davon muss „Überschrift“ oder „Wort davor“ heißen.
 

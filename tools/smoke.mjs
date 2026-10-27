@@ -39,7 +39,7 @@ import { bindFirstEntry, bindSpots, setEntryChoice } from './smoke/binding.mjs'
 import { addEntryToolStep, addToolStep } from './smoke/events.mjs'
 import { firstValue, SOURCE } from './smoke/fixture.mjs'
 import { attributesOf, bridgeScript, nth, sent, shown } from './smoke/mask.mjs'
-import { trigger } from './smoke/triggers.mjs'
+import { linesKeys, trigger } from './smoke/triggers.mjs'
 
 const require = createRequire(import.meta.url)
 let chromium
@@ -78,6 +78,21 @@ const NOT_WALKED = {
   windowHeight: 'Griffe des Suchfensters',
   value: 'Wert, den die Maske beim Tippen schreibt',
   pattern: 'Felder in Wörter weben (Stelle mit eigenem Text)',
+}
+
+// Settings that change how a block works in the mask: each gets a working
+// copy of its own (set before the plain one), so the mask checks it too.
+const VARIANTS = {
+  formfield: [
+    {
+      name: 'Mehrzeilig',
+      settings: [
+        ['fieldType', 'multiline'],
+        ['lines', 5],
+      ],
+      check: linesKeys,
+    },
+  ],
 }
 
 // Places that show something made of the value, not the value itself.
@@ -169,15 +184,26 @@ async function operate(def) {
   return { id: a, set, edited: inPlace.changed, spots: spots.bound }
 }
 
-// B: Funktion. Returns what B must show and send in the mask.
-async function wire(def) {
+// B: Funktion, plain or with the setting of a variant. Returns what it must
+// show and send in the mask.
+async function wire(def, variant) {
+  const label = variant ? `Funktion (${variant.name})` : 'Funktion'
   const b = await insert(page, def)
   if (b === null) {
-    fail('zweites Exemplar ließ sich nicht einfügen')
+    fail(`${label}: Exemplar ließ sich nicht einfügen`)
     return null
   }
   await choose(page, b)
-  if (def.source && !(await chooseOwnSource(page, b))) fail('Funktion: eigene Quelle ließ sich nicht wählen')
+  if (def.source && !(await chooseOwnSource(page, b))) fail(`${label}: eigene Quelle ließ sich nicht wählen`)
+  const settings = []
+  for (const [key, value] of variant?.settings ?? []) {
+    await openSections(page)
+    const prop = def.properties.find((p) => p.key === key)
+    const now = await setByUi(page, b, prop, value).catch(() => undefined)
+    if (now === value) settings.push(key)
+    else fail(`${label}: ${prop.label} ließ sich nicht auf ${JSON.stringify(value)} stellen`)
+  }
+  if (settings.length > 0) pass(`${label}: ${settings.length} Einstellungen gewählt`)
   const spots = await bindSpots(page, b, def, SOURCE.fields)
   if (def.spots.length > 0) check(`${spots.bound.length} Stellen gebunden`, spots.wrong)
   const listed = def.list !== null && def.properties.find((p) => p.key === def.list)?.place === 'block'
@@ -223,6 +249,9 @@ async function wire(def) {
   if (def.events.length > 0) pass(`${events.length} Ereignisse mit Aktionsketten belegt`)
   return {
     id: b,
+    label,
+    check: variant?.check,
+    settings,
     spots: spots.bound.filter((x) => showing.has(x.spot)),
     hidden: spots.bound.filter((x) => !showing.has(x.spot)).map((x) => x.spot),
     listed: entryField,
@@ -236,12 +265,19 @@ for (const def of palette) {
   console.log(`${def.name} (${def.tag})`)
   try {
     const a = await operate(def)
-    const b = a === null ? null : await wire(def)
-    if (a === null || b === null) continue
+    if (a === null) continue
+    const fns = []
+    for (const variant of VARIANTS[def.type] ?? []) {
+      const v = await wire(def, variant)
+      if (v) fns.push(v)
+    }
+    const b = await wire(def)
+    if (b === null) continue
+    fns.push(b)
 
     // Properties no way the probe walks covers.
     const covered = new Set([...a.set.keys(), ...a.edited.map((c) => c.key), ...GRID_CELLS, 'source'])
-    for (const s of [...a.spots, ...b.spots]) s.keys.forEach((k) => covered.add(k))
+    for (const s of [...a.spots, ...fns.flatMap((f) => f.spots)]) s.keys.forEach((k) => covered.add(k))
     def.spots.forEach((s) => covered.add(`${s.prop}Field`))
     if (def.list) covered.add(def.list)
     const setup = FUNCTION_SETUP[def.type]
@@ -254,7 +290,7 @@ for (const def of palette) {
       else nowhere.push(`„${p.label}“ (${p.key}, Ort ${p.place}) hat keinen Weg im Editor, den die Probe kennt`)
     }
     check('jede Eigenschaft hat einen Weg im Editor', nowhere)
-    plan.push({ def, a, b })
+    plan.push({ def, a, fns })
   } catch (error) {
     fail(`Probe brach ab: ${error.message.split('\n')[0]}`)
     await page.keyboard.press('Escape')
@@ -285,7 +321,7 @@ if (!fs.existsSync(html)) {
 }
 
 if (fs.existsSync(html)) {
-  const statuses = plan.map((p) => p.b.status).filter((s) => s !== '')
+  const statuses = plan.flatMap((p) => p.fns.map((f) => f.status)).filter((s) => s !== '')
   const mask = await context.newPage()
   mask.setDefaultTimeout(5000)
   const maskErrors = []
@@ -298,7 +334,7 @@ if (fs.existsSync(html)) {
   // What each block shows, before any event writes into the rows.
   console.log('Exportierte Maske: Eigenschaften und Daten')
   const live = []
-  for (const { def, a, b } of plan) {
+  for (const { def, a, fns } of plan) {
     block = def.name
     console.log(`${def.name} (${def.tag})`)
     const defined = await mask.evaluate(
@@ -310,8 +346,8 @@ if (fs.existsSync(html)) {
       continue
     }
     const count = await mask.locator(def.tag).count()
-    if (count < 2) {
-      fail(`${count} statt 2 Exemplare in der Maske`)
+    if (count < 1 + fns.length) {
+      fail(`${count} statt ${1 + fns.length} Exemplare in der Maske`)
       continue
     }
     const keys = []
@@ -338,30 +374,52 @@ if (fs.existsSync(html)) {
           `${k} (${written[k].attribute}): erwartet ${JSON.stringify(written[k].raw)}, im Export ${JSON.stringify(inMask[written[k].attribute])}`,
       ),
     )
-    const text = (await shown(mask, def.tag, 1)) ?? ''
-    const wanted = [
-      ...b.spots.filter((s) => !SHOWN_OTHERWISE[s.spot]).map((s) => ({ what: `Stelle ${s.spot}`, code: s.field })),
-      ...(b.listed ? [{ what: 'erster Eintrag', code: SOURCE.fields[0].code }] : []),
-    ]
-    const missing = wanted.filter((w) => !text.includes(firstValue(w.code, b.status)))
-    if (wanted.length > 0) {
-      check(
-        `${wanted.length - missing.length} von ${wanted.length} gebundenen Feldern zeigen ihren Wert`,
-        missing.map((w) => `${w.what} zeigt „${firstValue(w.code, b.status)}“ (${w.code}) nicht`),
-      )
+    for (const [i, b] of fns.entries()) {
+      const text = (await shown(mask, def.tag, 1 + i)) ?? ''
+      const wanted = [
+        ...b.spots.filter((s) => !SHOWN_OTHERWISE[s.spot]).map((s) => ({ what: `Stelle ${s.spot}`, code: s.field })),
+        ...(b.listed ? [{ what: 'erster Eintrag', code: SOURCE.fields[0].code }] : []),
+      ]
+      const missing = wanted.filter((w) => !text.includes(firstValue(w.code, b.status)))
+      if (wanted.length > 0) {
+        check(
+          `${b.label}: ${wanted.length - missing.length} von ${wanted.length} gebundenen Feldern zeigen ihren Wert`,
+          missing.map((w) => `${w.what} zeigt „${firstValue(w.code, b.status)}“ (${w.code}) nicht`),
+        )
+      }
+      if (b.settings.length > 0) {
+        const set = Object.fromEntries(
+          await Promise.all(b.settings.map(async (k) => [k, await seam.exported(page, b.id, k)])),
+        )
+        const there = await attributesOf(
+          mask,
+          def.tag,
+          1 + i,
+          b.settings.map((k) => set[k].attribute),
+        )
+        check(
+          `${b.label}: Einstellungen im Export`,
+          b.settings
+            .filter((k) => there[set[k].attribute] !== set[k].raw)
+            .map(
+              (k) =>
+                `${k}: erwartet ${JSON.stringify(set[k].raw)}, im Export ${JSON.stringify(there[set[k].attribute])}`,
+            ),
+        )
+      }
+      if (b.hidden.length > 0) {
+        unchecked.push(`${def.name}: gebunden, mit der letzten Einstellung nicht sichtbar: ${b.hidden.join(', ')}`)
+      }
+      live.push({ def, b, index: 1 + i })
     }
-    if (b.hidden.length > 0) {
-      unchecked.push(`${def.name}: gebunden, mit der letzten Einstellung nicht sichtbar: ${b.hidden.join(', ')}`)
-    }
-    live.push({ def, b })
   }
 
   console.log('Exportierte Maske: Ereignisse')
-  for (const { def, b } of live) {
+  for (const { def, b, index } of live) {
     block = def.name
-    if (b.events.length === 0) continue
-    console.log(`${def.name} (${def.tag})`)
-    const el = nth(mask, def.tag, 1)
+    if (b.events.length === 0 && !b.check) continue
+    console.log(`${def.name} (${def.tag}), ${b.label}`)
+    const el = nth(mask, def.tag, index)
     for (const { event, nr } of b.events) {
       const before = (await sent(mask)).length
       const known = await trigger(mask, el, event.key).catch((error) => {
@@ -379,6 +437,7 @@ if (fs.existsSync(html)) {
       else fail(`Ereignis „${event.name}“: kein START_TOOL ${nr} gesendet (${JSON.stringify(after)})`)
       await mask.keyboard.press('Escape')
     }
+    if (b.check) check(`${b.label}: Tasten`, await b.check(mask, el))
   }
   block = ''
   if (maskErrors.length > 0) fail(`Skriptfehler in der Maske:\n  ${maskErrors.join('\n  ')}`)

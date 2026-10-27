@@ -83,7 +83,7 @@ export class FormField extends BlockElement implements ValueCarrier {
   }
 
   focusValue(): void {
-    this.renderRoot.querySelector<HTMLElement>('input, select')?.focus()
+    this.renderRoot.querySelector<HTMLElement>('input, select, textarea')?.focus()
   }
 
   private onInput(e: Event): void {
@@ -119,9 +119,18 @@ export class FormField extends BlockElement implements ValueCarrier {
     focusNextField(this)
   }
 
+  // Several lines: Enter starts a new line; Ctrl+Enter goes on to the next
+  // field, as Enter does in a field of one line. Tab goes on as anywhere.
+  private onLinesKey(e: KeyboardEvent): void {
+    if (e.key !== 'Enter' || !(e.ctrlKey || e.metaKey) || this.preview) return
+    e.preventDefault()
+    this.takeTyped()
+    focusNextField(this)
+  }
+
   private onFieldClick(e: MouseEvent): void {
     if (this.preview) return
-    const control = this.renderRoot.querySelector<HTMLElement>('input, select')
+    const control = this.renderRoot.querySelector<HTMLElement>('input, select, textarea')
     if (!control || e.composedPath().includes(control)) return
     if (e.composedPath().some((at) => at instanceof HTMLButtonElement)) return
     control.focus()
@@ -170,6 +179,17 @@ export class FormField extends BlockElement implements ValueCarrier {
         ${foreignValue ? html`<option value=${this.value} hidden selected>${this.value}</option>` : nothing}
         ${entries.map((o) => html`<option value=${o} ?selected=${o === this.value}>${o}</option>`)}
       </select>`
+    }
+    if (kind === 'multiline') {
+      return html`<textarea
+        class="ctrl"
+        aria-label=${this.label}
+        .value=${live(this.value)}
+        @input=${this.onInput}
+        @focus=${this.onFocus}
+        @blur=${this.takeTyped}
+        @keydown=${this.onLinesKey}
+      ></textarea>`
     }
     return html`<input
       class="ctrl"
@@ -240,6 +260,7 @@ export class FormField extends BlockElement implements ValueCarrier {
     const noticed = notice !== nothing
     return html`<div
       class=${classMap({ field: true, labelled: this.showLabel, [`kind-${kind}`]: true, lookup: this.lookup, noticed })}
+      style=${kind === 'multiline' ? `--lines: ${this.lines}` : nothing}
       @click=${this.onFieldClick}
     >
       ${this.symbol !== '' ? html`<span class="symbol">${symbolTpl(this.symbol)}</span>` : nothing}

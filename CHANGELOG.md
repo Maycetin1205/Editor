@@ -2,10 +2,11 @@
 
 ## Unveröffentlicht (Zweig `marktreife`)
 
-Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauweise.
+Vor allem geändert ist die Bauweise. Neu für Anwender ist der mehrzeilige Text im Feld; dazu die Korrekturen unten.
 
 ### Für Anwender sichtbar
 
+- Feld: neuer Feldtyp „Mehrzeilig“ für Bemerkungen, Notizen, Lieferhinweise. „Zeilen“ (2 bis 12) bestimmt die Höhe. Enter beginnt eine neue Zeile, Strg+Enter und Tab gehen zum nächsten Feld; „Wert geändert“ löst beim Verlassen aus wie beim einzeiligen Feld.
 - Stürzt der Editor ab, zeigt er den Fehler, bietet die Sicherung der Maske und der Bibliothek als Datei an und kann die Maske im Browser zurücksetzen.
 - Ein Baustein, der nicht mehr in den gewählten Bereich passt, landet auf der Seite; passt er auch dort nicht, sagt es eine Meldung. Vorher verschwand er.
 - Die Suche findet „Müller“ mit „muller“ in jeder Liste, auch im Kanban.
@@ -43,7 +44,7 @@ Was der Editor und die Maske können, ist unverändert. Geändert ist die Bauwei
 - Namen: Spaltentyp `kind` statt `holding`; gewählte Zeile der Maske `chosen` (Klasse, `TABLE_PART.chosen`, `chosenIndex`) statt `selected`; Fähigkeit `recordChoice` statt `recordPick`; `HeadHandle` statt `HeadSpot`, `firstFocusable` statt `firstFocusSpot`.
 - Zustände im Code auf Englisch (`quiet`, `loading`, `writing`, `saved`, `sent`, `failed`).
 - Tests (vitest) an den Nähten: Export-Markup, Escaping, Maskendatei mit Leftover und Abweisung fremder Stufen, Aktionsketten, SoftEngine-Datenlesen. `npm test`, in `npm run check` und auf GitHub.
-- Rauchprobe im Browser: `npm run smoke` (braucht Playwright). Sie prüft jeden Baustein der Palette über die Oberfläche: einfügen, Größe, verschieben, jede Eigenschaft über ihr Bedienelement, Wörter auf der Fläche, Stellen und ersten Listeneintrag binden, Aktionsketten an jedem Ereignis; dazu den Export jeder gesetzten Eigenschaft und in der exportierten Maske, mit einem Stellvertreter der Brücke, die gebundenen Werte und den Werkzeugstart jedes Ereignisses. Den Zustand liest sie über `src/editor/smokeAccess.ts`, nur im Entwicklungsbau.
+- Rauchprobe im Browser: `npm run smoke` (braucht Playwright). Sie prüft jeden Baustein der Palette über die Oberfläche: einfügen, Größe, verschieben, jede Eigenschaft über ihr Bedienelement, Wörter auf der Fläche, Stellen und ersten Listeneintrag binden, Aktionsketten an jedem Ereignis; dazu den Export jeder gesetzten Eigenschaft und in der exportierten Maske, mit einem Stellvertreter der Brücke, die gebundenen Werte und den Werkzeugstart jedes Ereignisses. Den Zustand liest sie über `src/editor/smokeAccess.ts`, nur im Entwicklungsbau. Einstellungen, die die Arbeitsweise ändern (etwa „Mehrzeilig“), prüft sie an einem eigenen Exemplar (`VARIANTS` in `tools/smoke.mjs`): Export der Einstellungen, gebundene Werte, Ereignisse und die Tasten in der Maske.
 - Tabellenmotor: ein Wechsel der Zeilenquelle (`rowsFrom`) löscht die gemerkte Sortierung des Bedieners nicht mehr, sondern liest sie gegen die neuen Spalten neu. Heute schaltet kein Baustein nach dem ersten Zeichnen um; der Fehler war still.
 - Editor-Fläche, feine Abos: `useEditorSelect` nimmt einen Vergleich (`sameItems`, `sameFields` aus `useStoreSelect.ts`). `Canvas`, `RootArea`, `NodeList` und `CanvasNode` lesen damit nur ihren Teil; ein Baustein zeichnet neu, wenn er selbst, seine Wahl oder der Träger seiner Quellen sich ändert, der gewählte bei jeder Änderung. Gemessen: Ändern einer Eigenschaft zeichnete 12 von 12 Bausteinen der Fläche, jetzt einen; je Änderung 54 statt 101 Komponenten im ganzen Editor (der Rest ist Seitenleiste, Werkzeugleiste, Inspektor).
 - Editor-Fläche, Ziehen: der Zieh-Zustand ist ein eigener Speicher (`DndState` mit `useDndSelect`) statt React-Zustand im Canvas; nur der getragene Baustein und der Geist des Zielbereichs zeichnen bei einer Zeigerbewegung neu. Gemessen (12 Bausteine, 40 Bewegungen): je Bewegung zeichneten 51 Komponenten, jetzt 2,5; Skriptzeit rund 220 ms, jetzt 62 ms.

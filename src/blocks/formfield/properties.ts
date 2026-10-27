@@ -14,7 +14,7 @@ import { coerceLookupColumns } from '../lookup/lookup'
 import { WINDOW_HEIGHT, WINDOW_WIDTH } from '../dialog/DialogFrame'
 import { symbolProperty } from '../look/symbol'
 
-export const FIELD_TYPES = ['text', 'number', 'date', 'time', 'select', 'checkbox', 'search'] as const
+export const FIELD_TYPES = ['text', 'multiline', 'number', 'date', 'time', 'select', 'checkbox', 'search'] as const
 
 export type FieldType = (typeof FIELD_TYPES)[number]
 
@@ -36,6 +36,7 @@ export const formFieldProperties = {
   fieldType: choiceProperty(
     [
       { value: 'text', name: 'Text' },
+      { value: 'multiline', name: 'Mehrzeilig' },
       { value: 'number', name: 'Zahl' },
       { value: 'date', name: 'Datum' },
       { value: 'time', name: 'Uhrzeit' },
@@ -67,6 +68,14 @@ export const formFieldProperties = {
     label: 'Beschriftung',
     place: 'block',
     attribute: 'label',
+  }),
+  lines: numberProperty({
+    default: 3,
+    min: 2,
+    max: 12,
+    label: 'Zeilen',
+    attribute: 'lines',
+    when: { key: 'fieldType', equals: 'multiline' },
   }),
   options: textProperty({
     default: '',

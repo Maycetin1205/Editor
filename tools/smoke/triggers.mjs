@@ -11,7 +11,7 @@ export const TRIGGERS = {
   entry: async (page, el) => el.locator('[role="button"]').first().click(),
   onClick: async (page, el) => el.click(),
   onChange: async (page, el) => {
-    const input = el.locator('input').first()
+    const input = el.locator('input, textarea').first()
     await input.fill('Neu')
     await input.press('Tab')
   },
@@ -42,4 +42,26 @@ export async function trigger(page, el, key) {
   await run(page, el)
   await settle(page, 400)
   return true
+}
+
+// A field of several lines in the mask: Enter starts a new line and stays,
+// Ctrl+Enter goes on to the next field. Returns what went wrong.
+export async function linesKeys(page, el) {
+  const area = el.locator('textarea').first()
+  if ((await area.count()) === 0) return ['kein mehrzeiliges Eingabefeld']
+  await area.click()
+  await page.keyboard.press('Control+A')
+  await page.keyboard.type('eins')
+  await page.keyboard.press('Enter')
+  await page.keyboard.type('zwei')
+  const value = await area.inputValue()
+  const stays = await area.evaluate((t) => t.getRootNode().activeElement === t)
+  await page.keyboard.press('Control+Enter')
+  await settle(page)
+  const left = await area.evaluate((t) => t.getRootNode().activeElement !== t)
+  const wrong = []
+  if (value !== 'eins\nzwei') wrong.push(`Enter machte keine neue Zeile (${JSON.stringify(value)})`)
+  if (!stays) wrong.push('Enter verließ das Feld')
+  if (!left) wrong.push('Strg+Enter ging nicht zum nächsten Feld')
+  return wrong
 }
