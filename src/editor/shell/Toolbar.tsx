@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { Check, Database, Download, Eye, Redo2, Save, SquareDashed, Undo2 } from '@/editor/icons/icon'
 import { frameNumberOf } from '../../core/block/documentFrame'
 import { maskNameOf } from '../../core/block/maskName'
@@ -8,8 +8,8 @@ import { leftoverLines } from '../state/leftoverLines'
 import { saveOrAsk } from '../state/maskFile'
 import { useEditorInstance } from '../state/EditorContext'
 import type { EditorStore } from '../state/EditorStore'
-import { useEditor } from '../state/useEditor'
 import { useEditorSelect } from '../state/useEditorSelect'
+import { sameFields, useStoreSelect } from '../state/useStoreSelect'
 import { useView } from '../state/useView'
 import { Button, PRESSED } from '@/editor/widgets/Button'
 import { cn } from '@/editor/widgets/cn'
@@ -110,9 +110,10 @@ export function Toolbar() {
   )
 }
 
-function MaskWho() {
-  const ed = useEditor()
-  const frame = frameNumberOf(ed.tree)
+const MaskWho = memo(function MaskWho() {
+  const ed = useEditorInstance()
+  const name = useEditorSelect((e) => maskNameOf(e.tree))
+  const frame = useEditorSelect((e) => frameNumberOf(e.tree))
   return (
     <button
       type="button"
@@ -123,7 +124,7 @@ function MaskWho() {
       }}
       className="ml-[4px] flex min-w-0 items-baseline gap-[10px] rounded px-[12px] py-[5px] text-left transition-colors hover:bg-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
     >
-      <span className="truncate font-bold text-ink">{maskNameOf(ed.tree)}</span>
+      <span className="truncate font-bold text-ink">{name}</span>
       {frame !== '' && (
         <span className="shrink-0 text-dense text-muted">
           Rahmen <span className="tabular-nums text-ink">{frame}</span>
@@ -131,56 +132,66 @@ function MaskWho() {
       )}
     </button>
   )
-}
+})
 
 // The sign of a mask opened only to look at: changes stay out of its file
 // until the guard is lifted.
-function OnlyToSee() {
-  const ed = useEditor()
-  if (!ed.files.maskOnDisk.attached || !ed.maskLocked) return null
-  const aside = leftoverLines(ed.tree, ed.dataSources.list, ed.leftover)
+const OnlyToSee = memo(function OnlyToSee() {
+  const ed = useEditorInstance()
+  const onlyToSee = useEditorSelect((e) => e.files.maskOnDisk.attached && e.maskLocked)
+  if (!onlyToSee) return null
+  const showWhy = () => {
+    const aside = leftoverLines(ed.tree, ed.dataSources.list, ed.leftover)
+    ed.view.showNotice({
+      title: 'Nur zum Ansehen',
+      lead:
+        `„${ed.files.maskOnDisk.name}“ ist zum Schutz nur zum Ansehen geöffnet: Änderungen hier kommen nicht in die Datei. ` +
+        (aside.length > 0
+          ? 'Diese Teile kann dieser Editor nicht lesen; in der Datei bleiben sie in jedem Fall erhalten:'
+          : 'Die Datei stammt aus einer neueren Fassung des Editors.'),
+      lines: aside,
+      action: { label: 'Trotzdem bearbeiten', run: () => ed.unlockMask() },
+    })
+  }
   return (
     <button
       type="button"
       title="Änderungen kommen nicht in die Datei der Maske"
-      onClick={() =>
-        ed.view.showNotice({
-          title: 'Nur zum Ansehen',
-          lead:
-            `„${ed.files.maskOnDisk.name}“ ist zum Schutz nur zum Ansehen geöffnet: Änderungen hier kommen nicht in die Datei. ` +
-            (aside.length > 0
-              ? 'Diese Teile kann dieser Editor nicht lesen; in der Datei bleiben sie in jedem Fall erhalten:'
-              : 'Die Datei stammt aus einer neueren Fassung des Editors.'),
-          lines: aside,
-          action: { label: 'Trotzdem bearbeiten', run: () => ed.unlockMask() },
-        })
-      }
+      onClick={showWhy}
       className="mr-[8px] flex shrink-0 items-center gap-[6px] rounded-full bg-pending-soft px-[10px] py-[3px] text-dense font-semibold text-pending transition-colors hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
     >
       <Eye size={13} /> <span className={LABEL}>Nur zum Ansehen</span>
     </button>
   )
-}
+})
 
-function SaveState() {
-  const ed = useEditor()
-  const view = useView()
+const fileOf = (e: EditorStore) => ({
+  attached: e.files.maskOnDisk.attached,
+  locked: e.maskLocked,
+  name: e.files.maskOnDisk.name,
+  savedAt: e.files.savedAt,
+})
+
+const SaveState = memo(function SaveState() {
+  const ed = useEditorInstance()
+  const file = useEditorSelect(fileOf, sameFields)
+  const done = useStoreSelect(ed.view, (v) => v.done)
   const [, tick] = useState(0)
   useEffect(() => {
     const timer = setInterval(() => tick((n) => n + 1), 15_000)
     return () => clearInterval(timer)
   }, [])
 
-  if (ed.files.maskOnDisk.attached && !ed.maskLocked && view.done !== 'saved') {
+  if (file.attached && !file.locked && done !== 'saved') {
     return (
       <Button
         kind="command"
         className={cn('font-normal', NARROW)}
-        title={`In „${ed.files.maskOnDisk.name}“ gespeichert. Speichern: Strg+S`}
+        title={`In „${file.name}“ gespeichert. Speichern: Strg+S`}
         onClick={() => void saveOrAsk(ed)}
       >
         <Check size={14} /> <span className={LABEL}>Gespeichert</span>
-        {ed.files.savedAt > 0 && <span className={cn('tabular-nums', LABEL)}>{TIME.format(ed.files.savedAt)}</span>}
+        {file.savedAt > 0 && <span className={cn('tabular-nums', LABEL)}>{TIME.format(file.savedAt)}</span>}
       </Button>
     )
   }
@@ -192,7 +203,7 @@ function SaveState() {
       onClick={() => void saveOrAsk(ed)}
     >
       <DoneLabel
-        done={view.done === 'saved'}
+        done={done === 'saved'}
         icon={<Save size={14} />}
         label="Speichern"
         doneLabel="Gespeichert"
@@ -200,4 +211,4 @@ function SaveState() {
       />
     </Button>
   )
-}
+})

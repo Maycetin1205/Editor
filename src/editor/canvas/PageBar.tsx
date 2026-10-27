@@ -1,15 +1,21 @@
 import { Plus, Trash } from '@/editor/icons/icon'
-import { Fragment, useState } from 'react'
+import { Fragment, memo, useState } from 'react'
 import { Field } from '@/editor/widgets/Field'
 import { Button } from '@/editor/widgets/Button'
 import { Tabs } from '@/editor/widgets/Tabs'
+import type { PagesEntry } from '../../core/block/pages'
 import { allBlockTypes } from '../../core/block/registry'
-import { useEditor } from '../state/useEditor'
+import { useEditorInstance } from '../state/EditorContext'
+import { useEditorSelect } from '../state/useEditorSelect'
+import { sameFields } from '../state/useStoreSelect'
 
-export function PageBar() {
-  const ed = useEditor()
-  const pages = ed.pages
-  const active = ed.activePageId
+const samePages = (a: readonly PagesEntry[], b: readonly PagesEntry[]): boolean =>
+  a.length === b.length && a.every((page, i) => sameFields(page, b[i]))
+
+export const PageBar = memo(function PageBar() {
+  const ed = useEditorInstance()
+  const pages = useEditorSelect((e) => e.pages, samePages)
+  const active = useEditorSelect((e) => e.activePageId)
 
   const [rename, setRename] = useState<{ id: string; text: string } | null>(null)
   const pageTypes = allBlockTypes().filter((def) => def.page)
@@ -81,4 +87,4 @@ export function PageBar() {
       ))}
     </nav>
   )
-}
+})

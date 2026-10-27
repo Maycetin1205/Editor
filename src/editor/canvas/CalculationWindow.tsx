@@ -11,6 +11,7 @@ import { KIND_NAMES } from '../origin/origins'
 import { calculationReach, columnEntries, sourceGroup } from '../origin/reach'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
+import type { OpenCalculation } from '../state/editorStore/viewState'
 import { useView } from '../state/useView'
 import { columnTitle, sentenceText, termName, termOriginKey, termsText, type Names } from './calculationWords'
 import { CalculationSettings } from './CalculationSettings'
@@ -24,11 +25,15 @@ const COLUMNS = [
   { name: 'Eingabe' },
 ]
 
+// Closed, the window hears only the view, not every change of the mask.
 export function OpenCalculationWindow() {
-  const ed = useEditor()
   const open = useView().calculationWindow
+  return open === null ? null : <OpenedCalculationWindow open={open} />
+}
+
+function OpenedCalculationWindow({ open }: { open: OpenCalculation }) {
+  const ed = useEditor()
   const library = useDataSources().list
-  if (open === null) return null
   const block = ed.tree[open.blockId]
   const def = block === undefined ? undefined : blockType(block.type)
   const prop = capability(def, 'compute')?.prop

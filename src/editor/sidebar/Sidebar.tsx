@@ -1,7 +1,8 @@
 import { cn } from '@/editor/widgets/cn'
 import { FoldButton, FoldedColumn, type FoldTab } from '@/editor/widgets/Folded'
 import type { SideTab } from '../state/editorStore/viewState'
-import { useView } from '../state/useView'
+import { useEditorInstance } from '../state/EditorContext'
+import { useStoreSelect } from '../state/useStoreSelect'
 import { MasksTab } from '../masks/MasksTab'
 import { BlockPalette } from './BlockPalette'
 
@@ -11,8 +12,10 @@ const TABS: readonly FoldTab<SideTab>[] = [
 ]
 
 export function Sidebar() {
-  const view = useView()
-  if (view.isShut('left')) {
+  const view = useEditorInstance().view
+  const shut = useStoreSelect(view, (v) => v.isShut('left'))
+  const sideTab = useStoreSelect(view, (v) => v.sideTab)
+  if (shut) {
     return <FoldedColumn side="left" tabs={TABS} onOpen={(tab) => view.showSide(tab)} />
   }
   return (
@@ -22,13 +25,13 @@ export function Sidebar() {
           <button
             key={t.key}
             type="button"
-            aria-pressed={view.sideTab === t.key}
-            title={view.sideTab === t.key ? 'Spalte einklappen' : undefined}
-            onClick={() => (view.sideTab === t.key ? view.shutColumn('left', true) : view.showSide(t.key))}
+            aria-pressed={sideTab === t.key}
+            title={sideTab === t.key ? 'Spalte einklappen' : undefined}
+            onClick={() => (sideTab === t.key ? view.shutColumn('left', true) : view.showSide(t.key))}
             className={cn(
               'text-rubric font-bold transition-colors',
               'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent',
-              view.sideTab === t.key ? 'text-ink shadow-tab' : 'text-muted hover:text-ink',
+              sideTab === t.key ? 'text-ink shadow-tab' : 'text-muted hover:text-ink',
             )}
           >
             {t.name}
@@ -38,7 +41,7 @@ export function Sidebar() {
           <FoldButton side="left" onFold={() => view.shutColumn('left', true)} />
         </span>
       </nav>
-      <div className="flex min-h-0 flex-1 flex-col">{view.sideTab === 'blocks' ? <BlockPalette /> : <MasksTab />}</div>
+      <div className="flex min-h-0 flex-1 flex-col">{sideTab === 'blocks' ? <BlockPalette /> : <MasksTab />}</div>
     </aside>
   )
 }
