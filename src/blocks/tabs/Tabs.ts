@@ -1,6 +1,13 @@
 import { html, nothing, type CSSResultGroup, type PropertyValues, type TemplateResult } from 'lit'
 import { state } from 'lit/decorators.js'
-import { BlockElement, CHILD_ADD, defineBlock, type ChildAdd } from '../base/BlockElement'
+import {
+  BlockElement,
+  CHILD_ADD,
+  CHILD_REMOVE,
+  defineBlock,
+  type ChildAdd,
+  type ChildRemove,
+} from '../base/BlockElement'
 import { runEvent } from '../../runtime/actions/runEvent'
 import { REVEAL } from '../../runtime/reveal'
 import { makeOperatorState } from '../list/operatorState'
@@ -109,6 +116,14 @@ export class Tabs extends BlockElement {
     )
   }
 
+  // On the canvas: the open page goes, with its blocks; the one before it
+  // opens. The last page stays: a Reiter without pages is nothing.
+  private removePage(at: number): void {
+    if (this.pages().length < 2) return
+    this.open = Math.max(0, at - 1)
+    this.dispatchEvent(new CustomEvent<ChildRemove>(CHILD_REMOVE, { detail: { child: at } }))
+  }
+
   override connectedCallback(): void {
     super.connectedCallback()
     this.watch.observe(this, { childList: true, subtree: true })
@@ -139,6 +154,7 @@ export class Tabs extends BlockElement {
   override render(): TemplateResult {
     const pages = this.pages()
     const open = this.shown()
+    const editing = this.preview && this.editable
     return html`<div class="frame appearance-${this.appearance}">
       <div class="strip" role="tablist">
         ${pages.map(
@@ -154,10 +170,20 @@ export class Tabs extends BlockElement {
             class="title"
             data-ff-editable
             @dblclick=${(e: MouseEvent) => this.inlineEditChild(e, i, 'name')}
-          >${titleOf(page, i)}</span></button>`,
+          >${titleOf(page, i)}</span></button>${
+            editing && i === open && pages.length > 1
+              ? html`<button
+                type="button"
+                class="drop"
+                aria-label=${`Seite „${titleOf(page, i)}“ löschen`}
+                title="Seite löschen"
+                @click=${() => this.removePage(i)}
+              >${icon('close')}</button>`
+              : nothing
+          }`,
         )}
         ${
-          this.preview && this.editable
+          editing
             ? html`<button type="button" class="add" aria-label="Seite anfügen" title="Seite anfügen" @click=${this.addPage}>
               ${icon('plus')}
             </button>`

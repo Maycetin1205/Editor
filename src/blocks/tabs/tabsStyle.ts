@@ -44,7 +44,8 @@ export const tabsStyle = css`
   .appearance-box .strip { margin: 0 ${unsafeCSS(ROOM)}px; }
 
   .tab,
-  .add {
+  .add,
+  .drop {
     appearance: none;
     flex: none;
     position: relative;
@@ -93,6 +94,17 @@ export const tabsStyle = css`
   }
   .add:hover { color: var(--se-ink); background: var(--se-hover); }
   .add .icon { width: 14px; height: 14px; }
+
+  /* On the canvas, after the open title: takes the page away. */
+  .drop {
+    justify-content: center;
+    width: ${unsafeCSS(PITCH)}px;
+    margin-left: -8px;
+    color: var(--se-faint);
+    border-radius: var(--se-radius-sm);
+  }
+  .drop:hover { color: var(--se-danger); background: var(--se-hover); }
+  .drop .icon { width: 12px; height: 12px; }
 
   .body {
     flex: 1 1 auto;

@@ -8,10 +8,12 @@ import {
   BlockElement,
   CHILD_ADD,
   CHILD_CHANGE,
+  CHILD_REMOVE,
   PROP_CHANGE,
   SPOT_CLICK,
   type ChildAdd,
   type ChildChange,
+  type ChildRemove,
   type PropChange,
   type SpotClick,
 } from '../../blocks/base/BlockElement'
@@ -39,7 +41,8 @@ interface LitElementArgs {
 }
 
 // What a block changes in its children on the canvas: their words (the
-// title of a page of a Reiter) and a new child (a new page), one undo step.
+// title of a page of a Reiter), a new child (a new page, one undo step) and
+// a child taken away (a page with its blocks).
 function listenToChildren(el: HTMLElement, editor: EditorStore, blockRef: RefObject<BlockNode>): () => void {
   const onChange = (e: Event) => {
     const { child, prop, value } = (e as CustomEvent<ChildChange>).detail
@@ -53,11 +56,18 @@ function listenToChildren(el: HTMLElement, editor: EditorStore, blockRef: RefObj
       if (node) for (const [prop, value] of Object.entries(values)) editor.updateProperty(node.id, prop, value)
     })
   }
+  const onRemove = (e: Event) => {
+    const { child } = (e as CustomEvent<ChildRemove>).detail
+    const id = editor.childNodesOf(blockRef.current.id)[child]?.id
+    if (id !== undefined) editor.removeBlock(id)
+  }
   el.addEventListener(CHILD_CHANGE, onChange)
   el.addEventListener(CHILD_ADD, onAdd)
+  el.addEventListener(CHILD_REMOVE, onRemove)
   return () => {
     el.removeEventListener(CHILD_CHANGE, onChange)
     el.removeEventListener(CHILD_ADD, onAdd)
+    el.removeEventListener(CHILD_REMOVE, onRemove)
   }
 }
 

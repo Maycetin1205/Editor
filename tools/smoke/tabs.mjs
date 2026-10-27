@@ -34,7 +34,8 @@ const openAt = async (tabs) =>
   (await heads(tabs).evaluateAll((all) => all.map((b) => b.getAttribute('aria-selected')))).indexOf('true')
 
 // On the canvas: rename the second page in its title, add a third with "+",
-// add a fourth and delete it again, put a field on the second page (undone
+// add a fourth and delete it again with Entf, once more with the cross at
+// its title, put a field on the second page (undone
 // once: the page with the choice opens again), bound to a field of the
 // source. Returns what went wrong.
 export async function pagesWork(page, id) {
@@ -71,6 +72,18 @@ export async function pagesWork(page, id) {
     await page.keyboard.press('Delete')
     await settle(page)
     if ((await pageIds(page, id)).length !== 3) wrong.push('Entf löscht die gewählte Seite nicht')
+  }
+  await choose(page, id)
+  await tabs.locator('button.add').click()
+  await settle(page, 300)
+  const cross = tabs.locator('button.drop')
+  if ((await cross.count()) !== 1) wrong.push(`${await cross.count()} Kreuze zum Löschen statt eines am offenen Titel`)
+  else {
+    await cross.click()
+    await settle(page, 300)
+    const left = await pageIds(page, id)
+    if (left.length !== 3) wrong.push('das Kreuz am Titel löscht die Seite nicht')
+    if ((await openAt(tabs)) !== 2) wrong.push('nach dem Löschen steht nicht die Seite davor offen')
   }
 
   await heads(tabs).nth(1).click()

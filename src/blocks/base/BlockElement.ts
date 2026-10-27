@@ -126,6 +126,12 @@ export interface ChildAdd {
   values: Readonly<Record<string, unknown>>
 }
 
+export const CHILD_REMOVE = 'ff-child-remove'
+
+export interface ChildRemove {
+  child: number
+}
+
 export const SPOT_CLICK = 'ff-spot-click'
 
 export type SpotClick =
