@@ -37,6 +37,12 @@ import { TABLE_PART } from '../list/parts'
 
 export interface Capture extends CaptureValues, SourceValue {}
 
+// The capture block: a table whose rows the operator types in. Below the
+// booked rows stand the captured rows and the typing row (body.ts); the
+// ledger keeps them all (ledger.ts). A captured row runs the event "Zeile
+// erfasst" (rowCaptured.ts), whose action chain writes the rows and tells the
+// block how it went (rowWrites, rowFailed, runDone).
+
 export class Capture extends BlockElement implements CaptureCarrier, ChangeCarrier, SentRowsElement, RunReportElement {
   static readonly type = 'capture'
   static readonly tag = 'ff-capture'
@@ -120,6 +126,8 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
       }),
   })
 
+  // What an action chain takes to write: the captured rows not yet on their
+  // way, and the changes to booked rows.
   get capturedRows(): readonly (readonly string[])[] {
     return this._ledger.captured.pendingMarks().map((v) => v.values)
   }

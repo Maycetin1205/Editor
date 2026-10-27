@@ -1,3 +1,5 @@
+// Texts of booked rows by record key and column: the changes typed and those
+// sent. A record without a key cannot be changed.
 export type Cells = Map<string, Map<number, string>>
 
 export function cellIn(cells: Cells, record: string, column: number): string | undefined {

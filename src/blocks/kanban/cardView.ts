@@ -96,7 +96,7 @@ function cornerTpl(
 // fixed text; a text before place or note leads them in.
 function footWords(
   column: KanbanColumn,
-  spot: BoardCell,
+  cell: BoardCell,
   look: Card<CardSpot>,
   values: CardValues,
 ): TemplateResult | string | typeof nothing {
@@ -106,7 +106,7 @@ function footWords(
     case 'text':
       return lead === '' ? nothing : lead
     case 'place':
-      return led(column.places[spot.place]?.name ?? column.heading)
+      return led(column.places[cell.place]?.name ?? column.heading)
     case 'note':
       if (values !== null && (values.note ?? '').trim() === '') return nothing
       return look.shows('note') ? led(look.spot('note', 'note')) : nothing
@@ -117,9 +117,9 @@ function footWords(
 
 // A choice of the places of the next column: the card moves there without
 // being dragged.
-function pickTpl(el: KanbanElement, spot: BoardCell, card: CardData | null): TemplateResult | typeof nothing {
-  const next = el.columns[spot.column + 1]
-  if (!el.columns[spot.column]?.placePick || !next) return nothing
+function pickTpl(el: KanbanElement, cell: BoardCell, card: CardData | null): TemplateResult | typeof nothing {
+  const next = el.columns[cell.column + 1]
+  if (!el.columns[cell.column]?.placePick || !next) return nothing
   return html`<select
     class="pick"
     draggable="false"
@@ -132,7 +132,7 @@ function pickTpl(el: KanbanElement, spot: BoardCell, card: CardData | null): Tem
       const select = e.target as HTMLSelectElement
       const chosen = select.value
       select.value = ''
-      if (card !== null && chosen !== '') el.board.pick(card, { column: spot.column + 1, place: Number(chosen) })
+      if (card !== null && chosen !== '') el.board.pick(card, { column: cell.column + 1, place: Number(chosen) })
     }}
   >
     <option value="" selected>${next.heading} …</option>
@@ -142,16 +142,16 @@ function pickTpl(el: KanbanElement, spot: BoardCell, card: CardData | null): Tem
 
 function footTpl(
   el: KanbanElement,
-  spot: BoardCell,
+  cell: BoardCell,
   card: CardData | null,
   look: Card<CardSpot>,
   values: CardValues,
 ): TemplateResult | typeof nothing {
-  const column = el.columns[spot.column]
-  const button = buttonTpl(el, spot.column, card)
-  const pick = pickTpl(el, spot, card)
+  const column = el.columns[cell.column]
+  const button = buttonTpl(el, cell.column, card)
+  const pick = pickTpl(el, cell, card)
   if (!column || (column.foot === 'none' && pick === nothing)) return button
-  const words = footWords(column, spot, look, values)
+  const words = footWords(column, cell, look, values)
   if (words === nothing && pick === nothing && button === nothing) return nothing
   return html`<div class="foot">
     <span class="foot-text">${words}</span>
@@ -164,11 +164,11 @@ function footTpl(
 // its spots.
 export function cardContent(
   el: KanbanElement,
-  spot: BoardCell,
+  cell: BoardCell,
   card: CardData | null,
   until: Until | null,
 ): TemplateResult {
-  const column = el.columns[spot.column]
+  const column = el.columns[cell.column]
   const values: CardValues = card === null ? null : card.values
   const look = el.cardLook(values)
   const { shows, spot: spotTpl, avatar } = look
@@ -198,10 +198,10 @@ export function cardContent(
     ${shows('text') ? spotTpl('text', 'text') : nothing}
     ${shows('date') ? spotTpl('date', 'date') : nothing}
     ${until ? html`<span class="until${until.late ? ' late' : ''}">${until.text}</span>` : nothing}
-    ${footTpl(el, spot, card, look, values)}`
+    ${footTpl(el, cell, card, look, values)}`
 }
 
-export function cardTpl(el: KanbanElement, card: CardData, spot: BoardCell, until: Until | null): TemplateResult {
+export function cardTpl(el: KanbanElement, card: CardData, cell: BoardCell, until: Until | null): TemplateResult {
   const board = el.board
   const chosen = card.key === board.chosen
   return html`<div
@@ -218,5 +218,5 @@ export function cardTpl(el: KanbanElement, card: CardData, spot: BoardCell, unti
     }}
     @dragstart=${(e: DragEvent) => board.startDrag(e, card)}
     @dragend=${() => board.endDrag()}
-  >${cardContent(el, spot, card, until)}</div>`
+  >${cardContent(el, cell, card, until)}</div>`
 }

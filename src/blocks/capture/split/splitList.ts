@@ -8,6 +8,10 @@ import { alignSuggestionsFrom } from '../../lookup/suggestionList'
 import { splitColumnText, splitTone } from './splitRecords'
 import { SPLIT_DECIMALS, type SplitState } from './splitState'
 
+// The list that opens under the typing row to split an amount over records
+// of a helper source: a tick and an amount per record, and what is left to
+// split in the head.
+
 interface SplitAct {
   key: (e: KeyboardEvent) => void
   toggle: (index: number) => void
@@ -22,6 +26,7 @@ const AMOUNT_WIDTH = 84
 
 const classes = (...names: (string | false | undefined)[]): string => names.filter((n) => n).join(' ')
 
+// Scrolls the marked row into the grid, below its sticky column heads.
 function keepInSight(el: Element | undefined): void {
   const grid = el?.closest('.split-grid')
   if (!(el instanceof HTMLElement) || !(grid instanceof HTMLElement)) return
@@ -32,6 +37,9 @@ function keepInSight(el: Element | undefined): void {
   else if (row.bottom > room.bottom) grid.scrollTop += row.bottom - room.bottom
 }
 
+// The list reaches right from its cell or, without room there, left, and
+// stays inside the table; once more after the first frame, when its width is
+// known.
 function placed(el: Element | undefined): void {
   if (!(el instanceof HTMLElement)) return
   alignSuggestionsFrom(el)
@@ -143,6 +151,7 @@ export function splitListTpl(state: SplitState, amountTitle: string, act: SplitA
     @keydown=${act.key}
     @focusout=${act.leave}
     @mousedown=${(e: MouseEvent) => {
+      // The list keeps the focus, so a click does not leave the row.
       e.preventDefault()
       ;(e.currentTarget as HTMLElement).focus()
     }}

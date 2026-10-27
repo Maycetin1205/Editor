@@ -15,7 +15,13 @@ import { bringBack } from './ledger/capturing'
 import type { RowState } from './ledger/outbound'
 import type { WorkingRow } from './workingRow'
 
-function typingCellTpl(ledger: CaptureLedger, rawIndex: number, slot: number, column: Column): TemplateResult {
+// What the capture adds to the table: the cells of booked rows that can be
+// changed in place, and below the booked rows the captured rows and the
+// typing row.
+
+// A cell of a booked row the operator may change: its input shows the booked
+// value, or the change typed and not yet written.
+function changeableCellTpl(ledger: CaptureLedger, rawIndex: number, slot: number, column: Column): TemplateResult {
   const booked = ledger.booked
   return inputAnchorTpl(
     {
@@ -83,6 +89,9 @@ function greyParts(layout: RowLayout, slots: readonly number[], values: readonly
 
 const TYPING = -1
 
+// A captured row, not yet booked. A click chooses it for the blocks that
+// follow the capture; a double click takes it back into the typing row while
+// it is not on its way; the cross takes it away.
 function capturedRowTpl(placement: CapturedPlacement, act: CapturedAct, rowsIndex: number): TemplateResult {
   const values = placement.captured[rowsIndex] ?? []
   const state = placement.capturedState(rowsIndex)
@@ -204,6 +213,7 @@ interface DecorationPlacement {
   ledger: CaptureLedger
 }
 
+// Per booked row: its write status, and an input in each changeable cell.
 export function captureDecoration(placement: DecorationPlacement): (rawIndex: number) => RowDecoration {
   return (rawIndex) => {
     const state = placement.ledger.booked.statusOf(rawIndex)
@@ -211,7 +221,9 @@ export function captureDecoration(placement: DecorationPlacement): (rawIndex: nu
       ...WITHOUT_DECORATION,
       status: state.status === 'booked' ? '' : state.status,
       cell: (slot, column) =>
-        placement.typable && columnEditable(column) ? typingCellTpl(placement.ledger, rawIndex, slot, column) : null,
+        placement.typable && columnEditable(column)
+          ? changeableCellTpl(placement.ledger, rawIndex, slot, column)
+          : null,
     }
   }
 }

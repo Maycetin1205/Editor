@@ -11,7 +11,7 @@ export interface CardData {
 
   record: string
 
-  spot: BoardCell
+  cell: BoardCell
 
   values: Readonly<Record<string, string>>
 }
@@ -22,9 +22,11 @@ interface BoardElement extends HTMLElement {
   others: string
   cardValues: (row: unknown, read: DataPreamble['read']) => Record<string, string>
   requestUpdate: () => void
-  arrived: (card: CardData, spot: BoardCell) => void
+  arrived: (card: CardData, cell: BoardCell) => void
 }
 
+// The cards of a board and what the operator does with them: choose one,
+// drag it onto a place, or pick the next place from its menu.
 export class Board {
   cards: readonly CardData[] = []
 
@@ -33,6 +35,7 @@ export class Board {
   target: BoardCell | null = null
   writes = false
 
+  // Cards shown at the place they were dropped on, ahead of their rows.
   private readonly moved = new Map<string, BoardCell>()
 
   private readonly el: BoardElement
@@ -42,7 +45,7 @@ export class Board {
   }
 
   cellOf(card: CardData): BoardCell {
-    return this.moved.get(card.key) ?? card.spot
+    return this.moved.get(card.key) ?? card.cell
   }
 
   // The cards a search field of the mask leaves; the summary counts all.
@@ -50,24 +53,24 @@ export class Board {
     return matchesSearch(Object.values(card.values))
   }
 
-  cardsAt(spot: BoardCell): CardData[] {
-    return this.cards.filter((card) => sameCell(this.cellOf(card), spot) && this.shown(card))
+  cardsAt(cell: BoardCell): CardData[] {
+    return this.cards.filter((card) => sameCell(this.cellOf(card), cell) && this.shown(card))
   }
 
   cardsIn(column: number): CardData[] {
     return this.cards.filter((card) => this.cellOf(card).column === column && this.shown(card))
   }
 
-  allAt(spot: BoardCell): CardData[] {
-    return this.cards.filter((card) => sameCell(this.cellOf(card), spot))
+  allAt(cell: BoardCell): CardData[] {
+    return this.cards.filter((card) => sameCell(this.cellOf(card), cell))
   }
 
   allIn(column: number): CardData[] {
     return this.cards.filter((card) => this.cellOf(card).column === column)
   }
 
-  isTarget(spot: BoardCell): boolean {
-    return this.target !== null && sameCell(this.target, spot)
+  isTarget(cell: BoardCell): boolean {
+    return this.target !== null && sameCell(this.target, cell)
   }
 
   hydrate(delivery: boolean): void {
@@ -84,15 +87,15 @@ export class Board {
     const keys = rowKeys(preamble.source, preamble.rows)
     const hideOthers = el.others === 'hide'
     this.cards = preamble.rows.flatMap((row, i) => {
-      const spot = cellOf(columns, field, row, hideOthers)
-      return spot === null
+      const cell = cellOf(columns, field, row, hideOthers)
+      return cell === null
         ? []
         : [
             {
               key: keys[i],
               row,
               record: recordOf(preamble.source, row),
-              spot,
+              cell,
               values: el.cardValues(row, preamble.read),
             },
           ]
@@ -132,13 +135,13 @@ export class Board {
     this.el.requestUpdate()
   }
 
-  over(event: DragEvent, spot: BoardCell): void {
+  over(event: DragEvent, cell: BoardCell): void {
     if (this.dragging === '' || this.writes) return
     event.preventDefault()
     event.stopPropagation()
     if (event.dataTransfer) event.dataTransfer.dropEffect = 'move'
-    if (this.isTarget(spot)) return
-    this.target = spot
+    if (this.isTarget(cell)) return
+    this.target = cell
     this.el.requestUpdate()
   }
 
@@ -158,32 +161,35 @@ export class Board {
   }
 
   // A place of the next column, chosen on the card.
-  pick(card: CardData, spot: BoardCell): void {
-    void this.move(card, spot)
+  pick(card: CardData, cell: BoardCell): void {
+    void this.move(card, cell)
   }
 
   press(card: CardData): void {
     void runEvent(this.el, 'onCardButton', { PINDEX: card.record })
   }
 
-  drop(event: DragEvent, spot: BoardCell): void {
+  drop(event: DragEvent, cell: BoardCell): void {
     const card = this.cards.find((c) => c.key === this.dragging)
     this.endDrag()
     if (!card) return
     event.preventDefault()
     event.stopPropagation()
-    void this.move(card, spot)
+    void this.move(card, cell)
   }
 
-  private async move(card: CardData, spot: BoardCell): Promise<void> {
+  // The card shows at its new place at once; the action chain of the drop
+  // writes it. Refused or failed, it goes back; written, it shows where its
+  // row says; unconfirmed, it stays where it was dropped until rows come.
+  private async move(card: CardData, cell: BoardCell): Promise<void> {
     const columns = this.el.columns
-    const column = columns[spot.column]
-    const place = column?.places[spot.place]
+    const column = columns[cell.column]
+    const place = column?.places[cell.place]
     const from = this.cellOf(card)
-    if (this.writes || !column || !place || sameCell(from, spot)) return
+    if (this.writes || !column || !place || sameCell(from, cell)) return
     const fromColumn = columns[from.column]
     const fromPlace = placeAt(columns, from)
-    this.moved.set(card.key, spot)
+    this.moved.set(card.key, cell)
     this.writes = true
     this.el.requestUpdate()
     const result = await runEvent(this.el, 'onCardDrop', {
@@ -195,7 +201,7 @@ export class Board {
     const back = !result.written || (result.state !== 'ran' && result.state !== 'unconfirmed')
     if (back || result.state === 'ran') this.moved.delete(card.key)
     // The column's notice only once the chain wrote and nothing is left unconfirmed.
-    if (result.written && result.state === 'ran') this.el.arrived(card, spot)
+    if (result.written && result.state === 'ran') this.el.arrived(card, cell)
     this.el.requestUpdate()
   }
 }

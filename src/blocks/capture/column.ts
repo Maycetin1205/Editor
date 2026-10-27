@@ -11,16 +11,26 @@ import { listProperty, type Property } from '../../core/block/property'
 import { isUnread } from '../../core/unread'
 import { coerceColumns, COLUMNS_BINDING, defaultColumns, type Column } from '../parts/column'
 
+// A column of the capture: a column of the table, plus what the typing row
+// does with it.
 export type CaptureColumn = Column & {
+  // The operator may type into the cell; on unless set, and only for a field
+  // of the capture's own source.
   editable?: boolean
 
+  // The row is not captured while the cell is empty.
   required?: boolean
 
+  // The column stands in the second, grey line, under the column whose key
+  // `under` names; without one it takes the next free place.
   subline?: boolean
   under?: string
 
+  // A field of a helper source: typing in the cell looks up a record of that
+  // source by this field, in place of the column's own field.
   fillField?: string
 
+  // The lookup window of the cell: its columns and its size.
   windowColumns?: Column[]
 
   windowWidth?: number
@@ -83,6 +93,8 @@ const SUBLINE: EntrySwitch<CaptureColumn> = {
     withEntryValue(withEntryValue(column, 'subline', on), 'under', on === true ? column.under : undefined),
 }
 
+// Which column of the grey line stands under which column of the row, by
+// slot: those with an `under` first, the rest in the free places from the left.
 export function greyLine(columns: readonly CaptureColumn[], shown: readonly number[]): Map<number, number> {
   const row = shown.filter((slot) => columns[slot]?.subline !== true)
   const under = new Map<number, number>()
@@ -101,6 +113,8 @@ export function greyLine(columns: readonly CaptureColumn[], shown: readonly numb
   return under
 }
 
+// The column at index moves under the column with the key; the column that
+// stood there takes its old place.
 function placedUnder(columns: readonly CaptureColumn[], index: number, key: string): CaptureColumn[] | null {
   const target = columns.findIndex((c) => c.key === key && c.subline !== true)
   if (columns[index]?.subline !== true || target === -1) return null

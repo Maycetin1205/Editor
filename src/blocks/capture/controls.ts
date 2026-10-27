@@ -21,6 +21,9 @@ import { dropAskTpl } from './dropAsk'
 
 import '../table/Table'
 
+// The typing row on the page: what it shows, and what typing, its keys and
+// its lookup window do. The jobs themselves live in row/ and ledger/.
+
 interface CaptureRowPlacement {
   ledger: CaptureLedger
 
@@ -62,6 +65,8 @@ function enter(placement: CaptureRowPlacement, index: number): void {
   if (enterFrom(placement.ledger, index) === 'window') openWindow(placement, index)
 }
 
+// What a key in a cell does, as the suggestion list and the cell decide it.
+// keep is false where the key did nothing in the row; the browser then has it.
 function key(placement: CaptureRowPlacement, index: number, e: KeyboardEvent): void {
   const ledger = placement.ledger
   const row = ledger.row
@@ -98,6 +103,8 @@ function key(placement: CaptureRowPlacement, index: number, e: KeyboardEvent): v
   if (keep) e.preventDefault()
 }
 
+// The faint words in an empty cell: a linked source still loading, the title
+// of a required column, else the hint of the capture in the first free cell.
 function placeholders(
   block: HTMLElement,
   view: ColumnView,

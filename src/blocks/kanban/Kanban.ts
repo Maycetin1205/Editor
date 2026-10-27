@@ -85,10 +85,10 @@ export class Kanban extends BlockElement {
   }
 
   // A card came to a column: its notice shows for a moment.
-  arrived(card: CardData, spot: BoardCell): void {
-    const column = this.columns[spot.column]
+  arrived(card: CardData, cell: BoardCell): void {
+    const column = this.columns[cell.column]
     if (!column || column.notice.trim() === '') return
-    this.message = noticeText(column.notice, card, column, column.places[spot.place])
+    this.message = noticeText(column.notice, card, column, column.places[cell.place])
     clearTimeout(this.messageTimer)
     this.messageTimer = setTimeout(() => {
       this.message = ''
