@@ -1,9 +1,9 @@
 import { splitBinding } from '../../core/block/binding'
 import { numberText } from '../../core/data/number'
 
-export const CURRENT_SCHEMA_VERSION = 39
+export const CURRENT_SCHEMA_VERSION = 40
 
-const LIFTABLE = [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38]
+const LIFTABLE = [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -403,6 +403,27 @@ function liftTo39(tree: unknown): void {
   }
 }
 
+// The area of 26.10.2026: its five forms become three kinds and a switch.
+const AREA_KINDS_40: Readonly<Record<string, string>> = {
+  plain: 'plain',
+  box: 'card',
+  headed: 'headed',
+  fold: 'headed',
+  band: 'card',
+}
+
+function liftTo40(tree: unknown): void {
+  if (!isPlainObject(tree)) return
+  for (const node of Object.values(tree)) {
+    if (!isPlainObject(node) || node.type !== 'area' || !isPlainObject(node.values)) continue
+    const values = node.values
+    const appearance = String(values.appearance ?? 'box')
+    values.kind = AREA_KINDS_40[appearance] ?? 'headed'
+    if (appearance === 'fold') values.foldable = true
+    delete values.appearance
+  }
+}
+
 export function liftState(raw: unknown, knownSources: readonly unknown[] = []): Record<string, unknown> | null {
   if (!isPlainObject(raw) || typeof raw.schemaVersion !== 'number') return null
   if (raw.schemaVersion !== CURRENT_SCHEMA_VERSION && !LIFTABLE.includes(raw.schemaVersion)) return null
@@ -428,6 +449,7 @@ export function liftState(raw: unknown, knownSources: readonly unknown[] = []): 
   }
   if (raw.schemaVersion < 38) liftTo38(lifted.tree)
   if (raw.schemaVersion < 39) liftTo39(lifted.tree)
+  if (raw.schemaVersion < 40) liftTo40(lifted.tree)
   lifted.schemaVersion = CURRENT_SCHEMA_VERSION
   return lifted
 }

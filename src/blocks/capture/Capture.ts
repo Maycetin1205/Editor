@@ -59,6 +59,11 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
 
   @property({ attribute: false }) rawRows: unknown[] = []
 
+  // How many booked rows the capture holds, for an area that counts them.
+  get rowCount(): number {
+    return this.rawRows.length
+  }
+
   readonly paging = false
 
   private readonly _working = new WorkingRow(this)

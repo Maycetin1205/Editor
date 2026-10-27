@@ -27,6 +27,11 @@ export class DataList extends BlockElement {
 
   @state() private items: readonly Item[] = []
 
+  // How many rows the list holds, for an area that counts them in its head.
+  get rowCount(): number {
+    return this.items.length
+  }
+
   @state() private chosen: ReadonlySet<string> = new Set()
 
   hydrate(): void {

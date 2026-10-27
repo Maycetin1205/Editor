@@ -5,7 +5,8 @@ import { MASK_ROOT_CLASS } from '../../core/block/frameFit'
 // the rows of its head; the rows it gives up close, when no other block of its
 // grid holds them, and every block below moves up by as many rows. An open
 // area whose own grid closed rows gives up as many at its foot, so a fold
-// inside a fold reaches the sheet.
+// inside a fold reaches the sheet. An area that gives up all its rows (set to
+// hide while it is empty) leaves the grid, hidden, and comes back the same way.
 
 export interface FoldHost extends HTMLElement {
   foldCut(rows: number): number
@@ -55,7 +56,7 @@ export function closedRowsIn(container: Element): number {
     if (!(el instanceof HTMLElement)) continue
     const at = rowsOf(el)
     if (!at) continue
-    const cut = isFoldHost(el) ? Math.min(Math.max(0, el.foldCut(at.h)), at.h - 1) : 0
+    const cut = isFoldHost(el) ? Math.min(Math.max(0, el.foldCut(at.h)), at.h) : 0
     items.push({ el, at, cut })
   }
 
@@ -68,6 +69,9 @@ export function closedRowsIn(container: Element): number {
   const closed = [...held].filter((r) => !kept.has(r)).sort((a, b) => a - b)
 
   for (const { el, at, cut } of items) {
+    const gone = cut === at.h
+    if (isFoldHost(el)) el.toggleAttribute('hidden', gone)
+    if (gone) continue
     const y = at.y - closed.filter((r) => r < at.y).length
     const was = currentY(el, at.y)
     el.style.gridRowStart = String(y + 1)

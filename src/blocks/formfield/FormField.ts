@@ -1,6 +1,7 @@
 import { html, nothing, type CSSResultGroup, type PropertyValues, type TemplateResult } from 'lit'
 import { classMap } from 'lit/directives/class-map.js'
 import { live } from 'lit/directives/live.js'
+import { LIST_INSIDE_ATTR } from '../area/areaStyle'
 import { BlockElement, defineBlock } from '../base/BlockElement'
 import { noticeSignTpl } from '../base/notice'
 import { reportsHeight } from '../base/heightReport'
@@ -227,7 +228,11 @@ export class FormField extends BlockElement implements ValueCarrier {
   protected override updated(changed: PropertyValues): void {
     super.updated(changed)
 
-    this.toggleAttribute('data-ff-list', this._lookup.hangsBelow)
+    const open = this._lookup.hangsBelow
+    if (open === this.hasAttribute('data-ff-list')) return
+    this.toggleAttribute('data-ff-list', open)
+    // The areas around stop cutting at their edge while the list hangs out.
+    for (let at = this.parentElement; at; at = at.parentElement) at.toggleAttribute(LIST_INSIDE_ATTR, open)
   }
 
   private checkboxTpl(bound: boolean): TemplateResult {
