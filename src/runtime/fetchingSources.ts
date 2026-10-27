@@ -7,6 +7,7 @@ import { SOURCE_PROP, SOURCE_PROPERTY } from '../core/block/sourceProperty'
 import { BLOCK_ID_ATTR } from '../core/data/actions'
 import type { RuntimeSource } from '../core/data/dataSources'
 import { DELIVERY_KINDS, deliveryAdapter } from '../core/data/deliveries/deliveries'
+import { extraSourcesProperty } from '../core/data/extraSources'
 import { extraSourcesOf } from './foreignSources'
 import { warn } from './log'
 import { loadEnded, loadStarted } from './notice'
@@ -18,6 +19,8 @@ const state = {
   lastPrint: new Map<string, string>(),
   silentLoaded: new Map<string, Set<string>>(),
   running: new Map<string, Promise<void>>(),
+  // Sources no block shows before a selection: fetched when first needed.
+  deferred: new Set<string>(),
   wired: false,
 }
 
@@ -97,12 +100,14 @@ function loadOnChoice(source: RuntimeSource): void {
 }
 
 export function sourceSettled(sourceId: string): Promise<void> {
+  if (state.deferred.has(sourceId)) return ensureSource(sourceId)
   const source = maskHost().source(sourceId)
   if (source) loadOnChoice(source)
   return state.running.get(sourceId) ?? Promise.resolve()
 }
 
 function checkFetchingSources(byControls: boolean): void {
+  loadNeeded()
   const defsPerTag = defsWithRecordChoice()
   const host = maskHost()
   for (const source of host.sources()) {
@@ -139,14 +144,73 @@ function load(source: RuntimeSource, giverRow: unknown): void {
   state.running.set(source.id, running)
 }
 
+const EXTRA_SOURCES_ATTR = extraSourcesProperty.attribute
+
+function blocksInMask(): HTMLElement[] {
+  if (typeof document === 'undefined') return []
+  return Array.from(document.getElementsByTagName('*')).filter(
+    (el): el is HTMLElement => el instanceof HTMLElement && el.tagName.startsWith('FF-'),
+  )
+}
+
+// A block names a source by its own source or a lookup source; the extra
+// sources of a capture do not count as naming.
+function namesSource(el: HTMLElement, sourceId: string): boolean {
+  return Array.from(el.attributes).some(
+    (a) => a.name !== EXTRA_SOURCES_ATTR && a.name.endsWith('source') && a.value === sourceId,
+  )
+}
+
+function blocksNaming(sourceId: string): HTMLElement[] {
+  return blocksInMask().filter((el) => namesSource(el, sourceId))
+}
+
+// A source may wait when no block shows it before a selection: it serves a
+// capture as an extra source, or every block naming it follows a selection.
+function mayWait(source: RuntimeSource): boolean {
+  const named = blocksNaming(source.id)
+  const helps = blocksInMask().some(
+    (el) => !namesSource(el, source.id) && extraSourcesOf(el).some((extra) => extra.sourceId === source.id),
+  )
+  if (!helps && named.length === 0) return false
+  return named.every((el) => selectionGiverOf(el).length > 0)
+}
+
+// A waiting source is needed once a block naming it has its selection.
+function neededNow(sourceId: string): boolean {
+  return blocksNaming(sourceId).some((el) =>
+    selectionGiverOf(el).some((giverId) => selectionFor(giverId) !== undefined),
+  )
+}
+
+function loadNeeded(): void {
+  for (const sourceId of [...state.deferred]) {
+    if (neededNow(sourceId)) void ensureSource(sourceId)
+  }
+}
+
+// Fetches a source that waited; a fetch already running is returned instead.
+export function ensureSource(sourceId: string): Promise<void> {
+  const running = state.running.get(sourceId)
+  if (running) return running
+  const source = maskHost().source(sourceId)
+  if (!source || deliveryAdapter(source.delivery.kind).fetchOn !== 'delivery') return Promise.resolve()
+  state.deferred.delete(sourceId)
+  load(source, undefined)
+  return state.running.get(sourceId) ?? Promise.resolve()
+}
+
 function fetchAfterDelivery(): void {
   const sources = maskHost().sources()
   for (const kind of DELIVERY_KINDS) {
     if (deliveryAdapter(kind).fetchOn !== 'delivery') continue
     for (const source of sources) {
-      if (source.delivery.kind === kind) load(source, undefined)
+      if (source.delivery.kind !== kind) continue
+      if (mayWait(source)) state.deferred.add(source.id)
+      else load(source, undefined)
     }
   }
+  loadNeeded()
 }
 
 export function wireFetchingSources(): void {

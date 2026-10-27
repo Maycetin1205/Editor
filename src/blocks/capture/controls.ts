@@ -1,6 +1,7 @@
 import type { TemplateResult } from 'lit'
 import { readDeclared } from '../../core/block/registry'
-import { openLookup } from '../lookup/lookup'
+import { ensureSource } from '../../runtime/fetchingSources'
+import { openLookup, sourceCame } from '../lookup/lookup'
 import { keyOf } from '../lookup/suggestionState'
 import type { ColumnView } from '../parts/column'
 import type { RowLayout } from '../parts/cell'
@@ -11,6 +12,7 @@ import { enterFrom, jumpFrom, moveDown, moveUp } from './ledger/moves'
 import { keyIntent } from './keys'
 import { captureProperties } from './properties'
 import { rowView, waitingSources } from './row/cellValues'
+import { targetIn } from './row/context'
 import { adopt } from './row/linkedRecords'
 import { lookupAt, windowColumnsAt } from './row/lookupSpot'
 import { captureRowTpl } from './row/rowTpl'
@@ -33,10 +35,25 @@ interface CaptureRowPlacement {
   dropAskAbove: boolean
 }
 
+// A window whose source waited: the source is fetched now, and the window
+// opens once its rows are there, as long as the row is still the same.
+function fetchForWindow(placement: CaptureRowPlacement, index: number): void {
+  const ledger = placement.ledger
+  const row = ledger.row
+  const sourceId = targetIn(row.host.context(), index).sourceId
+  if (sourceId === '' || sourceCame(sourceId)) return
+  void ensureSource(sourceId).then(() => {
+    if (ledger.row === row && lookupAt(row, index) !== null) openWindow(placement, index)
+  })
+}
+
 function openWindow(placement: CaptureRowPlacement, index: number): void {
   const ledger = placement.ledger
   const spot = lookupAt(ledger.row, index)
-  if (spot === null) return
+  if (spot === null) {
+    fetchForWindow(placement, index)
+    return
+  }
   openLookup({
     el: placement.block,
     spot: spot.spot,

@@ -1,0 +1,401 @@
+<title>Feld heute und neu</title>
+<meta name="claude:viewport-fit-sides" content="cover" />
+<style>
+  /* Layout: Kopf mit Umschaltern, darunter zwei Blätter nebeneinander (heute, neu), die bei
+     wenig Platz untereinander stehen. Werte aus src/design/mask.css und formFieldStyle.ts des
+     Aufbau-Editors; die Maske ist bewusst nur hell, darum auch diese Seite. */
+  :root {
+    color-scheme: light;
+    --se-bg: #F3F3F3;
+    --se-panel: #FFFFFF;
+    --se-panel-2: #FAFAFA;
+    --se-ink: #1B1B1B;
+    --se-ink-2: #5C5C5C;
+    --se-faint: #8A8A8A;
+    --se-line: #E3E3E3;
+    --se-line-soft: #EDEDED;
+    --se-line-strong: #C8C8C8;
+    --se-box-bottom: #8A8A8A;
+    --se-accent: #0067C0;
+    --se-accent-soft: #EAF3FB;
+    --se-read-ground: #F7F7F7;
+    --se-hover: #F2F2F2;
+    --se-success: #0F7B0F;
+    --se-warning-soft: #FFF4CE;
+    --se-danger: #C42B1C;
+    --se-danger-tint: #FDE7E9;
+    --se-neutral-soft: #EBEBEB;
+    --se-font: "Segoe UI Variable Text", "Segoe UI", Arial, sans-serif;
+    --se-radius: 4px;
+    --se-radius-card: 8px;
+    --se-edge: inset 0 0 0 1px var(--se-line);
+    --se-move: 120ms;
+  }
+  * { box-sizing: border-box; }
+  html { height: 100%; }
+  body {
+    margin: 0; background: var(--se-bg); color: var(--se-ink); font-family: var(--se-font); font-size: 13px; line-height: 1.4;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 32px;
+  }
+  .page { max-width: 1360px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  .intro { display: flex; flex-direction: column; gap: 4px; max-width: 70ch; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--se-ink-2); }
+  h1 { margin: 0; font-size: 20px; font-weight: 600; line-height: 1.25; text-wrap: balance; }
+  .intro p { margin: 0; color: var(--se-ink-2); }
+
+  .controls {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center;
+    padding: 12px 16px; background: var(--se-panel); border-radius: var(--se-radius-card); box-shadow: var(--se-edge);
+  }
+  .group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .group-name { font-size: 12px; color: var(--se-ink-2); min-width: 48px; }
+  .segment { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 2px; background: var(--se-neutral-soft); border-radius: var(--se-radius); }
+  .segment button {
+    height: 24px; padding: 0 10px; border: 0; border-radius: 3px; background: transparent; color: var(--se-ink-2);
+    font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: background-color var(--se-move), color var(--se-move);
+  }
+  .segment button:hover { background: rgba(255,255,255,.6); color: var(--se-ink); }
+  .segment button[aria-pressed="true"] { background: var(--se-panel); color: var(--se-ink); box-shadow: 0 0 0 1px var(--se-line-strong); }
+  .segment button:focus-visible { outline: 2px solid var(--se-ink); outline-offset: 1px; }
+  .state-note { margin: 0; padding: 0 2px; color: var(--se-ink-2); max-width: 90ch; min-height: 1.4em; }
+
+  .panes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  @media (max-width: 1040px) { .panes { grid-template-columns: minmax(0, 1fr); } }
+  .pane { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .pane-head { display: flex; align-items: baseline; gap: 10px; padding: 0 2px; }
+  .pane-head h2 { margin: 0; font-size: 14px; font-weight: 600; }
+  .pane-head span { font-size: 12px; color: var(--se-ink-2); }
+
+  .sheet { position: relative; background: var(--se-bg); border-radius: var(--se-radius-card); box-shadow: var(--se-edge); padding: 20px 24px; min-height: 380px; }
+  .card { position: relative; height: 296px; background: var(--se-panel); border-radius: var(--se-radius-card); box-shadow: var(--se-edge); }
+  .head { display: flex; align-items: center; gap: 8px; height: 36px; margin: 0 16px; border-bottom: 1px solid var(--se-line); color: var(--se-accent); font-size: 14px; font-weight: 600; }
+  .body { padding: 12px 16px; }
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 24px; }
+  @container (max-width: 500px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+  .body { container-type: inline-size; }
+  .col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+  /* Das Feld, wie formFieldStyle.ts es zeichnet: 14 Punkte Beschriftung, 2 Lücke, 28 Kasten. */
+  .field { position: relative; display: grid; grid-template-rows: 14px 28px; row-gap: 2px; height: 44px; min-width: 0; }
+  .label { display: flex; align-items: baseline; gap: 4px; color: var(--se-ink-2); font-size: 12px; line-height: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .label .star { color: var(--se-danger); }
+  .label .msg { color: var(--se-danger); overflow: hidden; text-overflow: ellipsis; }
+  .box {
+    position: relative; height: 28px; display: flex; align-items: center; gap: 8px; padding: 0 10px; background: var(--se-panel);
+    border: 1px solid var(--se-line-strong); border-bottom-color: var(--se-box-bottom); border-radius: var(--se-radius); color: var(--se-ink);
+    cursor: text; transition: background-color var(--se-move);
+  }
+  .box:hover { background: var(--se-hover); }
+  .box .val { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+  .box .val.num { text-align: right; }
+  .box .val.ph { color: var(--se-faint); }
+  .box .unit { flex: none; color: var(--se-ink-2); font-size: 12px; }
+  .box .sign { flex: none; display: grid; color: var(--se-faint); }
+  .box .sign svg { width: 16px; height: 16px; fill: currentColor; }
+  .box .lupe { flex: none; width: 32px; height: 24px; margin-right: -8px; display: grid; place-items: center; border: 0; border-radius: var(--se-radius); background: none; color: var(--se-faint); cursor: pointer; }
+  .box .lupe:hover { background: var(--se-neutral-soft); color: var(--se-ink); }
+  .box .lupe svg { width: 16px; height: 16px; fill: currentColor; }
+  /* Mit dem Fokus: Akzentrand und 2 Punkte Unterkante. */
+  .field.focus .box { background: var(--se-panel); border-color: var(--se-accent); box-shadow: inset 0 -1px 0 var(--se-accent); }
+  .field.focus .box .val::after { content: ''; display: inline-block; width: 1px; height: 15px; margin-left: 1px; background: var(--se-ink); vertical-align: -3px; }
+  /* Neu: Fehler an der Stelle, rote Unterkante, der Satz in der Beschriftungszeile, nichts rutscht. */
+  .field.error .box { border-bottom-color: var(--se-danger); box-shadow: inset 0 -2px 0 var(--se-danger); }
+  /* Neu: Lesefeld (fehlendes Recht): grauer Kasten, zweite Tinte, kein Zeiger. */
+  .field.read .box { background: var(--se-read-ground); border-color: var(--se-line); color: var(--se-ink-2); cursor: default; }
+  .field.read .box:hover { background: var(--se-read-ground); }
+  .field.read .box .lupe, .field.read .box .sign { visibility: hidden; }
+  /* Neu: gesperrt, weil nichts gewählt. */
+  .field.off .box { background: var(--se-panel-2); border-color: var(--se-line-soft); border-bottom-color: var(--se-line); color: var(--se-faint); cursor: default; }
+  .field.off .box:hover { background: var(--se-panel-2); }
+  .field.off .label { color: var(--se-faint); }
+  .field.off .box .lupe, .field.off .box .sign, .field.off .box .unit { opacity: .5; }
+
+  /* Ring und Haken (notice.ts). */
+  .ring { flex: none; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--se-accent-soft); border-top-color: var(--se-accent); animation: turn 1s linear infinite; }
+  @keyframes turn { to { transform: rotate(1turn); } }
+  .tick { flex: none; width: 16px; height: 16px; color: var(--se-success); }
+  .tick svg { width: 16px; height: 16px; fill: currentColor; }
+
+  /* Ankreuzfeld (tickBox.ts). */
+  .check { display: flex; align-items: center; gap: 10px; height: 28px; }
+  .check .cb { position: relative; width: 20px; height: 20px; border: 1.5px solid var(--se-box-bottom); border-radius: var(--se-radius); background: var(--se-panel); display: grid; place-items: center; }
+  .check .cb svg { width: 12px; height: 12px; fill: var(--se-ink); visibility: hidden; }
+  .check .cb.on svg { visibility: visible; }
+  .check .cb.on { border-color: var(--se-ink-2); }
+  .field.read .check .cb { background: var(--se-read-ground); border-color: var(--se-line-strong); }
+  .field.read .check .cb svg { fill: var(--se-faint); }
+  .field.off .check .cb { border-color: var(--se-line); }
+  .check .text { color: var(--se-ink); }
+  .field.off .check .text, .field.read .check .text { color: var(--se-ink-2); }
+
+  /* Vorschläge (suggestionList.ts). */
+  .suggestions {
+    position: absolute; top: 100%; left: 0; z-index: 3; width: max-content; min-width: 100%; max-height: calc(24px * 7 + 2px); overflow: auto;
+    margin-top: 4px; background: var(--se-panel); border: 1px solid var(--se-line); border-radius: var(--se-radius); font-size: 13px;
+    display: grid; grid-template-columns: minmax(160px, auto) minmax(60px, auto);
+  }
+  .suggestions .srow, .suggestions .shead { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; height: 24px; }
+  .suggestions .shead { position: sticky; top: 0; background: var(--se-panel); border-bottom: 1px solid var(--se-line-soft); font-size: 12px; font-weight: 600; color: var(--se-ink-2); }
+  .suggestions .srow > div, .suggestions .shead > div { padding: 0 8px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .suggestions .srow + .srow { border-top: 1px solid var(--se-line-soft); }
+  .suggestions .srow.marked { background: var(--se-accent-soft); box-shadow: inset 3px 0 0 var(--se-accent); }
+  .suggestions mark { background: var(--se-warning-soft); color: inherit; padding: 0 1px; border-radius: 2px; }
+  .suggestions .sfoot { grid-column: 1 / -1; height: 24px; display: flex; align-items: center; padding: 0 8px; border-top: 1px solid var(--se-line-soft); color: var(--se-faint); font-size: 12px; }
+  .suggestions .sfoot b { color: var(--se-ink-2); font-weight: 600; margin-left: 4px; }
+  .card.open { z-index: 2; }
+
+  .infobar {
+    position: absolute; left: 24px; right: 24px; bottom: 20px; z-index: 4; display: flex; align-items: center; gap: 12px; height: 40px;
+    padding: 0 6px 0 15px; border-radius: var(--se-radius); background: #F9EEEE; box-shadow: inset 3px 0 0 var(--se-danger), var(--se-edge); font-size: 13px;
+  }
+  .infobar[hidden] { display: none; }
+  .infobar .sign { flex: none; width: 16px; height: 16px; border-radius: 50%; background: var(--se-danger); color: var(--se-panel); display: grid; place-items: center; font-size: 11px; font-weight: 700; }
+  .infobar .text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .infobar b { font-weight: 600; }
+  .infobar .x { flex: none; width: 32px; height: 32px; border: 0; background: none; color: var(--se-ink-2); font-size: 16px; cursor: pointer; border-radius: var(--se-radius); }
+  .infobar .x:hover { background: #E6E6E6; color: var(--se-ink); }
+
+  .legend { margin: 0; padding-left: 18px; color: var(--se-ink-2); display: flex; flex-direction: column; gap: 2px; }
+  .legend li::marker { color: var(--se-faint); }
+  .legend b { color: var(--se-ink); font-weight: 600; }
+  .keys { margin: 0; padding: 0 2px; color: var(--se-faint); font-size: 12px; }
+  .keys kbd { font: inherit; color: var(--se-ink-2); }
+  footer { color: var(--se-faint); font-size: 12px; padding: 0 2px; }
+  @media (prefers-reduced-motion: reduce) { .ring { animation: none; } }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <span class="eyebrow">Baustein Feld · Entwurf zu PLAN-BAUSTEINE-NEU.md, Abschnitt 3.4</span>
+    <h1>Feld heute und neu</h1>
+    <p>
+      Ein Bereich „Abgabe“ mit sieben Feldern aller Typen: Nachschlagen, Zahl mit Einheit, Datum, Auswahl, Ankreuzfeld,
+      Text. Links, wie der Editor das Feld heute zeichnet, rechts das Neukonzept. Lage und Höhe jedes Feldes bleiben in
+      beiden gleich, nichts rutscht.
+    </p>
+  </header>
+
+  <div class="controls" role="toolbar" aria-label="Umschalter">
+    <div class="group">
+      <span class="group-name">Lage</span>
+      <div class="segment" id="states" role="group" aria-label="Lage">
+        <button type="button" id="st-filled" data-state="filled" aria-pressed="true">Ausgefüllt</button>
+        <button type="button" id="st-fresh" data-state="fresh" aria-pressed="false">Neu, leer</button>
+        <button type="button" id="st-none" data-state="none" aria-pressed="false">Nichts gewählt</button>
+        <button type="button" id="st-required" data-state="required" aria-pressed="false">Pflicht fehlt</button>
+        <button type="button" id="st-writing" data-state="writing" aria-pressed="false">Schreibt</button>
+        <button type="button" id="st-refused" data-state="refused" aria-pressed="false">Abgelehnt</button>
+        <button type="button" id="st-read" data-state="read" aria-pressed="false">Nur lesen</button>
+        <button type="button" id="st-suggest" data-state="suggest" aria-pressed="false">Vorschläge</button>
+      </div>
+    </div>
+  </div>
+  <p class="state-note" id="note"></p>
+
+  <div class="panes">
+    <section class="pane" aria-labelledby="h-today">
+      <div class="pane-head">
+        <h2 id="h-today">Heute</h2>
+        <span>src/blocks/formfield, lookup, parts/tickBox</span>
+      </div>
+      <div class="sheet" id="sheet-today">
+        <div class="mask" id="mask-today"></div>
+        <div class="infobar" id="bar-today" hidden>
+          <span class="sign">!</span><span class="text" id="bar-today-text"></span
+          ><button type="button" class="x" aria-label="Schließen">×</button>
+        </div>
+      </div>
+      <ul class="legend" id="legend-today"></ul>
+    </section>
+
+    <section class="pane" aria-labelledby="h-new">
+      <div class="pane-head">
+        <h2 id="h-new">Neu</h2>
+        <span>Konzept: Stern, Einheit, Fehler am Ort, Lesefeld, Sperre mit Grund</span>
+      </div>
+      <div class="sheet" id="sheet-new">
+        <div class="mask" id="mask-new"></div>
+        <div class="infobar" id="bar-new" hidden>
+          <span class="sign">!</span><span class="text" id="bar-new-text"></span
+          ><button type="button" class="x" aria-label="Schließen">×</button>
+        </div>
+      </div>
+      <ul class="legend" id="legend-new"></ul>
+      <p class="keys">
+        <kbd>Enter</kbd> nächstes Feld, im letzten der Hauptknopf · <kbd>Esc</kbd> Wert zurück · <kbd>F5</kbd> oder
+        <kbd>Alt+↓</kbd> Nachschlagen · <kbd>↑↓</kbd> Vorschlag oder Zahl · <kbd>Leertaste</kbd> Häkchen ·
+        <kbd>F1</kbd> Tastenhilfe
+      </p>
+    </section>
+  </div>
+
+  <footer>
+    Beispieldaten. Entwurf vom 26.10.2026 mit der Entscheidung „feste Lage“; umgebaut wird erst nach Freigabe des
+    Konzepts.
+  </footer>
+</div>
+
+<script>
+  (function () {
+    'use strict';
+
+    var FULL = { med: 'PRRS Unistrain (10 ID/20ml)', amount: '62,00', animals: '31', start: '23.10.2026', how: 'i.m.', vaccine: true, note: '2 ml je Tier' };
+    var EMPTY = { med: '', amount: '', animals: '', start: '', how: '', vaccine: false, note: '' };
+
+    var NOTES = {
+      filled: 'Alle Werte sind da. Heute und neu sehen fast gleich aus. Neu: Stern an den Pflichtfeldern, die Einheit „ml“ im Kasten, die Lupe im Kasten.',
+      fresh: 'Ein neuer Datensatz, noch nichts getippt. Heute: leere Kästen ohne Hinweis. Neu: Stern an Menge und Tiere, ein Platzhalter im ersten Feld sagt, wie es weitergeht.',
+      none: 'Die Felder folgen einer Liste links, dort ist nichts gewählt. Heute: leere Kästen, tippbar, der Wert geht nirgendwohin. Neu: Felder gesperrt, das erste sagt warum.',
+      required: 'Menge wurde leer verlassen. Heute: nichts zu sehen, erst der Knopf meldet später, dass ein Wert fehlt. Neu: rote Unterkante und das Wort „Pflicht“ in der Beschriftungszeile, sonst bleibt alles, wo es ist.',
+      writing: 'Menge wurde auf 62,00 geändert und geht gerade an SoftEngine. Heute wie neu: der Ring im Kasten, das Feld bleibt tippbar.',
+      refused: 'SoftEngine lehnt 62,00 ab. Heute: das Feld springt auf den alten Wert 60,00 zurück, die Leiste meldet. Neu: 62,00 bleibt stehen, rote Unterkante, „nicht gespeichert“ in der Beschriftungszeile, Enter versucht es erneut; die Leiste meldet auch.',
+      read: 'Der Anwender darf nicht ändern. Heute: kein Lesemodus, alle Felder bleiben tippbar. Neu: jedes Feld wird ein Lesefeld (grauer Kasten, zweite Tinte), das Häkchen grau.',
+      suggest: 'Im Medikament ist „pr“ getippt. Heute: die Vorschläge mit Spalten, der erste markiert. Neu: der beste Treffer markiert, Enter übernimmt ihn, die letzte Zeile sagt, wie viele weitere es gibt.'
+    };
+    var LEGEND_TODAY = {
+      filled: ['Beschriftung 12 Punkte, Kasten 28 Punkte, Einheit nirgends: „62,00“ ohne ml.', 'Pflichtfelder sind nicht zu erkennen; „Pflicht“ wirkt erst, wenn eine Kette läuft.', 'Die Lupe sitzt rechts im Kasten (gibt es heute schon).'],
+      fresh: ['Kein Platzhalter, kein Stern: der Anwender weiß nicht, was er zuerst tippen soll.'],
+      none: ['Die Kästen sind leer und tippbar; eine Änderung läuft ins Leere.', 'Kein Wort sagt, dass links erst etwas zu wählen wäre.'],
+      required: ['Das leere Pflichtfeld sieht aus wie jedes leere Feld.', 'Erst beim Klick auf den Knopf meldet die Leiste unten, dass die Menge fehlt.'],
+      writing: ['Der Ring ersetzt das Zeichen rechts im Kasten (gibt es heute schon).', 'Danach 2 Sekunden der Haken.'],
+      refused: ['<b>Der getippte Wert ist weg</b>: das Feld springt auf 60,00 zurück (valueBinding.ts, takeBack).', 'Die Leiste unten nennt Feld und Grund (gibt es heute schon).'],
+      read: ['Es gibt keinen Lesemodus; ein Recht kennt der Editor nicht.', 'Wer nicht ändern darf, kann trotzdem tippen; SoftEngine lehnt dann ab.'],
+      suggest: ['Vorschläge ab dem ersten Zeichen, Treffer gelb markiert (gibt es heute schon).', 'Enter öffnet bei mehreren Treffern das Fenster; Tab übernimmt nur einen eindeutigen.', 'Verlässt der Anwender das Feld ohne Treffer, ist „pr“ still verschwunden.']
+    };
+    var LEGEND_NEW = {
+      filled: ['<b>Gleiche Lage, gleiche Höhe wie heute.</b>', 'Stern hinter der Beschriftung der Pflichtfelder, die Einheit im Kasten rechts in der zweiten Tinte.', 'Zahlen rechtsbündig mit tabellarischen Ziffern.'],
+      fresh: ['Platzhalter im ersten Feld: „Name oder Nummer tippen, F5 sucht“.', 'Stern an Menge und Tiere; rot wird nichts, bevor der Anwender ein Feld leer verlässt.'],
+      none: ['<b>Gesperrt mit Grund</b>: „Erst links eine Abgabe wählen“ im ersten Feld, die anderen still.', 'Lage und Höhe unverändert; die Felder bleiben als Anker stehen.'],
+      required: ['<b>Der Fehler hat einen Ort</b>: rote Unterkante an der Menge.', 'Das Wort steht in der Beschriftungszeile, damit kein Satz darunter Platz braucht und nichts rutscht.'],
+      writing: ['Wie heute: der Ring im Kasten.', 'Unter 300 ms passiert sichtbar nichts, damit es nicht flackert.'],
+      refused: ['<b>Nichts geht verloren</b>: 62,00 bleibt im Feld.', 'Rote Unterkante, „nicht gespeichert, Enter wiederholt“ in der Beschriftungszeile.', 'Die Leiste unten bleibt, einmal für die ganze Maske.'],
+      read: ['Fehlendes Recht macht jedes Feld zum Lesefeld: grauer Kasten, zweite Tinte, kein Zeiger, keine Lupe.', 'Das Ankreuzfeld zeigt den Haken grau statt einen Schalter.'],
+      suggest: ['Der beste Treffer ist markiert, Enter übernimmt ihn (D24).', 'Letzte Zeile: „3 weitere – F5 zeigt alle“; ohne Treffer „Kein Treffer“.', 'Tab ohne Treffer lässt „pr“ stehen und markiert das Feld rot: „nicht gefunden“, statt still zu löschen.']
+    };
+
+    var state = 'filled';
+    var maskToday = document.getElementById('mask-today');
+    var maskNew = document.getElementById('mask-new');
+    var barToday = document.getElementById('bar-today');
+    var barNew = document.getElementById('bar-new');
+
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+    var ICON = {
+      caret: '<svg viewBox="0 0 256 256" aria-hidden="true"><path d="M212.24,100.24l-80,80a6,6,0,0,1-8.48,0l-80-80a6,6,0,0,1,8.48-8.48L128,167.51l75.76-75.75a6,6,0,0,1,8.48,8.48Z"></path></svg>',
+      calendar: '<svg viewBox="0 0 256 256" aria-hidden="true"><path d="M208,34H182V24a6,6,0,0,0-12,0V34H86V24a6,6,0,0,0-12,0V34H48A14,14,0,0,0,34,48V208a14,14,0,0,0,14,14H208a14,14,0,0,0,14-14V48A14,14,0,0,0,208,34ZM48,46H74V56a6,6,0,0,0,12,0V46h84V56a6,6,0,0,0,12,0V46h26a2,2,0,0,1,2,2V82H46V48A2,2,0,0,1,48,46ZM208,210H48a2,2,0,0,1-2-2V94H210V208A2,2,0,0,1,208,210Z"></path></svg>',
+      lupe: '<svg viewBox="0 0 256 256" aria-hidden="true"><path d="M228.24,219.76l-51.38-51.38a86.15,86.15,0,1,0-8.48,8.48l51.38,51.38a6,6,0,0,0,8.48-8.48ZM38,112a74,74,0,1,1,74,74A74.09,74.09,0,0,1,38,112Z"></path></svg>',
+      check: '<svg viewBox="0 0 256 256" aria-hidden="true"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"></path></svg>'
+    };
+
+    var HITS = [
+      ['<mark>PR</mark>RS Unistrain (10 ID/20ml)', '788P1N2'],
+      ['<mark>Pr</mark>ocox 0,9 mg/ml', '601Q31'],
+      ['<mark>Pr</mark>edni 5 mg Tabletten', '7B0C14']
+    ];
+
+    /* Ein Feld, gleich für heute und neu; die Lage steckt in den Klassen. */
+    function field(o) {
+      var cls = 'field' + (o.focus ? ' focus' : '') + (o.error ? ' error' : '') + (o.read ? ' read' : '') + (o.off ? ' off' : '');
+      var label = '<span class="label"><span>' + esc(o.label) + '</span>' + (o.star ? '<span class="star">*</span>' : '') + (o.msg ? '<span class="msg">· ' + esc(o.msg) + '</span>' : '') + '</span>';
+      if (o.kind === 'check') {
+        return '<div class="' + cls + '">' + label + '<div class="check"><span class="cb' + (o.on ? ' on' : '') + '">' + ICON.check + '</span><span class="text">' + esc(o.text) + '</span></div></div>';
+      }
+      var right = '';
+      if (o.notice === 'ring') right = '<span class="ring" role="progressbar" aria-label="schreibt"></span>';
+      else if (o.notice === 'tick') right = '<span class="tick">' + ICON.check + '</span>';
+      else if (o.kind === 'lookup') right = '<button type="button" class="lupe" aria-label="Nachschlagen">' + ICON.lupe + '</button>';
+      else if (o.kind === 'select') right = '<span class="sign">' + ICON.caret + '</span>';
+      else if (o.kind === 'date') right = '<span class="sign">' + ICON.calendar + '</span>';
+      var unit = o.unit ? '<span class="unit">' + esc(o.unit) + '</span>' : '';
+      var val = o.value !== '' ? esc(o.value) : (o.placeholder ? esc(o.placeholder) : '');
+      var vcls = 'val' + (o.kind === 'number' ? ' num' : '') + (o.value === '' && o.placeholder ? ' ph' : '');
+      return '<div class="' + cls + '">' + label + '<div class="box"><span class="' + vcls + '">' + val + '</span>' + unit + right + (o.list || '') + '</div></div>';
+    }
+
+    function suggestions(withFoot) {
+      var rows = HITS.map(function (h, i) { return '<div class="srow' + (i === 0 ? ' marked' : '') + '"><div>' + h[0] + '</div><div>' + h[1] + '</div></div>'; }).join('');
+      return '<div class="suggestions" role="listbox"><div class="shead"><div>Bezeichnung</div><div>Nummer</div></div>' + rows + (withFoot ? '<div class="sfoot">3 weitere <b>F5 zeigt alle</b></div>' : '') + '</div>';
+    }
+
+    function card(cols, open) {
+      return '<div class="card' + (open ? ' open' : '') + '"><div class="head"><span>Abgabe</span></div><div class="body"><div class="cols">' + cols + '</div></div></div>';
+    }
+
+    function valuesFor() {
+      if (state === 'fresh' || state === 'none') return EMPTY;
+      if (state === 'required') return { med: FULL.med, amount: '', animals: FULL.animals, start: FULL.start, how: FULL.how, vaccine: FULL.vaccine, note: FULL.note };
+      if (state === 'suggest') return { med: 'pr', amount: '', animals: '', start: '', how: '', vaccine: false, note: '' };
+      return FULL;
+    }
+
+    function renderToday() {
+      var v = valuesFor();
+      var amount = state === 'refused' ? '60,00' : v.amount;
+      var left =
+        '<div class="col">' +
+          field({ kind: 'lookup', label: 'Medikament', value: v.med, focus: state === 'suggest', list: state === 'suggest' ? suggestions(false) : '' }) +
+          field({ kind: 'number', label: 'Menge', value: amount, focus: state === 'writing' || state === 'required', notice: state === 'writing' ? 'ring' : '' }) +
+          field({ kind: 'number', label: 'Tiere', value: v.animals }) +
+          field({ kind: 'text', label: 'Bemerkung', value: v.note }) +
+        '</div>';
+      var right =
+        '<div class="col">' +
+          field({ kind: 'date', label: 'Anwendungsbeginn', value: v.start }) +
+          field({ kind: 'select', label: 'Art der Verabreichung', value: v.how }) +
+          field({ kind: 'check', label: 'Impfstoff', text: 'Impfstoff', on: v.vaccine }) +
+        '</div>';
+      maskToday.innerHTML = card(left + right, state === 'suggest');
+      barToday.hidden = state !== 'refused';
+      document.getElementById('bar-today-text').innerHTML = '<b>Menge:</b> SoftEngine hat abgelehnt: Menge über Bestand';
+    }
+
+    function renderNew() {
+      var v = valuesFor();
+      var off = state === 'none';
+      var read = state === 'read';
+      var base = { off: off, read: read };
+      var medPh = state === 'fresh' ? 'Name oder Nummer tippen, F5 sucht' : off ? 'Erst links eine Abgabe wählen' : '';
+      var amountMsg = state === 'required' ? 'Pflicht' : state === 'refused' ? 'nicht gespeichert, Enter wiederholt' : '';
+      var left =
+        '<div class="col">' +
+          field(Object.assign({ kind: 'lookup', label: 'Medikament', value: v.med, star: true, placeholder: medPh, focus: state === 'suggest', list: state === 'suggest' ? suggestions(true) : '' }, base)) +
+          field(Object.assign({ kind: 'number', label: 'Menge', value: v.amount, unit: 'ml', star: true, msg: amountMsg, error: amountMsg !== '', focus: state === 'writing' || state === 'required' || state === 'refused', notice: state === 'writing' ? 'ring' : '' }, base)) +
+          field(Object.assign({ kind: 'number', label: 'Tiere', value: v.animals, star: true }, base)) +
+          field(Object.assign({ kind: 'text', label: 'Bemerkung', value: v.note }, base)) +
+        '</div>';
+      var right =
+        '<div class="col">' +
+          field(Object.assign({ kind: 'date', label: 'Anwendungsbeginn', value: v.start }, base)) +
+          field(Object.assign({ kind: 'select', label: 'Art der Verabreichung', value: v.how }, base)) +
+          field(Object.assign({ kind: 'check', label: 'Impfstoff', text: 'Impfstoff', on: v.vaccine }, base)) +
+        '</div>';
+      maskNew.innerHTML = card(left + right, state === 'suggest');
+      barNew.hidden = state !== 'refused';
+      document.getElementById('bar-new-text').innerHTML = '<b>Menge:</b> SoftEngine hat abgelehnt: Menge über Bestand. Der Wert bleibt im Feld, Enter versucht es erneut.';
+    }
+
+    function renderLegends() {
+      document.getElementById('legend-today').innerHTML = LEGEND_TODAY[state].map(function (t) { return '<li>' + t + '</li>'; }).join('');
+      document.getElementById('legend-new').innerHTML = LEGEND_NEW[state].map(function (t) { return '<li>' + t + '</li>'; }).join('');
+      document.getElementById('note').textContent = NOTES[state];
+    }
+
+    function setState(next) {
+      state = next;
+      var buttons = document.getElementById('states').querySelectorAll('button');
+      for (var i = 0; i < buttons.length; i++) buttons[i].setAttribute('aria-pressed', String(buttons[i].getAttribute('data-state') === state));
+      renderToday();
+      renderNew();
+      renderLegends();
+    }
+
+    document.getElementById('states').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (b) setState(b.getAttribute('data-state'));
+    });
+    barToday.querySelector('.x').addEventListener('click', function () { barToday.hidden = true; });
+    barNew.querySelector('.x').addEventListener('click', function () { barNew.hidden = true; });
+
+    setState('filled');
+  })();
+</script>

@@ -1,4 +1,5 @@
 import { asNumber } from '../../../core/data/number'
+import { ensureSource } from '../../../runtime/fetchingSources'
 import { sourceCame, sourcesRows } from '../../lookup/lookup'
 import { splitRows } from '../split/splitRecords'
 import type { CaptureRow } from './captureRow'
@@ -17,6 +18,7 @@ export function openSplit(row: CaptureRow, context: CaptureContext): SplitOpenin
   const amountAt = context.columns.findIndex((c) => c.key === split.amountColumn)
   const total = amountAt === -1 ? null : asNumber(valueIn(row, context, amountAt))
   if (!sourceCame(split.sourceId)) {
+    void ensureSource(split.sourceId)
     row.split.list.start(split, [], total, row.split.picks, true)
     return 'waits'
   }

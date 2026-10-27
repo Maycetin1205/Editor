@@ -1,4 +1,5 @@
 import type { KeyPair } from '../../../core/data/extraSources'
+import { ensureSource } from '../../../runtime/fetchingSources'
 import { outsideValue } from '../../../runtime/foreignSources'
 import { maskHost } from '../../../runtime/host'
 import { lookupEntries, sourcesRows, type Entry } from '../../lookup/lookup'
@@ -127,11 +128,20 @@ export function entriesIn(row: CaptureRow, context: CaptureContext, index: numbe
 
 // A record of the block's own source carries the keys of all others, so their
 // records are chosen anew from it.
+// Sources partnered to a chosen record are fetched now, where they waited.
+function fetchPartnered(context: CaptureContext, sourceId: string): void {
+  const wanted = [...linkedSourcesIn(context), ...(context.split ? [context.split.sourceId] : [])]
+  for (const id of wanted) {
+    if (id !== sourceId && context.partnerOf(id) === sourceId) void ensureSource(id)
+  }
+}
+
 export function takeRecord(row: CaptureRow, context: CaptureContext, index: number, record: unknown): void {
   const target = targetIn(context, index)
   if (target.sourceId === '') return
   row.split.done = false
   chooseRecord(row, context, target.sourceId, record)
+  fetchPartnered(context, target.sourceId)
   row.records.byHand.add(target.sourceId)
   if (target.kind === 'own') {
     for (const id of [...row.records.chosen.keys()]) {

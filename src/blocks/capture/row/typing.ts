@@ -1,5 +1,6 @@
 import { walkOrder } from '../../parts/cell'
 import { plainText } from '../../parts/cellSearch'
+import { ensureSource } from '../../../runtime/fetchingSources'
 import { sourceCame } from '../../lookup/lookup'
 import type { CaptureColumn } from '../column'
 import { forgetCell, type CaptureRow } from './captureRow'
@@ -39,6 +40,7 @@ export function settleCell(row: CaptureRow, index: number): void {
   const target = targetIn(context, index)
   if (typed === '' || target.kind !== 'linked') return
   if (!sourceCame(target.sourceId)) {
+    void ensureSource(target.sourceId)
     row.cells.waiting.add(index)
     return
   }
