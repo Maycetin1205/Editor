@@ -77,5 +77,6 @@ export function mayContain(parentType: string, childType: string): boolean {
   }
   const def = registry.get(parentType)
   if (!def) return parentType === ROOT_TYPE
+  if (def.allowedChildren && !def.allowedChildren.includes(childType)) return false
   return def.takesChildren
 }

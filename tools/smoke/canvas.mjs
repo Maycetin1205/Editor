@@ -19,9 +19,9 @@ async function settle(page, ms = 150) {
   await page.waitForTimeout(ms)
 }
 
-// A point of the block where the block itself is on top, not a grip or
-// another helper the editor lays over it (the heads of a list carry their
-// own handles): the first of a grid of points, from the left top.
+// A point of the block where the block itself is on top, not a block inside
+// it, a grip or another helper the editor lays over it (the heads of a list
+// carry their own handles): the first of a grid of points, from the left top.
 async function corner(page, id) {
   await center(page, id)
   const box = await host(page, id).boundingBox()
@@ -29,14 +29,13 @@ async function corner(page, id) {
   const point = await page.evaluate((id) => {
     const root = document.querySelector(`main [data-block-id="${id}"]`)
     const r = root.getBoundingClientRect()
-    for (const fy of [0.12, 0.5, 0.88, 0.3, 0.7]) {
+    for (const fy of [0.12, 0.5, 0.88, 0.3, 0.7, 0.04]) {
       for (const fx of [0.05, 0.3, 0.6, 0.9]) {
         const x = r.left + Math.max(4, r.width * fx)
         const y = r.top + Math.max(4, Math.min(r.height - 4, r.height * fy))
         const hit = document.elementFromPoint(x, y)
         if (
-          hit &&
-          root.contains(hit) &&
+          hit?.closest('[data-block-id]') === root &&
           !hit.closest('[data-ff-editor-helper]') &&
           !hit.closest('.cursor-ew-resize, .cursor-ns-resize, .cursor-nwse-resize, .cursor-nesw-resize')
         )
@@ -52,8 +51,11 @@ async function corner(page, id) {
 // Inserts a block of this type from the palette onto the page; the id of the
 // new node, or null.
 export async function insert(page, def) {
+  await page.evaluate(() => document.activeElement?.blur())
   await page.keyboard.press('Escape')
   await page.keyboard.press('Escape')
+  // On the page, not into the block chosen last.
+  if ((await seam.selectedId(page)) !== null) return null
   const before = new Set(Object.keys(await seam.tree(page)))
   await page.click(`button[aria-label="${def.name} einfügen"]`)
   await settle(page, 300)

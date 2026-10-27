@@ -21,17 +21,31 @@ export function isGridArea(node: BlockNode): boolean {
 const isInnerArea = (node: BlockNode | undefined): node is BlockNode =>
   node !== undefined && node.id !== ROOT_ID && !isPagesBlock(node) && blockType(node.type)?.gridArea === true
 
+const fillsParent = (node: BlockNode): boolean => blockType(node.type)?.fillsParent === true
+
+// A block whose children fill it (a Reiter) hands its columns down to them.
+const handsColumns = (node: BlockNode): boolean =>
+  blockType(node.type)?.allowedChildren?.some((type) => blockType(type)?.fillsParent === true) === true
+
+// The block that takes the room of an area in its parent's grid.
+function slotHolder(tree: MaskTree, area: BlockNode): BlockNode | undefined {
+  return fillsParent(area) ? (area.parentId ? tree[area.parentId] : undefined) : area
+}
+
 export function columnsOf(tree: MaskTree, parentId: string | null | undefined): number {
   const parent = parentId ? tree[parentId] : undefined
-  return isInnerArea(parent) ? gridSlotRead(parent.values).w : GRID.columns
+  const holder = isInnerArea(parent) ? slotHolder(tree, parent) : undefined
+  return holder ? gridSlotRead(holder.values).w : GRID.columns
 }
 
 export function areaColumnsStyle(node: BlockNode): Record<string, number> {
-  return isInnerArea(node) ? { [AREA_COLUMNS]: gridSlotRead(node.values).w } : {}
+  if (fillsParent(node)) return {}
+  return isInnerArea(node) || handsColumns(node) ? { [AREA_COLUMNS]: gridSlotRead(node.values).w } : {}
 }
 
 function keptInside(tree: MaskTree, areaId: string, columns: number): MaskTree {
   const area = tree[areaId]
+  if (area && handsColumns(area)) return area.childIds.reduce((next, id) => keptInside(next, id, columns), tree)
   if (!isInnerArea(area)) return tree
   let next = tree
   for (const childId of area.childIds) {
@@ -217,7 +231,9 @@ function areaFitted(tree: MaskTree, areaId: string, capacity: (areaId: string) =
     .map((n) => gridSlotRead(n.values))
     .reduce((max, p) => Math.max(max, p.y + p.h), 0)
   if (reach <= holds) return tree
-  return slotGrownPushing(tree, areaId, gridSlotRead(area.values).h + reach - holds, capacity) ?? tree
+  const holder = slotHolder(tree, area)
+  if (!holder) return tree
+  return slotGrownPushing(tree, holder.id, gridSlotRead(holder.values).h + reach - holds, capacity) ?? tree
 }
 
 export function newBlockOnCell(

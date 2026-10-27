@@ -108,6 +108,24 @@ export function sendPropChange(el: HTMLElement, prop: string, value: unknown): v
   el.dispatchEvent(new CustomEvent<PropChange>(PROP_CHANGE, { detail: { prop, value } }))
 }
 
+// A block that holds its children's words (the titles of a Reiter's pages)
+// changes them on the canvas through these; the child is its place among
+// the block's children.
+export const CHILD_CHANGE = 'ff-child-change'
+
+export interface ChildChange {
+  child: number
+  prop: string
+  value: unknown
+}
+
+export const CHILD_ADD = 'ff-child-add'
+
+export interface ChildAdd {
+  type: string
+  values: Readonly<Record<string, unknown>>
+}
+
 export const SPOT_CLICK = 'ff-spot-click'
 
 export type SpotClick =
@@ -175,6 +193,11 @@ export abstract class BlockElement extends LitElement {
   @property({ attribute: NOTICE_ATTR, converter: { fromAttribute: noticeStateOf } })
   notice: NoticeState = 'quiet'
 
+  // On the canvas: the place of the child that holds the editor's choice,
+  // -1 when none does.
+  @property({ attribute: false })
+  chosenChild = -1
+
   private noticeRoom: HTMLElement | null = null
 
   constructor() {
@@ -224,6 +247,16 @@ export abstract class BlockElement extends LitElement {
   }
 
   protected inlineEdit(event: MouseEvent, prop: string): void {
+    this.renameOn(event, (text) => sendPropChange(this, prop, text))
+  }
+
+  protected inlineEditChild(event: MouseEvent, child: number, prop: string): void {
+    this.renameOn(event, (text) => {
+      this.dispatchEvent(new CustomEvent<ChildChange>(CHILD_CHANGE, { detail: { child, prop, value: text } }))
+    })
+  }
+
+  private renameOn(event: MouseEvent, adopt: (text: string) => void): void {
     if (!this.editable) return
     const target = event.currentTarget as HTMLElement | null
     if (!target) return
@@ -232,7 +265,7 @@ export abstract class BlockElement extends LitElement {
     event.stopPropagation()
     event.preventDefault()
     startRename(target, (text, original) => {
-      if (text !== original) sendPropChange(this, prop, text)
+      if (text !== original) adopt(text)
     })
   }
 }

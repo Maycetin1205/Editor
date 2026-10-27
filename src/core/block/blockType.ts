@@ -37,6 +37,13 @@ export interface BlockDeclaration {
   takesChildren?: boolean
 
   allowedParent?: readonly string[]
+  // Only blocks of these types go into it.
+  allowedChildren?: readonly string[]
+  // The children a new block of the type starts with.
+  startChildren?: readonly ChildDefault[]
+  // Fills the body of its parent instead of taking a slot of the parent's
+  // grid; its blocks have the parent's columns (the pages of a Reiter).
+  fillsParent?: boolean
   inPalette?: boolean
 
   page?: boolean

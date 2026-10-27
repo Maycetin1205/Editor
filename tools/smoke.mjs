@@ -38,7 +38,8 @@ import {
 import { bindFirstEntry, bindSpots, setEntryChoice } from './smoke/binding.mjs'
 import { addEntryToolStep, addToolStep } from './smoke/events.mjs'
 import { firstValue, SOURCE } from './smoke/fixture.mjs'
-import { attributesOf, bridgeScript, nth, sent, shown } from './smoke/mask.mjs'
+import { attributesOf, bridgeScript, nth, onPage, sent, shown } from './smoke/mask.mjs'
+import { pagesInMask, pagesWork, rememberInMask } from './smoke/tabs.mjs'
 import { linesKeys, trigger } from './smoke/triggers.mjs'
 
 const require = createRequire(import.meta.url)
@@ -90,7 +91,14 @@ const VARIANTS = {
         ['fieldType', 'multiline'],
         ['lines', 5],
       ],
-      check: linesKeys,
+      checks: [{ what: 'Tasten', run: linesKeys }],
+    },
+  ],
+  tabs: [
+    {
+      name: 'Merken',
+      settings: [['remember', true]],
+      checks: [{ what: 'Letzten Reiter merken', run: rememberInMask }],
     },
   ],
 }
@@ -99,13 +107,18 @@ const VARIANTS = {
 const SHOWN_OTHERWISE = { since: 'die Wartezeit seit der Uhrzeit' }
 
 // What a block needs beyond its own source, its places and its first entry to
-// show rows in the mask.
+// show rows in the mask, and what it is put through beyond what every block
+// gets: work on the canvas, checks in the mask.
 const FUNCTION_SETUP = {
   kanban: {
     field: { key: 'columnsField', code: 'STATUS' },
     entryChoices: [['Knopf', 'Aktion']],
     words: true,
     status: (node) => node.values.columns?.[0]?.value ?? '',
+  },
+  tabs: {
+    work: { what: 'Seiten bearbeitet', run: pagesWork },
+    checks: [{ what: 'Seiten', run: pagesInMask }],
   },
 }
 
@@ -223,6 +236,7 @@ async function wire(def, variant) {
       fail(`Funktion: „${group}: ${option}“ am ersten Eintrag nicht wählbar`)
   }
   if (setup?.words) await editInPlace(page, b, def.tag)
+  if (setup?.work) check(`${label}: ${setup.work.what}`, await setup.work.run(page, b))
   // The places the block shows now; one setting can show one place in
   // place of another (the corner of a card), the mask shows the same.
   await choose(page, b)
@@ -250,7 +264,7 @@ async function wire(def, variant) {
   return {
     id: b,
     label,
-    check: variant?.check,
+    checks: [...(variant?.checks ?? []), ...(setup?.checks ?? [])],
     settings,
     spots: spots.bound.filter((x) => showing.has(x.spot)),
     hidden: spots.bound.filter((x) => !showing.has(x.spot)).map((x) => x.spot),
@@ -345,7 +359,7 @@ if (fs.existsSync(html)) {
       fail('in der exportierten Maske nicht definiert')
       continue
     }
-    const count = await mask.locator(def.tag).count()
+    const count = await mask.locator(onPage(def.tag)).count()
     if (count < 1 + fns.length) {
       fail(`${count} statt ${1 + fns.length} Exemplare in der Maske`)
       continue
@@ -417,7 +431,7 @@ if (fs.existsSync(html)) {
   console.log('Exportierte Maske: Ereignisse')
   for (const { def, b, index } of live) {
     block = def.name
-    if (b.events.length === 0 && !b.check) continue
+    if (b.events.length === 0 && b.checks.length === 0) continue
     console.log(`${def.name} (${def.tag}), ${b.label}`)
     const el = nth(mask, def.tag, index)
     for (const { event, nr } of b.events) {
@@ -437,7 +451,7 @@ if (fs.existsSync(html)) {
       else fail(`Ereignis „${event.name}“: kein START_TOOL ${nr} gesendet (${JSON.stringify(after)})`)
       await mask.keyboard.press('Escape')
     }
-    if (b.check) check(`${b.label}: Tasten`, await b.check(mask, el))
+    for (const c of b.checks) check(`${b.label}: ${c.what}`, await c.run(mask, el))
   }
   block = ''
   if (maskErrors.length > 0) fail(`Skriptfehler in der Maske:\n  ${maskErrors.join('\n  ')}`)

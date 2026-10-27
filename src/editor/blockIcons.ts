@@ -12,6 +12,7 @@ import {
   SeparatorHorizontal,
   SquareKanban,
   Table as TableSign,
+  Tabs as TabsSign,
   TextCursorInput,
   Type,
   type Icon,
@@ -27,6 +28,7 @@ import { Picture } from '../blocks/image/Picture'
 import { Kanban } from '../blocks/kanban/Kanban'
 import { Popup } from '../blocks/popup/Popup'
 import { Table } from '../blocks/table/Table'
+import { Tabs } from '../blocks/tabs/Tabs'
 import { Text } from '../blocks/text/Text'
 import { ValueList } from '../blocks/valuelist/ValueList'
 
@@ -42,6 +44,7 @@ export const BLOCK_ICONS: Record<string, Icon> = {
   [Kanban.type]: SquareKanban,
   [Popup.type]: AppWindow,
   [Table.type]: TableSign,
+  [Tabs.type]: TabsSign,
   [Text.type]: Type,
   [ValueList.type]: List,
 }

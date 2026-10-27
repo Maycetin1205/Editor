@@ -45,6 +45,8 @@ class HeightReport implements ReactiveController {
   }
 
   private report(el: HTMLElement): void {
+    // Not drawn (on a hidden page of a Reiter): no height to report.
+    if (el.getClientRects().length === 0) return
     const height = el.getBoundingClientRect().height / cssZoomOf(el)
     this.host.dispatchEvent(new CustomEvent<HeightReported>(HEIGHT_REPORTED, { detail: { height } }))
   }

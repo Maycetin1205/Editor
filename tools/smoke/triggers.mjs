@@ -29,6 +29,7 @@ export const TRIGGERS = {
   },
   onCardClick: async (page, el) => el.locator('.card').first().click(),
   onCardButton: async (page, el) => el.locator('.card button').first().click(),
+  onTabChange: async (page, el) => el.locator('[role="tab"]').nth(1).click(),
   onCardDrop: async (page, el) => {
     const card = el.locator('.card').first()
     const target = el.locator('.column').nth(1)

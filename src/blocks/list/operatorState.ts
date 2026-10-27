@@ -40,12 +40,13 @@ function withCurrentNames(value: unknown): unknown {
 
 export function makeOperatorState<T>(
   prefix: string,
-  formerPrefix: string,
+  formerPrefix: string | null,
   parse: (raw: unknown) => T | null,
 ): OperatorState<T> {
   const inMemory = new Map<string, T | null>()
 
   const moved = (storeKey: string, id: string): T | null => {
+    if (formerPrefix === null) return null
     const formerKey = keyFor(formerPrefix, id.replace(LOOKUP_KEY_PART, FORMER_LOOKUP_KEY_PART))
     const raw = localStorage.getItem(formerKey)
     if (raw === null) return null

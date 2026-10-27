@@ -8,6 +8,7 @@ import { actionValue, bindable, type ValueCarrier } from '../../core/block/capab
 import { propertyVisible } from '../../core/block/property'
 import { LOOKUP_COLUMNS_BINDING } from '../lookup/lookup'
 import { focusNextField } from '../../runtime/nextField'
+import { revealSelf } from '../../runtime/reveal'
 import { setSearchText } from '../../runtime/searchText'
 import { suggestionStyle } from '../lookup/suggestionList'
 import { LookupControl } from '../lookup/lookupControl'
@@ -83,6 +84,7 @@ export class FormField extends BlockElement implements ValueCarrier {
   }
 
   focusValue(): void {
+    revealSelf(this)
     this.renderRoot.querySelector<HTMLElement>('input, select, textarea')?.focus()
   }
 
@@ -112,17 +114,11 @@ export class FormField extends BlockElement implements ValueCarrier {
     this.onFocus()
   }
 
+  // Enter goes on to the next field. In a field of several lines Enter
+  // starts a new line and Ctrl+Enter goes on; Tab goes on as anywhere.
   private onKey(e: KeyboardEvent): void {
-    if (e.key !== 'Enter' || this.preview) return
-    e.preventDefault()
-    this.takeTyped()
-    focusNextField(this)
-  }
-
-  // Several lines: Enter starts a new line; Ctrl+Enter goes on to the next
-  // field, as Enter does in a field of one line. Tab goes on as anywhere.
-  private onLinesKey(e: KeyboardEvent): void {
-    if (e.key !== 'Enter' || !(e.ctrlKey || e.metaKey) || this.preview) return
+    const lines = fieldTypeOf(this.fieldType) === 'multiline'
+    if (e.key !== 'Enter' || (lines && !(e.ctrlKey || e.metaKey)) || this.preview) return
     e.preventDefault()
     this.takeTyped()
     focusNextField(this)
@@ -188,7 +184,7 @@ export class FormField extends BlockElement implements ValueCarrier {
         @input=${this.onInput}
         @focus=${this.onFocus}
         @blur=${this.takeTyped}
-        @keydown=${this.onLinesKey}
+        @keydown=${this.onKey}
       ></textarea>`
     }
     return html`<input

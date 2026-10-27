@@ -66,12 +66,29 @@ interface NodeLook {
   selected: boolean
   carrier: BlockNode | undefined
   version: number
+  chosenChild: number
+}
+
+// The place of the child of a block that holds the choice, -1 when none does:
+// a Reiter shows the page with the chosen block.
+function chosenChildOf(e: EditorStore, id: string): number {
+  let cur = e.selectedId === null ? undefined : e.getNode(e.selectedId)
+  while (cur && cur.parentId !== id) cur = cur.parentId === null ? undefined : e.getNode(cur.parentId)
+  return cur ? e.childNodesOf(id).findIndex((child) => child.id === cur.id) : -1
 }
 
 function nodeLook(e: EditorStore, id: string): NodeLook {
   const selected = e.selectedId === id
-  return { selected, carrier: sourcesCarrier(e.tree, id), version: selected ? e.version : 0 }
+  const holds = blockType(e.getNode(id)?.type ?? '')?.takesChildren === true
+  return {
+    selected,
+    carrier: sourcesCarrier(e.tree, id),
+    version: selected ? e.version : 0,
+    chosenChild: holds ? chosenChildOf(e, id) : -1,
+  }
 }
+
+const FILLS_STYLE = { minWidth: 0, minHeight: 0 }
 
 // The place of a block on the canvas: it follows the pointer while carried,
 // and only then draws again on a move.
@@ -81,15 +98,17 @@ const CanvasNode = memo(function CanvasNode({ node, parentId }: { node: BlockNod
   const drag = usePointerDrag()
   const look = useEditorSelect((e) => nodeLook(e, node.id), sameFields)
   const carried = useDndSelect((d) => (d.dragId === node.id ? d.dragOffset : null))
+  // A page of a Reiter has no slot of its own: it neither moves nor sizes.
+  const fills = blockType(node.type)?.fillsParent === true
 
   return (
     <div
       onPointerDown={(e) => {
-        if (underChosen(ed, parentId)) return
+        if (fills || underChosen(ed, parentId)) return
         drag(e, positionDrag(ed, dnd, e, node, parentId))
       }}
       style={{
-        ...gridSlotStyle(gridSlotRead(node.values)),
+        ...(fills ? FILLS_STYLE : gridSlotStyle(gridSlotRead(node.values))),
         ...areaColumnsStyle(node),
         ...(carried
           ? {
@@ -110,9 +129,16 @@ const CanvasNode = memo(function CanvasNode({ node, parentId }: { node: BlockNod
 
 const CanvasBlock = memo(function CanvasBlock({ node, look }: { node: BlockNode; look: NodeLook }) {
   const ed = useEditorInstance()
-  const isContainer = blockType(node.type)?.takesChildren ?? false
+  const def = blockType(node.type)
+  const isContainer = def?.takesChildren ?? false
   return (
-    <BlockHost block={node} selected={look.selected} onSelect={() => ed.chooseHit(node.id)} grid>
+    <BlockHost
+      block={node}
+      selected={look.selected}
+      onSelect={() => ed.chooseHit(node.id)}
+      grid={def?.fillsParent !== true}
+      chosenChild={look.chosenChild}
+    >
       {isContainer && <NodeList parentId={node.id} />}
     </BlockHost>
   )

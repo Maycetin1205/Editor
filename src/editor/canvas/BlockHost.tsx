@@ -35,6 +35,8 @@ interface BlockHostProps {
 
   grid?: boolean
 
+  chosenChild?: number
+
   children?: ReactNode
 }
 
@@ -86,7 +88,7 @@ function followClicked(editor: EditorStore, block: BlockNode, library: readonly 
   editor.view.pickFollowFor(null)
 }
 
-export function BlockHost({ block, selected, onSelect, grid = false, children }: BlockHostProps) {
+export function BlockHost({ block, selected, onSelect, grid = false, chosenChild = -1, children }: BlockHostProps) {
   const editor = useEditorInstance()
   const view = useView()
   const follower = view.followPickFor
@@ -99,28 +101,9 @@ export function BlockHost({ block, selected, onSelect, grid = false, children }:
 
   const blockRef = useLatest(block)
 
-  const { containerRef, elementRef, element, spotClickOf } = useLitElement({
-    editor,
-    blockRef,
-    block,
-    selected,
-    bindableSpots,
-    sources,
-    grid,
-  })
-  const binding = useFieldBinding({
-    editor,
-    blockRef,
-    block,
-    selected,
-    bindableSpots,
-    listBinding: list,
-    searchWindow,
-    sources,
-    element,
-    spotClickOf,
-    onSelect,
-  })
+  const shared = { editor, blockRef, block, selected, bindableSpots, sources }
+  const { containerRef, elementRef, element, spotClickOf } = useLitElement({ ...shared, grid, chosenChild })
+  const binding = useFieldBinding({ ...shared, listBinding: list, searchWindow, element, spotClickOf, onSelect })
   const toFollow = follower !== null && followableByClick(block, follower)
 
   const onClick = (e: MouseEvent<HTMLDivElement>): void => {

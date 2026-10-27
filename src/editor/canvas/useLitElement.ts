@@ -4,7 +4,17 @@ import type { BlockNode } from '../../core/block/tree'
 import { bindingProp, capability, type BindableSpot } from '../../core/block/capability'
 import { gridMetricsOf, rowsForHeight } from '../../core/block/grid'
 import { blockType } from '../../core/block/registry'
-import { BlockElement, PROP_CHANGE, SPOT_CLICK, type PropChange, type SpotClick } from '../../blocks/base/BlockElement'
+import {
+  BlockElement,
+  CHILD_ADD,
+  CHILD_CHANGE,
+  PROP_CHANGE,
+  SPOT_CLICK,
+  type ChildAdd,
+  type ChildChange,
+  type PropChange,
+  type SpotClick,
+} from '../../blocks/base/BlockElement'
 import { HEIGHT_REPORTED, type HeightReported } from '../../blocks/base/heightReport'
 import { boundNames } from '../../core/data/boundField'
 import type { SourceInReach } from '../../core/data/extraSources'
@@ -24,9 +34,35 @@ interface LitElementArgs {
   sources: readonly SourceInReach[]
 
   grid: boolean
+
+  chosenChild: number
 }
 
-export function useLitElement({ editor, blockRef, block, selected, bindableSpots, sources, grid }: LitElementArgs) {
+// What a block changes in its children on the canvas: their words (the
+// title of a page of a Reiter) and a new child (a new page), one undo step.
+function listenToChildren(el: HTMLElement, editor: EditorStore, blockRef: RefObject<BlockNode>): () => void {
+  const onChange = (e: Event) => {
+    const { child, prop, value } = (e as CustomEvent<ChildChange>).detail
+    const id = editor.childNodesOf(blockRef.current.id)[child]?.id
+    if (id !== undefined) editor.updateProperty(id, prop, value)
+  }
+  const onAdd = (e: Event) => {
+    const { type, values } = (e as CustomEvent<ChildAdd>).detail
+    editor.transaction(() => {
+      const node = editor.addBlock(type, blockRef.current.id)
+      if (node) for (const [prop, value] of Object.entries(values)) editor.updateProperty(node.id, prop, value)
+    })
+  }
+  el.addEventListener(CHILD_CHANGE, onChange)
+  el.addEventListener(CHILD_ADD, onAdd)
+  return () => {
+    el.removeEventListener(CHILD_CHANGE, onChange)
+    el.removeEventListener(CHILD_ADD, onAdd)
+  }
+}
+
+export function useLitElement(args: LitElementArgs) {
+  const { editor, blockRef, block, selected, bindableSpots, sources, grid, chosenChild } = args
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   const elementRef = useRef<HTMLElement | null>(null)
@@ -55,6 +91,8 @@ export function useLitElement({ editor, blockRef, block, selected, bindableSpots
     }
     el.addEventListener(PROP_CHANGE, onPropChange)
 
+    const unlistenChildren = listenToChildren(el, editor, blockRef)
+
     const onSpotClick = (e: Event) => {
       spotClick.current = (e as CustomEvent<SpotClick>).detail
     }
@@ -68,6 +106,7 @@ export function useLitElement({ editor, blockRef, block, selected, bindableSpots
 
     return () => {
       el.removeEventListener(PROP_CHANGE, onPropChange)
+      unlistenChildren()
       el.removeEventListener(SPOT_CLICK, onSpotClick)
       el.removeEventListener(HEIGHT_REPORTED, onHeightReported)
       if (container.contains(el)) container.removeChild(el)
@@ -107,9 +146,10 @@ export function useLitElement({ editor, blockRef, block, selected, bindableSpots
     el.spotTexts = texts
 
     el.editable = !!selected
+    el.chosenChild = chosenChild
 
     el.toggleAttribute('fills', !!grid)
-  }, [element, block.type, block.values, selected, bindableSpots, sources, grid])
+  }, [element, block.type, block.values, selected, bindableSpots, sources, grid, chosenChild])
 
   const spotClickOf = (click: Event): SpotClick | null =>
     spotClick.current?.click === click ? spotClick.current : null

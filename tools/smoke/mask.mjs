@@ -17,8 +17,12 @@ export function bridgeScript(status) {
   `
 }
 
-// The k-th element of the tag in the mask, in the order of the page.
-export const nth = (page, tag, k) => page.locator(tag).nth(k)
+// The blocks the probe puts on the page; a block inside another (a field on
+// a page of a Reiter) does not count.
+export const onPage = (tag) => `${tag}[data-ff-main]`
+
+// The k-th element of the tag on the page, in the order of the page.
+export const nth = (page, tag, k) => page.locator(onPage(tag)).nth(k)
 
 // Everything an element shows: its words, the values of its inputs and the
 // sources of its pictures, through its own and nested shadow roots.
@@ -34,7 +38,7 @@ export function shown(page, tag, k) {
         }
         out.push(root.textContent ?? '')
       }
-      const el = document.querySelectorAll(tag)[k]
+      const el = document.querySelectorAll(`${tag}[data-ff-main]`)[k]
       if (!el) return null
       if (el.shadowRoot) walk(el.shadowRoot)
       walk(el)
@@ -48,7 +52,7 @@ export function shown(page, tag, k) {
 export function attributesOf(page, tag, k, names) {
   return page.evaluate(
     ([tag, k, names]) => {
-      const el = document.querySelectorAll(tag)[k]
+      const el = document.querySelectorAll(`${tag}[data-ff-main]`)[k]
       if (!el) return null
       return Object.fromEntries(names.map((name) => [name, el.getAttribute(name)]))
     },

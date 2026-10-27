@@ -114,7 +114,7 @@ function nodeToHtml(
   const pagesAttr = node.parentId === ROOT_ID && !def.page ? ' data-ff-main' : ''
   const alias = pictureAlias(node)
   const aliasAttr = alias === '' ? '' : htmlAttr(PICTURE_ALIAS_ATTR, alias)
-  const open = `${pad}<${def.tag}${attrs}${actionsAttr}${keyAttr}${aliasAttr}${pagesAttr}${fillsAttr}${styleAttr(node, def.page === true)}>`
+  const open = `${pad}<${def.tag}${attrs}${actionsAttr}${keyAttr}${aliasAttr}${pagesAttr}${fillsAttr}${styleAttr(node, def.page === true || def.fillsParent === true)}>`
   if (!def.takesChildren || node.childIds.length === 0) {
     return `${open}</${def.tag}>`
   }

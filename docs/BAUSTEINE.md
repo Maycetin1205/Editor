@@ -2,12 +2,13 @@
 
 Stand 26.10.2026. Eine Bewertung, keine Entscheidung. Die Entscheidung trifft das Produkt.
 
-## Bestand: 13 Bausteine
+## Bestand: 14 Bausteine
 
 | Baustein | Tag | Was er tut | Eigene Einstellungen | Urteil |
 |---|---|---|---|---|
 | Bereich | `ff-area` | Gruppe mit Titel, Rahmen oder Band; kann einklappen | 3 | bleibt |
 | Trennlinie | `ff-divider` | Linie mit optionalem Wort | 3 | bleibt |
+| Reiter | `ff-tabs` | Seiten (`ff-tab`, je ein Raster wie der Bereich) unter einer Leiste von Titeln; eine Seite offen | 2, je Seite 1 | neu |
 | Knopf | `ff-button` | löst eine Aktionskette aus | 4 | bleibt |
 | Feld | `ff-formfield` | Text, mehrzeiliger Text, Zahl, Datum, Uhrzeit, Auswahl, Ankreuzfeld, Suche; nachschlagen in einer Quelle | 16 | bleibt, zu voll (siehe unten) |
 | Datum | `ff-date` | der gewählte Tag der Maske, mit Vor/Zurück | 0 | bleibt |
@@ -26,7 +27,7 @@ Die Zahlen sind Eigenschaften aus `properties.ts`. Dazu kommen bei jedem Baustei
 
 Nach dem, was eine ERP-Karteikarte braucht, und was die vorhandenen Bausteine nicht können:
 
-1. **Reiter** innerhalb einer Maske. Heute gibt es nur Seiten über Popups. Eine Karteikarte mit „Adresse / Konditionen / Historie“ ist nicht baubar.
+1. **Reiter** innerhalb einer Maske. Gebaut als Baustein „Reiter“ mit Seiten („Reiterseite“, nicht in der Palette). Form Kasten oder Frei, „Letzten Reiter merken“, Ereignis „Reiter gewechselt“. Titel per Doppelklick, neue Seite mit „+“ an der Leiste. In der Maske Klick oder Pfeil links/rechts; ein Feld auf verborgener Seite, das den Fokus bekommt (leeres Pflichtfeld vor einer Aktion), öffnet seine Seite.
 2. **Mehrzeiliger Text**. Gebaut als Feldtyp „Mehrzeilig“ des Feldes (`multiline`) mit „Zeilen“ (2 bis 12, Vorgabe 3). Enter beginnt eine neue Zeile, Strg+Enter und Tab gehen zum nächsten Feld.
 3. **Auswahlgruppe** (Optionsfelder nebeneinander, Ankreuzfelder als Gruppe). Das Auswahlfeld ist ein Aufklapper, mehr nicht.
 4. **Status** (Badge, Ampel, Fortschritt) aus einem Feldwert mit Zuordnung Wert → Farbe und Wort. Heute nur über einen Text mit Ton.
