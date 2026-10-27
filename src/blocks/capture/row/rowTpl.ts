@@ -7,6 +7,10 @@ import { figureAt, greyCellTpl, type RowLayout } from '../../parts/cell'
 import { cellsClass } from '../cells'
 import { cellTargetOf } from './context'
 
+// The markup of the typing row: an input per column, and the grey line with
+// the inputs of the subline columns. In the editor's preview the cells stay
+// empty.
+
 interface CapturePlacement {
   columns: readonly Column[]
   slots: readonly number[]
@@ -102,6 +106,8 @@ function captureCellTpl(placement: CapturePlacement, act: CaptureAct, column: Co
   )}</div>`
 }
 
+// Only the cell typed in shows suggestions, and only where its column reads a
+// field; a free cell is plain text.
 function captureInputTpl(placement: CapturePlacement, act: CaptureAct, column: Column, slot: number): TemplateResult {
   const free = cellTargetOf(column, placement.sourceId).kind === 'free'
   const list = !free && placement.typingColumn === slot

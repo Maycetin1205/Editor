@@ -11,22 +11,22 @@ function empty(column: KanbanColumn | undefined): TemplateResult | typeof nothin
 }
 
 // The cards of a place; in the editor one sample card in the first place.
-export function cardsAt(el: KanbanElement, spot: BoardCell): TemplateResult | TemplateResult[] | typeof nothing {
-  const column = el.columns[spot.column]
+export function cardsAt(el: KanbanElement, cell: BoardCell): TemplateResult | TemplateResult[] | typeof nothing {
+  const column = el.columns[cell.column]
   const byTime = column?.byTime === true
   if (el.preview) {
-    if (spot.place !== 0) return empty(column)
+    if (cell.place !== 0) return empty(column)
     return html`${byTime ? SAMPLE_HOUR_LINE : nothing}<div class="card">${cardContent(
       el,
-      spot,
+      cell,
       null,
       byTime ? SAMPLE_UNTIL : null,
     )}</div>`
   }
-  const cards = el.board.cardsAt(spot)
+  const cards = el.board.cardsAt(cell)
   if (cards.length === 0) return empty(column)
-  if (!byTime) return cards.map((card) => cardTpl(el, card, spot, null))
-  return cardsByClock(cards, (card, until) => cardTpl(el, card, spot, until))
+  if (!byTime) return cards.map((card) => cardTpl(el, card, cell, null))
+  return cardsByClock(cards, (card, until) => cardTpl(el, card, cell, until))
 }
 
 export function count(el: KanbanElement, cards: readonly CardData[]): string | number {
@@ -34,31 +34,31 @@ export function count(el: KanbanElement, cards: readonly CardData[]): string | n
 }
 
 // Whether a place holds a card, whatever a search leaves.
-export function isTaken(el: KanbanElement, spot: BoardCell): boolean {
-  return el.preview ? spot.place === 0 : el.board.allAt(spot).length > 0
+export function isTaken(el: KanbanElement, cell: BoardCell): boolean {
+  return el.preview ? cell.place === 0 : el.board.allAt(cell).length > 0
 }
 
-export function placeTpl(el: KanbanElement, spot: BoardCell, place: KanbanPlace): TemplateResult {
+export function placeTpl(el: KanbanElement, cell: BoardCell, place: KanbanPlace): TemplateResult {
   const board = el.board
-  const column = el.columns[spot.column]
+  const column = el.columns[cell.column]
   const occupancy = column?.occupancy === true
-  const taken = occupancy && isTaken(el, spot)
+  const taken = occupancy && isTaken(el, cell)
   const subtitle = place.subtitle.trim()
   return html`<div
-    class="place${board.isTarget(spot) ? ' target' : ''}${occupancy ? (taken ? ' taken' : ' free') : ''}"
-    @dragover=${(e: DragEvent) => board.over(e, spot)}
-    @drop=${(e: DragEvent) => board.drop(e, spot)}
+    class="place${board.isTarget(cell) ? ' target' : ''}${occupancy ? (taken ? ' taken' : ' free') : ''}"
+    @dragover=${(e: DragEvent) => board.over(e, cell)}
+    @drop=${(e: DragEvent) => board.drop(e, cell)}
   >
-    <div class="place-head" data-ff-entry="${spot.column}.${spot.place}">
+    <div class="place-head" data-ff-entry="${cell.column}.${cell.place}">
       ${occupancy ? html`<span class="dot"></span>` : nothing}
       <span class="head-text">${place.name}</span>
       ${subtitle === '' ? nothing : html`<span class="place-sub">${subtitle}</span>`}
       ${
         occupancy
           ? html`<span class="state">${taken ? 'Belegt' : 'Frei'}</span>`
-          : html`<span class="place-count">${count(el, board.cardsAt(spot))}</span>`
+          : html`<span class="place-count">${count(el, board.cardsAt(cell))}</span>`
       }
     </div>
-    <div class="place-body">${cardsAt(el, spot)}</div>
+    <div class="place-body">${cardsAt(el, cell)}</div>
   </div>`
 }

@@ -6,6 +6,8 @@ export interface RowState {
   status: RowsStatus
 }
 
+// Which rows are on their way to SoftEngine and which failed, per kind of
+// write. What a row shows comes from here first, then from its own status.
 export class Outbound {
   private readonly report: () => void
 

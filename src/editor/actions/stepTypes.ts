@@ -2,8 +2,9 @@ import type { ComponentType } from 'react'
 import type { RelationTemplate } from '../../core/data/relations'
 import type { Step, StepKind } from '../../core/data/steps/steps'
 import type { Reach } from '../origin/reach'
+import type { StepTab } from '../state/stepTab'
 
-export type StepTab = 'GET' | 'PUT' | 'TOOL' | 'POPUP' | 'ASK'
+export type { StepTab }
 
 export interface StepContext {
   relations: readonly RelationTemplate[]

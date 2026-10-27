@@ -1,6 +1,11 @@
 import { css } from 'lit'
 import { TABLE_PART } from '../list/parts'
 
+// The input fields in the cells of a capture row: how they look, and how the
+// capture finds and enters them.
+
+// quiet: as it is; changed: a booked cell with a change not yet written;
+// automatic: a cell of the typing row filled from the chosen record.
 type CellsState = 'quiet' | 'changed' | 'automatic'
 
 const CELL_CLASS: Record<CellsState, string> = {
@@ -13,6 +18,8 @@ export function cellsClass(state: CellsState): string {
   return CELL_CLASS[state]
 }
 
+// The input fields of the slots inside the area, a selector such as the
+// typing row or a booked row.
 export function cellsFields(
   root: ShadowRoot | null | undefined,
   area: string,

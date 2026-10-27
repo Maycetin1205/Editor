@@ -46,7 +46,7 @@ function PopupGrips({ ed, node, width, height }: PopupGripsProps) {
             )
           }
           onReset={() =>
-            ed.transaction(() => {
+            ed.history.transaction(() => {
               for (const axis of axesOf(edge)) {
                 ed.updateProperty(node.id, POPUP_SIZE[axis], declared[POPUP_SIZE[axis]]?.default)
               }

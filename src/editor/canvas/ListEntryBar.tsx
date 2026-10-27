@@ -1,13 +1,12 @@
 import { Calculator, ListPlus, Search } from '@/editor/icons/icon'
+import type { ComponentProps } from 'react'
 import {
-  entriesWithValue,
   entryValues,
   fieldChoicesRead,
   flagOn,
   flagFor,
   innerOf,
   listDefaultTitle,
-  withInner,
   type ListBinding,
 } from '../../core/block/blockType'
 import type { LookupWindow } from '../../core/block/capability'
@@ -20,6 +19,7 @@ import { ColumnBar } from '../bar/ColumnBar'
 import type { EditorStore } from '../state/EditorStore'
 import type { PickerGroup, SourcesChoice } from './FieldPicker'
 import { widthFromLength } from './fieldWidth'
+import { listEntryWrites, type ListEntryWrites } from './listEntryWrites'
 import { openLookupInEditor } from './lookupWindowState'
 
 export interface ListPick {
@@ -53,226 +53,234 @@ interface ListEntryBarProps {
   onClose: () => void
 }
 
-export function ListEntryBar({
-  editor,
-  block,
-  listBinding,
-  pick,
-  sources,
-  groups,
-  sourceFromProp,
-  hasFields,
-  sourcesChoice,
-  searchWindow,
-  element,
-  onClose,
-}: ListEntryBarProps) {
-  const entriesOf = (): unknown[] => listBinding.entries(block.values[listBinding.prop])
+type BarProps = ComponentProps<typeof ColumnBar>
 
-  const list = entriesOf()
-  const entry = list[pick.index]
+const withoutNumber = (title: string): string => title.replace(/\s*\{n\}/, '')
+
+export function ListEntryBar(props: ListEntryBarProps) {
+  const { editor, block, listBinding, pick, sources, groups, sourceFromProp, onClose } = props
+  const w = listEntryWrites(editor, block, listBinding, pick.index)
+  const entry = w.entriesOf()[pick.index]
   if (entry === undefined) return null
   const innerBinding = listBinding.inner?.binding
   const innerList = innerOf(listBinding, entry)
-
-  const writeInEntry = (change: (entry: unknown) => unknown): void => {
-    const next = entriesOf()
-    const target = next[pick.index]
-    if (target === undefined) return
-    next[pick.index] = change(target)
-    editor.updateProperty(block.id, listBinding.prop, next)
-  }
-
-  const writeInner = (change: (inner: readonly unknown[]) => readonly unknown[] | null): boolean => {
-    const entries = entriesOf()
-    const next = change(innerOf(listBinding, entries[pick.index]))
-    if (next === null) return false
-    return editor.updateProperty(block.id, listBinding.prop, withInner(listBinding, entries, pick.index, next))
-  }
-
-  const innerGroup = (at: number, inner: ListBinding, own: unknown) => ({
-    properties: Object.entries(inner.entryProperties ?? {}),
-    access: {
-      values: entryValues(inner, own),
-      set: (key: string, value: unknown) => {
-        writeInner((list) => entriesWithValue(inner, list, at, key, value))
-      },
-    },
-  })
-
-  const perSource = sourceFromProp !== undefined
-  const listGroups: PickerGroup[] = perSource
-    ? [
-        {
-          sourceId: '',
-          name: sourceFromProp.name,
-          badge: sourcesKey(sourceFromProp),
-          fields: sourceFromProp.fields,
-        },
-      ]
-    : groups
-  const titleNow = listBinding.titleOf(entry)
-  const defaultTitle = listDefaultTitle(listBinding, pick.index)
-  const reach: readonly SourceInReach[] = perSource ? [{ source: sourceFromProp }] : sources
-  const plainName = (fieldValue: string): string => boundField(fieldValue, reach)?.name || fieldValue
-  const sourceName = (fieldValue: string): string => sourceInReachOf(fieldValue, reach)?.name ?? ''
-  const nameWithSource = (fieldValue: string): string => {
-    const source = sourceName(fieldValue)
-    return source === '' ? plainName(fieldValue) : `${source}: ${plainName(fieldValue)}`
-  }
-
-  const pickField = (value: string): void => {
-    editor.transaction(() => {
-      const next = entriesOf()
-      const target = next[pick.index]
-      if (target === undefined) return
-      next[pick.index] = listBinding.withPickedField(
-        target,
-        value,
-        value === '' ? defaultTitle : plainName(value),
-        widthFromLength(boundField(value, reach)?.length),
-      )
-      editor.updateProperty(block.id, listBinding.prop, next)
-    })
-  }
 
   const at = pick.inner
   if (at !== undefined) {
     const own = innerList[at]
     if (own === undefined || !innerBinding) return null
-    const title = innerBinding.titleOf(own)
     return (
-      <ColumnBar
-        key={`${pick.index}.${at}`}
+      <InnerEntryBar
         block={block}
-        at={pick}
-        name={title === '' ? listDefaultTitle(innerBinding, at) : title}
-        fields={[]}
+        pick={pick}
+        at={at}
+        inner={innerBinding}
+        own={own}
         groups={groups}
-        nameOf={(value) => value}
-        entries={[innerGroup(at, innerBinding, own)]}
-        switches={[]}
-        actions={[]}
-        removeLabel={`${innerBinding.defaultTitle.replace(/\s*\{n\}/, '')} entfernen`}
-        onRemove={
-          innerBinding.entryRemove === undefined
-            ? undefined
-            : () => {
-                if (writeInner((inner) => innerBinding.entryRemove?.(inner, at) ?? null)) onClose()
-              }
-        }
+        w={w}
         onClose={onClose}
       />
     )
   }
 
-  const innerAdd = innerBinding?.entryAdd
-  const column = listBinding.keyOf?.(entry) ?? ''
+  const perSource = sourceFromProp !== undefined
+  const listGroups: PickerGroup[] = perSource
+    ? [{ sourceId: '', name: sourceFromProp.name, badge: sourcesKey(sourceFromProp), fields: sourceFromProp.fields }]
+    : groups
+  const reach: readonly SourceInReach[] = perSource ? [{ source: sourceFromProp }] : sources
+  const plainName = (fieldValue: string): string => boundField(fieldValue, reach)?.name || fieldValue
+  const nameWithSource = (fieldValue: string): string => {
+    const source = sourceInReachOf(fieldValue, reach)?.name ?? ''
+    return source === '' ? plainName(fieldValue) : `${source}: ${plainName(fieldValue)}`
+  }
+  const titleNow = listBinding.titleOf(entry)
+  const defaultTitle = listDefaultTitle(listBinding, pick.index)
+
   return (
     <ColumnBar
       key={pick.index}
       block={block}
       at={pick}
       name={titleNow === '' ? defaultTitle : titleNow}
-      fields={
-        !hasFields || listBinding.fieldless === true
-          ? []
-          : [
-              { key: 'field', label: 'Feld', current: listBinding.fieldOf(entry), onChoose: pickField },
-              ...fieldChoicesRead(listBinding, entry).map(({ choice, value }) => ({
-                key: choice.key,
-                label: choice.name,
-                current: value,
-                onlyForeignSources: choice.onlyForeignSources,
-                onChoose: (next: string) =>
-                  writeInEntry((e) => choice.withValue(e, next, next === '' ? defaultTitle : plainName(next))),
-              })),
-            ]
-      }
+      fields={entryFields(props, entry, w, reach)}
       groups={listGroups}
-      sourcesChoice={perSource ? undefined : sourcesChoice}
+      sourcesChoice={perSource ? undefined : props.sourcesChoice}
       nameOf={nameWithSource}
-      entries={[
-        ...(innerBinding && innerList.length === 1 ? [innerGroup(0, innerBinding, innerList[0])] : []),
-        ...(listBinding.entryProperties === undefined
-          ? []
-          : [
-              {
-                properties: Object.entries(listBinding.entryProperties),
-                access: {
-                  values: entryValues(listBinding, entry),
-                  set: (key: string, value: unknown) =>
-                    editor.updateProperty(
-                      block.id,
-                      listBinding.prop,
-                      entriesWithValue(listBinding, entriesOf(), pick.index, key, value),
-                    ),
-                },
-              },
-            ]),
-        ...(listBinding.entryChoice ?? []).map((choice) => ({
-          properties: [[choice.key, choice.property] as const],
-          access: {
-            values: { [choice.key]: choice.valueOf(entry) },
-            set: (_key: string, value: unknown) => writeInEntry((e) => choice.withValue(e, String(value))),
-          },
-        })),
-      ]}
+      entries={entryGroups(listBinding, entry, innerList, w)}
       switches={flagFor(listBinding, entry).map((s) => ({
         key: s.key,
         label: s.short ?? s.name,
         on: flagOn(s, entry),
-        onToggle: (on) => writeInEntry((e) => s.withValue(e, on)),
+        onToggle: (on) => w.writeInEntry((e) => s.withValue(e, on)),
       }))}
-      actions={[
-        ...(!innerBinding || innerAdd === undefined
-          ? []
-          : [
-              {
-                label: `${innerBinding.defaultTitle.replace(/\s*\{n\}/, '')} anfügen`,
-                icon: ListPlus,
-                onOpen: () => {
-                  writeInner((inner) => innerAdd(inner))
-                },
-              },
-            ]),
-        ...(searchWindow === undefined
-          ? []
-          : [
-              {
-                label: 'Nachschlagen',
-                icon: Search,
-                onOpen: () => {
-                  if (element) openLookupInEditor(editor, element, block.id, searchWindow, pick.index)
-                  onClose()
-                },
-              },
-            ]),
-        ...(!canCompute(block) || column === ''
-          ? []
-          : [
-              {
-                label: 'Berechnung',
-                icon: Calculator,
-                onOpen: () => {
-                  editor.view.openCalculation({ blockId: block.id, column })
-                  onClose()
-                },
-              },
-            ]),
-      ]}
-      removeLabel={`${listBinding.defaultTitle.replace(/\s*\{n\}/, '')} entfernen`}
+      actions={entryActions(props, entry, w)}
+      removeLabel={`${withoutNumber(listBinding.defaultTitle)} entfernen`}
       onRemove={
         listBinding.entryRemove === undefined
           ? undefined
           : () => {
-              const next = listBinding.entryRemove?.(entriesOf(), pick.index) ?? null
-              if (next === null) return
-              editor.updateProperty(block.id, listBinding.prop, next)
-              onClose()
+              if (w.removeEntry()) onClose()
             }
       }
       onClose={onClose}
     />
   )
+}
+
+// The bar of an entry in the inner list of an entry, such as a place in a
+// column of the board.
+function InnerEntryBar({
+  block,
+  pick,
+  at,
+  inner,
+  own,
+  groups,
+  w,
+  onClose,
+}: {
+  block: BlockNode
+  pick: ListPick
+  at: number
+  inner: ListBinding
+  own: unknown
+  groups: PickerGroup[]
+  w: ListEntryWrites
+  onClose: () => void
+}) {
+  const title = inner.titleOf(own)
+  return (
+    <ColumnBar
+      key={`${pick.index}.${at}`}
+      block={block}
+      at={pick}
+      name={title === '' ? listDefaultTitle(inner, at) : title}
+      fields={[]}
+      groups={groups}
+      nameOf={(value) => value}
+      entries={[w.innerGroup(at, inner, own)]}
+      switches={[]}
+      actions={[]}
+      removeLabel={`${withoutNumber(inner.defaultTitle)} entfernen`}
+      onRemove={
+        inner.entryRemove === undefined
+          ? undefined
+          : () => {
+              if (w.writeInner((list) => inner.entryRemove?.(list, at) ?? null)) onClose()
+            }
+      }
+      onClose={onClose}
+    />
+  )
+}
+
+// The fields of the entry: the one it shows, and the fields of its choices.
+// Picking a field names an untitled entry after it.
+function entryFields(
+  props: ListEntryBarProps,
+  entry: unknown,
+  w: ListEntryWrites,
+  reach: readonly SourceInReach[],
+): BarProps['fields'] {
+  const { editor, block, listBinding, pick } = props
+  if (!props.hasFields || listBinding.fieldless === true) return []
+  const defaultTitle = listDefaultTitle(listBinding, pick.index)
+  const titleFor = (value: string): string => (value === '' ? defaultTitle : boundField(value, reach)?.name || value)
+  const pickField = (value: string): void => {
+    editor.history.transaction(() => {
+      const next = w.entriesOf()
+      const target = next[pick.index]
+      if (target === undefined) return
+      next[pick.index] = listBinding.withPickedField(
+        target,
+        value,
+        titleFor(value),
+        widthFromLength(boundField(value, reach)?.length),
+      )
+      editor.updateProperty(block.id, listBinding.prop, next)
+    })
+  }
+  return [
+    { key: 'field', label: 'Feld', current: listBinding.fieldOf(entry), onChoose: pickField },
+    ...fieldChoicesRead(listBinding, entry).map(({ choice, value }) => ({
+      key: choice.key,
+      label: choice.name,
+      current: value,
+      onlyForeignSources: choice.onlyForeignSources,
+      onChoose: (next: string) => w.writeInEntry((e) => choice.withValue(e, next, titleFor(next))),
+    })),
+  ]
+}
+
+// The settings of the entry: those of its only inner entry, its own, and its choices.
+function entryGroups(
+  listBinding: ListBinding,
+  entry: unknown,
+  innerList: readonly unknown[],
+  w: ListEntryWrites,
+): NonNullable<BarProps['entries']> {
+  const innerBinding = listBinding.inner?.binding
+  return [
+    ...(innerBinding && innerList.length === 1 ? [w.innerGroup(0, innerBinding, innerList[0])] : []),
+    ...(listBinding.entryProperties === undefined
+      ? []
+      : [
+          {
+            properties: Object.entries(listBinding.entryProperties),
+            access: { values: entryValues(listBinding, entry), set: w.setEntryValue },
+          },
+        ]),
+    ...(listBinding.entryChoice ?? []).map((choice) => ({
+      properties: [[choice.key, choice.property] as const],
+      access: {
+        values: { [choice.key]: choice.valueOf(entry) },
+        set: (_key: string, value: unknown) => w.writeInEntry((e) => choice.withValue(e, String(value))),
+      },
+    })),
+  ]
+}
+
+// What the bar opens from the entry: a new inner entry, the lookup window, a calculation.
+function entryActions(props: ListEntryBarProps, entry: unknown, w: ListEntryWrites): BarProps['actions'] {
+  const { editor, block, listBinding, pick, searchWindow, element, onClose } = props
+  const innerBinding = listBinding.inner?.binding
+  const innerAdd = innerBinding?.entryAdd
+  const column = listBinding.keyOf?.(entry) ?? ''
+  return [
+    ...(!innerBinding || innerAdd === undefined
+      ? []
+      : [
+          {
+            label: `${withoutNumber(innerBinding.defaultTitle)} anfügen`,
+            icon: ListPlus,
+            onOpen: () => {
+              w.writeInner((inner) => innerAdd(inner))
+            },
+          },
+        ]),
+    ...(searchWindow === undefined
+      ? []
+      : [
+          {
+            label: 'Nachschlagen',
+            icon: Search,
+            onOpen: () => {
+              if (element) openLookupInEditor(editor, element, block.id, searchWindow, pick.index)
+              onClose()
+            },
+          },
+        ]),
+    ...(!canCompute(block) || column === ''
+      ? []
+      : [
+          {
+            label: 'Berechnung',
+            icon: Calculator,
+            onOpen: () => {
+              editor.view.openCalculation({ blockId: block.id, column })
+              onClose()
+            },
+          },
+        ]),
+  ]
 }

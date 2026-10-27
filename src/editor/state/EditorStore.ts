@@ -6,7 +6,7 @@ import { type DataSource } from '../../core/data/dataSources'
 import { type SourceInReach } from '../../core/data/extraSources'
 import { DataSourceStore } from './DataSourceStore'
 import { firstSourceInReach, sourcesInReach } from '../../core/block/sourcesInReach'
-import { gestureBracket, History, type EditorSnapshot, type GestureBracket } from './history'
+import type { EditorSnapshot } from './history'
 import { packMask, type MaskContent, type MaskFileAt } from './maskFile'
 import { storedMaskRefused } from './stageNotice'
 import { NO_LEFTOVER, type Leftover } from './leftover'
@@ -29,6 +29,7 @@ import { deepClone } from '../../core/deepClone'
 import { EditorFiles } from './editorStore/files'
 import { EditorPersistence } from './editorStore/persistence'
 import { blockAdded, blockRemoved, eventsUpdated, inSubtree, propertyUpdated } from './editorStore/treeEdits'
+import { UndoSteps } from './editorStore/undoSteps'
 import { EditorView } from './editorStore/viewState'
 
 export class EditorStore extends Subject<EditorStore> {
@@ -43,7 +44,12 @@ export class EditorStore extends Subject<EditorStore> {
 
   private _activePageId: string = ROOT_ID
   private _version = 0
-  private _history = new History()
+
+  readonly history = new UndoSteps(
+    () => this.snapshot(),
+    (state) => this.restoreFrom(state),
+    () => this.files.maskOnDisk.stir(),
+  )
 
   readonly view = new EditorView()
 
@@ -69,7 +75,7 @@ export class EditorStore extends Subject<EditorStore> {
 
     for (const store of [this.dataSources, this.relation]) {
       store.observeBeforeChange(() => {
-        if (!this._restoring) this.pushHistory()
+        if (!this._restoring) this.history.record()
       })
       store.subscribe(() => {
         if (!this._restoring) this.notify(this)
@@ -157,12 +163,6 @@ export class EditorStore extends Subject<EditorStore> {
   get version(): number {
     return this._version
   }
-  get canUndo(): boolean {
-    return this._history.canUndo
-  }
-  get canRedo(): boolean {
-    return this._history.canRedo
-  }
 
   override notify(data: EditorStore): void {
     this._version++
@@ -195,48 +195,6 @@ export class EditorStore extends Subject<EditorStore> {
     }
   }
 
-  private pushHistory(): void {
-    this._history.record(() => this.snapshot())
-    this.files.maskOnDisk.stir()
-  }
-
-  beginTransaction(): void {
-    this._history.begin(() => this.snapshot())
-  }
-
-  endTransaction(): void {
-    this._history.end()
-  }
-
-  transaction<T>(run: () => T): T {
-    return this._history.transaction(() => this.snapshot(), run)
-  }
-
-  // One undo step for a gesture; cancel puts the mask back as it was when
-  // the gesture began.
-  openGesture(): GestureBracket {
-    return gestureBracket(
-      () => this.beginTransaction(),
-      () => this.endTransaction(),
-      () => {
-        const start = this._history.abandon()
-        if (start) this.restoreFrom(start)
-      },
-    )
-  }
-
-  undo(): void {
-    const prev = this._history.undo(() => this.snapshot())
-    if (!prev) return
-    this.restoreFrom(prev)
-  }
-
-  redo(): void {
-    const next = this._history.redo(() => this.snapshot())
-    if (!next) return
-    this.restoreFrom(next)
-  }
-
   private restoreFrom(state: EditorSnapshot): void {
     this.setLibraries(state)
     if (state.file) this.files.maskOnDisk.restore(state.file)
@@ -248,7 +206,7 @@ export class EditorStore extends Subject<EditorStore> {
   }
 
   private apply(tree: MaskTree, selectedId: string | null = this._selectedId): void {
-    this.pushHistory()
+    this.history.record()
     this._tree = tree
     this._selectedId = selectedId
     this.notify(this)
@@ -268,7 +226,7 @@ export class EditorStore extends Subject<EditorStore> {
       this.pages.map((p) => p.name),
       def.name,
     )
-    return this.transaction(() => {
+    return this.history.transaction(() => {
       const node = this.addBlock(type, ROOT_ID)
       if (node) {
         this._activePageId = node.id
@@ -302,7 +260,7 @@ export class EditorStore extends Subject<EditorStore> {
   duplicateBlock(id: string, rows: number | null = null): BlockNode | null {
     const res = duplicateSubtree(this._tree, id, rows)
     if (!res) return null
-    this.pushHistory()
+    this.history.record()
     this._tree = res.tree
 
     this._activePageId = pageOf(this._tree, res.copyId)
@@ -344,7 +302,7 @@ export class EditorStore extends Subject<EditorStore> {
 
   newMask(): void {
     if (!this.files.maskOnDisk.attached && JSON.stringify(this._tree) === JSON.stringify(emptyTree())) return
-    this.pushHistory()
+    this.history.record()
     this.files.maskOnDisk.forget()
     this.persistence.restarted(null, 0)
     this._tree = emptyTree()
@@ -355,7 +313,7 @@ export class EditorStore extends Subject<EditorStore> {
   }
 
   replaceMask(content: MaskContent, from: MaskFileAt | null = null, locked = false): void {
-    this.pushHistory()
+    this.history.record()
     this.files.maskOnDisk.forget()
     this.setLibraries({
       dataSources: missingOn(this.dataSources.list, content.dataSources),

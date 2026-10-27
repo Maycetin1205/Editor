@@ -7,6 +7,7 @@ import type { EventDef } from '../../core/block/capability'
 import type { BlockNode } from '../../core/block/tree'
 import type { Step } from '../../core/data/steps/steps'
 import { useEditor } from '../state/useEditor'
+import type { OpenStep } from '../state/editorStore/viewState'
 import { useView } from '../state/useView'
 import { conditionWords } from './conditionWords'
 import { releaseEmptyEntryKeys } from './entryEvents'
@@ -42,7 +43,7 @@ export function EventChain({ block, ev, context }: { block: BlockNode; ev: Event
   const opened = useView().stepWindow
   const chain = chainOf(ed, block.id, ev.key)
   const set = (steps: Step[]) =>
-    ed.transaction(() => {
+    ed.history.transaction(() => {
       setChain(ed, block.id, ev.key, steps)
       if (steps.length === 0) releaseEmptyEntryKeys(ed, block.id)
     })
@@ -92,11 +93,16 @@ export function EventChain({ block, ev, context }: { block: BlockNode; ev: Event
   )
 }
 
+// Closed, the window hears only the view, not every change of the mask.
 export function OpenStepWindow() {
-  const ed = useEditor()
   const opened = useView().stepWindow
+  return opened === null ? null : <OpenedStepWindow opened={opened} />
+}
+
+function OpenedStepWindow({ opened }: { opened: OpenStep }) {
+  const ed = useEditor()
   const context = useStepContext()
-  if (opened === null || ed.tree[opened.blockId] === undefined) return null
+  if (ed.tree[opened.blockId] === undefined) return null
 
   const chain = chainOf(ed, opened.blockId, opened.eventKey)
   return (

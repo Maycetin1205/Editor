@@ -1,5 +1,6 @@
-import { useKeyboardShortcuts } from '../state/useKeyboardShortcuts'
-import { useView } from '../state/useView'
+import { useKeyboardShortcuts } from './useKeyboardShortcuts'
+import { useEditorInstance } from '../state/EditorContext'
+import { useStoreSelect } from '../state/useStoreSelect'
 import { Canvas } from '../canvas/Canvas'
 import { OpenCalculationWindow } from '../canvas/CalculationWindow'
 import { OpenSplitWindow } from '../canvas/SplitWindow'
@@ -12,7 +13,11 @@ import { Toolbar } from './Toolbar'
 
 export function EditorShell() {
   useKeyboardShortcuts()
-  const view = useView()
+  // The shell reads only the data window of the view; each part below hears
+  // the view itself, so a change of the view does not draw the whole editor.
+  const view = useEditorInstance().view
+  const dataOpen = useStoreSelect(view, (v) => v.dataWindow)
+  const startsNewSource = useStoreSelect(view, (v) => v.startsNewSource)
 
   return (
     <div className="flex h-screen w-screen flex-col bg-ground text-ink">
@@ -26,7 +31,7 @@ export function EditorShell() {
         <Inspector />
       </div>
 
-      {view.dataWindow && <DataWindow startsNewSource={view.startsNewSource} onClose={() => view.showData(false)} />}
+      {dataOpen && <DataWindow startsNewSource={startsNewSource} onClose={() => view.showData(false)} />}
 
       <LookupColumns />
       <OpenCalculationWindow />

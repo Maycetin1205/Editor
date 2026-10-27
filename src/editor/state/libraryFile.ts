@@ -15,7 +15,7 @@ interface LibraryEditor {
   readonly files: { readonly libraryOnDisk: FileOnDisk }
   readonly dataSources: LibraryList<DataSource>
   readonly relation: LibraryList<RelationTemplate>
-  transaction<T>(run: () => T): T
+  readonly history: { transaction<T>(run: () => T): T }
 }
 
 const LIBRARY_FILE_VERSION = 2
@@ -124,7 +124,7 @@ export async function loadLibraryFromFile(editor: LibraryEditor, file: File): Pr
   const relation = addOn(editor.relation.list, result.content.relation)
   if (sources.list === editor.dataSources.list && relation.list === editor.relation.list) return
 
-  editor.transaction(() => {
+  editor.history.transaction(() => {
     if (sources.list !== editor.dataSources.list) editor.dataSources.replaceAll(sources.list)
     if (relation.list !== editor.relation.list) editor.relation.replaceAll(relation.list)
   })

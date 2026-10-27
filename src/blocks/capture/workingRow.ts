@@ -5,6 +5,10 @@ import type { CaptureColumn } from './column'
 const TYPING = 'typing'
 const CAPTURED = 'captured'
 
+// The row of the capture that blocks following its selection see. While the
+// operator types, it is the typing row; once captured, the captured row it
+// became; once booked, that row as SoftEngine wrote it. A click on a captured
+// row chooses it, a second click lets it go.
 export class WorkingRow {
   private readonly block: HTMLElement
 
@@ -20,10 +24,14 @@ export class WorkingRow {
     return giverIdOf(this.block)
   }
 
+  // Nobody chose another row of this capture since the row was given.
   private get stands(): boolean {
     return this.given !== null && selectionFor(this.giverId) === this.given.row
   }
 
+  // The trait tells the same row from a new one. The same row typed again
+  // does not take the selection back from a row chosen meanwhile; a click on
+  // it does.
   private give(key: string, columns: readonly CaptureColumn[], values: readonly string[], byClick: boolean): void {
     const row: Record<string, string> = {}
     columns.forEach((column, i) => {
@@ -41,6 +49,9 @@ export class WorkingRow {
     this.given = null
   }
 
+  // After each update. A row given by typing goes when the typing row is
+  // empty again, unless it was just captured: then it stays, under the key of
+  // the captured row, until booked() swaps in the written row.
   followTyping(
     columns: readonly CaptureColumn[],
     touched: boolean,

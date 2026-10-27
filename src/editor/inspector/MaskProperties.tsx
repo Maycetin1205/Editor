@@ -15,12 +15,12 @@ import { useEditor } from '../state/useEditor'
 export function MaskProperties() {
   const ed = useEditor()
   const nameSession = useInputSession(
-    () => ed.beginTransaction(),
-    () => ed.endTransaction(),
+    () => ed.history.begin(),
+    () => ed.history.end(),
   )
   const frameSession = useInputSession(
-    () => ed.beginTransaction(),
-    () => ed.endTransaction(),
+    () => ed.history.begin(),
+    () => ed.history.end(),
   )
   const maskName = String(ed.tree[ROOT_ID]?.values[MASK_NAME_PROP] ?? '')
   const frameRaw = String(ed.tree[ROOT_ID]?.values[DOCUMENT_FRAME_PROP] ?? '')

@@ -14,8 +14,8 @@ export function placeValue(column: KanbanColumn, place: KanbanPlace): string {
   return column.places.length === 1 ? column.heading : place.name
 }
 
-export function placeAt(columns: readonly KanbanColumn[], spot: BoardCell): KanbanPlace | undefined {
-  return columns[spot.column]?.places[spot.place]
+export function placeAt(columns: readonly KanbanColumn[], cell: BoardCell): KanbanPlace | undefined {
+  return columns[cell.column]?.places[cell.place]
 }
 
 const same = (a: string, b: string): boolean => a.trim().toLowerCase() === b.trim().toLowerCase()

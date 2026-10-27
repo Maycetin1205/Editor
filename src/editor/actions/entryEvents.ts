@@ -57,7 +57,7 @@ export function claimEntryKey(ed: EditorStore, blockId: string, index: number): 
   const free = at.pool.filter((key) => !taken.has(key))
   const key = free.find((k) => (node.chains?.[k]?.length ?? 0) === 0) ?? free[0]
   if (key === undefined) return null
-  ed.transaction(() => {
+  ed.history.transaction(() => {
     ed.updateProperty(
       blockId,
       at.binding.prop,

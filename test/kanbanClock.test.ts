@@ -8,7 +8,7 @@ const card = (key: string, time: string): CardData => ({
   key,
   row: {},
   record: key,
-  spot: { column: 0, place: 0 },
+  cell: { column: 0, place: 0 },
   values: { time },
 })
 

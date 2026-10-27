@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { FoldButton, FoldedColumn, type FoldTab } from '@/editor/widgets/Folded'
 import { blockType } from '../../core/block/registry'
 import { useEditor } from '../state/useEditor'
-import { useView } from '../state/useView'
+import { useStoreSelect } from '../state/useStoreSelect'
 import { BlockProperties } from './BlockProperties'
 import { MaskProperties } from './MaskProperties'
 import type { Folds } from './Sections'
@@ -11,7 +11,9 @@ const TABS: readonly FoldTab<'properties'>[] = [{ key: 'properties', name: 'Eige
 
 export function Inspector() {
   const ed = useEditor()
-  const view = useView()
+  // Of the view, the column only needs whether it is shut.
+  const view = ed.view
+  const shut = useStoreSelect(view, (v) => v.isShut('right'))
   const [folded, setFolded] = useState<ReadonlySet<string>>(() => new Set())
   const toggle = useCallback(
     (name: string) =>
@@ -24,7 +26,7 @@ export function Inspector() {
   )
   const folds = useMemo<Folds>(() => ({ folded: (name) => folded.has(name), toggle }), [folded, toggle])
 
-  if (view.isShut('right')) {
+  if (shut) {
     return <FoldedColumn side="right" tabs={TABS} onOpen={() => view.shutColumn('right', false)} />
   }
 

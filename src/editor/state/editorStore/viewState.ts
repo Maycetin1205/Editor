@@ -1,5 +1,5 @@
 import type { LookupWindow } from '../../../core/block/capability'
-import type { StepTab } from '../../actions/stepRegistry'
+import type { StepTab } from '../stepTab'
 import type { NoticeText } from '../noticeText'
 import { Subject } from '../Subject'
 import {
@@ -20,14 +20,14 @@ type Finished = 'saved' | 'exported' | 'template'
 
 const DONE_MS = 1600
 
-interface OpenStep {
+export interface OpenStep {
   blockId: string
   eventKey: string
   stepId: string | null
   tab: StepTab
 }
 
-interface OpenCalculation {
+export interface OpenCalculation {
   blockId: string
   column: string
 }

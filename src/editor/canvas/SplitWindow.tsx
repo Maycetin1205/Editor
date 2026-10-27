@@ -15,11 +15,15 @@ import { SplitColumns } from './SplitColumns'
 import { SplitSettings } from './SplitSettings'
 import { carriesSplit } from './splitWords'
 
+// Closed, the window hears only the view, not every change of the mask.
 export function OpenSplitWindow() {
-  const ed = useEditor()
   const blockId = useView().splitWindow
+  return blockId === null ? null : <OpenedSplitWindow blockId={blockId} />
+}
+
+function OpenedSplitWindow({ blockId }: { blockId: string }) {
+  const ed = useEditor()
   const library = useDataSources().list
-  if (blockId === null) return null
   const block = ed.tree[blockId]
   if (block === undefined || !carriesSplit(block)) return null
 

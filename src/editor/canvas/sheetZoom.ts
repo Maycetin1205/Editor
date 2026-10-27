@@ -95,6 +95,44 @@ function steadyAnchor(box: HTMLElement, paper: HTMLElement, zoom: number, chosen
   return { clientX: view.left + SHEET_MARGIN, clientY: top, x: 0, y: (top - rect.top) / zoom }
 }
 
+// Ctrl or Cmd with the wheel zooms around the pointer; with + and - it zooms
+// in steps, with 0 back to fit. Only while the canvas is the active one.
+function useZoomInput(
+  canvas: RefObject<HTMLDivElement | null>,
+  active: boolean,
+  coming: RefObject<number>,
+  choose: (next: ZoomChoice, at?: { clientX: number; clientY: number }) => void,
+): void {
+  useEffect(() => {
+    const box = canvas.current
+    if (!box || !active) return
+    const wheel = (e: WheelEvent): void => {
+      if (!e.ctrlKey && !e.metaKey) return
+      e.preventDefault()
+      const speed = e.deltaMode === WheelEvent.DOM_DELTA_LINE ? 0.05 : 0.002
+      choose(coming.current * Math.exp(-e.deltaY * speed), { clientX: e.clientX, clientY: e.clientY })
+    }
+    box.addEventListener('wheel', wheel, { passive: false })
+    return () => box.removeEventListener('wheel', wheel)
+  }, [canvas, coming, active, choose])
+
+  useEffect(() => {
+    if (!active) return
+    const key = (e: KeyboardEvent): void => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return
+      let next: ZoomChoice
+      if (e.key === '+' || e.key === '=') next = zoomStep(coming.current, 1)
+      else if (e.key === '-') next = zoomStep(coming.current, -1)
+      else if (e.key === '0') next = 'fit'
+      else return
+      e.preventDefault()
+      choose(next)
+    }
+    window.addEventListener('keydown', key)
+    return () => window.removeEventListener('keydown', key)
+  }, [coming, active, choose])
+}
+
 export function useSheetZoom(active: boolean, chosenId: string | null): SheetZoom & SheetZoomPlaces {
   const canvas = useRef<HTMLDivElement | null>(null)
   const sheet = useRef<HTMLDivElement | null>(null)
@@ -156,34 +194,7 @@ export function useSheetZoom(active: boolean, chosenId: string | null): SheetZoo
     box.dispatchEvent(new Event('scroll'))
   })
 
-  useEffect(() => {
-    const box = canvas.current
-    if (!box || !active) return
-    const wheel = (e: WheelEvent): void => {
-      if (!e.ctrlKey && !e.metaKey) return
-      e.preventDefault()
-      const speed = e.deltaMode === WheelEvent.DOM_DELTA_LINE ? 0.05 : 0.002
-      choose(coming.current * Math.exp(-e.deltaY * speed), { clientX: e.clientX, clientY: e.clientY })
-    }
-    box.addEventListener('wheel', wheel, { passive: false })
-    return () => box.removeEventListener('wheel', wheel)
-  }, [active, choose])
-
-  useEffect(() => {
-    if (!active) return
-    const key = (e: KeyboardEvent): void => {
-      if (!(e.ctrlKey || e.metaKey) || e.altKey) return
-      let next: ZoomChoice
-      if (e.key === '+' || e.key === '=') next = zoomStep(coming.current, 1)
-      else if (e.key === '-') next = zoomStep(coming.current, -1)
-      else if (e.key === '0') next = 'fit'
-      else return
-      e.preventDefault()
-      choose(next)
-    }
-    window.addEventListener('keydown', key)
-    return () => window.removeEventListener('keydown', key)
-  }, [active, choose])
+  useZoomInput(canvas, active, coming, choose)
 
   return { zoom, choice, fit, choose, canvas, sheet }
 }

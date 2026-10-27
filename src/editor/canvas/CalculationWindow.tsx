@@ -1,39 +1,22 @@
-import { useState } from 'react'
 import { Button } from '@/editor/widgets/Button'
 import { cn } from '@/editor/widgets/cn'
-import { Field } from '@/editor/widgets/Field'
-import { Grid, GridAddLine, NAME, SETTINGS, Strip, TD } from '@/editor/widgets/Grid'
-import { Segment } from '@/editor/widgets/Segment'
+import { Grid, GridAddLine, Strip, TD } from '@/editor/widgets/Grid'
 import { Window } from '@/editor/widgets/Window'
 import { blockName } from '../../core/block/blockName'
 import { capability, hasCapability } from '../../core/block/capability'
 import { blockType, declaredValue } from '../../core/block/registry'
 import { sourcesInReach } from '../../core/block/sourcesInReach'
-import {
-  calculationsProperty,
-  newCalculation,
-  toldFrom,
-  DECIMALS_MAX,
-  type Calculation,
-  type Term,
-} from '../../core/data/calculation'
-import { asNumber } from '../../core/data/number'
+import { calculationsProperty, newCalculation, toldFrom, type Calculation } from '../../core/data/calculation'
 import { KIND_NAMES } from '../origin/origins'
 import { calculationReach, columnEntries, sourceGroup } from '../origin/reach'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
+import type { OpenCalculation } from '../state/editorStore/viewState'
 import { useView } from '../state/useView'
-import {
-  columnTitle,
-  sentenceText,
-  termName,
-  termOrigin,
-  termOriginKey,
-  termsText,
-  type Names,
-} from './calculationWords'
+import { columnTitle, sentenceText, termName, termOriginKey, termsText, type Names } from './calculationWords'
+import { CalculationSettings } from './CalculationSettings'
 import { TermLine } from './TermLine'
-import { UnitsPane } from './UnitsPane'
+import { useCalculationDraft, type CalculationDraft } from './useCalculationDraft'
 
 const COLUMNS = [
   { name: 'Nr.', width: 44, right: true },
@@ -42,13 +25,15 @@ const COLUMNS = [
   { name: 'Eingabe' },
 ]
 
-const EMPTY_TERM: Term = { kind: 'fixed', value: '', divides: false }
-
+// Closed, the window hears only the view, not every change of the mask.
 export function OpenCalculationWindow() {
-  const ed = useEditor()
   const open = useView().calculationWindow
+  return open === null ? null : <OpenedCalculationWindow open={open} />
+}
+
+function OpenedCalculationWindow({ open }: { open: OpenCalculation }) {
+  const ed = useEditor()
   const library = useDataSources().list
-  if (open === null) return null
   const block = ed.tree[open.blockId]
   const def = block === undefined ? undefined : blockType(block.type)
   const prop = capability(def, 'compute')?.prop
@@ -118,51 +103,13 @@ function CalculationWindow({
   onRemove?: () => void
   onClose: () => void
 }) {
-  const [draft, setDraft] = useState(calculation)
-  const [selected, setSelected] = useState<number | null>(null)
-  const [pending, setPending] = useState<{ at: number; origin: string } | null>(null)
-  const [open, setOpen] = useState<{ at: number; list: 'origin' | 'entry' } | null>(null)
-
-  const terms = draft.terms
-  const setTerms = (next: Term[]): void => setDraft({ ...draft, terms: next })
-  const setTerm = (i: number, term: Term): void => setTerms(terms.map((t, k) => (k === i ? term : t)))
-
-  const chooseOrigin = (i: number, key: string): void => {
-    setOpen(null)
-    const divides = terms[i]?.divides ?? false
-    if (key === 'fixed') {
-      setPending(null)
-      if (terms[i]?.kind !== 'fixed') setTerm(i, { kind: 'fixed', value: '', divides })
-      return
-    }
-    if (key === 'units') {
-      setPending(null)
-      if (terms[i]?.kind !== 'units') setTerm(i, { kind: 'units', table: [], divides })
-      return
-    }
-    setPending({ at: i, origin: key })
-    setOpen({ at: i, list: 'entry' })
-  }
-  const takeEntry = (i: number, value: string): void => {
-    setPending(null)
-    setOpen(null)
-    const origin = termOrigin(value)
-    if (origin) setTerm(i, { ...origin, divides: terms[i]?.divides ?? false })
-  }
-
-  const unitsAt =
-    selected !== null && terms[selected]?.kind === 'units' ? selected : terms.findIndex((t) => t.kind === 'units')
-  const units = terms[unitsAt]
-  const complete = terms.filter((t) => !(t.kind === 'fixed' && t.value.trim() === ''))
-  const ready = complete.length > 0 && complete.every((t) => t.kind !== 'fixed' || asNumber(t.value) !== null)
-  const finished: Calculation = { ...draft, terms: complete }
-
+  const d = useCalculationDraft(calculation)
   return (
     <Window
       title="Berechnung"
       beside={
         <span className="min-w-0 truncate border-l border-line-soft pl-[14px] font-mono text-dense text-muted">
-          {sentenceText(finished, names)}
+          {sentenceText(d.finished, names)}
         </span>
       }
       width={1040}
@@ -176,7 +123,7 @@ function CalculationWindow({
             </Button>
           )}
           <Button onClick={onClose}>Abbrechen</Button>
-          <Button kind="primary" disabled={!ready} onClick={() => onApply(finished)}>
+          <Button kind="primary" disabled={!d.ready} onClick={() => onApply(d.finished)}>
             Übernehmen
           </Button>
         </>
@@ -184,102 +131,50 @@ function CalculationWindow({
       onClose={onClose}
     >
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_320px]">
-        <div className="flex min-h-0 flex-col border-r border-line-soft">
-          <Strip right={termsText(complete.length)}>Satz</Strip>
-          <Grid columns={COLUMNS} onEmpty={() => setSelected(null)}>
-            <tr className="cursor-default">
-              <td className={TD} />
-              <td className={cn(TD, 'px-[10px] font-mono text-dense text-muted')}>=</td>
-              <td className={cn(TD, 'px-[10px] text-muted')}>
-                {names.leadName === undefined ? KIND_NAMES.row : KIND_NAMES.block}
-              </td>
-              <td className={cn(TD, 'truncate px-[10px] font-semibold')}>{columnTitle(names, draft.lead)}</td>
-            </tr>
-            {terms.map((term, i) => (
-              <TermLine
-                key={i}
-                nr={i + 1}
-                term={term}
-                adds={draft.adds === true}
-                names={names}
-                origin={pending?.at === i ? pending.origin : termOriginKey(term)}
-                entry={pending?.at === i ? '' : termName(term, names)}
-                on={selected === i}
-                open={open?.at === i ? open.list : null}
-                onSelect={() => {
-                  if (selected !== i) setPending(null)
-                  setSelected(i)
-                }}
-                onOpen={(list) => setOpen(list === null ? null : { at: i, list })}
-                onSign={(divides) => setTerm(i, { ...term, divides })}
-                onOrigin={(key) => chooseOrigin(i, key)}
-                onTake={(value) => takeEntry(i, value)}
-                onType={(value) => setTerm(i, { kind: 'fixed', value, divides: term.divides })}
-                onRemove={() => {
-                  setTerms(terms.filter((_, k) => k !== i))
-                  setSelected(null)
-                  setPending(null)
-                }}
-              />
-            ))}
-            <GridAddLine
-              onAdd={() => {
-                setTerms([...terms, EMPTY_TERM])
-                setSelected(terms.length)
-                setOpen({ at: terms.length, list: 'origin' })
-              }}
-            >
-              Größe hinzufügen
-            </GridAddLine>
-          </Grid>
-        </div>
-        <div className="flex min-h-0 flex-col overflow-y-auto">
-          <Strip>Ergebnis</Strip>
-          <div className="break-words border-b border-line-soft px-[12px] py-[9px] font-mono text-dense leading-[19px] text-ink">
-            {sentenceText(finished, names)}
-          </div>
-          <Strip>Rechnung</Strip>
-          <div className={cn(SETTINGS, 'grid-cols-[112px_auto]')}>
-            <span className={NAME}>Zeichen</span>
-            <Segment
-              name="Rechnung"
-              options={[
-                { value: 'times', name: '× ÷' },
-                { value: 'adds', name: '+ −' },
-              ]}
-              value={draft.adds === true ? 'adds' : 'times'}
-              onChoose={(v) =>
-                setDraft({
-                  key: draft.key,
-                  lead: draft.lead,
-                  terms: draft.terms,
-                  decimals: draft.decimals,
-                  ...(v === 'adds' ? { adds: true } : {}),
-                })
-              }
-            />
-          </div>
-          <Strip>Rundung</Strip>
-          <div className={cn(SETTINGS, 'grid-cols-[112px_72px]')}>
-            <span className={NAME}>Stellen</span>
-            <Field
-              aria-label="Stellen"
-              inputMode="numeric"
-              value={draft.decimals}
-              onChange={(e) => {
-                const decimals = Number.parseInt(e.currentTarget.value, 10)
-                if (Number.isInteger(decimals) && decimals >= 0 && decimals <= DECIMALS_MAX) {
-                  setDraft({ ...draft, decimals })
-                }
-              }}
-              className="text-right font-mono"
-            />
-          </div>
-          {units?.kind === 'units' && (
-            <UnitsPane term={units} names={names} onChange={(next) => setTerm(unitsAt, next)} />
-          )}
-        </div>
+        <TermsPane d={d} names={names} />
+        <CalculationSettings d={d} names={names} />
       </div>
     </Window>
+  )
+}
+
+// The left side: the lead of the sentence and one line per term.
+function TermsPane({ d, names }: { d: CalculationDraft; names: Names }) {
+  const { draft, pending, open } = d
+  return (
+    <div className="flex min-h-0 flex-col border-r border-line-soft">
+      <Strip right={termsText(d.complete.length)}>Satz</Strip>
+      <Grid columns={COLUMNS} onEmpty={d.unselect}>
+        <tr className="cursor-default">
+          <td className={TD} />
+          <td className={cn(TD, 'px-[10px] font-mono text-dense text-muted')}>=</td>
+          <td className={cn(TD, 'px-[10px] text-muted')}>
+            {names.leadName === undefined ? KIND_NAMES.row : KIND_NAMES.block}
+          </td>
+          <td className={cn(TD, 'truncate px-[10px] font-semibold')}>{columnTitle(names, draft.lead)}</td>
+        </tr>
+        {d.terms.map((term, i) => (
+          <TermLine
+            key={i}
+            nr={i + 1}
+            term={term}
+            adds={draft.adds === true}
+            names={names}
+            origin={pending?.at === i ? pending.origin : termOriginKey(term)}
+            entry={pending?.at === i ? '' : termName(term, names)}
+            on={d.selected === i}
+            open={open?.at === i ? open.list : null}
+            onSelect={() => d.select(i)}
+            onOpen={(list) => d.setOpen(list === null ? null : { at: i, list })}
+            onSign={(divides) => d.setTerm(i, { ...term, divides })}
+            onOrigin={(key) => d.chooseOrigin(i, key)}
+            onTake={(value) => d.takeEntry(i, value)}
+            onType={(value) => d.setTerm(i, { kind: 'fixed', value, divides: term.divides })}
+            onRemove={() => d.remove(i)}
+          />
+        ))}
+        <GridAddLine onAdd={d.add}>Größe hinzufügen</GridAddLine>
+      </Grid>
+    </div>
   )
 }

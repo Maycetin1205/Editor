@@ -15,6 +15,7 @@ import { controlShown } from '../bar/controlShown'
 import { followOffered } from '../bar/followOffer'
 import { useDataSources } from '../state/useDataSources'
 import { useEditor } from '../state/useEditor'
+import { useStoreSelect } from '../state/useStoreSelect'
 import { BarControl } from './BarControl'
 import { Sections, type Folds } from './Sections'
 
@@ -32,8 +33,8 @@ export function BlockProperties({ block, def, folds, onRemove }: BlockProperties
 
   const session = useMemo(
     () => ({
-      onBeginEditing: () => ed.beginTransaction(),
-      onEndEditing: () => ed.endTransaction(),
+      onBeginEditing: () => ed.history.begin(),
+      onEndEditing: () => ed.history.end(),
     }),
     [ed],
   )
@@ -62,6 +63,7 @@ export function BlockProperties({ block, def, folds, onRemove }: BlockProperties
     propertyVisible(searchWindow.when, block.values)
   const helpers = carriesOwnSource(block) ? capability(def, 'source')?.helpers : undefined
   const follows = maySelectionFollows(block) && followOffered(ed.tree, block, library)
+  const waitsForGiver = useStoreSelect(ed.view, (v) => v.followPickFor === block.id)
 
   const kind = def?.name ?? block.type
   const what = blockName(block, library)
@@ -95,7 +97,7 @@ export function BlockProperties({ block, def, folds, onRemove }: BlockProperties
         searchWindow={windowShown ? searchWindow : undefined}
         helpers={helpers === 'apart' && declaredValue(block, SOURCE_PROPERTY) === '' ? undefined : helpers}
         follows={follows}
-        waiting={ed.view.followPickFor === block.id}
+        waiting={waitsForGiver}
         events={(capability(def, 'events')?.list ?? []).filter((ev) => !ev.entry)}
         folds={folds}
       />
