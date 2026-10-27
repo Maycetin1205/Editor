@@ -67,7 +67,8 @@ Fertig ist er erst, wenn `npm run smoke` ihn besteht: in der Palette einfügbar,
 
 ## Der Editor (`src/editor`)
 
-- `state/EditorStore.ts`: Baum, Auswahl, Seiten, Verlauf (Rückgängig), Bibliotheken. Jede Änderung geht durch `apply` und meldet sich an alle Horcher.
+- `state/EditorStore.ts`: Baum, Auswahl, Seiten, Bibliotheken. Jede Änderung geht durch `apply` und meldet sich an alle Horcher.
+- `state/editorStore/undoSteps.ts` (`editor.history`): Rückgängig und Wiederholen; eine Transaktion oder eine Geste macht aus mehreren Änderungen einen Schritt.
 - `state/editorStore/viewState.ts` (`EditorView`): was neben der Maske offen ist (Fenster, Spalten, Meldungen). Meldet sich selbst; `useView()` liefert es.
 - `state/editorStore/files.ts` (`EditorFiles`): Maske und Bibliothek auf der Platte, der Masken-Ordner, das Wiederfinden nach einem Neustart.
 - `state/editorStore/persistence.ts`: Speichern im Browser und auf die Platte, entprellt.
@@ -75,7 +76,7 @@ Fertig ist er erst, wenn `npm run smoke` ihn besteht: in der Palette einfügbar,
 - `commands/`: Abläufe, die mehr als den Zustand brauchen (Export).
 - Die Oberfläche: `shell` (Rahmen, Werkzeugleiste), `sidebar` (Palette, Masken), `canvas` (Fläche, Ziehen, Fenster), `inspector` (Eigenschaften), `data` (Datenfenster), `actions` (Aktionsketten), `widgets` (Bedienelemente).
 
-React-Teile sprechen mit dem Zustand über `useEditor()` (Modell) und `useView()` (Ansicht). Beide sind `useSyncExternalStore` auf einer Versionsnummer.
+React-Teile sprechen mit dem Zustand über `useEditor()` (Modell) und `useView()` (Ansicht). Beide sind `useSyncExternalStore` auf einer Versionsnummer und zeichnen bei jeder Änderung. Wer nur einen Teil zeigt, nimmt `useEditorSelect(select, same)` oder `useStoreSelect(view, select)` und zeichnet nur, wenn sich dieser Teil ändert; ein Teil ohne Props, der so hört, steht als `memo`, damit ihn das Zeichnen seines Elternteils nicht mitnimmt. Was erst beim Klick gebraucht wird, liest der Klick aus `useEditorInstance()`.
 
 ## Wörter
 

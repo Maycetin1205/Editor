@@ -1,6 +1,6 @@
 # Bauplan: Stand und offene Punkte
 
-Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR.md`, die Bausteine und Einstellungen in `docs/BAUSTEINE.md`.
+Stand 27.10.2026, Zweig `marktreife` mit den Schritten vom 27.10. darauf. Die Architektur steht in `docs/ARCHITEKTUR.md`, die Bausteine und Einstellungen in `docs/BAUSTEINE.md`.
 
 ## Erledigt
 
@@ -11,7 +11,7 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 | Bauzeit und Laufzeit in den Aktionsschritten | Ausführen in `runtime/steps`, Lesen und Export in `core/data/steps` |
 | Globaler Sammelbehälter `maskState` | aufgelöst; der Host ist eine Funktion (`runtime/host.ts`) |
 | `runtime/events.ts` (418 Zeilen) | vier Teile in `runtime/actions` |
-| `EditorStore` (585 Zeilen, acht Aufgaben) | Ansicht und Dateien eigene Teile, 380 Zeilen |
+| `EditorStore` (585 Zeilen, acht Aufgaben) | Ansicht, Dateien und Verlauf eigene Teile (`editor.view`, `editor.files`, `editor.history`), 346 Zeilen |
 | Export in der Werkzeugleiste | `editor/commands/exportMask.ts` |
 | Zwei Suchen mit verschiedenem Ergebnis | eine Suche, Umlaute überall gefaltet |
 | Kleintierpraxis im Kanban | raus (Tierarten, Wortlaut); „Belegt/Frei“ bleibt als allgemeine Belegung |
@@ -35,6 +35,10 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 | Namen: `Piece`, `holding`, `Spot` in fremden Bedeutungen, `selected` für die gewählte Zeile der Maske | Zusammenfassung/Reiter, `kind`, `HeadHandle`/`firstFocusable`, `chosen`/`recordChoice`; Wörter in `docs/ARCHITEKTUR.md`. Nichts davon stand in Dateien, Aliasse waren nicht nötig |
 | Beim Ziehen zeichnete die ganze Fläche bei jeder Zeigerbewegung (gemessen: 51 Komponenten je Bewegung, darunter alle 12 Bausteine) | Zieh-Zustand als eigener Speicher (`DndState`, `useDndSelect`), Baustein und Platz getrennt (`CanvasNode`, `CanvasBlock`); 2,5 Komponenten je Bewegung, Skriptzeit 62 statt rund 220 ms auf 40 Bewegungen |
 | Feine Abos für die Fläche (`useEditorSelect` mit Vergleich) | Ändern einer Eigenschaft zeichnete alle Bausteine der Fläche neu (12 von 12), jetzt nur den geänderten; je Änderung 54 statt 101 Komponenten |
+| Feine Abos für Seitenleiste, Werkzeugleiste und Fenster | Bausteinliste, Seitenreiter, Maskenname und Speichern hören je ihren Ausschnitt (als `memo`); Schritt-, Berechnungs- und Verteilen-Fenster hören geschlossen nur die Ansicht; Rahmen, Seitenleiste und Inspektor lesen aus der Ansicht nur ihre Werte. Gemessen wie React DevTools mit sechs Bausteinen: Eigenschaft ändern 99 → 58, Baustein wählen 116 → 85, Verschieben 102 → 61, nur Ansicht (Umrisse) 141 → 35 Komponenten |
+| `editor/state` importierte React-Teile und den Export (zuletzt 4 Stellen) | was Maske und Export beide brauchen in `core/data/usedByMask.ts`, Tastenkürzel nach `shell/`; die Importregel ist ein Fehler |
+| Größenbremse als Warnung (zuletzt 8 Stellen) | Fehler: Dateien 300, Funktionen 80, React-Komponenten 120 Zeilen; null Warnungen. Geteilt nach Aufgaben: Verlauf, Berechnungsfenster, Leiste eines Listeneintrags, Zoom, Beobachter der SoftEngine-Reihe |
+| Erfassung und Kanban: zweite Lesung | jede Datei sagt, wofür sie da ist, Warum-Sätze an kniffligen Stellen (`WorkingRow`, Spalten, Ausgang, Verteilen); der Platz einer Karte heißt `cell` wie `BoardCell` |
 | Escape beim Größenändern behielt die erreichte Größe | `GestureBracket.cancel()` rollt über `History.abandon()` auf den Stand beim Öffnen zurück, ohne Rückgängig-Schritt, Wiederholen bleibt; gilt für Baustein, Popup-Seite und Nachschlagefenster |
 | Hebungen alter Masken (Stufe 20 bis 38, nur gegen synthetische Dokumente geprüft) | gestrichen; eine Maske unter 39 wird mit „zu alte Fassung“ abgelehnt |
 | Verdacht auf Fehler (12 Fälle aus dem Umbau) | je ein Commit: Kanban (Meldung nach Aushängen, Ankunftsmeldung erst nach bestätigtem Schreiben, Jetzt-Linie vor Karten ohne Uhrzeit); Tabelle (Sortierung bleibt beim Wechsel der Zeilenquelle, tote `rawIndex === null`-Zweige raus); Erfassung (Auswahl folgt der korrigierten Zeile, geleerte Korrektur fragt vor dem Löschen, Einfügen nur an eine sichtbare Erfassung, Doppelklick beim Laden wird nachgeholt); Fläche (Fenstergriff hebt die Auswahl nicht auf, tote `dragId`-Zweige raus, Escape beim Ziehen geht vor offenen Fenstern) |
@@ -42,9 +46,9 @@ Stand 26.10.2026, Zweig `marktreife`. Die Architektur steht in `docs/ARCHITEKTUR
 ## Offen
 
 1. **Namen**: erledigt, siehe oben.
-2. **Feine Abos im Editor**: für die Fläche erledigt, siehe oben. Offen: Seitenleiste (`BlockPalette`), Werkzeugleiste (`PageBar`, `SaveState`, `MaskWho`) und Inspektor zeichnen weiter bei jeder Änderung (gemessen 54 Komponenten je Eigenschaftsänderung).
-3. **Größenbremse scharf schalten**: `max-lines` 300 und `max-lines-per-function` 80 von Warnung auf Fehler, sobald die laufenden Umbauten drin sind. Für React-Komponenten ist 80 Zeilen zu knapp; Vorschlag 120 für `.tsx`.
-4. **Erfassung und Kanban**: beide bleiben (Belegpositionen sind Kern, das Brett ist allgemein brauchbar). Beide brauchen nach dem Umbau eine zweite Lesung auf Verständlichkeit.
+2. **Feine Abos im Editor**: erledigt, siehe oben. Der Inspektor zeichnet weiter bei jeder Änderung der Maske: er zeigt Quellen in Reichweite und Geber anderer Bausteine, die von der ganzen Maske abhängen; ein enger Ausschnitt zeigte dort veraltete Werte.
+3. **Größenbremse**: erledigt, siehe oben.
+4. **Erfassung und Kanban**: beide bleiben (Belegpositionen sind Kern, das Brett ist allgemein brauchbar); zweite Lesung erledigt, siehe oben.
 5. **Hebungen alter Masken**: erledigt, siehe oben.
 6. **SoftEngine-Anschluss**: gegen eine Installation geprüft (laut Betreiber); die offenen Fragen in `docs/SOFTENGINE-SCHNITTSTELLE.md` bleiben dokumentiert.
 7. **Verdacht auf Fehler**: erledigt, siehe oben.
