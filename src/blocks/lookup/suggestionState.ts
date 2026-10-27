@@ -71,10 +71,12 @@ function keyAction(
     if (!l.fieldEmpty) return 'clear'
     return l.jumps ? 'giveUp' : 'nothing'
   }
+  // Arrow down lists what fits the field; an empty field has nothing to fit,
+  // its records come with Enter in the window.
   if (key === 'ArrowDown') {
     if (l.listOpen) return 'markDown'
     if (l.jumps) return 'down'
-    return l.lookupable && l.hasRecords() ? 'openList' : 'nothing'
+    return l.lookupable && !l.fieldEmpty && l.hasRecords() ? 'openList' : 'nothing'
   }
   if (key === 'ArrowUp') {
     if (l.listOpen) return 'markUp'
