@@ -1,5 +1,5 @@
 import type { LookupWindow } from '../../../core/block/capability'
-import type { StepTab } from '../../actions/stepRegistry'
+import type { StepTab } from '../stepTab'
 import type { NoticeText } from '../noticeText'
 import { Subject } from '../Subject'
 import {

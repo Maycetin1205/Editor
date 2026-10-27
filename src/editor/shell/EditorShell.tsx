@@ -1,4 +1,4 @@
-import { useKeyboardShortcuts } from '../state/useKeyboardShortcuts'
+import { useKeyboardShortcuts } from './useKeyboardShortcuts'
 import { useView } from '../state/useView'
 import { Canvas } from '../canvas/Canvas'
 import { OpenCalculationWindow } from '../canvas/CalculationWindow'

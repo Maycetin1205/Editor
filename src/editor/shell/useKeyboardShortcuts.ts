@@ -2,8 +2,8 @@ import { useEffect } from 'react'
 import { blockType } from '../../core/block/registry'
 import { gridMetricsOf, gridSlotRead } from '../../core/block/grid'
 import { capacityOf } from '../canvas/gridArea'
-import { useEditorInstance } from './EditorContext'
-import { saveOrAsk } from './maskFile'
+import { useEditorInstance } from '../state/EditorContext'
+import { saveOrAsk } from '../state/maskFile'
 
 type Editor = ReturnType<typeof useEditorInstance>
 

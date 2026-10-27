@@ -197,12 +197,12 @@ export default defineConfig([
     },
   },
   // The editor's state is the model under its React parts and imports none of
-  // them. Warnings until phase 4 of BAUPLAN.md has moved what still does.
+  // them.
   {
     files: ['src/editor/state/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
-        'warn',
+        'error',
         {
           patterns: [
             {

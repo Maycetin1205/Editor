@@ -14,41 +14,9 @@ import type { DataSource } from '../core/data/dataSources'
 import { deliveryAdapter } from '../core/data/deliveries/deliveries'
 import { alwaysOrdered } from '../core/data/positions'
 import { sourceUsable, completePairs, extraSourcesProperty, type SourceInReach } from '../core/data/extraSources'
-import { sourceIdsUsedBy, sourcesInReach } from '../core/block/sourcesInReach'
+import { sourcesInReach } from '../core/block/sourcesInReach'
 import { stepAdapter } from '../core/data/steps/steps'
-
-function fieldsReadBy(source: DataSource): { sourceId: string; code: string }[] {
-  const out: { sourceId: string; code: string }[] = []
-  for (const binding of deliveryAdapter(source.delivery.kind).bindings(source.delivery)) {
-    if (binding.source !== 'dataField') continue
-    const sourceId = binding.sourceId ?? ''
-    if (sourceId !== '') out.push({ sourceId, code: binding.value })
-  }
-  return out
-}
-
-export function collectDataSources(tree: MaskTree, sources: readonly DataSource[]): DataSource[] {
-  const seen = new Set<string>()
-  const acc: DataSource[] = []
-  const add = (id: string): void => {
-    const src = sources.find((s) => s.id === id)
-    if (src && !seen.has(src.id)) {
-      seen.add(src.id)
-      acc.push(src)
-    }
-  }
-  const visit = (node: BlockNode | undefined): void => {
-    if (!node) return
-    for (const id of sourceIdsUsedBy(node)) add(id)
-    node.childIds.forEach((id) => visit(tree[id]))
-  }
-  visit(tree[ROOT_ID])
-
-  for (let i = 0; i < acc.length; i++) {
-    for (const { sourceId } of fieldsReadBy(acc[i])) add(sourceId)
-  }
-  return acc
-}
+import { collectDataSources, fieldsReadBy } from '../core/data/usedByMask'
 
 // Where a block reaches into a source: one collector per block, with the
 // sources in reach of that block resolved once.
