@@ -1,4 +1,4 @@
-import type { JobReason, JobView, PutConfirm, RunAnswer } from '../../core/data/jobs'
+import type { JobArt, JobReason, JobView, PutConfirm, RunAnswer, RunOptions } from '../../core/data/jobs'
 import { isObject, rowsFromQueryAnswer } from '../data'
 import type { RowShape } from '../positionsOverlay'
 import { extractRecordAnswer } from './answer'
@@ -38,6 +38,20 @@ export interface Job {
   fail: (reason: JobReason) => void
   arrived?: () => void
   heard?: (raw: unknown) => void
+}
+
+// A job as it joins the line; the line gives it its start, drop and fail.
+export function queuedJob(id: number, art: JobArt, question: string, options: RunOptions): Job {
+  const view: JobView = {
+    id,
+    art,
+    origin: options.origin ?? '',
+    generation: options.generation ?? 0,
+    question,
+    state: 'queued',
+    queuedAt: Date.now(),
+  }
+  return { view, start: () => {}, drop: () => {}, fail: () => {} }
 }
 
 export type Hit = { kind: 'added'; row: unknown } | { kind: 'removed' }

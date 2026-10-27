@@ -205,7 +205,7 @@ function FieldBar({
       value={value == null ? '' : String(value)}
       emptyText="Nicht gebunden"
       onChoose={(code) => {
-        ed.transaction(() => {
+        ed.history.transaction(() => {
           onSet(code)
 
           if (property.plainNameProp) {

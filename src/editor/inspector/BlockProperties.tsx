@@ -32,8 +32,8 @@ export function BlockProperties({ block, def, folds, onRemove }: BlockProperties
 
   const session = useMemo(
     () => ({
-      onBeginEditing: () => ed.beginTransaction(),
-      onEndEditing: () => ed.endTransaction(),
+      onBeginEditing: () => ed.history.begin(),
+      onEndEditing: () => ed.history.end(),
     }),
     [ed],
   )

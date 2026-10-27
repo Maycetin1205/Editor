@@ -51,7 +51,7 @@ function listenToChildren(el: HTMLElement, editor: EditorStore, blockRef: RefObj
   }
   const onAdd = (e: Event) => {
     const { type, values } = (e as CustomEvent<ChildAdd>).detail
-    editor.transaction(() => {
+    editor.history.transaction(() => {
       const node = editor.addBlock(type, blockRef.current.id)
       if (node) for (const [prop, value] of Object.entries(values)) editor.updateProperty(node.id, prop, value)
     })

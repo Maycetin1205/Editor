@@ -220,12 +220,18 @@ export default defineConfig([
     },
   },
   // Size brake: a long file or function has usually gathered more than one
-  // task. Warnings until the clean-up is through, then errors.
+  // task. A React component gets more lines, its markup takes room.
   {
     files: ['src/**/*.{ts,tsx}'],
     rules: {
-      'max-lines': ['warn', { max: 300, skipBlankLines: true, skipComments: true }],
-      'max-lines-per-function': ['warn', { max: 80, skipBlankLines: true, skipComments: true }],
+      'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': ['error', { max: 80, skipBlankLines: true, skipComments: true }],
+    },
+  },
+  {
+    files: ['src/**/*.tsx'],
+    rules: {
+      'max-lines-per-function': ['error', { max: 120, skipBlankLines: true, skipComments: true }],
     },
   },
   // The door itself reaches back into nothing that uses it.

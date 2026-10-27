@@ -126,8 +126,8 @@ function useOwnControls(block: BlockNode, entries: readonly ColumnEntry[]) {
   const library = useDataSources().list
   const session = useMemo<BarSession>(
     () => ({
-      onBeginEditing: () => ed.beginTransaction(),
-      onEndEditing: () => ed.endTransaction(),
+      onBeginEditing: () => ed.history.begin(),
+      onEndEditing: () => ed.history.end(),
     }),
     [ed],
   )

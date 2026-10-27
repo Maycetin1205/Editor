@@ -50,7 +50,7 @@ export function SpotFieldPicker({
     const words = typed === blockType(node.type)?.properties[spot.prop]?.default ? '' : typed
     const next = weave(String(node.values[weaveProp] ?? ''), words, latest(), value)
     if (next === null) return false
-    editor.transaction(() => {
+    editor.history.transaction(() => {
       bind(next.binding)
       editor.updateProperty(block.id, weaveProp, next.pattern)
       if (next.text !== undefined) editor.updateProperty(block.id, spot.prop, next.text)

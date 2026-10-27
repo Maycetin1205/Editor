@@ -29,8 +29,8 @@ const selectTarget = (editor: EditorStore): string => exportTargetFolder(editor)
 
 export function Toolbar() {
   const ed = useEditorInstance()
-  const canUndo = useEditorSelect((e) => e.canUndo)
-  const canRedo = useEditorSelect((e) => e.canRedo)
+  const canUndo = useEditorSelect((e) => e.history.canUndo)
+  const canRedo = useEditorSelect((e) => e.history.canRedo)
   const blockCount = useEditorSelect((e) => e.blockCount)
   const target = useEditorSelect(selectTarget)
   const view = useView()
@@ -52,7 +52,7 @@ export function Toolbar() {
           onlyIcon
           aria-label="Rückgängig (Strg+Z)"
           title="Rückgängig (Strg+Z)"
-          onClick={() => ed.undo()}
+          onClick={() => ed.history.undo()}
           disabled={!canUndo}
         >
           <Undo2 size={15} />
@@ -62,7 +62,7 @@ export function Toolbar() {
           onlyIcon
           aria-label="Wiederholen (Strg+Umschalt+Z)"
           title="Wiederholen (Strg+Umschalt+Z)"
-          onClick={() => ed.redo()}
+          onClick={() => ed.history.redo()}
           disabled={!canRedo}
         >
           <Redo2 size={15} />

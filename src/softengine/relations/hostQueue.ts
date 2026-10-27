@@ -19,6 +19,7 @@ import { startGet, startQuery } from './getJob'
 import {
   ALL_RECORDS,
   failedAnswer,
+  queuedJob,
   unconfirmedAnswer,
   type Job,
   type JobLine,
@@ -28,6 +29,7 @@ import {
   type Wired,
 } from './job'
 import { runPut } from './putJob'
+import { Watchers } from './watchers'
 
 // The one line to SoftEngine: jobs run one after the other, a write goes
 // ahead of waiting questions, an unanswered question pauses the line until
@@ -52,22 +54,16 @@ class HostQueue implements JobLine {
 
   private listening: (() => void) | null = null
 
-  private readonly watchers = new Set<(job: JobView) => void>()
+  private readonly jobWatchers = new Watchers<JobView>('Beobachter der Reihe gescheitert')
 
-  private readonly connectionWatchers = new Set<(lost: boolean) => void>()
+  private readonly connectionWatchers = new Watchers<boolean>('Beobachter der Verbindung gescheitert')
 
   watch(listener: (job: JobView) => void): () => void {
-    this.watchers.add(listener)
-    return () => {
-      this.watchers.delete(listener)
-    }
+    return this.jobWatchers.add(listener)
   }
 
   watchConnection(listener: (lost: boolean) => void): () => void {
-    this.connectionWatchers.add(listener)
-    return () => {
-      this.connectionWatchers.delete(listener)
-    }
+    return this.connectionWatchers.add(listener)
   }
 
   relation(template: RuntimeRelation, params: readonly string[], options: RunOptions = {}): Promise<RunAnswer> {
@@ -139,27 +135,11 @@ class HostQueue implements JobLine {
   }
 
   private newJob(art: JobArt, question: string, options: RunOptions): Job {
-    const view: JobView = {
-      id: this.nextId++,
-      art,
-      origin: options.origin ?? '',
-      generation: options.generation ?? 0,
-      question,
-      state: 'queued',
-      queuedAt: Date.now(),
-    }
-    return { view, start: () => {}, drop: () => {}, fail: () => {} }
+    return queuedJob(this.nextId++, art, question, options)
   }
 
   private report(job: Job): void {
-    const view = { ...job.view }
-    this.watchers.forEach((watcher) => {
-      try {
-        watcher(view)
-      } catch (error) {
-        warn('Beobachter der Reihe gescheitert', error)
-      }
-    })
+    this.jobWatchers.tell({ ...job.view })
   }
 
   private enqueue(job: Job): void {
@@ -179,7 +159,7 @@ class HostQueue implements JobLine {
   private pause(): void {
     if (this.paused) return
     this.paused = true
-    this.tellConnection(true)
+    this.connectionWatchers.tell(true)
     this.expireWaiting()
     this.keepPauseClock()
   }
@@ -188,7 +168,7 @@ class HostQueue implements JobLine {
     if (!this.paused) return
     this.paused = false
     this.stopPauseClock()
-    this.tellConnection(false)
+    this.connectionWatchers.tell(false)
     this.pump()
   }
 
@@ -213,16 +193,6 @@ class HostQueue implements JobLine {
       job.fail(NO_ANSWER)
     })
     if (this.waiting.length === 0) this.stopPauseClock()
-  }
-
-  private tellConnection(lost: boolean): void {
-    this.connectionWatchers.forEach((watcher) => {
-      try {
-        watcher(lost)
-      } catch (error) {
-        warn('Beobachter der Verbindung gescheitert', error)
-      }
-    })
   }
 
   sent(job: Job): void {

@@ -36,7 +36,7 @@ export function sizeDrag(
   const min: Size = { width: DIALOG_MIN_WIDTH, height: DIALOG_MIN_HEIGHT }
   const last: Size = { width: Math.round(start.width), height: Math.round(start.height) }
 
-  const bracket = editor.openGesture()
+  const bracket = editor.history.openGesture()
   return {
     move: (ev) => {
       const dx = (ev.clientX - startX) / zoom

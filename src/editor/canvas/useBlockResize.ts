@@ -78,7 +78,7 @@ function gridSizeDrag(
       ? cellFromPointer(area, ev.clientX, ev.clientY).y
       : grabRow + Math.round((ev.clientY - e.clientY) / zoom / (GRID.rowPx + GRID.gapPx))
 
-  const bracket = editor.openGesture()
+  const bracket = editor.history.openGesture()
   let last = start
   return {
     move: (ev) => {

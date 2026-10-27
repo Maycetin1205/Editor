@@ -42,7 +42,7 @@ export function EventChain({ block, ev, context }: { block: BlockNode; ev: Event
   const opened = useView().stepWindow
   const chain = chainOf(ed, block.id, ev.key)
   const set = (steps: Step[]) =>
-    ed.transaction(() => {
+    ed.history.transaction(() => {
       setChain(ed, block.id, ev.key, steps)
       if (steps.length === 0) releaseEmptyEntryKeys(ed, block.id)
     })

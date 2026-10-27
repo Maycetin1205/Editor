@@ -128,10 +128,10 @@ export function useKeyboardShortcuts() {
           editor.selectBlock(null)
           break
         case 'back':
-          editor.undo()
+          editor.history.undo()
           break
         case 'forward':
-          editor.redo()
+          editor.history.redo()
           break
         case 'duplicate':
           if (chosen) {

@@ -112,7 +112,7 @@ function WindowGrips({ ed, state, box }: { ed: EditorStore; state: WindowState; 
           edge={edge}
           onDrag={(e) => sizeDrag(ed, e, edge, box, (axis, value) => state.setMetrics(axis, value))}
           onReset={() =>
-            ed.transaction(() => {
+            ed.history.transaction(() => {
               for (const axis of axesOf(edge)) state.setMetrics(axis, undefined)
             })
           }
