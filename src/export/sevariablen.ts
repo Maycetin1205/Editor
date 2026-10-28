@@ -1,6 +1,6 @@
 import { orderedFields, type DataSource } from '../core/data/dataSources'
-import { ORDER_KINDS, orderAdapter } from '../core/data/orders/orders'
-import { sheetFrom } from '../core/data/orders/sheet'
+import { ORDER_KINDS, orderAdapter } from '../core/data/orders'
+import { sheetFrom } from '../core/data/sheet'
 import { escapeNonAsciiJs } from './serializer'
 import type { GetRelationEntry } from './pictureRelations'
 

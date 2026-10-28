@@ -1,12 +1,11 @@
 import { SOURCES_DIVIDER } from '../block/blockType'
 import { isUnread } from '../unread'
 import { deliveryAdapter, isDeliveryKind, type Delivery, type RuntimeDelivery } from './deliveries/deliveries'
-import { isOrderKind, orderAdapter, type Order } from './orders/orders'
-import { isPresetId, sourcePreset, type PresetId } from './presets/presets'
-import { EMPTY_CHOICE, type SourceChoice } from './presets/sourcePreset'
+import { isOrderKind, orderAdapter, type Order } from './orders'
+import { isPresetId, sourcePreset, type PresetId, EMPTY_CHOICE, type SourceChoice } from './presets'
 import { POS_LEN, keyDisplay } from './sourceInput'
 import type { DataField, SourceFacts } from './sourceFacts'
-import { isWriteKind, recordFieldOf, writeAdapter, type Write } from './writes/writes'
+import { isWriteKind, recordFieldOf, writeAdapter, type Write } from './writes'
 
 export { fieldPrefixFromInput, keyDisplay } from './sourceInput'
 

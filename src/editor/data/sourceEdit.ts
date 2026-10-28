@@ -1,10 +1,9 @@
 import { SOURCES_DIVIDER } from '../../core/block/blockType'
 import { aliasOf, choiceOf, keyDisplay, LENGTH_MAX, type DataField, type DataSource } from '../../core/data/dataSources'
-import { sourcePreset, type PresetId } from '../../core/data/presets/presets'
-import { EMPTY_CHOICE, descriptorFor, type SourceChoice } from '../../core/data/presets/sourcePreset'
+import { sourcePreset, type PresetId, EMPTY_CHOICE, descriptorFor, type SourceChoice } from '../../core/data/presets'
 import { POSITIONS_RELATION, relationSyntaxAsText, type RelationTemplate } from '../../core/data/relations'
 import { keyFromInput } from '../../core/data/sourceInput'
-import type { Write } from '../../core/data/writes/writes'
+import type { Write } from '../../core/data/writes'
 
 export type SourceData = Omit<DataSource, 'id'>
 

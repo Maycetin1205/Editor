@@ -1,4 +1,4 @@
-import { withoutTablePrefix } from '../orders/sheet'
+import { withoutTablePrefix } from '../sheet'
 import type { DeliveryAdapter } from './deliveryAdapter'
 
 const PUSH_PATHS = ['SEFileLoop', 'Var', 'Tabellen', 'Masken', 'ErpApiCall'] as const

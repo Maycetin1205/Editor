@@ -1,7 +1,6 @@
 import { checkLoadRelation } from '../../core/data/deliveries/relationRows'
 import { checkGetValue } from '../../core/data/deliveries/relationValue'
-import { isPresetId, sourcePreset } from '../../core/data/presets/presets'
-import { EMPTY_CHOICE, descriptorFor } from '../../core/data/presets/sourcePreset'
+import { isPresetId, sourcePreset, EMPTY_CHOICE, descriptorFor } from '../../core/data/presets'
 import { OLD_POSITIONS_PARAMETER, OLD_POSITIONS_SLOTS } from '../../core/data/relations'
 
 export const LIBRARY_SCHEMA_VERSION = 2

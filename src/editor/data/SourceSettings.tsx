@@ -5,7 +5,7 @@ import { relationParameterDefault, type Parameter } from '../../core/data/action
 import { splitBinding } from '../../core/block/blockType'
 import { choiceOf, fieldPrefixFromInput, type DataSource } from '../../core/data/dataSources'
 import { getValueSourceAllowed } from '../../core/data/deliveries/relationValue'
-import { PRESET_IDS, sourcePreset, type PresetId } from '../../core/data/presets/presets'
+import { PRESET_IDS, sourcePreset, type PresetId } from '../../core/data/presets'
 import { POSITIONS_RELATION, relationSyntaxAsText, type RelationTemplate } from '../../core/data/relations'
 import { selectionGiverInTree } from '../../core/block/treeQuery'
 import { giverGroup, sourceReach } from '../origin/reach'
