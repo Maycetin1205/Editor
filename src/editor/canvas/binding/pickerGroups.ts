@@ -26,7 +26,7 @@ export function librarySourcesChoice(
     entries: library.map((s) => ({ value: s.id, name: s.name, badge: sourcesKey(s) })),
     onNewSource: () => {
       onLeave()
-      editor.view.startNewSource()
+      editor.view.startNewSource(sourcesCarrier(editor.tree, blockId)?.id ?? null)
     },
     onChoose: (sourceId: string) => {
       const carrier = sourcesCarrier(editor.tree, blockId)

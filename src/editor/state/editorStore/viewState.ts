@@ -56,6 +56,7 @@ export class EditorView {
   private _followPickFor: string | null = null
 
   private _dataWindow: 'closed' | 'open' | 'newSource' = 'closed'
+  private _newSourceFor: string | null = null
 
   private _sideTab = loadSide()
 
@@ -94,15 +95,27 @@ export class EditorView {
 
   showData(open: boolean): void {
     const next = open ? 'open' : 'closed'
+    if (!open) this._newSourceFor = null
     if (this._dataWindow === next) return
     this._dataWindow = next
     this.changed()
   }
 
-  startNewSource(): void {
+  // The block that asked for a new source: the first source made then goes
+  // to it, unless it has one by then.
+  get newSourceFor(): string | null {
+    return this._newSourceFor
+  }
+
+  startNewSource(forBlock: string | null = null): void {
+    this._newSourceFor = forBlock
     if (this._dataWindow === 'newSource') return
     this._dataWindow = 'newSource'
     this.changed()
+  }
+
+  newSourceMade(): void {
+    this._newSourceFor = null
   }
 
   get sideTab(): SideTab {

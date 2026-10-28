@@ -3,6 +3,9 @@ import { Plus } from '../icons/icon'
 import { Button } from '../widgets/Button'
 import { Grid, GridLine, GridNewLine, Strip } from '../widgets/Grid'
 import type { DataSource } from '../../core/data/dataSources'
+import { declaredValue } from '../../core/block/registry'
+import { SOURCE_PROP, SOURCE_PROPERTY } from '../../core/block/sharedProperties'
+import type { EditorStore } from '../state/EditorStore'
 import { sourcePreset } from '../../core/data/presets'
 import { useDataSources, useEditor } from '../state/useEditor'
 import { SourceBelow, SourceSettings } from './SourceSettings'
@@ -78,7 +81,9 @@ export function SourcesTab({ startsNew }: { startsNew: boolean }) {
             onAdd={(v) => {
               const kind = tableKind(at(v, 1))
               if (at(v, 0).trim() === '' || taken(at(v, 0)) || !kind) return false
-              setMarkedId(store.add(inTab(newSource(at(v, 0), kind), filing.tab)).id)
+              const made = store.add(inTab(newSource(at(v, 0), kind), filing.tab))
+              setMarkedId(made.id)
+              giveToAsker(ed, made.id)
               return true
             }}
           />
@@ -89,6 +94,15 @@ export function SourcesTab({ startsNew }: { startsNew: boolean }) {
       </div>
     </>
   )
+}
+
+// A source made after a block asked for a new one goes to that block,
+// unless it has a source by now.
+function giveToAsker(ed: EditorStore, sourceId: string): void {
+  const blockId = ed.view.newSourceFor
+  ed.view.newSourceMade()
+  const block = blockId === null ? undefined : ed.getNode(blockId)
+  if (block && declaredValue(block, SOURCE_PROPERTY) === '') ed.updateProperty(block.id, SOURCE_PROP, sourceId)
 }
 
 function SourcePart({ source }: { source: DataSource }) {

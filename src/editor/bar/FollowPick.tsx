@@ -13,14 +13,15 @@ export function FollowPick({ block }: { block: BlockNode }) {
   const openDocument = openDocumentOf(useDataSources().list)
   const waiting = view.followPickFor === block.id
   return (
-    <div className="flex flex-col items-start gap-[2px]">
+    <div className="flex min-w-0 flex-col items-start gap-[2px]">
       <Button
         kind="command"
         aria-pressed={waiting}
-        className={waiting ? PRESSED : '-ml-[10px]'}
+        className={waiting ? `${PRESSED} max-w-full` : '-ml-[10px] max-w-full'}
         onClick={() => view.pickFollowFor(waiting ? null : block.id)}
       >
-        <Link2 size={14} /> {waiting ? 'Geber auf der Leinwand anklicken …' : 'Geber auf der Leinwand anklicken'}
+        <Link2 size={14} className="shrink-0" />
+        <span className="truncate">{waiting ? 'Baustein anklicken …' : 'Auf der Fläche wählen'}</span>
       </Button>
       {waiting && openDocument && (
         <Button

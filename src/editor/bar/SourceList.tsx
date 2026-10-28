@@ -37,7 +37,7 @@ export function SourceList({ block, part = 'all' }: SourceListProps) {
 
   if (library.length === 0) {
     return (
-      <Button className="self-start" onClick={() => ed.view.startNewSource()}>
+      <Button className="self-start" onClick={() => ed.view.startNewSource(block.id)}>
         <Plus size={14} /> Neue Datenquelle
       </Button>
     )
@@ -51,7 +51,7 @@ export function SourceList({ block, part = 'all' }: SourceListProps) {
           value={first}
           sources={freeSources(library, first, extra, first)}
           onChoose={(v) => ed.updateProperty(block.id, SOURCE_PROP, v)}
-          onNewSource={() => ed.view.startNewSource()}
+          onNewSource={() => ed.view.startNewSource(block.id)}
         />
       )}
 
