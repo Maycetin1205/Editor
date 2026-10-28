@@ -45,7 +45,11 @@ function inCapability(c: Capability): Named[] {
     case 'actionValue':
       return c.spots.flatMap((spot) => named('spots.prop', spot.prop))
     case 'list':
-      return [...named('binding.prop', c.binding.prop), ...named('binding.sourceProp', c.binding.sourceProp)]
+      return [
+        ...named('binding.prop', c.binding.prop),
+        ...named('binding.sourceProp', c.binding.sourceProp),
+        ...inCondition(c.when, 'when'),
+      ]
     case 'lookupWindow': {
       const w = c.window
       if (w.entriesProp !== undefined) {
@@ -65,9 +69,9 @@ function inCapability(c: Capability): Named[] {
     case 'capture':
       return inCondition(c.when, 'when')
     case 'compute':
-      return named('prop', c.prop)
+      return [...named('prop', c.prop), ...inCondition(c.when, 'when')]
     case 'events':
-      return named('entries.prop', c.entries?.prop)
+      return [...named('entries.prop', c.entries?.prop), ...inCondition(c.when, 'when')]
     default:
       return []
   }

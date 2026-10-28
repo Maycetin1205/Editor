@@ -1,7 +1,6 @@
 import type { BlockNode, MaskTree } from './tree'
-import { blockType, declaredValue } from './registry'
+import { blockType, capabilityOn, declaredValue } from './registry'
 import { propertyVisible } from './property'
-import { hasCapability } from './capability'
 import { splitBinding } from './binding'
 import { SOURCE_PROPERTY } from './sharedProperties'
 import { sourcesIdsInChainsOf, carriesOwnSource, maySelectionFollows } from './treeQuery'
@@ -64,7 +63,7 @@ export function sourceIdsUsedBy(node: BlockNode): string[] {
   for (const [key, prop] of Object.entries(def?.properties ?? {})) {
     if (prop.type.control === 'source' && propertyVisible(prop.when, node.values)) add(node.values[key])
   }
-  if (hasCapability(def, 'compute')) {
+  if (capabilityOn(node, 'compute')) {
     for (const field of fieldBindingsOf(declaredValue(node, calculationsProperty))) add(splitBinding(field).sourceId)
   }
   for (const id of sourcesIdsInChainsOf(node)) add(id)

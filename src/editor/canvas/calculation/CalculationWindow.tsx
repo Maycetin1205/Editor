@@ -3,8 +3,7 @@ import { cn } from '../../widgets/cn'
 import { Grid, GridAddLine, Strip, TD } from '../../widgets/Grid'
 import { Window } from '../../widgets/Window'
 import { blockName } from '../../../core/block/blockName'
-import { capability, hasCapability } from '../../../core/block/capability'
-import { blockType, declaredValue } from '../../../core/block/registry'
+import { capabilityOn, declaredValue } from '../../../core/block/registry'
 import { sourcesInReach } from '../../../core/block/sourcesInReach'
 import { calculationsProperty, newCalculation, toldFrom, type Calculation } from '../../../core/data/calculation'
 import { KIND_NAMES } from '../../origin/origins'
@@ -33,10 +32,9 @@ function OpenedCalculationWindow({ open }: { open: OpenCalculation }) {
   const ed = useEditor()
   const library = useDataSources().list
   const block = ed.tree[open.blockId]
-  const def = block === undefined ? undefined : blockType(block.type)
-  const prop = capability(def, 'compute')?.prop
+  const prop = block === undefined ? undefined : capabilityOn(block, 'compute')?.prop
   if (block === undefined || prop === undefined) return null
-  const list = hasCapability(def, 'list')
+  const list = capabilityOn(block, 'list') !== undefined
 
   const all = declaredValue(block, calculationsProperty)
   const present = all.flatMap((b) => {

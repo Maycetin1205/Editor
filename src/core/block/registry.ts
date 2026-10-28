@@ -1,7 +1,15 @@
 import { ROOT_TYPE, type BlockNode } from './tree'
 import type { BlockDeclaration, BlockType } from './blockType'
-import { capability, hasCapability, type ContractKind, type RuntimeContracts } from './capability'
-import type { Property, PropertyValue } from './property'
+import {
+  capability,
+  conditionOf,
+  hasCapability,
+  type CapabilityKind,
+  type CapabilityOf,
+  type ContractKind,
+  type RuntimeContracts,
+} from './capability'
+import { propertyVisible, type Property, type PropertyValue } from './property'
 
 const registry = new Map<string, BlockType>()
 
@@ -19,6 +27,16 @@ export function registerBlockType(declared: BlockDeclaration): void {
 
 export function blockType(type: string): BlockType | undefined {
   return registry.get(type)
+}
+
+// The capability of a block as its values have it: one that holds only under
+// a condition (the click of a Text drawn as a divider) counts while it holds.
+export function capabilityOn<A extends CapabilityKind>(
+  node: Pick<BlockNode, 'type' | 'values'>,
+  kind: A,
+): CapabilityOf<A> | undefined {
+  const found = capability(registry.get(node.type), kind)
+  return found !== undefined && propertyVisible(conditionOf(found), node.values) ? found : undefined
 }
 
 export function allBlockTypes(): BlockType[] {

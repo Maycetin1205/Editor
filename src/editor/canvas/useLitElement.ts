@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { RefObject } from 'react'
 import type { BlockNode } from '../../core/block/tree'
 import { bindingProp, capability, type BindableSpot } from '../../core/block/capability'
-import { gridMetricsOf, rowsForHeight } from '../../core/block/grid'
+import { gridMetricsOf, heightFollowsContent, rowsForHeight } from '../../core/block/grid'
 import { blockType } from '../../core/block/registry'
 import {
   BlockElement,
@@ -109,10 +109,11 @@ export function useLitElement(args: LitElementArgs) {
     el.addEventListener(SPOT_CLICK, onSpotClick)
 
     const onHeightReported = (e: Event) => {
+      if (!heightFollowsContent(gridMetricsOf(def), blockRef.current.values)) return
       const { height } = (e as CustomEvent<HeightReported>).detail
       editor.fitNodeHeight(blockRef.current.id, rowsForHeight(height), (areaId) => capacityOf(editor.tree, areaId))
     }
-    if (gridMetricsOf(def).heightFromContent) el.addEventListener(HEIGHT_REPORTED, onHeightReported)
+    if (gridMetricsOf(def).heightFromContent !== false) el.addEventListener(HEIGHT_REPORTED, onHeightReported)
 
     return () => {
       el.removeEventListener(PROP_CHANGE, onPropChange)

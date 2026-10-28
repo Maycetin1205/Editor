@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { blockType } from '../../core/block/registry'
-import { gridMetricsOf, gridSlotRead } from '../../core/block/grid'
+import { gridMetricsOf, gridSlotRead, heightFollowsContent } from '../../core/block/grid'
 import { capacityOf } from '../canvas/gridArea'
 import { useEditorInstance } from '../state/useEditor'
 import { saveOrAsk } from '../state/maskFile'
@@ -16,7 +16,7 @@ function nudge(editor: Editor, id: string, key: string, resize: boolean): void {
   const capacity = capacityOf(editor.tree, node.parentId)
   if (resize) {
     const spec = gridMetricsOf(blockType(node.type))
-    const fixedHeight = spec.heightFixed || spec.heightFromContent
+    const fixedHeight = spec.heightFixed || heightFollowsContent(spec, node.values)
     const w = Math.max(1, spec.minWidth, slot.w + dx)
     const h = fixedHeight ? slot.h : Math.max(1, spec.minHeight, slot.h + dy)
     editor.resizeNodeToSlot(id, { ...slot, w, h: capacity === null ? h : Math.min(h, capacity - slot.y) })

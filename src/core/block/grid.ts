@@ -1,4 +1,4 @@
-import { numberProperty, type Property, type PropertyValue } from './property'
+import { numberProperty, propertyVisible, type Condition, type Property, type PropertyValue } from './property'
 import { styleAsCss } from './styleCss'
 
 export const GRID = { columns: 48, rowPx: 12, gapPx: 4 } as const
@@ -16,8 +16,19 @@ export interface GridMetrics {
   minWidth: number
   minHeight: number
   heightFixed: boolean
-  heightFromContent: boolean
+  // Always, never, or while a condition on the values holds.
+  heightFromContent: boolean | Condition
   grows: boolean
+}
+
+// Whether the height of a block follows its content; a Text drawn as a
+// divider takes the height it is given.
+export function heightFollowsContent(
+  metrics: GridMetrics,
+  values: Readonly<Record<string, PropertyValue>>,
+): boolean {
+  const follows = metrics.heightFromContent
+  return typeof follows === 'boolean' ? follows : propertyVisible(follows, values)
 }
 
 const GRID_FALLBACK: GridMetrics = {

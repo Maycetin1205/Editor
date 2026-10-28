@@ -1,6 +1,6 @@
 import { ROOT_ID, type BlockNode, type MaskTree } from '../core/block/tree'
 import { bindingProp, capability, applies } from '../core/block/capability'
-import { blockType } from '../core/block/registry'
+import { blockType, capabilityOn } from '../core/block/registry'
 import { propertyVisible } from '../core/block/property'
 import { bindableSpotsOf, isSelectionGiver, carriesChanges } from '../core/block/treeQuery'
 import { BLOCK_ID_ATTR } from '../core/data/actions'
@@ -96,7 +96,7 @@ function nodeToHtml(
 
   const actions = chainsForExport(
     node.chains,
-    (capability(def, 'events')?.list ?? []).map((e) => e.key),
+    (capabilityOn(node, 'events')?.list ?? []).map((e) => e.key),
     popupName,
     columnsIndex,
   )

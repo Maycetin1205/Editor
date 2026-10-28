@@ -1,6 +1,6 @@
 import { ROOT_ID, type BlockNode, type MaskTree } from './tree'
 import { type ValueSpot, type BindableSpot, capability, applies, hasCapability } from './capability'
-import { blockType } from './registry'
+import { blockType, capabilityOn } from './registry'
 import { flagOn, flagFor } from './listBinding'
 import { propertyVisible } from './property'
 import { SOURCE_PROP } from './sharedProperties'
@@ -97,7 +97,7 @@ export function captureCarrierInTree(tree: MaskTree): BlockNode[] {
 export function carriesChanges(node: BlockNode): boolean {
   const def = blockType(node.type)
   const key = capability(def, 'change')?.key
-  const binding = capability(def, 'list')?.binding
+  const binding = capabilityOn(node, 'list')?.binding
   if (key === undefined || !binding) return false
   const flag = (binding.entryFlag ?? []).find((s) => s.key === key)
   if (!flag) return false
@@ -112,5 +112,5 @@ export function changeCarrierInTree(tree: MaskTree): BlockNode[] {
 }
 
 export function canCompute(node: BlockNode): boolean {
-  return hasCapability(blockType(node.type), 'compute')
+  return capabilityOn(node, 'compute') !== undefined
 }

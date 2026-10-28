@@ -2,8 +2,8 @@ import { ROOT_ID, type BlockNode, type MaskTree } from '../core/block/tree'
 import type { BlockType } from '../core/block/blockType'
 import { fieldChoicesRead, splitBinding } from '../core/block/blockType'
 import { bindingFields } from '../core/block/binding'
-import { bindingProp, capability, hasCapability } from '../core/block/capability'
-import { blockType, declaredValue } from '../core/block/registry'
+import { bindingProp, capability } from '../core/block/capability'
+import { blockType, capabilityOn, declaredValue } from '../core/block/registry'
 import { propertyVisible } from '../core/block/property'
 import { selectionSourceIdOf, bindableSpotsOf, maySelectionFollows, carriesOwnSource } from '../core/block/treeQuery'
 import { SOURCE_PROPERTY } from '../core/block/sharedProperties'
@@ -60,7 +60,7 @@ function fieldsOfSpots(c: Collector): void {
 }
 
 function fieldsOfList(c: Collector): void {
-  const b = capability(c.def, 'list')?.binding
+  const b = capabilityOn(c.node, 'list')?.binding
   if (!b) return
   const ownSource = b.sourceProp === undefined ? undefined : String(c.node.values[b.sourceProp] ?? '')
   const rememberEntryField = (value: unknown): void => {
@@ -90,7 +90,7 @@ function fieldsOfList(c: Collector): void {
 }
 
 function fieldsOfCalculations(c: Collector): void {
-  if (!hasCapability(c.def, 'compute')) return
+  if (!capabilityOn(c.node, 'compute')) return
   for (const field of fieldBindingsOf(declaredValue(c.node, calculationsProperty))) c.rememberBinding(field)
 }
 
@@ -145,7 +145,7 @@ function fieldsOfFollows(c: Collector): void {
 }
 
 function fieldsOfChains(c: Collector): void {
-  for (const event of capability(c.def, 'events')?.list ?? []) {
+  for (const event of capabilityOn(c.node, 'events')?.list ?? []) {
     for (const step of c.node.chains?.[event.key] ?? []) {
       for (const binding of stepAdapter(step.kind).bindings(step)) {
         if (binding.source === 'dataField') {

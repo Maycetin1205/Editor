@@ -8,7 +8,7 @@ import { capability } from '../../core/block/capability'
 import { propertyVisible, type PropertyPlace } from '../../core/block/property'
 import { propertiesFor, type DeclaredProperty } from '../../core/block/propertyPlace'
 import { carriesOwnSource, maySelectionFollows } from '../../core/block/treeQuery'
-import { declaredValue } from '../../core/block/registry'
+import { capabilityOn, declaredValue } from '../../core/block/registry'
 import { SOURCE_PROPERTY } from '../../core/block/sharedProperties'
 import { BLOCK_ICONS } from '../blockIcons'
 import { controlShown } from '../bar/controlShown'
@@ -97,7 +97,7 @@ export function BlockProperties({ block, def, folds, onRemove }: BlockProperties
         helpers={helpers === 'apart' && declaredValue(block, SOURCE_PROPERTY) === '' ? undefined : helpers}
         follows={follows}
         waiting={waitsForGiver}
-        events={(capability(def, 'events')?.list ?? []).filter((ev) => !ev.entry)}
+        events={(capabilityOn(block, 'events')?.list ?? []).filter((ev) => !ev.entry)}
         folds={folds}
       />
     </>

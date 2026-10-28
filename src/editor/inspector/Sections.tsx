@@ -5,8 +5,7 @@ import type { EventDef, LookupWindow } from '../../core/block/capability'
 import type { DeclaredProperty } from '../../core/block/propertyPlace'
 import type { BlockNode } from '../../core/block/tree'
 import { canCompute, carriesOwnSource } from '../../core/block/treeQuery'
-import { blockType, declaredValue } from '../../core/block/registry'
-import { hasCapability } from '../../core/block/capability'
+import { capabilityOn, declaredValue } from '../../core/block/registry'
 import { SOURCE_PROPERTY } from '../../core/block/sharedProperties'
 import { extraSourcesProperty } from '../../core/data/extraSources'
 import { ActionsSection } from '../actions/ActionsSection'
@@ -123,7 +122,7 @@ export function Sections({
   const sourceName = library.find((s) => s.id === declaredValue(block, SOURCE_PROPERTY))?.name ?? 'keine'
   const entries = entryEventsOf(block) !== undefined
   const steps = events.reduce((n, ev) => n + (block.chains?.[ev.key]?.length ?? 0), 0) + entryStepCount(block)
-  const computes = canCompute(block) && !hasCapability(blockType(block.type), 'list')
+  const computes = canCompute(block) && capabilityOn(block, 'list') === undefined
 
   const dataSummary = [
     ownSource ? sourceName : changedOf(block, dataProps),

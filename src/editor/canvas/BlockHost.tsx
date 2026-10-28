@@ -10,7 +10,7 @@ import {
 import { createPortal } from 'react-dom'
 import type { BlockNode } from '../../core/block/tree'
 import type { SourceInReach } from '../../core/data/extraSources'
-import { blockType } from '../../core/block/registry'
+import { blockType, capabilityOn } from '../../core/block/registry'
 import { capability, type BindableSpot } from '../../core/block/capability'
 import { bindableSpotsOf, carriesOwnSource } from '../../core/block/treeQuery'
 import { SELECTION_FOLLOW_PROP } from '../../core/data/selectionFollow'
@@ -92,7 +92,7 @@ export function BlockHost({ block, selected, onSelect, grid = false, chosenChild
   const follower = view.followPickFor
   const rootRef = useRef<HTMLDivElement | null>(null)
   const def = blockType(block.type)
-  const list = capability(def, 'list')?.binding
+  const list = capabilityOn(block, 'list')?.binding
   const searchWindow = capability(def, 'lookupWindow')?.window
   const bindableSpots = useMemo(() => bindableSpotsOf(block), [block])
   const { sources, library } = useBlockSources(editor, block, bindableSpots)
@@ -147,7 +147,9 @@ export function BlockHost({ block, selected, onSelect, grid = false, chosenChild
           onPick={binding.pickList}
         />
       )}
-      {selected && grid && <BlockGrips editor={editor} def={def} blockRef={blockRef} rootRef={rootRef} />}
+      {selected && grid && (
+        <BlockGrips editor={editor} def={def} values={block.values} blockRef={blockRef} rootRef={rootRef} />
+      )}
     </div>
   )
 }

@@ -78,17 +78,17 @@ export type Capability<K extends string = string> =
   | { kind: 'followsSelection' }
   | { kind: 'bindable'; spots: readonly BindableSpot[] }
   | { kind: 'actionValue'; spots: readonly ValueSpot[] }
-  | { kind: 'list'; binding: ListBinding<unknown, K> }
+  | { kind: 'list'; binding: ListBinding<unknown, K>; when?: Condition<K> }
   | { kind: 'lookupWindow'; window: LookupWindow<K> }
   | { kind: 'capture'; when?: Condition<K> }
   | { kind: 'change'; key: string }
   | { kind: 'holdsSent' }
-  | { kind: 'compute'; prop: K }
-  | { kind: 'events'; list: readonly EventDef[]; entries?: EntryEvents<unknown, K> }
+  | { kind: 'compute'; prop: K; when?: Condition<K> }
+  | { kind: 'events'; list: readonly EventDef[]; entries?: EntryEvents<unknown, K>; when?: Condition<K> }
 
-type CapabilityKind = Capability['kind']
+export type CapabilityKind = Capability['kind']
 
-type CapabilityOf<A extends CapabilityKind> = Extract<Capability, { kind: A }>
+export type CapabilityOf<A extends CapabilityKind> = Extract<Capability, { kind: A }>
 
 interface HasCapabilities {
   capabilities: readonly Capability[]
@@ -103,6 +103,11 @@ export function capability<A extends CapabilityKind>(
 
 export function hasCapability(carrier: HasCapabilities | undefined, kind: CapabilityKind): boolean {
   return capability(carrier, kind) !== undefined
+}
+
+// The condition a capability holds under, if it has one.
+export function conditionOf(c: Capability): Condition | undefined {
+  return 'when' in c ? c.when : undefined
 }
 
 export function applies(f: { when?: Condition } | undefined, values: Readonly<Record<string, PropertyValue>>): boolean {

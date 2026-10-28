@@ -1,6 +1,6 @@
-import { capability, type EntryEvents } from '../../core/block/capability'
+import type { EntryEvents } from '../../core/block/capability'
 import type { ListBinding } from '../../core/block/listBinding'
-import { blockType } from '../../core/block/registry'
+import { capabilityOn } from '../../core/block/registry'
 import type { BlockNode } from '../../core/block/tree'
 import type { EditorStore } from '../state/EditorStore'
 
@@ -11,9 +11,9 @@ interface EntryEventsAt {
 }
 
 export function entryEventsOf(block: BlockNode | undefined): EntryEventsAt | undefined {
-  const def = blockType(block?.type ?? '')
-  const on = capability(def, 'events')
-  const binding = capability(def, 'list')?.binding
+  if (!block) return undefined
+  const on = capabilityOn(block, 'events')
+  const binding = capabilityOn(block, 'list')?.binding
   if (!on?.entries || !binding || binding.prop !== on.entries.prop) return undefined
   return { events: on.entries, binding, pool: on.list.filter((ev) => ev.entry).map((ev) => ev.key) }
 }
