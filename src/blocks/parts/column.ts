@@ -1,5 +1,6 @@
 import {
   assignKeys,
+  entryMoved,
   listForExport,
   withEntryValue,
   type EntryChoice,
@@ -164,16 +165,6 @@ function withoutColumn(columns: readonly Column[], index: number): Column[] | nu
   return columns.filter((_, i) => i !== index)
 }
 
-function withMovedColumn(columns: readonly Column[], from: number, to: number): Column[] | null {
-  if (from < 0 || from >= columns.length) return null
-  const target = Math.max(0, Math.min(to, columns.length - 1))
-  if (target === from) return null
-  const l = [...columns]
-  const [column] = l.splice(from, 1)
-  l.splice(target, 0, column)
-  return l
-}
-
 export const COLUMN_ACCESS: Pick<
   ListBinding<Column>,
   'titleOf' | 'fieldOf' | 'withTypedTitle' | 'withPickedField' | 'withoutEditorMarks'
@@ -269,7 +260,7 @@ export const COLUMNS_BINDING: ListBinding<Column, 'columns'> = {
 
   entryAdd: withAddedColumn,
   entryRemove: withoutColumn,
-  entryMove: withMovedColumn,
+  entryMove: entryMoved,
 
   entryHeads: true,
 

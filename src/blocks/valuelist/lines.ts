@@ -1,4 +1,10 @@
-import { listForExport, withEntryValue, type EntrySwitch, type ListBinding } from '../../core/block/listBinding'
+import {
+  entryMoved,
+  listForExport,
+  withEntryValue,
+  type EntrySwitch,
+  type ListBinding,
+} from '../../core/block/listBinding'
 import { entryEventKeys, type EntryEvents } from '../../core/block/capability'
 import { listProperty, type Property } from '../../core/block/property'
 import { isUnread } from '../../core/unread'
@@ -64,16 +70,6 @@ function coerceLines(v: unknown): ValueLine[] {
   return own.length > 0 ? own : [newLine(0)]
 }
 
-function withMovedLine(lines: readonly ValueLine[], from: number, to: number): ValueLine[] | null {
-  if (from < 0 || from >= lines.length) return null
-  const target = Math.max(0, Math.min(to, lines.length - 1))
-  if (target === from) return null
-  const next = [...lines]
-  const [line] = next.splice(from, 1)
-  next.splice(target, 0, line)
-  return next
-}
-
 const SUM: EntrySwitch<ValueLine> = {
   key: 'sum',
   name: 'Summe: Strich darüber, groß im Akzent',
@@ -101,7 +97,7 @@ export const LINES_BINDING: ListBinding<ValueLine, 'lines'> = {
   entryAdd: (lines) => [...lines, newLine(lines.length)],
   entryRemove: (lines, index) =>
     lines.length <= 1 || index < 0 || index >= lines.length ? null : lines.filter((_, i) => i !== index),
-  entryMove: withMovedLine,
+  entryMove: entryMoved,
 
   entryHeads: true,
   entriesDown: true,

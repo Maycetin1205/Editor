@@ -1,16 +1,15 @@
 import { useContext } from 'react'
+import { FieldBar, SourceBar } from './PickerBars'
 import type { BlockNode } from '../../core/block/tree'
 import { blockType } from '../../core/block/registry'
 import type { Property } from '../../core/block/property'
-import { fieldOf, sourcesKey, type DataSource } from '../../core/data/dataSources'
+import type { DataSource } from '../../core/data/dataSources'
 import { boundField } from '../../core/data/boundField'
 import { useDataSources, useEditor } from '../state/useEditor'
-import type { ListGroup } from '../widgets/List'
 import { Choice } from '../widgets/Choice'
 import { Field } from '../widgets/Field'
 import { LadderControl } from '../controls/LadderControl'
 import { NumberControl } from '../controls/NumberControl'
-import { PickerControl } from '../controls/PickerControl'
 import { SegmentControl } from '../controls/SegmentControl'
 import { useInputSession } from '../controls/useInputSession'
 import { controlShown, fieldSourceOf } from '../bar/controlShown'
@@ -105,118 +104,6 @@ export function BarControl({ block, propertyKey, property, sourceInReach, sessio
   }
 }
 
-// A labelled picker whose entries come from `groups`.
-function PropertyPicker({
-  label,
-  denominator,
-  groups,
-  value,
-  emptyText,
-  onChoose,
-}: {
-  label: string
-  denominator: string
-  groups: ListGroup[]
-  value: string
-  emptyText: string
-  onChoose: (value: string) => void
-}) {
-  const inLine = useContext(LabelsShown)
-  return (
-    <Labeled label={label}>
-      <PickerControl
-        name={`${denominator} für ${label}`}
-        className={inLine ? 'w-full' : 'w-36'}
-        groups={groups}
-        value={value}
-        emptyText={emptyText}
-        onChoose={onChoose}
-      />
-    </Labeled>
-  )
-}
-
-function SourceBar({
-  property,
-  value,
-  sources,
-  onSet,
-}: {
-  property: Property<unknown>
-  value: unknown
-  sources: readonly DataSource[]
-  onSet: (value: unknown) => void
-}) {
-  return (
-    <PropertyPicker
-      label={property.label}
-      denominator="Quelle"
-      groups={[
-        {
-          key: 'sources',
-          entries: sources.map((q) => ({
-            value: q.id,
-            name: q.name,
-            badge: sourcesKey(q),
-          })),
-        },
-      ]}
-      value={typeof value === 'string' ? value : ''}
-      emptyText="Keine"
-      onChoose={(newId) => {
-        if (newId !== String(value ?? '')) onSet(newId)
-      }}
-    />
-  )
-}
-
-// Binds a field; the plain name of the field goes into a second property when the property asks for it.
-function FieldBar({
-  blockId,
-  property,
-  value,
-  fieldSource,
-  onSet,
-}: {
-  blockId: string
-  property: Property<unknown>
-  value: unknown
-  fieldSource: DataSource | undefined
-  onSet: (value: unknown) => void
-}) {
-  const ed = useEditor()
-  return (
-    <PropertyPicker
-      label={property.label}
-      denominator="Feld"
-      groups={[
-        {
-          key: 'fields',
-          name: fieldSource?.name,
-          badge: fieldSource ? sourcesKey(fieldSource) : undefined,
-          entries: (fieldSource?.fields ?? []).map((f) => ({
-            value: f.code,
-            name: f.name,
-            badge: f.code,
-          })),
-        },
-      ]}
-      value={value == null ? '' : String(value)}
-      emptyText="Nicht gebunden"
-      onChoose={(code) => {
-        ed.history.transaction(() => {
-          onSet(code)
-
-          if (property.plainNameProp) {
-            const plainName = fieldOf(fieldSource, code)?.name ?? ''
-            ed.updateProperty(blockId, property.plainNameProp, plainName)
-          }
-        })
-      }}
-    />
-  )
-}
-
 // A text that may be named after a field of the parent; an unset parent field is asked for first.
 function TextBar({
   block,
@@ -238,10 +125,23 @@ function TextBar({
   const parentKey = property.nameFromParentField
   const parent =
     parentKey === undefined ? undefined : inEntry ? block : block.parentId ? ed.getNode(block.parentId) : undefined
-  const text = <BarText property={property} value={String(value ?? '')} wide={inLine} onChange={onSet} {...session} />
+  const code = parent && parentKey !== undefined ? String(parent.values[parentKey] ?? '') : ''
+  const fieldName = code === '' || !parent ? '' : (boundField(code, ed.sourcesFor(parent.id))?.name ?? '')
+  const parentField = fieldName !== '' ? fieldName : code
+  // On the canvas the bar shows no labels: an empty box says what goes in.
+  const hint = parentField !== '' ? parentField : property.label
+  const text = (
+    <BarText
+      property={property}
+      value={String(value ?? '')}
+      wide={inLine}
+      placeholder={inLine ? undefined : hint}
+      onChange={onSet}
+      {...session}
+    />
+  )
 
   if (!parent || parentKey === undefined) return <Labeled label={property.label}>{text}</Labeled>
-  const code = String(parent.values[parentKey] ?? '')
   if (code === '') {
     const parentProperty = blockType(parent.type)?.properties[parentKey]
     return parentProperty ? (
@@ -254,8 +154,7 @@ function TextBar({
       />
     ) : null
   }
-  const parentField = boundField(code, ed.sourcesFor(parent.id))?.name ?? ''
-  return <Labeled label={`${parentField !== '' ? parentField : code} =`}>{text}</Labeled>
+  return <Labeled label={`${parentField} =`}>{text}</Labeled>
 }
 
 function ChoiceBar({
@@ -291,6 +190,7 @@ function BarText({
   property,
   value,
   wide,
+  placeholder,
   onChange,
   onBeginEditing,
   onEndEditing,
@@ -298,6 +198,7 @@ function BarText({
   property: Property<unknown>
   value: string
   wide: boolean
+  placeholder?: string
   onChange: (value: string) => void
 } & EditCallbacks) {
   const session = useInputSession(onBeginEditing, onEndEditing)
@@ -305,6 +206,7 @@ function BarText({
     <Field
       aria-label={property.label}
       value={value}
+      placeholder={placeholder}
       maxLength={property.maxLength || undefined}
       className={wide ? 'w-full' : 'w-28'}
       onChange={(e) => {

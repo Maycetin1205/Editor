@@ -168,6 +168,17 @@ export function fieldChoicesRead<E>(b: ListBinding<E>, entry: E): { choice: Entr
   return (b.entryFieldChoice ?? []).map((choice) => ({ choice, value: choice.valueOf(entry) }))
 }
 
+// The entries with the one at from moved to to; null when nothing moves.
+export function entryMoved<E>(entries: readonly E[], from: number, to: number): E[] | null {
+  if (from < 0 || from >= entries.length) return null
+  const target = Math.max(0, Math.min(to, entries.length - 1))
+  if (target === from) return null
+  const next = [...entries]
+  const [entry] = next.splice(from, 1)
+  next.splice(target, 0, entry)
+  return next
+}
+
 export function listDefaultTitle(b: ListBinding, index: number): string {
   return b.defaultTitle.replace('{n}', String(index + 1))
 }

@@ -1,5 +1,5 @@
 import { listProperty, readValues, type Property } from '../../core/block/property'
-import { listDefaultTitle, type ListBinding } from '../../core/block/listBinding'
+import { entryMoved, listDefaultTitle, type ListBinding } from '../../core/block/listBinding'
 import { isUnread } from '../../core/unread'
 import { kanbanColumnProperties, kanbanPlaceProperties } from './columnProperties'
 
@@ -117,14 +117,6 @@ export function kanbanColumnsProperty(): Property<KanbanColumn[]> {
   })
 }
 
-function moved<E>(entries: readonly E[], from: number, to: number): E[] | null {
-  if (from === to || entries[from] === undefined) return null
-  const next = [...entries]
-  const [entry] = next.splice(from, 1)
-  next.splice(Math.max(0, Math.min(to, next.length)), 0, entry)
-  return next
-}
-
 const KANBAN_PLACES_BINDING: ListBinding<KanbanPlace> = {
   prop: 'places',
   defaultTitle: 'Platz {n}',
@@ -138,7 +130,7 @@ const KANBAN_PLACES_BINDING: ListBinding<KanbanPlace> = {
   withoutEditorMarks: (p) => p,
   entryAdd: (places) => [...places, place(listDefaultTitle(KANBAN_PLACES_BINDING, places.length))],
   entryRemove: (places, index) => (places.length <= 1 ? null : places.filter((_, i) => i !== index)),
-  entryMove: moved,
+  entryMove: entryMoved,
 }
 
 export const KANBAN_COLUMNS_BINDING: ListBinding<KanbanColumn, 'columns'> = {
@@ -173,6 +165,6 @@ export const KANBAN_COLUMNS_BINDING: ListBinding<KanbanColumn, 'columns'> = {
   withoutEditorMarks: (c) => c,
   entryAdd: (entries) => [...entries, column(listDefaultTitle(KANBAN_COLUMNS_BINDING, entries.length), 'info')],
   entryRemove: (entries, index) => (entries.length <= 1 ? null : entries.filter((_, i) => i !== index)),
-  entryMove: moved,
+  entryMove: entryMoved,
   entryHeads: true,
 }
