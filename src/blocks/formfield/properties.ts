@@ -14,7 +14,17 @@ import { coerceLookupColumns } from '../lookup/lookup'
 import { WINDOW_HEIGHT, WINDOW_WIDTH } from '../dialog/DialogFrame'
 import { symbolProperty } from '../look/symbol'
 
-export const FIELD_TYPES = ['text', 'multiline', 'number', 'date', 'time', 'select', 'checkbox', 'search'] as const
+export const FIELD_TYPES = [
+  'text',
+  'multiline',
+  'number',
+  'date',
+  'time',
+  'select',
+  'group',
+  'checkbox',
+  'search',
+] as const
 
 export type FieldType = (typeof FIELD_TYPES)[number]
 
@@ -29,6 +39,14 @@ export const WITH_VALUE: Condition<'lookup' | 'fieldType'> = {
   and: { key: 'fieldType', notEquals: 'search' },
 }
 
+// The entries of a choice, as the options name them: separated by commas.
+export function optionsOf(text: string): string[] {
+  return text
+    .split(',')
+    .map((o) => o.trim())
+    .filter((o) => o !== '')
+}
+
 export const TICKED = 'J'
 export const UNTICKED = 'N'
 
@@ -41,6 +59,7 @@ export const formFieldProperties = {
       { value: 'date', name: 'Datum' },
       { value: 'time', name: 'Uhrzeit' },
       { value: 'select', name: 'Auswahl' },
+      { value: 'group', name: 'Auswahlgruppe' },
       { value: 'checkbox', name: 'Ankreuzfeld' },
       { value: 'search', name: 'Suche' },
     ],
@@ -82,7 +101,7 @@ export const formFieldProperties = {
     default: '',
     label: 'Auswahl-Optionen',
     attribute: 'options',
-    when: { key: 'fieldType', equals: 'select' },
+    when: { key: 'fieldType', equals: 'select', otherwise: { key: 'fieldType', equals: 'group' } },
   }),
   value: textProperty({
     default: '',

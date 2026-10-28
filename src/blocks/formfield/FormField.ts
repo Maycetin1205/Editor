@@ -18,8 +18,9 @@ import { tickBoxStyle, tickBoxTpl } from '../parts/tickBox'
 import { symbolTpl } from '../look/symbol'
 import '../table/Table'
 import { disconnectValue, connectValue } from './valueBinding'
+import { choiceGroupStyle, fieldControlTpl } from './fieldControls'
 import { fieldStyle } from './formFieldStyle'
-import { fieldTypeOf, forInput, fromInput } from './inputValue'
+import { fieldTypeOf, fromInput } from './inputValue'
 import {
   NOT_CHECKBOX,
   ONLY_LOOKUP,
@@ -27,6 +28,7 @@ import {
   UNTICKED,
   WITH_VALUE,
   formFieldProperties,
+  optionsOf,
   type FieldType,
   type FormFieldValues,
 } from './properties'
@@ -44,7 +46,13 @@ export class FormField extends BlockElement implements ValueCarrier {
   static readonly type = 'formfield'
   static readonly tag = 'ff-formfield'
 
-  static override styles: CSSResultGroup = [BlockElement.styles, fieldStyle, tickBoxStyle, suggestionStyle]
+  static override styles: CSSResultGroup = [
+    BlockElement.styles,
+    fieldStyle,
+    tickBoxStyle,
+    suggestionStyle,
+    choiceGroupStyle,
+  ]
 
   private valueAtFocus = ''
   private typed = false
@@ -86,10 +94,10 @@ export class FormField extends BlockElement implements ValueCarrier {
 
   focusValue(): void {
     revealSelf(this)
-    this.renderRoot.querySelector<HTMLElement>('input, select, textarea')?.focus()
+    this.renderRoot.querySelector<HTMLElement>('input, select, textarea, [role=radio][tabindex="0"]')?.focus()
   }
 
-  private onInput(e: Event): void {
+  private readonly onInput = (e: Event): void => {
     const target = e.target as HTMLInputElement | HTMLSelectElement
     const kind = fieldTypeOf(this.fieldType)
     this.value = fromInput(kind, target.value)
@@ -101,23 +109,23 @@ export class FormField extends BlockElement implements ValueCarrier {
     return fieldTypeOf(this.fieldType) === 'search' && !this.preview
   }
 
-  private onChange(): void {
+  private readonly onChange = (): void => {
     this.dispatchEvent(new Event('change'))
   }
 
-  private onFocus(): void {
+  private readonly onFocus = (): void => {
     this.valueAtFocus = this.value
     this.typed = false
   }
 
-  private takeTyped(): void {
+  private readonly takeTyped = (): void => {
     if (this.typed && this.value !== this.valueAtFocus) this.onChange()
     this.onFocus()
   }
 
   // Enter goes on to the next field. In a field of several lines Enter
   // starts a new line and Ctrl+Enter goes on; Tab goes on as anywhere.
-  private onKey(e: KeyboardEvent): void {
+  private readonly onKey = (e: KeyboardEvent): void => {
     const lines = fieldTypeOf(this.fieldType) === 'multiline'
     if (e.key !== 'Enter' || (lines && !(e.ctrlKey || e.metaKey)) || this.preview) return
     e.preventDefault()
@@ -155,50 +163,32 @@ export class FormField extends BlockElement implements ValueCarrier {
     this.onChange()
   }
 
+  // A choice of the group: the value of the field, as a choice of the list is.
+  // A choice of the group: the value of the field, as a choice of the list is.
+  private readonly choose = (option: string): void => {
+    if (this.preview || option === this.value) return
+    this.value = option
+    this.onChange()
+  }
+
+  private readonly goOn = (): void => focusNextField(this)
+
   private controlTpl(kind: FieldType): TemplateResult {
     if (this.lookup) return this._lookup.render('ctrl', this.label)
-    if (this.preview) return html`<span class="shown">${this.value}</span>`
-    if (kind === 'select') {
-      const entries = this.options
-        .split(',')
-        .map((o) => o.trim())
-        .filter((o) => o !== '')
-      const foreignValue = this.value !== '' && !entries.includes(this.value)
-      return html`<span class="shown">${this.value}</span><select
-        class="ctrl"
-        aria-label=${this.label}
-        .value=${live(this.value)}
-        @input=${this.onInput}
-        @change=${this.onChange}
-        @keydown=${this.onKey}
-      >
-        <option value="" hidden></option>
-        ${foreignValue ? html`<option value=${this.value} hidden selected>${this.value}</option>` : nothing}
-        ${entries.map((o) => html`<option value=${o} ?selected=${o === this.value}>${o}</option>`)}
-      </select>`
+    const host = {
+      label: this.label,
+      value: this.value,
+      showLabel: this.showLabel,
+      preview: this.preview,
+      input: this.onInput,
+      change: this.onChange,
+      key: this.onKey,
+      focus: this.onFocus,
+      blur: this.takeTyped,
+      choose: this.choose,
+      goOn: this.goOn,
     }
-    if (kind === 'multiline') {
-      return html`<textarea
-        class="ctrl"
-        aria-label=${this.label}
-        .value=${live(this.value)}
-        @input=${this.onInput}
-        @focus=${this.onFocus}
-        @blur=${this.takeTyped}
-        @keydown=${this.onKey}
-      ></textarea>`
-    }
-    return html`<input
-      class="ctrl"
-      type=${kind}
-      aria-label=${this.label}
-      placeholder=${kind === 'search' && !this.showLabel ? this.label : nothing}
-      .value=${live(forInput(kind, this.value))}
-      @input=${this.onInput}
-      @focus=${this.onFocus}
-      @blur=${this.takeTyped}
-      @keydown=${this.onKey}
-    />`
+    return fieldControlTpl(kind, host, optionsOf(this.options))
   }
 
   protected override willUpdate(changed: PropertyValues): void {
