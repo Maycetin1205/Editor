@@ -8,9 +8,9 @@ import { useEditorInstance, useEditorSelect } from '../state/useEditor'
 import type { EditorStore } from '../state/EditorStore'
 import { sameFields, sameItems } from '../state/useStoreSelect'
 import { BlockHost } from './BlockHost'
-import { useDnd, useDndSelect } from './dndState'
-import { positionDrag } from './positionDrag'
-import { usePointerDrag } from './pointerDrag'
+import { useDnd, useDndSelect } from './drag/dndState'
+import { positionDrag } from './drag/positionDrag'
+import { usePointerDrag } from './drag/pointerDrag'
 
 function GridGhost({ slot, free }: { slot: GridSlot; free: boolean }) {
   const tone = free ? '--wb-selection' : '--wb-error'

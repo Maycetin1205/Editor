@@ -1,0 +1,84 @@
+import type { PointerEvent as ReactPointerEvent } from 'react'
+import type { BlockNode } from '../../../core/block/tree'
+import { gridSlotRead } from '../../../core/block/grid'
+import { columnsOf, slotTaken } from '../../../core/block/gridArea'
+import { mayContain } from '../../../core/block/registry'
+import type { EditorStore } from '../../state/EditorStore'
+import type { DndState } from './dndState'
+import { cssZoomOf } from '../../../blocks/base/cssZoom'
+import { cellFromPointer } from './gridDnd'
+import { areaUnderPointer, areaOf, rowsCapacity, rowInBox, type AreasHit } from '../gridArea'
+import { swallowNextClick, type PointerDrag } from './pointerDrag'
+
+const DRAG_THRESHOLD = 4
+
+function inTextEditing(e: ReactPointerEvent<HTMLElement>): boolean {
+  for (const t of e.nativeEvent.composedPath()) {
+    if (t === e.currentTarget) return false
+    if (t instanceof HTMLElement && t.isContentEditable) return true
+  }
+  return false
+}
+
+// Moves a block to another cell, also into another grid area. Nothing is
+// written before the drop; until then the ghost shows where it would land.
+export function positionDrag(
+  editor: EditorStore,
+  dnd: DndState,
+  e: ReactPointerEvent<HTMLElement>,
+  node: BlockNode,
+  parentId: string,
+): PointerDrag | null {
+  if (e.button !== 0) return null
+  if (inTextEditing(e)) return null
+  const wrapper = e.currentTarget
+
+  const gridEl = areaOf(wrapper)
+  if (!gridEl) return null
+
+  e.stopPropagation()
+  const startX = e.clientX
+  const startY = e.clientY
+  const rect = wrapper.getBoundingClientRect()
+
+  const grab = { x: startX - rect.left, y: startY - rect.top }
+  const zoom = cssZoomOf(gridEl)
+  const pos = gridSlotRead(node.values)
+  const id = node.id
+  const own: AreasHit = { parentId, area: gridEl }
+  let last: { target: AreasHit; x: number; y: number; free: boolean } | null = null
+
+  const targetArea = (x: number, y: number): AreasHit => {
+    const hit = areaUnderPointer(editor.tree, editor.rootId, x, y)
+    if (!hit || hit.parentId === parentId) return own
+    const target = editor.getNode(hit.parentId)
+    if (!target || !mayContain(target.type, node.type) || editor.isInSubtree(id, hit.parentId)) {
+      return own
+    }
+    return hit
+  }
+
+  return {
+    starts: (ev) => Math.abs(ev.clientX - startX) >= DRAG_THRESHOLD || Math.abs(ev.clientY - startY) >= DRAG_THRESHOLD,
+    begin: () => dnd.setDragId(id),
+    move: (ev) => {
+      dnd.setDragOffset({ dx: (ev.clientX - startX) / zoom, dy: (ev.clientY - startY) / zoom })
+      const target = targetArea(ev.clientX, ev.clientY)
+      const cell = cellFromPointer(target.area, ev.clientX - grab.x, ev.clientY - grab.y)
+      const w = Math.min(pos.w, columnsOf(editor.tree, target.parentId))
+      const x = Math.max(0, Math.min(cell.x, columnsOf(editor.tree, target.parentId) - w))
+      const capacity = rowsCapacity(editor.tree, target.parentId, target.area)
+      const y = rowInBox(capacity, cell.y, pos.h)
+      const free = !slotTaken(editor.tree, target.parentId, { x, y, w, h: pos.h }, id)
+      last = { target, x, y, free }
+      dnd.setDropTarget({ parentId: target.parentId, x, y, w, h: pos.h, free })
+    },
+    drop: () => {
+      if (last && last.free) editor.moveNodeToCell(id, last.target.parentId, last.x, last.y)
+      swallowNextClick()
+      dnd.reset()
+    },
+    click: () => dnd.reset(),
+    cancel: () => dnd.reset(),
+  }
+}

@@ -3,7 +3,12 @@ import type { BlockNode } from '../../core/block/tree'
 import { propertyVisible } from '../../core/block/property'
 import type { LookupWindow } from '../../core/block/capability'
 import { blockType } from '../../core/block/registry'
-import { blockElementInEditor, windowStateOf, openLookupInEditor, type WindowState } from '../canvas/lookupWindowState'
+import {
+  blockElementInEditor,
+  windowStateOf,
+  openLookupInEditor,
+  type WindowState,
+} from '../canvas/lookup/lookupWindowState'
 import { useEditor } from '../state/useEditor'
 
 interface LookupWindowSectionProps {

@@ -5,8 +5,8 @@ import type { BlockNode } from '../../core/block/tree'
 import { declaredValue } from '../../core/block/registry'
 import { calculationsProperty } from '../../core/data/calculation'
 import { Labeled } from '../bar/Labeled'
-import { termsText } from '../canvas/calculationWords'
-import { splitWords } from '../canvas/splitWords'
+import { termsText } from '../canvas/calculation/calculationWords'
+import { splitWords } from '../canvas/split/splitWords'
 import { useDataSources, useEditor } from '../state/useEditor'
 
 export function SplitRow({ block }: { block: BlockNode }) {

@@ -1,7 +1,7 @@
 import { memo, useEffect, useState } from 'react'
 import { Check, Database, Download, Eye, Redo2, Save, SquareDashed, Undo2 } from '../icons/icon'
 import { frameNumberOf, maskNameOf } from '../../core/block/maskSettings'
-import { PageBar } from '../canvas/PageBar'
+import { PageBar } from './PageBar'
 import { exportCurrentMask, exportTargetFolder } from '../commands/exportMask'
 import { leftoverLines } from '../state/leftoverLines'
 import { saveOrAsk } from '../state/maskFile'

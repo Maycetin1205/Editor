@@ -19,7 +19,7 @@ import { SelectionFollowSection } from '../bar/SelectionFollowSection'
 import { Labeled } from '../bar/Labeled'
 import { SourceList } from '../bar/SourceList'
 import { useDataSources, useEditor } from '../state/useEditor'
-import { carriesSplit } from '../canvas/splitWords'
+import { carriesSplit } from '../canvas/split/splitWords'
 import { CalculationRow, SplitRow } from './WindowRows'
 
 export interface Folds {

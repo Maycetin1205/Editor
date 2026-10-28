@@ -6,11 +6,11 @@ import type { EditorStore } from '../state/EditorStore'
 import { useEditor } from '../state/useEditor'
 import { BlockHost } from './BlockHost'
 import { NodeList } from './NodeList'
-import { useDnd } from './dndState'
-import { pageDrop } from './gridDnd'
-import { axesOf, sizeDrag, type Axis } from './sizeDrag'
-import { Grip } from './Grip'
-import { GRIPS } from './useBlockResize'
+import { useDnd } from './drag/dndState'
+import { pageDrop } from './drag/gridDnd'
+import { axesOf, sizeDrag, type Axis } from './drag/sizeDrag'
+import { Grip } from './drag/Grip'
+import { GRIPS } from './drag/useBlockResize'
 
 const POPUP_SIZE: Record<Axis, 'popupWidth' | 'popupHeight'> = { width: 'popupWidth', height: 'popupHeight' }
 
