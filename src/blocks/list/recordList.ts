@@ -1,7 +1,7 @@
 import { html, nothing, type ReactiveController, type ReactiveControllerHost, type TemplateResult } from 'lit'
 import { styleMap } from 'lit/directives/style-map.js'
 import { giverIdOf } from '../../runtime/selection'
-import { ROW_CONFIRM_EVENT } from '../../runtime/steps/confirm'
+import { ROW_CONFIRM_EVENT } from '../../runtime/steps/runners'
 import { sendPropChange } from '../base/BlockElement'
 import { reportsHeads } from '../base/headsReport'
 import type { Column } from '../parts/column'

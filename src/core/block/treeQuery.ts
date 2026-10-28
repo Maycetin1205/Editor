@@ -3,7 +3,7 @@ import { type ValueSpot, type BindableSpot, capability, applies, hasCapability }
 import { blockType } from './registry'
 import { flagOn, flagFor } from './listBinding'
 import { propertyVisible } from './property'
-import { SOURCE_PROP } from './sourceProperty'
+import { SOURCE_PROP } from './sharedProperties'
 import { stepAdapter } from '../data/steps/steps'
 
 interface ValueSpotsTarget {

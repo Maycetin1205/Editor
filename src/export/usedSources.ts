@@ -6,7 +6,7 @@ import { bindingProp, capability, hasCapability } from '../core/block/capability
 import { blockType, declaredValue } from '../core/block/registry'
 import { propertyVisible } from '../core/block/property'
 import { selectionSourceIdOf, bindableSpotsOf, maySelectionFollows, carriesOwnSource } from '../core/block/treeQuery'
-import { SOURCE_PROPERTY } from '../core/block/sourceProperty'
+import { SOURCE_PROPERTY } from '../core/block/sharedProperties'
 import { followsSelectionProperty, followUsable } from '../core/data/selectionFollow'
 import { calculationsProperty, fieldBindingsOf } from '../core/data/calculation'
 import { splitsProperty } from '../core/data/split'

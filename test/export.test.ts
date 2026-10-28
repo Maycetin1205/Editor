@@ -4,7 +4,7 @@ import { allBlockTypes, blockType, mayContain } from '../src/core/block/registry
 import { newSubtree } from '../src/core/block/newBlock'
 import { emptyTree } from '../src/core/block/treeOps'
 import { ROOT_ID, ROOT_TYPE, type MaskTree } from '../src/core/block/tree'
-import { MASK_NAME_PROP } from '../src/core/block/maskName'
+import { MASK_NAME_PROP } from '../src/core/block/maskSettings'
 import { checkDataSources } from '../src/core/data/dataSources'
 import { exportMask } from '../src/export/exportMask'
 import { failedChecks, validateMaskHtml } from '../src/export/validator'

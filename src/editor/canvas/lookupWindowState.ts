@@ -1,4 +1,4 @@
-import { SOURCE_PROPERTY } from '../../core/block/sourceProperty'
+import { SOURCE_PROPERTY } from '../../core/block/sharedProperties'
 import { declaredValue } from '../../core/block/registry'
 import { coerceCaptureColumns, windowColumnsIn, type CaptureColumn } from '../../blocks/capture'
 import {

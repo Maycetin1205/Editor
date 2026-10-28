@@ -1,6 +1,6 @@
 import { ROOT_ID, type BlockNode, type MaskTree } from '../core/block/tree'
 import { splitBinding } from '../core/block/binding'
-import { SOURCE_PROP } from '../core/block/sourceProperty'
+import { SOURCE_PROP } from '../core/block/sharedProperties'
 import type { DataSource } from '../core/data/dataSources'
 import { PICTURE_ALIAS_ATTR } from '../blocks/image/address'
 

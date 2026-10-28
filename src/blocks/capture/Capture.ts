@@ -32,7 +32,7 @@ import { splitStyle } from './split/splitStyle'
 import { captureProperties, type CaptureValues } from './properties'
 import { ROW_CAPTURED, rowCapturedRunner } from './rowCaptured'
 import { WorkingRow } from './workingRow'
-import type { SourceValue } from '../../core/block/sourceProperty'
+import type { SourceValue } from '../../core/block/sharedProperties'
 import { TABLE_PART } from '../list/parts'
 
 export interface Capture extends CaptureValues, SourceValue {}

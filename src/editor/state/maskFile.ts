@@ -1,5 +1,4 @@
-import { EXPORT_TARGET_PROP } from '../../core/block/exportTarget'
-import { MASK_NAME_PROP, maskNameOf } from '../../core/block/maskName'
+import { EXPORT_TARGET_PROP, MASK_NAME_PROP, maskNameOf } from '../../core/block/maskSettings'
 import { ROOT_ID, type MaskTree } from '../../core/block/tree'
 import type { DataSource } from '../../core/data/dataSources'
 import type { RelationTemplate } from '../../core/data/relations'

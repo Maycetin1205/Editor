@@ -1,5 +1,4 @@
-import { frameNumberOf } from '../../core/block/documentFrame'
-import { MASK_NAME_DEFAULT, MASK_NAME_PROP } from '../../core/block/maskName'
+import { frameNumberOf, MASK_NAME_DEFAULT, MASK_NAME_PROP } from '../../core/block/maskSettings'
 import { ROOT_ID, ROOT_TYPE, type MaskTree } from '../../core/block/tree'
 import {
   accessOf,

@@ -1,7 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { FilePlus, FileUp, FolderOpen } from '@/editor/icons/icon'
 import { Button } from '@/editor/widgets/Button'
-import { maskNameOf } from '../../core/block/maskName'
+import { maskNameOf } from '../../core/block/maskSettings'
 import { canPickFolder, reasonOf } from '../state/folderOnDisk'
 import { chooseMaskFolder, loadMaskFromFile, newMaskFrom, openMaskFile, saveAsTemplate } from '../state/maskFile'
 import type { MaskEntry, MaskFolder } from '../state/maskFolder'

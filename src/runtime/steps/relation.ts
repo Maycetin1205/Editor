@@ -1,5 +1,5 @@
 import { readDeclared } from '../../core/block/registry'
-import { SOURCE_PROPERTY } from '../../core/block/sourceProperty'
+import { SOURCE_PROPERTY } from '../../core/block/sharedProperties'
 import { BLOCK_ID_ATTR, COLUMN_PARAM_SOURCES, RECORD_PLACEHOLDER, type Parameter } from '../../core/data/actions'
 import { NO_CONFIRMATION, type PutConfirm } from '../../core/data/jobs'
 import { POSITION_DELETE_NR, positionsConfirm, type PositionsWrite } from '../../core/data/positions'

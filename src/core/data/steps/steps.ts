@@ -1,7 +1,13 @@
 import type { StepAdapter, StepCondition } from './stepAdapter'
 import { relation, type RelationStep, type RuntimeRelationStep } from './relation'
-import { popupOpen, type PopupOpenStep, type RuntimePopupOpenStep } from './popupOpen'
-import { popupClose, type PopupCloseStep, type RuntimePopupCloseStep } from './popupClose'
+import {
+  popupOpen,
+  type PopupOpenStep,
+  type RuntimePopupOpenStep,
+  popupClose,
+  type PopupCloseStep,
+  type RuntimePopupCloseStep,
+} from './popup'
 import { confirm, type ConfirmStep, type RuntimeConfirmStep } from './confirm'
 import { startTool, type RuntimeStartToolStep, type StartToolStep } from './startTool'
 

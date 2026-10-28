@@ -1,7 +1,6 @@
 import { bindingFields, bindingJoiner } from '../core/block/binding'
-import { DAY_FIELD_PROPERTY } from '../core/block/dayFieldProperty'
+import { DAY_FIELD_PROPERTY, SOURCE_PROPERTY } from '../core/block/sharedProperties'
 import { readDeclared } from '../core/block/registry'
-import { SOURCE_PROPERTY } from '../core/block/sourceProperty'
 import { BLOCK_ID_ATTR } from '../core/data/actions'
 import type { RuntimeSource } from '../core/data/dataSources'
 import { positionIdentity } from '../core/data/positions'

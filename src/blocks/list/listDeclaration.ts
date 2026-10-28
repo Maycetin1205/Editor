@@ -1,5 +1,5 @@
 import { booleanProperty, type ValuesOf } from '../../core/block/property'
-import { DAY_FIELD_PROPERTY } from '../../core/block/dayFieldProperty'
+import { DAY_FIELD_PROPERTY } from '../../core/block/sharedProperties'
 import type { Capability, EventDef } from '../../core/block/capability'
 import type { ListBinding } from '../../core/block/listBinding'
 import { columnsProperty } from '../parts/column'

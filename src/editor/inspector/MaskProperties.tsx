@@ -2,9 +2,14 @@ import { useEffect, useState } from 'react'
 import { FileText, FolderOpen, X } from '@/editor/icons/icon'
 import { Button, OPENER } from '@/editor/widgets/Button'
 import { Field } from '@/editor/widgets/Field'
-import { DOCUMENT_FRAME_PROP, FRAME_SPOTS } from '../../core/block/documentFrame'
-import { EXPORT_TARGET_PROP, exportTargetOf } from '../../core/block/exportTarget'
-import { MASK_NAME_DEFAULT, MASK_NAME_PROP } from '../../core/block/maskName'
+import {
+  DOCUMENT_FRAME_PROP,
+  FRAME_SPOTS,
+  EXPORT_TARGET_PROP,
+  exportTargetOf,
+  MASK_NAME_DEFAULT,
+  MASK_NAME_PROP,
+} from '../../core/block/maskSettings'
 import { ROOT_ID } from '../../core/block/tree'
 import { Labeled } from '../bar/Labeled'
 import { useInputSession } from '../controls/useInputSession'

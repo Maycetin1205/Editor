@@ -1,6 +1,6 @@
 import { html, type TemplateResult } from 'lit'
 import { styleMap } from 'lit/directives/style-map.js'
-import type { RowConfirm } from '../../runtime/steps/confirm'
+import type { RowConfirm } from '../../runtime/steps/runners'
 import type { ActionResult } from '../../runtime/actions/runEvent'
 import { warn } from '../../core/log'
 import { maskHost } from '../../runtime/host'

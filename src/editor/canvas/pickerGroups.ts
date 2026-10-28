@@ -1,4 +1,4 @@
-import { SOURCE_PROP } from '../../core/block/sourceProperty'
+import { SOURCE_PROP } from '../../core/block/sharedProperties'
 import { sourcesCarrier } from '../../core/block/sourcesInReach'
 import { sourcesKey, type DataSource } from '../../core/data/dataSources'
 import type { SourceInReach } from '../../core/data/extraSources'

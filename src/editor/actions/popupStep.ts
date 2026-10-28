@@ -1,5 +1,4 @@
-import type { PopupCloseStep } from '../../core/data/steps/popupClose'
-import type { PopupOpenStep } from '../../core/data/steps/popupOpen'
+import type { PopupCloseStep, PopupOpenStep } from '../../core/data/steps/popup'
 import { PopupBody } from './PopupBody'
 import type { StepContext, StepSummary, StepTabDef, StepWords } from './stepTypes'
 

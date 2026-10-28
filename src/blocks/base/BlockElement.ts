@@ -14,7 +14,7 @@ import type { Condition, Property, PropertyMap, PropertyValue } from '../../core
 import { checkPropertyNames } from '../../core/block/propertyNames'
 import { registerBlockType } from '../../core/block/registry'
 import { GRID_PROPERTIES } from '../../core/block/grid'
-import { SOURCE_PROP, SOURCE_PROPERTY } from '../../core/block/sourceProperty'
+import { SOURCE_PROP, SOURCE_PROPERTY } from '../../core/block/sharedProperties'
 import { deepClone } from '../../core/deepClone'
 import { followsSelectionProperty } from '../../core/data/selectionFollow'
 import { extraSourcesProperty } from '../../core/data/extraSources'

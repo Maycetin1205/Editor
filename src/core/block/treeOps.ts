@@ -1,9 +1,7 @@
 import { ROOT_ID, ROOT_TYPE, type BlockNode, type MaskTree } from './tree'
 import { blockType } from './registry'
 import { readValues, textProperty, type Property, type PropertyMap, type PropertyValue } from './property'
-import { DOCUMENT_FRAME_PROP } from './documentFrame'
-import { EXPORT_TARGET_PROP } from './exportTarget'
-import { MASK_NAME_PROP } from './maskName'
+import { DOCUMENT_FRAME_PROP, EXPORT_TARGET_PROP, MASK_NAME_PROP } from './maskSettings'
 import type { Unread } from '../unread'
 
 const ROOT_PROPERTIES: PropertyMap = {

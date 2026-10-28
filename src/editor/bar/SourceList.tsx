@@ -1,5 +1,5 @@
 import { declaredValue } from '../../core/block/registry'
-import { SOURCE_PROP, SOURCE_PROPERTY } from '../../core/block/sourceProperty'
+import { SOURCE_PROP, SOURCE_PROPERTY } from '../../core/block/sharedProperties'
 import { Plus, X } from '@/editor/icons/icon'
 import { Button } from '@/editor/widgets/Button'
 import type { BlockNode } from '../../core/block/tree'

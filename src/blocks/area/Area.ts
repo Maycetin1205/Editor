@@ -1,7 +1,7 @@
 import { html, nothing, type CSSResultGroup, type TemplateResult } from 'lit'
 import { state } from 'lit/decorators.js'
 import { rowsForHeight } from '../../core/block/grid'
-import type { SourceValue } from '../../core/block/sourceProperty'
+import type { SourceValue } from '../../core/block/sharedProperties'
 import { chainsRead } from '../../core/data/steps/chainsRead'
 import { stepAdapter } from '../../core/data/steps/steps'
 import { readBoundSpot } from '../../runtime/boundSpot'

@@ -1,6 +1,4 @@
-import { documentFileNames, frameNumberOf } from '../../core/block/documentFrame'
-import { exportTargetOf } from '../../core/block/exportTarget'
-import { maskNameOf } from '../../core/block/maskName'
+import { documentFileNames, frameNumberOf, exportTargetOf, maskNameOf } from '../../core/block/maskSettings'
 import type { MaskTree } from '../../core/block/tree'
 import type { DataSource } from '../../core/data/dataSources'
 import type { RelationTemplate } from '../../core/data/relations'

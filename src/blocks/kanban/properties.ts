@@ -1,5 +1,5 @@
 import { booleanProperty, fieldProperty, segmentProperty, type ValuesOf } from '../../core/block/property'
-import { DAY_FIELD_PROPERTY } from '../../core/block/dayFieldProperty'
+import { DAY_FIELD_PROPERTY } from '../../core/block/sharedProperties'
 import { spotFieldProperty } from '../parts/card'
 import { kanbanColumnsProperty } from './columns'
 
