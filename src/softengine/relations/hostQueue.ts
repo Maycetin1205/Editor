@@ -13,7 +13,7 @@ import {
 } from '../../core/data/jobs'
 import type { RuntimeRelation } from '../../core/data/relations'
 import { onSeAnswer, onSeArrival, seWindow, startSe } from '../bridge'
-import { warn } from '../warning'
+import { warn } from '../../core/log'
 import { refusalOf } from './answer'
 import { startGet, startQuery } from './getJob'
 import {

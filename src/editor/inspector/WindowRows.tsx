@@ -7,8 +7,7 @@ import { calculationsProperty } from '../../core/data/calculation'
 import { Labeled } from '../bar/Labeled'
 import { termsText } from '../canvas/calculationWords'
 import { splitWords } from '../canvas/splitWords'
-import { useDataSources } from '../state/useDataSources'
-import { useEditor } from '../state/useEditor'
+import { useDataSources, useEditor } from '../state/useEditor'
 
 export function SplitRow({ block }: { block: BlockNode }) {
   const ed = useEditor()

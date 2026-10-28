@@ -1,6 +1,6 @@
 import type { RuntimeSource } from '../core/data/dataSources'
 import { seWindow } from './bridge'
-import { sourceFromList, isObject, rowsOfSource as rowsFrom } from './data'
+import { sourceFromList, isObject, rowsInData } from './data'
 import { overlaid } from './positionsOverlay'
 
 export function runtimeSource(id: string): RuntimeSource | undefined {
@@ -20,5 +20,5 @@ export function runtimeSources(): RuntimeSource[] {
 }
 
 export function rowsOfSource(source: RuntimeSource): unknown[] {
-  return overlaid(source, rowsFrom(source, seWindow().SEDATA))
+  return overlaid(source, rowsInData(source, seWindow().SEDATA))
 }

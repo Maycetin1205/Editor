@@ -1,8 +1,6 @@
 import { useMemo } from 'react'
 import { isWindowPage, pagesOfMask } from '../../core/block/pages'
-import { useDataSources } from '../state/useDataSources'
-import { useEditor } from '../state/useEditor'
-import { useRelations } from '../state/useRelations'
+import { useDataSources, useEditor, useRelations } from '../state/useEditor'
 import { maskReach } from '../origin/reach'
 import type { StepContext } from './stepRegistry'
 

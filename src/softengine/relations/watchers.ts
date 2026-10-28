@@ -1,4 +1,4 @@
-import { warn } from '../warning'
+import { warn } from '../../core/log'
 
 // Who listens to the line. A listener that throws is warned about and does
 // not keep the others from hearing.

@@ -4,9 +4,7 @@ import { useCloseOnEscape } from '@/editor/widgets/useCloseOnEscape'
 import type { BlockNode } from '../../core/block/tree'
 import { SELECTION_FOLLOW_PROP } from '../../core/data/selectionFollow'
 import { openDocumentOf } from '../origin/reach'
-import { useDataSources } from '../state/useDataSources'
-import { useEditor } from '../state/useEditor'
-import { useView } from '../state/useView'
+import { useDataSources, useEditor, useView } from '../state/useEditor'
 import { followOnDocument } from './followOffer'
 
 export function FollowPick({ block }: { block: BlockNode }) {

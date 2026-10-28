@@ -1,6 +1,6 @@
 import { booleanProperty, fieldProperty, segmentProperty, type ValuesOf } from '../../core/block/property'
 import { DAY_FIELD_PROPERTY } from '../../core/block/dayFieldProperty'
-import { spotBinding } from '../parts/card'
+import { spotFieldProperty } from '../parts/card'
 import { kanbanColumnsProperty } from './columns'
 
 export const kanbanProperties = {
@@ -27,22 +27,22 @@ export const kanbanProperties = {
     },
   ),
   dayField: DAY_FIELD_PROPERTY,
-  avatarField: spotBinding('Avatar', 'avatarfield'),
+  avatarField: spotFieldProperty('Avatar', 'avatarfield'),
   columns: kanbanColumnsProperty(),
   summary: booleanProperty({
     default: false,
     label: 'Übersicht oben',
     attribute: 'summary',
   }),
-  headingField: spotBinding('Titel', 'headingfield'),
-  heading2Field: spotBinding('Titel 2', 'heading2field'),
-  timeField: spotBinding('Zeit', 'timefield'),
-  dateField: spotBinding('Datum', 'datefield'),
-  sublineField: spotBinding('Unterzeile', 'sublinefield'),
-  textField: spotBinding('Textzeile', 'textfield'),
-  sinceField: spotBinding('Seit', 'sincefield'),
-  amountField: spotBinding('Betrag', 'amountfield'),
-  noteField: spotBinding('Notiz', 'notefield'),
+  headingField: spotFieldProperty('Titel', 'headingfield'),
+  heading2Field: spotFieldProperty('Titel 2', 'heading2field'),
+  timeField: spotFieldProperty('Zeit', 'timefield'),
+  dateField: spotFieldProperty('Datum', 'datefield'),
+  sublineField: spotFieldProperty('Unterzeile', 'sublinefield'),
+  textField: spotFieldProperty('Textzeile', 'textfield'),
+  sinceField: spotFieldProperty('Seit', 'sincefield'),
+  amountField: spotFieldProperty('Betrag', 'amountfield'),
+  noteField: spotFieldProperty('Notiz', 'notefield'),
 }
 
 export type KanbanValues = ValuesOf<typeof kanbanProperties>

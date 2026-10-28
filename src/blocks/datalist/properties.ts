@@ -1,5 +1,5 @@
 import { choiceProperty, type Condition, type ValuesOf } from '../../core/block/property'
-import { spotBinding } from '../parts/card'
+import { spotFieldProperty } from '../parts/card'
 
 export const dataListProperties = {
   pick: choiceProperty(
@@ -13,10 +13,10 @@ export const dataListProperties = {
       attribute: 'pick',
     },
   ),
-  headingField: spotBinding('Titel', 'headingfield'),
-  sublineField: spotBinding('Unterzeile', 'sublinefield'),
-  asideField: spotBinding('Rechts', 'asidefield'),
-  avatarField: spotBinding('Avatar', 'avatarfield'),
+  headingField: spotFieldProperty('Titel', 'headingfield'),
+  sublineField: spotFieldProperty('Unterzeile', 'sublinefield'),
+  asideField: spotFieldProperty('Rechts', 'asidefield'),
+  avatarField: spotFieldProperty('Avatar', 'avatarfield'),
 }
 
 export type DataListValues = ValuesOf<typeof dataListProperties>

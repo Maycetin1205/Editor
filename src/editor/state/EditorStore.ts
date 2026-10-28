@@ -2,16 +2,16 @@ import { ROOT_ID, type BlockNode, type MaskTree } from '../../core/block/tree'
 import { blockType } from '../../core/block/registry'
 import { gridSlotRead, type GridSlot } from '../../core/block/grid'
 import { type ActionChains } from '../../core/data/steps/steps'
-import { type DataSource } from '../../core/data/dataSources'
+import type { DataSource } from '../../core/data/dataSources'
+import type { RelationTemplate } from '../../core/data/relations'
 import { type SourceInReach } from '../../core/data/extraSources'
-import { DataSourceStore } from './DataSourceStore'
+import { LibraryStore } from './LibraryStore'
 import { firstSourceInReach, sourcesInReach } from '../../core/block/sourcesInReach'
 import type { EditorSnapshot } from './history'
 import { packMask, type MaskContent, type MaskFileAt } from './maskFile'
 import { storedMaskRefused } from './stageNotice'
 import { NO_LEFTOVER, type Leftover } from './leftover'
 import { missingOn } from './libraryFile'
-import { RelationStore } from './RelationStore'
 import { Subject } from './Subject'
 import { duplicateSubtree } from './duplicateSubtree'
 import { emptyTree } from '../../core/block/treeOps'
@@ -33,8 +33,8 @@ import { UndoSteps } from './editorStore/undoSteps'
 import { EditorView } from './editorStore/viewState'
 
 export class EditorStore extends Subject<EditorStore> {
-  readonly dataSources: DataSourceStore
-  readonly relation: RelationStore
+  readonly dataSources: LibraryStore<DataSource>
+  readonly relation: LibraryStore<RelationTemplate>
 
   private _tree: MaskTree = emptyTree()
   private _leftover: Leftover = NO_LEFTOVER
@@ -63,8 +63,8 @@ export class EditorStore extends Subject<EditorStore> {
   constructor() {
     super()
     const { library, mask, refusedStage } = EditorPersistence.load()
-    this.dataSources = new DataSourceStore(library.dataSources)
-    this.relation = new RelationStore(library.relation)
+    this.dataSources = new LibraryStore<DataSource>(library.dataSources)
+    this.relation = new LibraryStore<RelationTemplate>(library.relation)
     this._tree = mask.tree
     this._leftover = mask.leftover
     this._activePageId = mask.activePageId

@@ -22,7 +22,7 @@ import { reportTrigger, seWindow, writeGoesOut } from '../bridge'
 import { rowsFromQueryAnswer } from '../data'
 import { fieldRead } from '../fields'
 import { addPosition, deliveredRows, dropPosition, plainRow, rowShape, shapedRow, shownRows } from '../positionsOverlay'
-import { warn } from '../warning'
+import { warn } from '../../core/log'
 import { answersRelation, refusalOf, resultFromAnswer } from './answer'
 import {
   failedAnswer,

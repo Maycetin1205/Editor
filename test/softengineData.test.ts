@@ -3,7 +3,7 @@ import {
   dataFromContent,
   messagesContent,
   rowsFromQueryAnswer,
-  rowsOfSource,
+  rowsInData,
   sourceFromList,
 } from '../src/softengine/data'
 import { fieldRead, fieldWrite } from '../src/softengine/fields'
@@ -88,7 +88,7 @@ describe('dataFromContent / messagesContent', () => {
   })
 })
 
-describe('sourceFromList / rowsOfSource', () => {
+describe('sourceFromList / rowsInData', () => {
   const list = [
     { id: 's1', name: 'Kunden', tableId: 'KD', recordField: '0_6', fields: ['0_6', '6_30', 7], path: 'Tabellen' },
     { id: 'bad', name: 3, tableId: 'X' },
@@ -109,21 +109,19 @@ describe('sourceFromList / rowsOfSource', () => {
   it('finds pushed rows under the alias in every section SoftEngine uses', () => {
     const source = sourceFromList(list, 's1')!
     const row = { '0_6': '1' }
-    expect(rowsOfSource(source, { Daten: { SEFileLoop: [{ ALIAS: 'kunden', Zeilen: [row] }] } })).toEqual([row])
-    expect(rowsOfSource(source, { Daten: { SEFileLoop: { Kunden: { Saetze: JSON.stringify([row]) } } } })).toEqual([
-      row,
-    ])
-    expect(rowsOfSource(source, { Daten: { ErpApiCall: { KUNDEN: { Rows: [row] } } } })).toEqual([row])
-    expect(rowsOfSource(source, { Daten: { Tabellen: { KD: { Daten: [row] } } } })).toEqual([row])
-    expect(rowsOfSource(source, { Daten: { Masken: { kunden: row } } })).toEqual([row])
-    expect(rowsOfSource(source, { Daten: { Tabellen: { OTHER: [row] } } })).toEqual([])
-    expect(rowsOfSource(source, null)).toEqual([])
+    expect(rowsInData(source, { Daten: { SEFileLoop: [{ ALIAS: 'kunden', Zeilen: [row] }] } })).toEqual([row])
+    expect(rowsInData(source, { Daten: { SEFileLoop: { Kunden: { Saetze: JSON.stringify([row]) } } } })).toEqual([row])
+    expect(rowsInData(source, { Daten: { ErpApiCall: { KUNDEN: { Rows: [row] } } } })).toEqual([row])
+    expect(rowsInData(source, { Daten: { Tabellen: { KD: { Daten: [row] } } } })).toEqual([row])
+    expect(rowsInData(source, { Daten: { Masken: { kunden: row } } })).toEqual([row])
+    expect(rowsInData(source, { Daten: { Tabellen: { OTHER: [row] } } })).toEqual([])
+    expect(rowsInData(source, null)).toEqual([])
   })
   it('reads the open record from the Var block', () => {
     const source = sourceFromList([{ ...list[0], openRecord: true }], 's1')!
     expect(source.delivery).toMatchObject({ kind: 'push', openRecord: true })
     const data = { Daten: { Var: { WINDOW_VARIABLE: { KD_0_6: '4711', XX_1: 'no' }, KD: { '6_30': 'Name' } } } }
-    expect(rowsOfSource(source, data)).toEqual([{ KD_0_6: '4711', '6_30': 'Name' }])
-    expect(rowsOfSource(source, { Daten: { Var: {} } })).toEqual([])
+    expect(rowsInData(source, data)).toEqual([{ KD_0_6: '4711', '6_30': 'Name' }])
+    expect(rowsInData(source, { Daten: { Var: {} } })).toEqual([])
   })
 })

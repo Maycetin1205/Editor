@@ -5,7 +5,7 @@ import { INPUT_EDGE } from '@/editor/widgets/Field'
 import { Strip } from '@/editor/widgets/Grid'
 import type { DataSource } from '../../core/data/dataSources'
 import { readMaskFields } from '../../core/data/maskFields'
-import { useDataSources } from '../state/useDataSources'
+import { useDataSources } from '../state/useEditor'
 import { withSettings } from './sourceEdit'
 
 // Reads the fields of a mask source from pasted text, with their prefix.

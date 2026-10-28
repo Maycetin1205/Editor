@@ -1,6 +1,6 @@
 import { KEEPS_TYPING_ATTR } from '../core/block/typingMarks'
 import { isObject, messagesContent, dataFromContent, type JsonObject } from './data'
-import { warn } from './warning'
+import { warn } from '../core/log'
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- SEDATA and selib are
    untyped globals of the SoftEngine host. */

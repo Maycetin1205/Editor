@@ -5,13 +5,9 @@ import { fieldRead, fieldWrite } from '../softengine/fields'
 import { fetchRows } from '../softengine/fetchRows'
 import { parameterResolve, relationRun, runtimeRelation, watchConnection, watchQueue } from '../softengine/relations'
 import { rowsOfSource, runtimeSource, runtimeSources } from '../softengine/runtimeSources'
-import { wireWarning } from '../softengine/warning'
 import { closeConnectionLost, showConnectionLost } from './infoBar'
 import { exposeJobLog, noteJob, printEndedJobs } from './jobs'
-import { warn } from './log'
-import type { MaskHost } from './maskHost'
-
-wireWarning(warn)
+import type { MaskHost } from './host'
 
 const wiring = { jobs: false }
 

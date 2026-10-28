@@ -1,7 +1,7 @@
 import { readActionValue } from '../../core/block/registry'
 import { BLOCK_ID_ATTR, type Parameter, type RuntimeValues } from '../../core/data/actions'
 import { seWindow } from '../bridge'
-import { isObject, rowsOfSource, sourceFromList } from '../data'
+import { isObject, rowsInData, sourceFromList } from '../data'
 import { fieldRead } from '../fields'
 import { overlaid } from '../positionsOverlay'
 import { fieldFromAnswer } from './answer'
@@ -56,7 +56,7 @@ export function parameterResolve(binding: Parameter, values: RuntimeValues, runt
 
   const source = sourceFromList(runtime.FF_DATA_SOURCES, binding.sourceId ?? '')
   if (!source) return ''
-  const rows = overlaid(source, rowsOfSource(source, runtime.SEDATA))
+  const rows = overlaid(source, rowsInData(source, runtime.SEDATA))
   const pindex = values.context.PINDEX ?? ''
 
   const row =

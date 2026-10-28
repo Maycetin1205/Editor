@@ -2,7 +2,7 @@ import type { RuntimeQuery } from '../../core/data/deliveries/message'
 import { NO_ANSWER, NOT_CONNECTED, refused, type JobState, type RunAnswer } from '../../core/data/jobs'
 import type { RuntimeRelation } from '../../core/data/relations'
 import { rowsFromQueryAnswer } from '../data'
-import { warn } from '../warning'
+import { warn } from '../../core/log'
 import { answersRelation, extractRecordAnswer, refusalOf, resultFromAnswer } from './answer'
 import {
   failedAnswer,

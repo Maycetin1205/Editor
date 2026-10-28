@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { EditorStore } from './EditorStore'
-import { EditorContext } from './EditorContext'
+import { EditorContext } from './useEditor'
 
 interface EditorProviderProps {
   editor: EditorStore

@@ -216,7 +216,7 @@ function pushedRows(seData: unknown, alias: string, tableId: string, openRecord:
   return []
 }
 
-export function rowsOfSource(source: RuntimeSource, seData: unknown): unknown[] {
+export function rowsInData(source: RuntimeSource, seData: unknown): unknown[] {
   const delivery = source.delivery
   if (delivery.kind !== 'push') return fetchedRowsFor(source.name) ?? []
   return pushedRows(seData, source.name, source.tableId, delivery.openRecord)

@@ -8,9 +8,8 @@ import type { Category, BlockType } from '../../core/block/blockType'
 import { BLOCK_ICONS } from '../blockIcons'
 import { setNewBlockDrag } from '../canvas/dnd'
 import { capacityOf } from '../canvas/gridArea'
-import { useEditorInstance } from '../state/EditorContext'
+import { useEditorInstance, useEditorSelect } from '../state/useEditor'
 import type { EditorStore } from '../state/EditorStore'
-import { useEditorSelect } from '../state/useEditorSelect'
 
 function symbolOf(type: string) {
   return BLOCK_ICONS[type] ?? Component

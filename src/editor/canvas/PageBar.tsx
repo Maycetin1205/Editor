@@ -5,8 +5,7 @@ import { Button } from '@/editor/widgets/Button'
 import { Tabs } from '@/editor/widgets/Tabs'
 import type { PagesEntry } from '../../core/block/pages'
 import { allBlockTypes } from '../../core/block/registry'
-import { useEditorInstance } from '../state/EditorContext'
-import { useEditorSelect } from '../state/useEditorSelect'
+import { useEditorInstance, useEditorSelect } from '../state/useEditor'
 import { sameFields } from '../state/useStoreSelect'
 
 const samePages = (a: readonly PagesEntry[], b: readonly PagesEntry[]): boolean =>

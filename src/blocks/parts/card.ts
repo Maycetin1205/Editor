@@ -2,7 +2,7 @@ import { css, html, nothing, type TemplateResult } from 'lit'
 import { fieldProperty, type Property } from '../../core/block/property'
 import type { BlockElement } from '../base/BlockElement'
 
-export function spotBinding(label: string, attribute: string): Property<string> {
+export function spotFieldProperty(label: string, attribute: string): Property<string> {
   return fieldProperty({
     default: '',
     label: `${label} — Feld`,

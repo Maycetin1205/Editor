@@ -1,5 +1,5 @@
 import { useKeyboardShortcuts } from './useKeyboardShortcuts'
-import { useEditorInstance } from '../state/EditorContext'
+import { useEditorInstance } from '../state/useEditor'
 import { useStoreSelect } from '../state/useStoreSelect'
 import { Canvas } from '../canvas/Canvas'
 import { OpenCalculationWindow } from '../canvas/CalculationWindow'

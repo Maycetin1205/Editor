@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { DataSource } from '../../core/data/dataSources'
-import type { DataSourceStore } from '../state/DataSourceStore'
+import type { LibraryStore } from '../state/LibraryStore'
 import { loadSourceTabs, persistSourceTabs } from '../state/maskStorage'
 import type { SourceTab } from './SourceTabs'
 import { allTabs, isStockTab, movedTo, sameTab, STOCK_TABS, tabOf, unfiled } from './sourceFiling'
@@ -12,7 +12,7 @@ function firstTab(sources: readonly DataSource[], startId: string | null): strin
 }
 
 // Which tab of the data window is open, and what the tab bar does to the sources.
-export function useSourceFiling(store: DataSourceStore, startId: string | null) {
+export function useSourceFiling(store: LibraryStore<DataSource>, startId: string | null) {
   const [own, setOwn] = useState(loadSourceTabs)
   const [tab, setTab] = useState(() => firstTab(store.list, startId))
 

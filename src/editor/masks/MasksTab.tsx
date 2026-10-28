@@ -5,9 +5,7 @@ import { maskNameOf } from '../../core/block/maskName'
 import { canPickFolder, reasonOf } from '../state/folderOnDisk'
 import { chooseMaskFolder, loadMaskFromFile, newMaskFrom, openMaskFile, saveAsTemplate } from '../state/maskFile'
 import type { MaskEntry, MaskFolder } from '../state/maskFolder'
-import { useEditor } from '../state/useEditor'
-import { useMaskFolder } from '../state/useMaskFolder'
-import { useView } from '../state/useView'
+import { useEditor, useMaskFolder, useView } from '../state/useEditor'
 import { MaskList } from './MaskList'
 
 export function MasksTab() {

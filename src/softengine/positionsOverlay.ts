@@ -1,7 +1,7 @@
 import type { RuntimeSource } from '../core/data/dataSources'
 import { POSITIONS_QUERY } from '../core/data/positions'
 import { onSeArrival, reportTrigger, seWindow } from './bridge'
-import { isObject, rowsOfSource, sourceFromList } from './data'
+import { isObject, rowsInData, sourceFromList } from './data'
 
 type Row = Readonly<Record<string, string>>
 
@@ -52,12 +52,12 @@ function sourceOf(sourceId: string): RuntimeSource | undefined {
 
 export function deliveredRows(sourceId: string): unknown[] {
   const source = sourceOf(sourceId)
-  return source ? rowsOfSource(source, seWindow().SEDATA) : []
+  return source ? rowsInData(source, seWindow().SEDATA) : []
 }
 
 export function shownRows(sourceId: string): unknown[] {
   const source = sourceOf(sourceId)
-  return source ? overlaid(source, rowsOfSource(source, seWindow().SEDATA)) : []
+  return source ? overlaid(source, rowsInData(source, seWindow().SEDATA)) : []
 }
 
 export interface RowShape {
@@ -72,7 +72,7 @@ const FIELD_CODE = /^\d+_\d+$/
 export function rowShape(sourceId: string): RowShape {
   const source = sourceOf(sourceId)
   if (!source) return { prefix: '', codes: [] }
-  const first = rowsOfSource(source, seWindow().SEDATA)[0]
+  const first = rowsInData(source, seWindow().SEDATA)[0]
   const keys = typeof first === 'object' && first !== null ? Object.keys(first) : []
   const matches = keys.map((key) => FIELD_KEY.exec(key)).filter((m): m is RegExpExecArray => m !== null)
   return {

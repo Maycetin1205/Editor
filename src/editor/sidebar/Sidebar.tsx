@@ -1,7 +1,7 @@
 import { cn } from '@/editor/widgets/cn'
 import { FoldButton, FoldedColumn, type FoldTab } from '@/editor/widgets/Folded'
 import type { SideTab } from '../state/editorStore/viewState'
-import { useEditorInstance } from '../state/EditorContext'
+import { useEditorInstance } from '../state/useEditor'
 import { useStoreSelect } from '../state/useStoreSelect'
 import { MasksTab } from '../masks/MasksTab'
 import { BlockPalette } from './BlockPalette'

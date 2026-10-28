@@ -1,5 +1,5 @@
 import type { JobView } from '../core/data/jobs'
-import { warn } from './log'
+import { warn } from '../core/log'
 
 const state = { known: new Map<number, JobView>(), listeners: new Set<(job: JobView) => void>() }
 

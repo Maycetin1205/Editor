@@ -7,8 +7,7 @@ import { SELECTION_FOLLOW_PROP, type SelectionFollow } from '../../core/data/sel
 import { originPair, pairOrigin, type ValueOrigin } from '../../core/data/valueOrigin'
 import { OriginPicker } from '../origin/OriginPicker'
 import { formFieldsOf, giverGroup, outsideReach, type Reach } from '../origin/reach'
-import { useDataSources } from '../state/useDataSources'
-import { useEditor } from '../state/useEditor'
+import { useDataSources, useEditor } from '../state/useEditor'
 import { followedName, followOf } from './followOffer'
 import { KeyPairRows } from './KeyPairRows'
 

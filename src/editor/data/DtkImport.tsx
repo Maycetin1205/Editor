@@ -6,7 +6,7 @@ import { Strip } from '@/editor/widgets/Grid'
 import { LINE_HOVER } from '@/editor/widgets/lineLook'
 import { keyDisplay, type DataSource } from '../../core/data/dataSources'
 import type { DtkTable } from '../../core/data/dtkImport'
-import { useDataSources } from '../state/useDataSources'
+import { useDataSources } from '../state/useEditor'
 import { newSource, withEntry } from './sourceEdit'
 
 const sameFields = (t: DtkTable, s: DataSource | undefined): boolean =>

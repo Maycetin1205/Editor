@@ -11,9 +11,7 @@ import {
   relationSyntaxRead,
   type RelationTemplate,
 } from '../../core/data/relations'
-import { useDataSources } from '../state/useDataSources'
-import { useEditor } from '../state/useEditor'
-import { useRelations } from '../state/useRelations'
+import { useDataSources, useEditor, useRelations } from '../state/useEditor'
 
 const COLUMNS = [
   { name: 'Syntax', mono: true },
