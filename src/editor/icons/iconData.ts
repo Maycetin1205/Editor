@@ -220,6 +220,12 @@ export const NODE = {
     ['path', { d: 'M12 7v4' }],
     ['path', { d: 'M16 7v9' }],
   ],
+  // A chip with its dot: the state of a value.
+  StatusChip: [
+    ['rect', { width: '20', height: '10', x: '2', y: '7', rx: '5' }],
+    ['circle', { cx: '7', cy: '12', r: '1.5' }],
+    ['path', { d: 'M11 12h6' }],
+  ],
   Tabs: [
     ['rect', { width: '18', height: '18', x: '3', y: '3', rx: '2' }],
     ['path', { d: 'M3 9h18' }],
