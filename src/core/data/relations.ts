@@ -231,12 +231,6 @@ export function relationSyntaxAsText(
   return `${relation.verb}[${parts.join('!')}]`
 }
 
-type RelationGroup = 'read' | 'write'
-
-export function relationGroup(relation: Pick<RelationTemplate, 'verb'>): RelationGroup {
-  return relation.verb === 'GET_RELATION' ? 'read' : 'write'
-}
-
 export function relationFitsToSearch(
   relation: Pick<RelationTemplate, 'name' | 'verb' | 'nr' | 'parameter' | 'extraParameterAllowed'>,
   query: string,

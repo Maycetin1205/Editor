@@ -1,14 +1,15 @@
 import type { ComponentType } from 'react'
-import { relationGroup, type RelationTemplate } from '../../core/data/relations'
+import type { RelationTemplate, RelationVerb } from '../../core/data/relations'
 import type { RelationStep } from '../../core/data/steps/relation'
-import { ReadRelationBody, WriteRelationBody } from './RelationBody'
-import type { StepBodyProps, StepContext, StepSummary, StepTabDef } from './stepTypes'
+import { GetRelationBody, PutAddRelationBody, PutRelationBody } from './RelationBody'
+import type { StepBodyProps, StepContext, StepSummary, StepTab, StepTabDef } from './stepTypes'
 
-const VERB_SHORT: Record<RelationTemplate['verb'], string> = {
+// Short form of the verb; it is also the key of the verb's tab.
+const VERB_SHORT = {
   GET_RELATION: 'GET',
   PUT_RELATION: 'PUT',
   PUTADD_RELATION: 'PUTADD',
-}
+} as const satisfies Record<RelationVerb, StepTab>
 
 const emptyRelation = (id: string): RelationStep => ({
   id,
@@ -27,27 +28,26 @@ export const relationSummary: StepSummary<'RELATION'> = {
     const t = templateOf(step, context)
     return { words: t?.name ?? 'Relation', short: t ? `${VERB_SHORT[t.verb]} ${t.nr}` : '', known: t !== undefined }
   },
-  tab: (step, context) => (templateOf(step, context)?.verb === 'GET_RELATION' ? 'GET' : 'PUT'),
+  tab(step, context) {
+    const t = templateOf(step, context)
+    return t ? VERB_SHORT[t.verb] : 'PUT'
+  },
 }
 
-function relationTab(
-  key: 'GET' | 'PUT',
-  name: string,
-  group: 'read' | 'write',
-  Body: ComponentType<StepBodyProps>,
-): StepTabDef {
+function relationTab(verb: RelationVerb, Body: ComponentType<StepBodyProps>): StepTabDef {
+  const key = VERB_SHORT[verb]
   return {
     key,
-    name,
-    count: (context) => context.relations.filter((r) => relationGroup(r) === group).length,
+    name: `${key} Relation`,
+    count: (context) => context.relations.filter((r) => r.verb === verb).length,
     start(id, step, context) {
       if (step?.kind !== 'RELATION') return emptyRelation(id)
-      const t = templateOf(step, context)
-      return t && relationGroup(t) === group ? step : emptyRelation(id)
+      return templateOf(step, context)?.verb === verb ? step : emptyRelation(id)
     },
     Body,
   }
 }
 
-export const getTab = relationTab('GET', 'GET Relation', 'read', ReadRelationBody)
-export const putTab = relationTab('PUT', 'PUT Relation', 'write', WriteRelationBody)
+export const getTab = relationTab('GET_RELATION', GetRelationBody)
+export const putTab = relationTab('PUT_RELATION', PutRelationBody)
+export const putAddTab = relationTab('PUTADD_RELATION', PutAddRelationBody)

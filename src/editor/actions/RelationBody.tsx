@@ -7,9 +7,9 @@ import { LINE_HOVER } from '@/editor/widgets/lineLook'
 import { relationParameterDefault } from '../../core/data/actions'
 import {
   relationFitsToSearch,
-  relationGroup,
   relationSyntaxAsText,
   type RelationTemplate,
+  type RelationVerb,
 } from '../../core/data/relations'
 import type { RelationStep } from '../../core/data/steps/relation'
 import { PickerControl } from '../controls/PickerControl'
@@ -18,20 +18,24 @@ import { Places, Result } from './Places'
 import { placeEmpty } from './placeOrigins'
 import type { StepBodyProps } from './stepTypes'
 
-export function ReadRelationBody(props: StepBodyProps) {
-  return <RelationTab group="read" {...props} />
+export function GetRelationBody(props: StepBodyProps) {
+  return <RelationTab verb="GET_RELATION" {...props} />
 }
 
-export function WriteRelationBody(props: StepBodyProps) {
-  return <RelationTab group="write" {...props} />
+export function PutRelationBody(props: StepBodyProps) {
+  return <RelationTab verb="PUT_RELATION" {...props} />
 }
 
-function RelationTab({ group, step, context, reach, onChange }: StepBodyProps & { group: 'read' | 'write' }) {
+export function PutAddRelationBody(props: StepBodyProps) {
+  return <RelationTab verb="PUTADD_RELATION" {...props} />
+}
+
+function RelationTab({ verb, step, context, reach, onChange }: StepBodyProps & { verb: RelationVerb }) {
   if (step.kind !== 'RELATION') return null
   return (
     <RelationBody
       step={step}
-      group={group}
+      verb={verb}
       template={context.relations.find((r) => r.id === step.relationId)}
       relations={context.relations}
       reach={reach}
@@ -42,21 +46,21 @@ function RelationTab({ group, step, context, reach, onChange }: StepBodyProps & 
 
 function RelationBody({
   step,
-  group,
+  verb,
   template,
   relations,
   reach,
   onChange,
 }: {
   step: RelationStep
-  group: 'read' | 'write'
+  verb: RelationVerb
   template: RelationTemplate | undefined
   relations: readonly RelationTemplate[]
   reach: Reach
   onChange: (step: RelationStep) => void
 }) {
   const [showResult, setShowResult] = useState(false)
-  const offered = relations.filter((r) => relationGroup(r) === group)
+  const offered = relations.filter((r) => r.verb === verb)
   const choose = (relationId: string) => {
     const t = relations.find((r) => r.id === relationId)
     if (!t) return
