@@ -4,6 +4,7 @@ import { allBlockTypes, mayContain } from '../src/core/block/registry'
 import { newSubtree } from '../src/core/block/newBlock'
 import { emptyTree } from '../src/core/block/treeOps'
 import { ROOT_ID, ROOT_TYPE, type MaskTree } from '../src/core/block/tree'
+import type { PropertyValue } from '../src/core/block/property'
 import { MASK_NAME_PROP } from '../src/core/block/maskSettings'
 import { checkDataSources } from '../src/core/data/dataSources'
 import { packMask, packMaskFrom } from '../src/editor/state/maskFile'
@@ -113,7 +114,7 @@ describe('currentState', () => {
     for (const step of [19, 20, 27, 38]) expect(currentState({ ...file, schemaVersion: step })).toBeNull()
   })
 
-  it('refuses a mask below the stage before the current one as too old and names its stage', () => {
+  it('refuses a mask below the oldest stage it lifts as too old and names its stage', () => {
     const file = JSON.parse(packMask(treeWithEveryBlock(), [], [])) as Record<string, unknown>
     for (const step of [20, 38]) {
       const result = packMaskFrom(JSON.stringify({ ...file, schemaVersion: step }))
@@ -155,7 +156,7 @@ describe('stage 40', () => {
   it('lifts the areas of stage 39 to kinds and keeps everything else', () => {
     const before = stage39()
     const read = currentState(before) as { schemaVersion: number; tree: MaskTree }
-    expect(read.schemaVersion).toBe(40)
+    expect(read.schemaVersion).toBe(CURRENT_SCHEMA_VERSION)
     const kind = (id: string) => read.tree[id].values
     expect(kind('plain')).toMatchObject({ kind: 'plain' })
     expect(kind('box')).toMatchObject({ kind: 'card', heading: 'Kunde' })
@@ -182,5 +183,67 @@ describe('stage 40', () => {
     if (!result.ok) return
     expect(result.note.lines).toEqual([])
     expect(result.content.tree.kept.values).toMatchObject({ kind: 'card', meta: 'count', countWord: 'Posten' })
+  })
+})
+
+describe('stage 41', () => {
+  // Blocks as stage 40 wrote them before they went into others.
+  function stage40(
+    nodes: Record<string, { type: string; values: Record<string, PropertyValue> }>,
+  ): Record<string, unknown> {
+    const file = JSON.parse(packMask(emptyTree(), [], [])) as { tree: MaskTree } & Record<string, unknown>
+    for (const [id, node] of Object.entries(nodes)) {
+      file.tree[id] = { id, type: node.type, values: node.values, parentId: ROOT_ID, childIds: [] }
+      file.tree[ROOT_ID].childIds.push(id)
+    }
+    return { ...file, schemaVersion: 40 }
+  }
+
+  const dividers = {
+    across: {
+      type: 'divider',
+      values: { gridX: 0, gridY: 41, gridW: 48, gridH: 1, word: 'Vergangene Belege', thickness: 5 },
+    },
+    down: { type: 'divider', values: { gridX: 26, gridY: 0, gridW: 1, gridH: 4, word: '', direction: 'vertical' } },
+    bare: { type: 'divider', values: { gridX: 0, gridY: 5, gridW: 11, gridH: 2 } },
+  }
+
+  it('takes a Trennlinie over as a Text drawn as a divider', () => {
+    const read = currentState(stage40(dividers)) as { schemaVersion: number; tree: MaskTree }
+    expect(read.schemaVersion).toBe(41)
+    expect(read.tree.across).toMatchObject({
+      type: 'text',
+      values: { form: 'divider', text: 'Vergangene Belege', thickness: 5, gridW: 48 },
+    })
+    expect(read.tree.down).toMatchObject({
+      type: 'text',
+      values: { form: 'divider', text: '', direction: 'vertical', gridH: 4 },
+    })
+    expect(read.tree.bare.values).toEqual({ gridX: 0, gridY: 5, gridW: 11, gridH: 2, form: 'divider', text: '' })
+    for (const id of Object.keys(dividers)) expect(read.tree[id].values).not.toHaveProperty('word')
+  })
+
+  it('takes over once, and also in a mask of this stage', () => {
+    const once = currentState(stage40(dividers))!
+    expect(currentState(once)).toEqual(once)
+    expect(currentState({ ...stage40(dividers), schemaVersion: 41 })).toEqual(once)
+  })
+
+  it('lifts a mask of stage 39 through 40 to 41', () => {
+    const file = stage40({
+      ...dividers,
+      box: { type: 'area', values: { gridX: 0, gridY: 0, gridW: 12, gridH: 4, appearance: 'box' } },
+    })
+    const read = currentState({ ...file, schemaVersion: 39 }) as { tree: MaskTree }
+    expect(read.tree.box.values).toMatchObject({ kind: 'card' })
+    expect(read.tree.across.type).toBe('text')
+  })
+
+  it('opens a lifted mask without a note on what it took over', () => {
+    const result = packMaskFrom(JSON.stringify(stage40(dividers)))
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.note.lines).toEqual([])
+    expect(result.content.tree.down.values).toMatchObject({ form: 'divider', direction: 'vertical' })
   })
 })

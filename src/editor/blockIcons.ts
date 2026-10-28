@@ -9,7 +9,6 @@ import {
   ListPlus,
   PanelTop,
   RectangleHorizontal,
-  SeparatorHorizontal,
   SquareKanban,
   StatusChip,
   Table as TableSign,
@@ -23,7 +22,6 @@ import { Button } from '../blocks/button/Button'
 import { Capture } from '../blocks/capture/Capture'
 import { DataList } from '../blocks/datalist/DataList'
 import { DatePicker } from '../blocks/date/DatePicker'
-import { Divider } from '../blocks/divider/Divider'
 import { FormField } from '../blocks/formfield/FormField'
 import { Picture } from '../blocks/image/Picture'
 import { Kanban } from '../blocks/kanban/Kanban'
@@ -40,7 +38,6 @@ export const BLOCK_ICONS: Record<string, Icon> = {
   [Capture.type]: ListPlus,
   [DataList.type]: ListChecks,
   [DatePicker.type]: Calendar,
-  [Divider.type]: SeparatorHorizontal,
   [FormField.type]: TextCursorInput,
   [Picture.type]: ImageSign,
   [Kanban.type]: SquareKanban,

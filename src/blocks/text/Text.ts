@@ -13,7 +13,8 @@ import { BINDING_JOINERS, bindingFields, bindingJoiner } from '../../core/block/
 import { hasSlots, patternForEditing, patternPieces } from '../../core/block/fieldPattern'
 import { symbolTpl } from '../look/symbol'
 import { textStyle } from './textStyle'
-import { textProperties, type TextValues } from './properties'
+import { dividerStyle, dividerTpl } from './divider'
+import { AS_TEXT, textProperties, type TextValues } from './properties'
 import { patternText, replacingReader } from './fieldValues'
 import { adoptPattern, editedPattern, fieldNameOf } from './woven'
 import { CALCULATIONS_PROP } from '../../core/data/calculation'
@@ -47,7 +48,7 @@ export class Text extends BlockElement {
   static readonly type = 'text'
   static readonly tag = 'ff-text'
 
-  static override styles: CSSResultGroup = [BlockElement.styles, textStyle]
+  static override styles: CSSResultGroup = [BlockElement.styles, textStyle, dividerStyle]
 
   @state() fieldValues: readonly string[] = []
 
@@ -79,11 +80,24 @@ export class Text extends BlockElement {
     return this.border === 'line' ? ' lined' : ''
   }
 
+  private get dividerLook() {
+    return {
+      text: this.text,
+      direction: this.direction,
+      thickness: this.thickness,
+      preview: this.preview,
+      editable: this.editable,
+    }
+  }
+
   private get framed(): boolean {
     return this.frameClass !== ''
   }
 
+  private readonly renameWord = (event: MouseEvent): void => this.inlineEdit(event, 'text')
+
   override render(): TemplateResult {
+    if (this.form === 'divider') return dividerTpl({ ...this.dividerLook, rename: this.renameWord })
     const align = ALIGNS.includes(this.align) ? this.align : 'left'
     const names = this.pairNames()
     if (names !== null) return this.pairsTpl(names, align)
@@ -230,6 +244,7 @@ export class Text extends BlockElement {
 
 const link = makeDataLink<Text>({
   hydrate: (el) => {
+    if (el.form === 'divider') return
     if (showCalculation(el)) return
     const spot = readBoundSpot(el, TEXT_BINDING)
     if (spot.kind === 'unbound') return
@@ -260,13 +275,13 @@ defineBlock(Text, {
   category: 'display',
   properties: textProperties,
   capabilities: [
-    { kind: 'source', after: 'text' },
+    { kind: 'source', after: 'text', when: AS_TEXT },
     { kind: 'followsSelection' },
     bindable<typeof textProperties>([
-      { prop: 'text', name: 'Text', several: true, nameProp: 'label', weaveProp: 'pattern' },
+      { prop: 'text', name: 'Text', several: true, nameProp: 'label', weaveProp: 'pattern', when: AS_TEXT },
     ]),
-    { kind: 'compute', prop: CALCULATIONS_PROP },
-    { kind: 'events', list: [{ key: CLICK, name: 'Klick' }] },
+    { kind: 'compute', prop: CALCULATIONS_PROP, when: AS_TEXT },
+    { kind: 'events', list: [{ key: CLICK, name: 'Klick' }], when: AS_TEXT },
   ],
-  grid: { startWidth: 12, startHeight: 2, minWidth: 2, minHeight: 1, heightFromContent: true },
+  grid: { startWidth: 12, startHeight: 2, minWidth: 1, minHeight: 1, heightFromContent: AS_TEXT },
 })

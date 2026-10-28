@@ -3,8 +3,10 @@ import {
   choiceProperty,
   fieldProperty,
   ladderProperty,
+  numberProperty,
   segmentProperty,
   textProperty,
+  type Condition,
   type ValuesOf,
 } from '../../core/block/property'
 import { calculationsProperty } from '../../core/data/calculation'
@@ -12,11 +14,50 @@ import { symbolProperty } from '../look/symbol'
 
 const TEXT_SIZE_STEPS = ['12', '13', '14', '20', '22']
 
-const WITH_LABEL = { key: 'showLabel', equals: true }
+// A Text is words, or a divider with its words on the line.
+export const AS_TEXT: Condition<'form'> = { key: 'form', notEquals: 'divider' }
+const AS_DIVIDER: Condition = { key: 'form', equals: 'divider' }
 
-const BOUND = { key: 'textField', notEquals: '' }
+const WITH_LABEL: Condition = { ...AS_TEXT, and: { key: 'showLabel', equals: true } }
+
+const BOUND: Condition = { ...AS_TEXT, and: { key: 'textField', notEquals: '' } }
 
 export const textProperties = {
+  form: segmentProperty(
+    [
+      { value: 'text', name: 'Text' },
+      { value: 'divider', name: 'Trennlinie' },
+    ],
+    {
+      default: 'text',
+      label: 'Form',
+      place: 'content',
+      attribute: 'form',
+    },
+  ),
+  direction: choiceProperty(
+    [
+      { value: 'horizontal', name: 'Waagerecht' },
+      { value: 'vertical', name: 'Senkrecht' },
+    ],
+    {
+      default: 'horizontal',
+      label: 'Richtung',
+      place: 'look',
+      attribute: 'direction',
+      when: AS_DIVIDER,
+    },
+  ),
+  thickness: numberProperty({
+    default: 1,
+    min: 1,
+    max: 8,
+    unit: 'px',
+    label: 'Dicke',
+    place: 'look',
+    attribute: 'thickness',
+    when: AS_DIVIDER,
+  }),
   size: ladderProperty(
     TEXT_SIZE_STEPS.map((value) => ({ value, name: value })),
     {
@@ -26,9 +67,10 @@ export const textProperties = {
       label: 'Größe',
       place: 'look',
       attribute: 'size',
+      when: AS_TEXT,
     },
   ),
-  symbol: symbolProperty({ place: 'look' }),
+  symbol: symbolProperty({ place: 'look', when: AS_TEXT }),
   align: segmentProperty(
     [
       { value: 'left', name: 'Links' },
@@ -40,6 +82,7 @@ export const textProperties = {
       label: 'Ausrichtung',
       place: 'look',
       attribute: 'align',
+      when: AS_TEXT,
     },
   ),
   border: choiceProperty(
@@ -53,6 +96,7 @@ export const textProperties = {
       label: 'Rahmen',
       place: 'look',
       attribute: 'border',
+      when: AS_TEXT,
     },
   ),
   text: textProperty({
@@ -66,6 +110,7 @@ export const textProperties = {
     label: 'Beschriftung',
     place: 'look',
     attribute: 'showlabel',
+    when: AS_TEXT,
   }),
   label: textProperty({
     default: '',
@@ -79,6 +124,7 @@ export const textProperties = {
     label: 'Fett',
     place: 'look',
     attribute: 'bold',
+    when: AS_TEXT,
   }),
   textField: fieldProperty({
     default: '',

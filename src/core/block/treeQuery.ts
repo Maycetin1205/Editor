@@ -69,6 +69,8 @@ export function selectionSourceIdOf(node: BlockNode | undefined): string {
   if (!node) return ''
   const choice = capability(blockType(node.type), 'recordChoice')
   const prop = choice && propertyVisible(choice.when, node.values) ? (choice.sourceProp ?? SOURCE_PROP) : SOURCE_PROP
+  // A source the block does not show under its settings gives nothing.
+  if (prop === SOURCE_PROP && !carriesOwnSource(node)) return ''
   const value = node.values[prop]
   return typeof value === 'string' ? value : ''
 }
