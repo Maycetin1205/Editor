@@ -1,4 +1,8 @@
-import { css } from 'lit'
+import { css, unsafeCSS } from 'lit'
+import { rowsHigh } from '../../core/block/grid'
+
+// The box of a field: a chip stands on its line.
+const BOX = rowsHigh(2)
 
 // A state as a chip: a dot in the tone and the word, on the soft ground of
 // the tone; as a dot, the word stands in the ink beside it. With its label
@@ -27,7 +31,7 @@ export const statusStyle = css`
     flex-wrap: wrap;
     align-items: center;
     gap: 6px;
-    min-height: var(--se-control);
+    min-height: ${unsafeCSS(BOX)}px;
   }
 
   .chip {
