@@ -1,0 +1,536 @@
+<title>Bereich heute und neu</title>
+<meta name="claude:viewport-fit-sides" content="cover" />
+<style>
+  /* Layout: Kopf mit Umschaltern, darunter zwei Blätter nebeneinander (heute, neu), die
+     bei wenig Platz untereinander stehen. Alle Werte stammen aus src/design/mask.css des
+     Aufbau-Editors; die Maske ist bewusst nur hell, darum auch diese Seite. */
+  :root {
+    color-scheme: light;
+    --se-bg: #F3F3F3;
+    --se-panel: #FFFFFF;
+    --se-panel-2: #FAFAFA;
+    --se-ink: #1B1B1B;
+    --se-ink-2: #5C5C5C;
+    --se-faint: #8A8A8A;
+    --se-line: #E3E3E3;
+    --se-line-soft: #EDEDED;
+    --se-line-strong: #C8C8C8;
+    --se-accent: #0067C0;
+    --se-accent-dark: #005A9E;
+    --se-accent-soft: #EAF3FB;
+    --se-read-ground: #F7F7F7;
+    --se-hover: #F2F2F2;
+    --se-danger: #C42B1C;
+    --se-danger-tint: #FDE7E9;
+    --se-neutral-soft: #EBEBEB;
+    --se-font: "Segoe UI Variable Text", "Segoe UI", Arial, sans-serif;
+    --se-radius: 4px;
+    --se-radius-card: 8px;
+    --se-edge: inset 0 0 0 1px var(--se-line);
+    --se-move: 120ms;
+  }
+  * { box-sizing: border-box; }
+  html { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--se-bg);
+    color: var(--se-ink);
+    font-family: var(--se-font);
+    font-size: 13px;
+    line-height: 1.4;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 20px 32px;
+  }
+  .page { max-width: 1360px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .intro { display: flex; flex-direction: column; gap: 4px; max-width: 70ch; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--se-ink-2); }
+  h1 { margin: 0; font-size: 20px; font-weight: 600; line-height: 1.25; text-wrap: balance; }
+  .intro p { margin: 0; color: var(--se-ink-2); }
+
+  /* Umschalter: Segmentknöpfe wie im Inspektor des Editors. */
+  .controls {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center;
+    padding: 12px 16px; background: var(--se-panel); border-radius: var(--se-radius-card); box-shadow: var(--se-edge);
+  }
+  .group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .group-name { font-size: 12px; color: var(--se-ink-2); min-width: 64px; }
+  .segment { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 2px; background: var(--se-neutral-soft); border-radius: var(--se-radius); }
+  .segment button {
+    height: 24px; padding: 0 10px; border: 0; border-radius: 3px; background: transparent; color: var(--se-ink-2);
+    font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: background-color var(--se-move), color var(--se-move);
+  }
+  .segment button:hover { background: rgba(255,255,255,.6); color: var(--se-ink); }
+  .segment button[aria-pressed="true"] { background: var(--se-panel); color: var(--se-ink); box-shadow: 0 0 0 1px var(--se-line-strong); }
+  .segment button:focus-visible, .check:focus-within { outline: 2px solid var(--se-ink); outline-offset: 1px; }
+  .check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+  .check input { width: 16px; height: 16px; margin: 0; accent-color: var(--se-accent); }
+  .check.off { color: var(--se-faint); }
+
+  .state-note { margin: 0; padding: 0 2px; color: var(--se-ink-2); max-width: 90ch; min-height: 1.4em; }
+
+  /* Zwei Blätter. */
+  .panes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  @media (max-width: 1040px) { .panes { grid-template-columns: minmax(0, 1fr); } }
+  .pane { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .pane-head { display: flex; align-items: baseline; gap: 10px; padding: 0 2px; }
+  .pane-head h2 { margin: 0; font-size: 14px; font-weight: 600; }
+  .pane-head span { font-size: 12px; color: var(--se-ink-2); }
+
+  /* Das Blatt: der graue Grund der Maske mit ihrem Rand (20/24 Punkte). */
+  .sheet {
+    position: relative; overflow: hidden; background: var(--se-bg); border-radius: var(--se-radius-card);
+    box-shadow: var(--se-edge); padding: 20px 24px; min-height: 420px;
+    transition: max-width 180ms ease;
+  }
+  .sheet.narrow { max-width: 480px; }
+  .mask { display: flex; flex-direction: column; gap: 12px; }
+  /* Heute: ein festes Blatt (hier 640 Punkte breit), das verkleinert und sonst abgeschnitten wird. */
+  .mask.today { width: 640px; transform-origin: top left; }
+
+  .clip-note {
+    position: absolute; right: 12px; top: 12px; z-index: 2; padding: 2px 8px; border-radius: var(--se-radius);
+    background: var(--se-danger-tint); color: var(--se-danger); font-size: 12px; font-weight: 600;
+  }
+  .clip-note[hidden] { display: none; }
+
+  /* Die Karte, wie areaStyle.ts sie zeichnet; heute wie neu 320 Punkte hoch, denn die Lage bleibt fest. */
+  .card { position: relative; height: 320px; background: var(--se-panel); border-radius: var(--se-radius-card); box-shadow: var(--se-edge); overflow: clip; }
+  .card.failed { box-shadow: inset 3px 0 0 var(--se-danger), var(--se-edge); }
+  .card.shut { height: 36px; }
+  .head {
+    display: flex; align-items: center; gap: 8px; height: 36px; margin: 0 16px; border-bottom: 1px solid var(--se-line);
+    color: var(--se-accent); font-size: 14px; font-weight: 600;
+  }
+  .head .title { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .head .extra { margin-left: auto; color: var(--se-ink-2); font-size: 12px; font-weight: 400; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .head.foldable { cursor: pointer; user-select: none; }
+  .head.foldable:focus-visible { outline: none; box-shadow: inset 0 -2px 0 var(--se-accent); }
+  .caret { display: inline-flex; width: 14px; height: 14px; opacity: .75; transition: transform var(--se-move); }
+  .caret svg { width: 14px; height: 14px; fill: currentColor; }
+  .card.shut .caret { transform: rotate(-90deg); }
+  .card.shut .head { border-bottom-color: transparent; }
+  .body { padding: 12px 16px 12px; container-type: inline-size; }
+  .card.shut .body { display: none; }
+
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 24px; }
+  @container (max-width: 500px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+  .col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+  /* Lauflinie an der Oberkante (notice.ts). */
+  .busy { position: absolute; left: 1px; right: 1px; top: 1px; height: 7px; border-radius: 7px 7px 0 0; overflow: hidden; pointer-events: none; }
+  .busy span { position: absolute; top: 0; left: -40%; width: 40%; height: 2px; border-radius: 2px; background: var(--se-accent); animation: run 1.5s cubic-bezier(.4,0,.6,1) infinite; }
+  @keyframes run { from { left: -40%; } to { left: 100%; } }
+
+  /* Text mit Beschriftung und Kasten (textStyle.ts: .label, .text.boxed). */
+  .field { display: flex; flex-direction: column; gap: 2px; min-width: 0; height: 44px; }
+  .label { color: var(--se-ink-2); font-size: 12px; line-height: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .boxed {
+    height: 28px; line-height: 26px; padding: 0 10px; background: var(--se-read-ground); border: 1px solid var(--se-line);
+    border-radius: var(--se-radius); color: var(--se-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  /* Neu: ein leerer Wert bleibt an seiner Stelle, aber still: Beschriftung schwach, ein Strich, kein Kasten. */
+  .field.quiet .label { color: var(--se-faint); }
+  .field.quiet .dash { height: 28px; line-height: 28px; padding: 0 10px; color: var(--se-faint); }
+  .field.wait .bar { height: 28px; display: flex; align-items: center; padding: 0 10px; }
+  .field.wait .bar i { display: block; width: 60%; height: 10px; border-radius: 5px; background: var(--se-line-soft); }
+  .heading { font-size: 14px; font-weight: 600; color: var(--se-accent); line-height: 1.4; height: 20px; }
+
+  /* Bild ohne Bild (pictureStyle.ts: .empty). */
+  .picture { height: 96px; display: flex; align-items: center; justify-content: center; }
+  .picture .empty {
+    width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    padding: 6px; background: var(--se-panel-2); border: 1px dashed var(--se-line); border-radius: var(--se-radius);
+    color: var(--se-faint); font-size: 12px; line-height: 14px; text-align: center;
+  }
+  .picture .empty .what { color: var(--se-ink-2); }
+  .picture svg.sign { width: 24px; height: 24px; }
+  .photo { width: 96px; height: 96px; border-radius: var(--se-radius); object-fit: cover; display: block; }
+
+  /* Werteliste (valueListStyle.ts). */
+  .values { display: table; width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .line { display: table-row; }
+  .line > span { display: table-cell; padding-top: 6px; height: 24px; }
+  .line:first-child > span { padding-top: 0; }
+  .line .k { width: 1%; padding-right: 24px; white-space: nowrap; color: var(--se-ink-2); }
+  .line .v { text-align: left; }
+  .line .v.num { text-align: right; white-space: nowrap; }
+  .line.quiet .k, .line.quiet .v { color: var(--se-faint); }
+  .sum { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--se-line-strong); }
+  .sum .k { color: var(--se-ink-2); }
+  .sum .v { color: var(--se-accent); font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; min-height: 31px; }
+  .sum.quiet .k, .sum.quiet .v { color: var(--se-faint); font-size: 13px; font-weight: 400; }
+
+  /* Neu: Avatar und Namenszeile an der Stelle des Fotos. */
+  .person { display: flex; align-items: center; gap: 12px; min-width: 0; height: 56px; }
+  .avatar { flex: none; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--se-neutral-soft); color: var(--se-ink-2); font-size: 20px; font-weight: 700; overflow: hidden; }
+  .avatar.quiet { background: var(--se-panel-2); box-shadow: inset 0 0 0 1px var(--se-line-soft); }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .person .name { font-size: 14px; font-weight: 600; color: var(--se-ink); min-height: 20px; }
+  .person .sub { font-size: 12px; color: var(--se-ink-2); min-height: 17px; }
+  .person.quiet .name, .person.quiet .sub { color: var(--se-faint); }
+
+  /* Stiller Satz oben im Körper, Fehlerzeile mit Knopf. */
+  .quiet-line { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin: -4px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--se-line-soft); color: var(--se-ink-2); font-size: 12px; }
+  .btn { height: 28px; padding: 0 12px; border: 1px solid var(--se-line-strong); border-radius: var(--se-radius); background: var(--se-panel); color: var(--se-ink); font: inherit; cursor: pointer; }
+  .btn:hover { background: var(--se-hover); }
+  .btn:focus-visible { outline: 2px solid var(--se-ink); outline-offset: 1px; }
+
+  /* Ausgeblendeter Bereich: an seiner Stelle nur ein Hinweis für diese Seite, in der Maske wäre dort nichts. */
+  .gone { height: 320px; display: grid; place-items: center; border: 1px dashed var(--se-line-strong); border-radius: var(--se-radius-card); color: var(--se-faint); font-size: 12px; text-align: center; padding: 16px; }
+
+  /* Die Leiste unten (infoBar.ts). */
+  .infobar {
+    position: absolute; left: 24px; right: 24px; bottom: 20px; z-index: 3; display: flex; align-items: center; gap: 12px;
+    height: 40px; padding: 0 6px 0 15px; border-radius: var(--se-radius); background: #F9EEEE;
+    box-shadow: inset 3px 0 0 var(--se-danger), var(--se-edge); font-size: 13px;
+  }
+  .infobar[hidden] { display: none; }
+  .infobar .sign { flex: none; width: 16px; height: 16px; border-radius: 50%; background: var(--se-danger); color: var(--se-panel); display: grid; place-items: center; font-size: 11px; font-weight: 700; }
+  .infobar .text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .infobar b { font-weight: 600; }
+  .infobar .x { flex: none; width: 32px; height: 32px; border: 0; background: none; color: var(--se-ink-2); font-size: 16px; cursor: pointer; border-radius: var(--se-radius); }
+  .infobar .x:hover { background: #E6E6E6; color: var(--se-ink); }
+
+  /* Erklärung unter jedem Blatt. */
+  .legend { margin: 0; padding-left: 18px; color: var(--se-ink-2); display: flex; flex-direction: column; gap: 2px; }
+  .legend li::marker { color: var(--se-faint); }
+  .legend b { color: var(--se-ink); font-weight: 600; }
+  .keys { padding: 0 2px; color: var(--se-faint); font-size: 12px; }
+  .keys kbd { font: inherit; color: var(--se-ink-2); }
+  footer { color: var(--se-faint); font-size: 12px; padding: 0 2px; }
+
+  @media (prefers-reduced-motion: reduce) { .busy span { animation: none; left: 30%; } .caret, .sheet { transition: none; } }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <span class="eyebrow">Baustein Bereich · Entwurf zu PLAN-BAUSTEINE-NEU.md, Abschnitt 3.1</span>
+    <h1>Bereich heute und neu</h1>
+    <p>
+      Links der Bereich, wie der Editor ihn heute zeichnet. Rechts das Neukonzept: Lage und Größe bleiben fest, Leeres
+      wird still, verschwinden kann der Bereich nur über eine Einstellung. Die Umschalter stellen dieselben
+      Beispieldaten in verschiedene Lagen.
+    </p>
+  </header>
+
+  <div class="controls" role="toolbar" aria-label="Umschalter">
+    <div class="group">
+      <span class="group-name">Datenlage</span>
+      <div class="segment" id="states" role="group" aria-label="Datenlage">
+        <button type="button" id="st-full" data-state="full" aria-pressed="true">Alle Werte</button>
+        <button type="button" id="st-partial" data-state="partial" aria-pressed="false">Teilweise leer</button>
+        <button type="button" id="st-none" data-state="none" aria-pressed="false">Nichts gewählt</button>
+        <button type="button" id="st-empty" data-state="empty" aria-pressed="false">Leer</button>
+        <button type="button" id="st-loading" data-state="loading" aria-pressed="false">Lädt</button>
+        <button type="button" id="st-failed" data-state="failed" aria-pressed="false">Fehler</button>
+      </div>
+    </div>
+    <div class="group">
+      <span class="group-name">Breite</span>
+      <div class="segment" id="widths" role="group" aria-label="Breite">
+        <button type="button" id="w-wide" data-width="wide" aria-pressed="true">Breit</button>
+        <button type="button" id="w-narrow" data-width="narrow" aria-pressed="false">Schmal</button>
+      </div>
+    </div>
+    <div class="group">
+      <label class="check"><input type="checkbox" id="foldable" /> Klappbar</label>
+      <label class="check" id="hide-check"
+        ><input type="checkbox" id="hide-empty" /> Ausblenden wenn leer (Einstellung je Bereich, neu)</label
+      >
+    </div>
+  </div>
+  <p class="state-note" id="note"></p>
+
+  <div class="panes">
+    <section class="pane" aria-labelledby="h-today">
+      <div class="pane-head">
+        <h2 id="h-today">Heute</h2>
+        <span>src/blocks/area, text, image, valuelist</span>
+      </div>
+      <div class="sheet" id="sheet-today">
+        <span class="clip-note" id="clip-today" hidden>abgeschnitten</span>
+        <div class="mask today" id="mask-today"></div>
+        <div class="infobar" id="bar-today" hidden>
+          <span class="sign">!</span><span class="text"><b>Kunde:</b> SoftEngine hat nicht geantwortet (20 s)</span
+          ><button type="button" class="x" aria-label="Schließen">×</button>
+        </div>
+      </div>
+      <ul class="legend" id="legend-today"></ul>
+    </section>
+
+    <section class="pane" aria-labelledby="h-new">
+      <div class="pane-head">
+        <h2 id="h-new">Neu</h2>
+        <span>Konzept: feste Lage, stilles Leer, Satz statt Rätsel</span>
+      </div>
+      <div class="sheet" id="sheet-new">
+        <div class="mask new" id="mask-new"></div>
+        <div class="infobar" id="bar-new" hidden>
+          <span class="sign">!</span
+          ><span class="text"
+            ><b>Kunde:</b> SoftEngine hat nicht geantwortet (20 s). Erneut laden mit dem Knopf an der Karte.</span
+          ><button type="button" class="x" aria-label="Schließen">×</button>
+        </div>
+      </div>
+      <ul class="legend" id="legend-new"></ul>
+      <p class="keys" id="keys-new" hidden>
+        <kbd>Tab</kbd> zum Kopf · <kbd>Enter</kbd> oder <kbd>Leertaste</kbd> klappt · Klappzustand wird je Anwender
+        gemerkt
+      </p>
+    </section>
+  </div>
+
+  <footer>
+    Beispieldaten, keine echten Kunden. Entwurf vom 26.10.2026, Stand nach der Entscheidung „feste Lage“; umgebaut wird
+    erst nach Freigabe des Konzepts.
+  </footer>
+</div>
+
+<script>
+  (function () {
+    'use strict';
+
+    var CUSTOMER = {
+      full: { name: 'Müller, Anna', nr: '4711', phone: '030 4455 6677', mobile: '0171 234 56 78', mail: 'anna.mueller@beispiel.de',
+              place: '10115 Berlin', group: 'Praxis', terms: '14 Tage', open: '1.284,50 €', photo: true },
+      partial: { name: 'Müller, Anna', nr: '4711', phone: '030 4455 6677', mobile: '', mail: '', place: '10115 Berlin',
+                 group: 'Praxis', terms: '', open: '1.284,50 €', photo: false }
+    };
+    var NOTES = {
+      full: 'Jeder Wert ist da. Heute und neu sehen fast gleich aus. Neu: der Kopf trägt rechts die Kundennummer, der Name steht in der Tinte, das Foto ist ein Avatar.',
+      partial: 'Mobil, E-Mail, Foto und Zahlungsziel fehlen. Heute: leere graue Kästen und ein gestrichelter Fotokasten mit Satz. Neu: jedes Feld bleibt an seiner Stelle, zeigt aber nur die Beschriftung schwach und einen Strich. Nichts rutscht.',
+      none: 'Links ist kein Kunde gewählt. Heute: Beschriftungen über leeren Kästen, kein Wort. Neu: ein Satz oben im Bereich sagt, was zu tun ist; die Felder bleiben als stille Beschriftungen an ihrem Platz.',
+      empty: 'SoftEngine hat geantwortet, aber null Zeilen geliefert. Heute sieht das aus wie „nichts gewählt“. Neu nennt der Satz den Unterschied. Mit „Ausblenden wenn leer“ würde der Bereich hier fehlen.',
+      loading: 'Die Quelle ist angefordert. Heute: Lauflinie über leeren Kästen. Neu: Lauflinie, an jeder Stelle ein schwacher Balken, kein Wort, bis die Antwort da ist.',
+      failed: 'Keine Antwort in 20 Sekunden. Heute: Kästen leer, Leiste unten. Neu: roter Balken am Bereich, ein Satz mit „Erneut laden“ oben im Körper, dazu die Leiste.'
+    };
+    var LEGEND_TODAY = {
+      full: ['Feste Höhe (320 Punkte), was nicht hineinpasst, wird abgeschnitten.', 'Der Name ist ein Text mit „Fett“, das heißt blau und halbfett.', 'Das Foto ist ein Bild-Baustein mit festem Rahmen.'],
+      partial: ['<b>Leere Kästen bleiben stehen</b>: Mobil, E-Mail, Zahlungsziel sehen aus wie Felder, in denen etwas fehlt.', 'Das fehlende Foto ist ein gestrichelter Kasten mit Satz, als wäre es ein Fehler.'],
+      none: ['Alle Werte sind leer, alle Kästen stehen.', 'Kein Wort sagt, dass links ein Kunde zu wählen wäre.'],
+      empty: ['Nicht zu unterscheiden von „nichts gewählt“.'],
+      loading: ['Lauflinie an der Oberkante (gibt es heute schon).', 'Darunter dieselben leeren Kästen wie bei „nichts gewählt“.'],
+      failed: ['Die Leiste unten nennt Baustein und Grund (gibt es heute schon).', 'An der Karte selbst ist nichts zu sehen; kein Knopf zum Wiederholen.']
+    };
+    var LEGEND_NEW = {
+      full: ['<b>Gleiche Lage, gleiche Größe wie heute</b>: der Anwender findet jeden Wert immer an derselben Stelle.', 'Kopf rechts: ein Wert aus einem Feld („Nr. 4711“).', 'Avatar mit Foto; der Name in der Tinte, der Akzent bleibt dem Titel.'],
+      partial: ['<b>Leere Felder bleiben an ihrem Platz, aber still</b>: Beschriftung schwach, ein Strich, kein Kasten.', 'Avatar ohne Foto zeigt den Anfangsbuchstaben, nie einen Satz und keinen gestrichelten Kasten.', 'Im Steckbrief steht die leere Zeile schwach mit Strich; die Summe bleibt.'],
+      none: ['Ein stiller Satz oben im Körper sagt, was zu tun ist.', 'Darunter die Beschriftungen an ihrem Platz, schwach, mit Strich: die Maske springt nicht.'],
+      empty: ['Der Satz unterscheidet „keine Daten“ von „nichts gewählt“.', 'Mit der Einstellung „Ausblenden wenn leer“ fehlt der Bereich samt Platz (oben anhaken).'],
+      loading: ['Lauflinie; an jeder Stelle ein schwacher Balken hält den Platz.', 'Kein Wort, kein Kasten, kein Flackern unter 300 ms.'],
+      failed: ['Roter Balken am Bereich: der Fehler hat einen Ort.', 'Der Satz sagt, was als Nächstes geht; „Erneut laden“ gleich daneben.', 'Die Leiste unten bleibt, einmal für die ganze Maske.']
+    };
+
+    var state = 'full';
+    var width = 'wide';
+    var foldable = false;
+    var hideEmpty = false;
+    var folded = false;
+    try { folded = localStorage.getItem('bereich-neu-folded') === '1'; } catch (e) { folded = false; }
+
+    var maskToday = document.getElementById('mask-today');
+    var maskNew = document.getElementById('mask-new');
+    var sheetToday = document.getElementById('sheet-today');
+    var sheetNew = document.getElementById('sheet-new');
+    var barToday = document.getElementById('bar-today');
+    var barNew = document.getElementById('bar-new');
+    var clipToday = document.getElementById('clip-today');
+
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+    var SIGN = '<svg class="sign" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>';
+    var CARET = '<svg viewBox="0 0 256 256" aria-hidden="true"><path d="M212.24,100.24l-80,80a6,6,0,0,1-8.48,0l-80-80a6,6,0,0,1,8.48-8.48L128,167.51l75.76-75.75a6,6,0,0,1,8.48,8.48Z"></path></svg>';
+    var PHOTO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" fill="#DCE6EF"/>' +
+      '<circle cx="48" cy="38" r="17" fill="#8FA7BC"/><path d="M14 92c4-20 18-30 34-30s30 10 34 30z" fill="#8FA7BC"/></svg>');
+
+    /* ---- Heute ------------------------------------------------------------ */
+
+    function fieldToday(label, value) {
+      return '<div class="field"><span class="label">' + esc(label) + '</span><span class="boxed">' + esc(value) + '</span></div>';
+    }
+    function lineToday(label, value, num) {
+      return '<div class="line"><span class="k">' + esc(label) + '</span><span class="v' + (num ? ' num' : '') + '">' + esc(value) + '</span></div>';
+    }
+
+    function renderToday() {
+      var c = state === 'full' ? CUSTOMER.full : state === 'partial' ? CUSTOMER.partial : null;
+      var v = function (k) { return c ? c[k] : ''; };
+      var picture = c && c.photo
+        ? '<div class="picture"><img class="photo" src="' + PHOTO + '" alt="Foto von Müller, Anna"></div>'
+        : '<div class="picture"><div class="empty">' + SIGN + '<span class="what">' + (state === 'loading' ? 'Warte auf SoftEngine …' : 'Kein Bild hinterlegt') + '</span></div></div>';
+      maskToday.innerHTML =
+        '<div class="card">' +
+          (state === 'loading' ? '<div class="busy"><span></span></div>' : '') +
+          '<div class="head"><span class="title">Kunde</span></div>' +
+          '<div class="body"><div class="cols">' +
+            '<div class="col">' +
+              '<div class="heading">' + esc(v('name')) + '</div>' +
+              fieldToday('Telefon', v('phone')) + fieldToday('Mobil', v('mobile')) + fieldToday('E-Mail', v('mail')) + fieldToday('Ort', v('place')) +
+            '</div>' +
+            '<div class="col">' + picture +
+              '<div class="values">' + lineToday('Kundennummer', v('nr'), true) + lineToday('Kundengruppe', v('group')) + lineToday('Zahlungsziel', v('terms')) + '</div>' +
+              '<div class="sum"><span class="k">Offene Posten</span><span class="v">' + esc(v('open')) + '</span></div>' +
+            '</div>' +
+          '</div></div>' +
+        '</div>';
+      barToday.hidden = state !== 'failed';
+    }
+
+    /* ---- Neu: feste Lage, stilles Leer ------------------------------------- */
+
+    function fieldNew(label, value) {
+      if (state === 'loading') return '<div class="field wait"><span class="label">' + esc(label) + '</span><span class="bar"><i></i></span></div>';
+      if (!value) return '<div class="field quiet"><span class="label">' + esc(label) + '</span><span class="dash">–</span></div>';
+      return '<div class="field"><span class="label">' + esc(label) + '</span><span class="boxed">' + esc(value) + '</span></div>';
+    }
+    function lineNew(label, value, num) {
+      if (!value) return '<div class="line quiet"><span class="k">' + esc(label) + '</span><span class="v' + (num ? ' num' : '') + '">' + (state === 'loading' ? '' : '–') + '</span></div>';
+      return '<div class="line"><span class="k">' + esc(label) + '</span><span class="v' + (num ? ' num' : '') + '">' + esc(value) + '</span></div>';
+    }
+    function sumNew(label, value) {
+      if (!value) return '<div class="sum quiet"><span class="k">' + esc(label) + '</span><span class="v">' + (state === 'loading' ? '' : '–') + '</span></div>';
+      return '<div class="sum"><span class="k">' + esc(label) + '</span><span class="v">' + esc(value) + '</span></div>';
+    }
+
+    function topLine() {
+      if (state === 'none') return '<div class="quiet-line"><span>Nichts gewählt – links einen Kunden wählen.</span></div>';
+      if (state === 'empty') return '<div class="quiet-line"><span>Keine Daten zu diesem Kunden.</span></div>';
+      if (state === 'failed') return '<div class="quiet-line"><span>SoftEngine hat nicht geantwortet (20 s).</span><button type="button" class="btn" id="retry">Erneut laden</button></div>';
+      return '';
+    }
+
+    function bodyNew() {
+      var c = state === 'full' ? CUSTOMER.full : state === 'partial' ? CUSTOMER.partial : null;
+      var v = function (k) { return c ? c[k] : ''; };
+      var avatar = c && c.photo
+        ? '<span class="avatar"><img src="' + PHOTO + '" alt=""></span>'
+        : c ? '<span class="avatar" aria-hidden="true">' + esc(c.name.charAt(0)) + '</span>'
+            : '<span class="avatar quiet" aria-hidden="true"></span>';
+      var name = c ? esc(c.name) : (state === 'loading' ? '' : '–');
+      var place = c ? esc(c.place) : '';
+      return topLine() + '<div class="cols">' +
+        '<div class="col">' +
+          '<div class="person' + (c ? '' : ' quiet') + '">' + avatar + '<div><div class="name">' + name + '</div><div class="sub">' + place + '</div></div></div>' +
+          fieldNew('Telefon', v('phone')) + fieldNew('Mobil', v('mobile')) + fieldNew('E-Mail', v('mail')) +
+        '</div>' +
+        '<div class="col">' +
+          '<div class="values">' + lineNew('Kundengruppe', v('group')) + lineNew('Zahlungsziel', v('terms')) + '</div>' +
+          sumNew('Offene Posten', v('open')) +
+        '</div>' +
+      '</div>';
+    }
+
+    function renderNew() {
+      var c = state === 'full' ? CUSTOMER.full : state === 'partial' ? CUSTOMER.partial : null;
+      var dataless = state === 'none' || state === 'empty';
+      if (hideEmpty && dataless) {
+        maskNew.innerHTML = '<div class="gone">Bereich „Kunde“ ist ausgeblendet (Einstellung „Ausblenden wenn leer“).<br>In der Maske stünde hier nichts; was darunter liegt, rückt nach.</div>';
+        barNew.hidden = true;
+        document.getElementById('keys-new').hidden = !foldable;
+        return;
+      }
+      var extra = c ? 'Nr. ' + esc(c.nr) : '';
+      var headAttrs = foldable ? ' class="head foldable" role="button" tabindex="0" aria-expanded="' + (!folded) + '"' : ' class="head"';
+      maskNew.innerHTML =
+        '<div class="card' + (state === 'failed' ? ' failed' : '') + (foldable && folded ? ' shut' : '') + '" id="card-new">' +
+          (state === 'loading' ? '<div class="busy"><span></span></div>' : '') +
+          '<div' + headAttrs + ' id="head-new">' + (foldable ? '<span class="caret">' + CARET + '</span>' : '') +
+            '<span class="title">Kunde</span>' + (extra ? '<span class="extra">' + extra + '</span>' : '') + '</div>' +
+          '<div class="body">' + bodyNew() + '</div>' +
+        '</div>';
+      barNew.hidden = state !== 'failed';
+      document.getElementById('keys-new').hidden = !foldable;
+
+      var head = document.getElementById('head-new');
+      if (foldable && head) {
+        var toggle = function () {
+          folded = !folded;
+          try { localStorage.setItem('bereich-neu-folded', folded ? '1' : '0'); } catch (e) { /* ohne Speicher geht es auch */ }
+          renderNew();
+          var again = document.getElementById('head-new');
+          if (again) again.focus();
+        };
+        head.addEventListener('click', toggle);
+        head.addEventListener('keydown', function (e) {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          e.preventDefault();
+          toggle();
+        });
+      }
+      var retry = document.getElementById('retry');
+      if (retry) retry.addEventListener('click', function () { setState('loading'); setTimeout(function () { if (state === 'loading') setState('full'); }, 1400); });
+    }
+
+    function renderLegends() {
+      document.getElementById('legend-today').innerHTML = LEGEND_TODAY[state].map(function (t) { return '<li>' + t + '</li>'; }).join('');
+      document.getElementById('legend-new').innerHTML = LEGEND_NEW[state].map(function (t) { return '<li>' + t + '</li>'; }).join('');
+      document.getElementById('note').textContent = NOTES[state];
+      var dataless = state === 'none' || state === 'empty';
+      document.getElementById('hide-check').classList.toggle('off', !dataless);
+    }
+
+    /* Heute: das feste Blatt wird auf die Breite verkleinert, höchstens auf 85 %, der Rest wird abgeschnitten (frameFit.ts). */
+    function fitToday() {
+      var room = sheetToday.clientWidth - 48;
+      var own = 640;
+      var zoom = room >= own ? 1 : Math.max(0.85, room / own);
+      maskToday.style.transform = zoom === 1 ? '' : 'scale(' + zoom + ')';
+      var shownWidth = own * zoom;
+      clipToday.hidden = shownWidth <= room + 1;
+      var h = maskToday.offsetHeight * zoom;
+      maskToday.style.marginBottom = (h - maskToday.offsetHeight) + 'px';
+    }
+
+    function setPressed(groupId, attr, value) {
+      var buttons = document.getElementById(groupId).querySelectorAll('button');
+      for (var i = 0; i < buttons.length; i++) buttons[i].setAttribute('aria-pressed', String(buttons[i].getAttribute(attr) === value));
+    }
+
+    function setState(next) {
+      state = next;
+      setPressed('states', 'data-state', state);
+      renderToday();
+      renderNew();
+      renderLegends();
+      fitToday();
+    }
+
+    function setWidth(next) {
+      width = next;
+      setPressed('widths', 'data-width', width);
+      sheetToday.classList.toggle('narrow', width === 'narrow');
+      sheetNew.classList.toggle('narrow', width === 'narrow');
+      setTimeout(fitToday, 200);
+      fitToday();
+    }
+
+    document.getElementById('states').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (b) setState(b.getAttribute('data-state'));
+    });
+    document.getElementById('widths').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (b) setWidth(b.getAttribute('data-width'));
+    });
+    document.getElementById('foldable').addEventListener('change', function (e) {
+      foldable = e.target.checked;
+      renderNew();
+    });
+    document.getElementById('hide-empty').addEventListener('change', function (e) {
+      hideEmpty = e.target.checked;
+      renderNew();
+    });
+    barToday.querySelector('.x').addEventListener('click', function () { barToday.hidden = true; });
+    barNew.querySelector('.x').addEventListener('click', function () { barNew.hidden = true; });
+
+    if (typeof ResizeObserver === 'function') new ResizeObserver(fitToday).observe(sheetToday);
+    window.addEventListener('resize', fitToday);
+
+    renderToday();
+    renderNew();
+    renderLegends();
+    fitToday();
+  })();
+</script>

@@ -1,0 +1,661 @@
+<title>Entwurf Bereich</title>
+<meta name="claude:viewport-fit-sides" content="cover" />
+<style>
+  /* Das System: eine Farbreihe mit leichtem Blaustich, ein Akzent, vier Bedeutungsfarben, eine
+     Schrift (Segoe UI Variable, auf jedem Windows vorhanden), ein 4-Punkte-Abstandsmaß, zwei
+     Ecken, kein Schatten auf Karten. Die Maske ist hell; diese Seite auch. */
+  :root {
+    color-scheme: light;
+    /* Flächen */
+    --ground: #F4F5F7;
+    --surface: #FFFFFF;
+    --surface-2: #F7F8FA;
+    --line: #E4E6EA;
+    --line-strong: #C9CDD3;
+    /* Tinte */
+    --ink: #1A1D21;
+    --ink-2: #5B616B;
+    --ink-3: #8B919B;
+    /* Akzent */
+    --accent: #0067C0;
+    --accent-hover: #005A9E;
+    --accent-soft: #EAF3FB;
+    --accent-line: #B7D4EE;
+    /* Bedeutung */
+    --success: #107C10; --success-soft: #DFF6DD;
+    --warning: #9D5D00; --warning-soft: #FFF4CE;
+    --danger: #C42B1C;  --danger-soft: #FDE7E9; --danger-line: #F1BBBC;
+    /* Maße */
+    --r-control: 4px;
+    --r-card: 8px;
+    --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-6: 24px; --s-8: 32px;
+    --control: 32px;
+    --head: 44px;
+    --font: "Segoe UI Variable Text", "Segoe UI", system-ui, Arial, sans-serif;
+    --move: 120ms;
+    --fold: 200ms cubic-bezier(.2, 0, 0, 1);
+    --shadow-pop: 0 4px 16px rgba(26, 29, 33, .10), 0 0 0 1px var(--line);
+  }
+  * { box-sizing: border-box; }
+  html { height: 100%; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink); font-family: var(--font); font-size: 13px; line-height: 18px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px 48px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+  h1 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 600; text-wrap: balance; }
+  h2 { margin: 0; font-size: 16px; line-height: 22px; font-weight: 600; }
+  h3 { margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; }
+  p { margin: 0; }
+  .muted { color: var(--ink-2); }
+  .faint { color: var(--ink-3); }
+  .eyebrow { font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+  .intro { display: flex; flex-direction: column; gap: 8px; max-width: 72ch; }
+  .intro p { font-size: 14px; line-height: 20px; }
+  .section { display: flex; flex-direction: column; gap: 16px; }
+  .section-head { display: flex; flex-direction: column; gap: 4px; max-width: 72ch; }
+  .num { color: var(--ink-3); font-weight: 400; margin-right: 8px; font-variant-numeric: tabular-nums; }
+  kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; background: var(--surface); color: var(--ink-2); }
+
+  /* ---- 1 System ------------------------------------------------------------ */
+  .tokens { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .token-card { background: var(--surface); border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--line); padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sw { display: flex; flex-direction: column; gap: 4px; width: 64px; }
+  .sw i { display: block; height: 32px; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.06); }
+  .sw span { font-size: 11px; line-height: 14px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .type-scale { display: flex; flex-direction: column; gap: 6px; }
+  .type-scale div { display: flex; align-items: baseline; gap: 12px; }
+  .type-scale small { flex: none; width: 92px; font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .t-caption { font-size: 12px; line-height: 16px; color: var(--ink-2); }
+  .t-body { font-size: 13px; line-height: 18px; }
+  .t-title { font-size: 14px; line-height: 20px; font-weight: 600; }
+  .t-page { font-size: 20px; line-height: 28px; font-weight: 600; }
+  .t-figure { font-size: 22px; line-height: 28px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .spacing { display: flex; align-items: flex-end; gap: 8px; }
+  .spacing div { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; color: var(--ink-3); }
+  .spacing i { display: block; width: 20px; background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); border-radius: 2px; }
+  .states-legend { display: flex; flex-direction: column; gap: 6px; font-size: 12px; line-height: 16px; color: var(--ink-2); }
+  .states-legend b { color: var(--ink); font-weight: 600; }
+  .states-legend span.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+
+  /* ---- 2 Der Baustein -------------------------------------------------------- */
+  .controls { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; padding: 12px 16px; background: var(--surface); border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--line); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
+  .group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .group-name { font-size: 12px; color: var(--ink-2); min-width: 56px; }
+  .seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 2px; background: var(--surface-2); border-radius: 6px; box-shadow: inset 0 0 0 1px var(--line); }
+  .seg button { height: 26px; padding: 0 10px; border: 0; border-radius: 4px; background: transparent; color: var(--ink-2); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: background-color var(--move), color var(--move); }
+  .seg button:hover { color: var(--ink); }
+  .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08), inset 0 0 0 1px var(--line); }
+  .seg button:focus-visible, .switch:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; color: var(--ink-2); }
+  .switch input { appearance: none; width: 32px; height: 18px; margin: 0; border-radius: 9px; background: var(--line-strong); position: relative; cursor: pointer; transition: background-color var(--move); }
+  .switch input::after { content: ''; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; border-radius: 50%; background: var(--surface); transition: transform var(--move); }
+  .switch input:checked { background: var(--accent); }
+  .switch input:checked::after { transform: translateX(14px); }
+
+  .stage { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+  @media (max-width: 960px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+  .sheet { background: var(--ground); border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--line); padding: 24px; min-height: 380px; }
+  .sheet--inner { background: var(--surface-2); }
+
+  /* Der Bereich. */
+  .area { position: relative; display: flex; flex-direction: column; min-width: 0; background: var(--surface); border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--line); }
+  .area--plain { background: transparent; box-shadow: none; }
+  .area--selected { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .area__head { position: relative; display: flex; align-items: center; gap: 8px; height: var(--head); padding: 0 12px 0 16px; border-bottom: 1px solid var(--line); }
+  .area--compact .area__head { height: 36px; padding: 0 8px 0 12px; }
+  .area--plain .area__head { padding: 0 4px 0 0; }
+  .area--folded .area__head { border-bottom-color: transparent; }
+  .area__fold { flex: none; width: 24px; height: 24px; margin-left: -6px; display: grid; place-items: center; border: 0; border-radius: 4px; background: transparent; color: var(--ink-2); cursor: pointer; }
+  .area__fold:hover { background: var(--surface-2); color: var(--ink); }
+  .area__fold:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .area__fold svg { width: 16px; height: 16px; transition: transform var(--fold); }
+  .area--folded .area__fold svg { transform: rotate(-90deg); }
+  .area__title { font-size: 14px; line-height: 20px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .area__meta { display: inline-flex; align-items: center; gap: 6px; min-width: 0; color: var(--ink-2); font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 10px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink-2); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .chip--accent { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); color: var(--accent-hover); }
+  .area__actions { margin-left: auto; display: flex; align-items: center; gap: 2px; }
+  .iconbtn { width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 4px; background: transparent; color: var(--ink-2); cursor: pointer; transition: background-color var(--move), color var(--move); }
+  .iconbtn:hover { background: var(--surface-2); color: var(--ink); }
+  .iconbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .iconbtn svg { width: 16px; height: 16px; }
+  .lock { color: var(--ink-3); display: inline-flex; }
+  .lock svg { width: 14px; height: 14px; }
+  .area__progress { position: absolute; left: 16px; right: 12px; bottom: -1px; height: 2px; overflow: hidden; border-radius: 2px; }
+  .area__progress i { position: absolute; top: 0; left: -40%; width: 40%; height: 100%; border-radius: 2px; background: var(--accent); animation: run 1.4s cubic-bezier(.4, 0, .6, 1) infinite; }
+  @keyframes run { to { left: 100%; } }
+
+  .area__body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; padding: 16px; min-height: 208px; align-content: start; }
+  .area--compact .area__body { padding: 12px; gap: 8px 16px; min-height: 184px; }
+  .area--plain .area__body { padding: 12px 0 0; }
+  .area--folded .area__body, .area--folded .area__foot { display: none; }
+  .area__foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); }
+  .col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .area--compact .col { gap: 8px; }
+  @container (max-width: 480px) { .area__body { grid-template-columns: minmax(0, 1fr); } }
+  .area { container-type: inline-size; }
+
+  /* Inhalt: Person, Fakten ohne Kasten, Eingabe mit Kasten, Kennzahl. */
+  .person { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .avatar { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-hover); font-weight: 600; font-size: 15px; overflow: hidden; }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .person__name { font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .person__sub { font-size: 12px; line-height: 16px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+  .fact { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .fact__k { font-size: 12px; line-height: 16px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fact__v { font-size: 13px; line-height: 18px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+  .fact__v a { color: var(--accent); text-decoration: none; }
+  .fact__v a:hover { text-decoration: underline; }
+  .fact--empty .fact__k { color: var(--ink-3); }
+  .fact--empty .fact__v { color: var(--ink-3); }
+  .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .field__k { font-size: 12px; line-height: 16px; color: var(--ink-2); display: flex; gap: 3px; }
+  .field__k .req { color: var(--danger); }
+  .input { position: relative; height: var(--control); display: flex; align-items: center; gap: 8px; padding: 0 10px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r-control); color: var(--ink); transition: border-color var(--move), box-shadow var(--move); }
+  .input:hover { border-color: var(--ink-3); }
+  .input--focus { border-color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
+  .input--read { background: var(--surface-2); border-color: var(--line); color: var(--ink-2); }
+  .input__v { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .input__v.ph { color: var(--ink-3); }
+  .input .sign { flex: none; display: grid; color: var(--ink-3); }
+  .input .sign svg { width: 16px; height: 16px; }
+  .kpi { display: flex; flex-direction: column; gap: 2px; padding: 12px; border-radius: var(--r-control); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
+  .kpi__k { font-size: 12px; line-height: 16px; color: var(--ink-2); }
+  .kpi__v { font-size: 22px; line-height: 28px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .kpi__v.danger { color: var(--danger); }
+  .kpi--empty .kpi__v { color: var(--ink-3); font-weight: 400; font-size: 13px; line-height: 28px; }
+
+  /* Zustände im Körper: lädt, leer, Fehler. */
+  .sk { height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--surface-2) 25%, var(--line) 50%, var(--surface-2) 75%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+  .sk--k { width: 40%; height: 10px; }
+  .sk--v { width: 70%; }
+  .sk-fact { display: flex; flex-direction: column; gap: 6px; }
+  .sk-avatar { width: 40px; height: 40px; border-radius: 50%; flex: none; }
+  .empty { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 176px; text-align: center; }
+  .empty svg { width: 28px; height: 28px; color: var(--ink-3); margin-bottom: 4px; }
+  .empty__t { font-size: 13px; line-height: 18px; font-weight: 600; color: var(--ink-2); }
+  .empty__h { font-size: 12px; line-height: 16px; color: var(--ink-3); }
+  .empty .btn { margin-top: 8px; }
+  .alert { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; min-height: 36px; padding: 6px 4px 6px 12px; border-radius: var(--r-control); background: var(--danger-soft); box-shadow: inset 0 0 0 1px var(--danger-line); color: var(--ink); }
+  .alert svg { flex: none; width: 16px; height: 16px; color: var(--danger); }
+  .alert__t { flex: 1; min-width: 0; }
+  .alert__t b { font-weight: 600; }
+  .alert .btn { height: 28px; }
+
+  .btn { height: var(--control); padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line-strong); border-radius: var(--r-control); background: var(--surface); color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; transition: background-color var(--move), border-color var(--move); }
+  .btn:hover { background: var(--surface-2); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn--primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn--primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn--ghost { border-color: transparent; background: transparent; color: var(--ink-2); }
+  .btn--ghost:hover { background: var(--surface-2); color: var(--ink); }
+  .btn--sm { height: 28px; padding: 0 10px; font-size: 12px; }
+  .grip { position: absolute; width: 8px; height: 8px; background: var(--surface); border: 1px solid var(--accent); border-radius: 2px; }
+  .grip.tl { left: -5px; top: -5px; } .grip.tr { right: -5px; top: -5px; } .grip.bl { left: -5px; bottom: -5px; } .grip.br { right: -5px; bottom: -5px; }
+
+  /* Galerie: alle Zustände auf einen Blick. */
+  .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+  .gallery .cell { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .gallery .cell > .cap { font-size: 12px; line-height: 16px; color: var(--ink-2); display: flex; gap: 8px; align-items: baseline; }
+  .gallery .cell > .cap b { color: var(--ink); font-weight: 600; }
+  .gallery .sheet { padding: 16px; min-height: 0; }
+  .gallery .area__body { min-height: 150px; }
+
+  /* Inspektor. */
+  .inspector { background: var(--surface); border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--line); display: flex; flex-direction: column; min-width: 0; }
+  .inspector__head { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 16px; border-bottom: 1px solid var(--line); }
+  .inspector__head svg { width: 18px; height: 18px; color: var(--ink-2); }
+  .inspector__head b { font-size: 14px; font-weight: 600; }
+  .inspector__head span { color: var(--ink-2); font-size: 12px; margin-left: auto; }
+  .isec { border-bottom: 1px solid var(--line); }
+  .isec:last-child { border-bottom: 0; }
+  .isec__t { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; font-size: 12px; font-weight: 600; color: var(--ink); }
+  .isec__t svg { width: 12px; height: 12px; color: var(--ink-3); }
+  .irow { display: grid; grid-template-columns: 120px minmax(0, 1fr); align-items: center; gap: 8px; min-height: 32px; padding: 2px 16px; font-size: 12px; }
+  .irow .k { color: var(--ink-2); }
+  .irow .v { display: flex; align-items: center; gap: 6px; min-width: 0; flex-wrap: wrap; }
+  .irow .v .seg button { height: 22px; padding: 0 8px; font-size: 11px; }
+  .irow .v .txt { flex: 1; min-width: 0; height: 26px; padding: 0 8px; display: flex; align-items: center; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .irow .v .txt.ph { color: var(--ink-3); }
+  .irow .v .switch input { width: 28px; height: 16px; }
+  .irow .v .switch input::after { width: 10px; height: 10px; }
+  .irow .v .switch input:checked::after { transform: translateX(12px); }
+  .irow .d { color: var(--ink-3); font-size: 11px; }
+  .not { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .not div { background: var(--surface); border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--line); padding: 12px 16px; display: flex; flex-direction: column; gap: 4px; }
+  .not b { font-size: 13px; font-weight: 600; }
+  .not span { font-size: 12px; line-height: 16px; color: var(--ink-2); }
+
+  .keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 24px; font-size: 13px; }
+  .keys div { display: flex; gap: 10px; align-items: baseline; }
+  .keys kbd { flex: none; }
+  .question { background: var(--surface); border-radius: var(--r-card); box-shadow: inset 0 0 0 1px var(--accent-line); padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; max-width: 72ch; }
+  .question b { font-size: 14px; font-weight: 600; }
+  .question p { font-size: 13px; line-height: 18px; }
+  footer { color: var(--ink-3); font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { .sk, .area__progress i { animation: none; } .area__fold svg, .switch input, .switch input::after { transition: none; } }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <span class="eyebrow">Entwurf 1 von 4 · Baustein Bereich · 26.10.2026</span>
+    <h1>Bereich</h1>
+    <p class="muted">
+      Der Bereich ist der Rahmen, in dem alles andere steht: eine Karte mit Kopf, Körper und wahlweise Fuß. Er sieht in
+      jeder Maske gleich aus, weil alles Sichtbare aus einem System kommt, und er hat in jedem Zustand (ruhig, lädt,
+      leer, Fehler, gesperrt, eingeklappt) eine feste Form. Lage und Größe bleiben fest; Leeres wird still.
+    </p>
+  </header>
+
+  <!-- 1 System -->
+  <section class="section" aria-labelledby="s1">
+    <div class="section-head">
+      <h2 id="s1"><span class="num">1</span>Das System</h2>
+      <p class="muted">
+        Gilt für jeden Baustein. Ein Baustein darf daraus wählen, aber nichts Eigenes erfinden. Änderbar nur zentral,
+        nie je Baustein.
+      </p>
+    </div>
+    <div class="tokens">
+      <div class="token-card">
+        <h3>Flächen und Tinte</h3>
+        <div class="swatches">
+          <div class="sw"><i style="background:var(--ground)"></i><span>Grund</span></div>
+          <div class="sw"><i style="background:var(--surface)"></i><span>Karte</span></div>
+          <div class="sw"><i style="background:var(--surface-2)"></i><span>Innen</span></div>
+          <div class="sw"><i style="background:var(--line)"></i><span>Haarlinie</span></div>
+          <div class="sw"><i style="background:var(--ink)"></i><span>Tinte</span></div>
+          <div class="sw"><i style="background:var(--ink-2)"></i><span>Zweite Tinte</span></div>
+          <div class="sw"><i style="background:var(--ink-3)"></i><span>Schwach</span></div>
+        </div>
+        <p class="t-caption">
+          Grau mit leichtem Blaustich statt reinem Grau. Karten liegen weiß auf dem Grund, getrennt durch die Haarlinie,
+          ohne Schatten. Schatten nur, wenn etwas über der Maske schwebt.
+        </p>
+      </div>
+      <div class="token-card">
+        <h3>Akzent und Bedeutung</h3>
+        <div class="swatches">
+          <div class="sw"><i style="background:var(--accent)"></i><span>Akzent</span></div>
+          <div class="sw"><i style="background:var(--accent-soft)"></i><span>Akzent weich</span></div>
+          <div class="sw"><i style="background:var(--success)"></i><span>Erfolg</span></div>
+          <div class="sw"><i style="background:var(--warning)"></i><span>Warnung</span></div>
+          <div class="sw"><i style="background:var(--danger)"></i><span>Gefahr</span></div>
+          <div class="sw"><i style="background:var(--danger-soft)"></i><span>Gefahr weich</span></div>
+        </div>
+        <p class="t-caption">
+          Ein Blau für alles, was Vorrang hat: Hauptknopf, Fokus, Auswahl, Links. Bedeutungsfarben nur als Punkt, Kante,
+          Chip oder weicher Grund einer Zeile, nie als Fläche eines Bereichs.
+        </p>
+      </div>
+      <div class="token-card">
+        <h3>Schrift</h3>
+        <div class="type-scale">
+          <div><small>12 / 16</small><span class="t-caption">Beschriftung, Nebeninformation</span></div>
+          <div><small>13 / 18</small><span class="t-body">Text, Wert, Eingabe</span></div>
+          <div><small>14 / 20 halbfett</small><span class="t-title">Titel eines Bereichs, Name</span></div>
+          <div><small>20 / 28 halbfett</small><span class="t-page">Titel der Maske</span></div>
+          <div><small>22 / 28 halbfett</small><span class="t-figure">1.284,50 €</span></div>
+        </div>
+        <p class="t-caption">
+          Segoe UI Variable, auf jedem Windows vorhanden, die Maske lädt keine Schrift. Fünf Größen, keine sechste.
+          Zahlen immer mit gleich breiten Ziffern.
+        </p>
+      </div>
+      <div class="token-card">
+        <h3>Abstände, Ecken, Höhen</h3>
+        <div class="spacing">
+          <div><i style="height:4px"></i>4</div>
+          <div><i style="height:8px"></i>8</div>
+          <div><i style="height:12px"></i>12</div>
+          <div><i style="height:16px"></i>16</div>
+          <div><i style="height:24px"></i>24</div>
+          <div><i style="height:32px"></i>32</div>
+        </div>
+        <p class="t-caption">
+          Sechs Abstände, nichts dazwischen. Innen in der Karte 16, zwischen Feldern 12, zwischen Karten 16. Ecken: 4 an
+          Eingabe und Knopf, 8 an der Karte. Höhen: Steuerelement 32, Kopf 44, Zeile 36.
+        </p>
+      </div>
+      <div class="token-card">
+        <h3>Zustände</h3>
+        <div class="states-legend">
+          <div>
+            <span class="dot" style="background:var(--ink-3)"></span><b>Ruhig</b> · so, wie der Bauer es gesetzt hat
+          </div>
+          <div>
+            <span class="dot" style="background:var(--accent)"></span><b>Lädt</b> · Lauflinie unter dem Kopf,
+            Platzhalter im Körper, kein Wort
+          </div>
+          <div>
+            <span class="dot" style="background:var(--line-strong)"></span><b>Leer</b> · Zeichen, ein Satz, wenn möglich
+            ein Knopf
+          </div>
+          <div>
+            <span class="dot" style="background:var(--danger)"></span><b>Fehler</b> · eine Zeile am Ort mit Grund und
+            „Erneut“
+          </div>
+          <div>
+            <span class="dot" style="background:var(--warning)"></span><b>Gesperrt</b> · Schloss im Kopf, Eingaben
+            werden Lesewerte
+          </div>
+          <div>
+            <span class="dot" style="background:var(--accent-line)"></span><b>Gewählt</b> · nur im Editor: Akzentrahmen
+            mit Griffen
+          </div>
+        </div>
+      </div>
+      <div class="token-card">
+        <h3>Bewegung und Fokus</h3>
+        <p class="t-caption">
+          Flächen wechseln in 120 ms, Klappen in 200 ms, beides aus, wenn Windows „Animationen reduzieren“ gesetzt hat.
+          Fokus ist immer ein 2-Punkte-Ring im Akzent mit 2 Punkten Luft, auf jedem Element gleich.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 Der Baustein -->
+  <section class="section" aria-labelledby="s2">
+    <div class="section-head">
+      <h2 id="s2"><span class="num">2</span>Der Baustein, zum Umschalten</h2>
+      <p class="muted">
+        Rechts daneben der Inspektor, der genau diese Einstellungen trägt. Was du oben umschaltest, siehst du im
+        Inspektor wechseln.
+      </p>
+    </div>
+    <div class="controls" role="toolbar" aria-label="Einstellungen">
+      <div class="group">
+        <span class="group-name">Art</span>
+        <div class="seg" id="kind">
+          <button type="button" data-v="plain" aria-pressed="false">Frei</button
+          ><button type="button" data-v="card" aria-pressed="false">Karte</button
+          ><button type="button" data-v="headed" aria-pressed="true">Karte mit Kopf</button>
+        </div>
+      </div>
+      <div class="group">
+        <span class="group-name">Zustand</span>
+        <div class="seg" id="state">
+          <button type="button" data-v="calm" aria-pressed="true">Ruhig</button
+          ><button type="button" data-v="loading" aria-pressed="false">Lädt</button
+          ><button type="button" data-v="empty" aria-pressed="false">Leer</button
+          ><button type="button" data-v="error" aria-pressed="false">Fehler</button
+          ><button type="button" data-v="locked" aria-pressed="false">Gesperrt</button
+          ><button type="button" data-v="selected" aria-pressed="false">Gewählt (Editor)</button>
+        </div>
+      </div>
+      <div class="group">
+        <span class="group-name">Zusatz</span>
+        <div class="seg" id="meta">
+          <button type="button" data-v="none" aria-pressed="false">Keiner</button
+          ><button type="button" data-v="value" aria-pressed="true">Wert</button
+          ><button type="button" data-v="count" aria-pressed="false">Zähler</button>
+        </div>
+      </div>
+      <div class="group">
+        <span class="group-name">Dichte</span>
+        <div class="seg" id="density">
+          <button type="button" data-v="normal" aria-pressed="true">Normal</button
+          ><button type="button" data-v="compact" aria-pressed="false">Kompakt</button>
+        </div>
+      </div>
+      <div class="group">
+        <label class="switch"><input type="checkbox" id="foldable" /> Klappbar</label
+        ><label class="switch"><input type="checkbox" id="actions" checked /> Knöpfe im Kopf</label
+        ><label class="switch"><input type="checkbox" id="foot" /> Fuß</label>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="sheet" id="live-sheet"><div id="live"></div></div>
+      <aside class="inspector" aria-label="Inspektor" id="inspector"></aside>
+    </div>
+  </section>
+
+  <!-- 3 Alle Zustände -->
+  <section class="section" aria-labelledby="s3">
+    <div class="section-head">
+      <h2 id="s3"><span class="num">3</span>Alle Zustände auf einen Blick</h2>
+      <p class="muted">Dieselbe Karte, dieselbe Lage, dieselbe Höhe. Nur der Körper sagt, was los ist.</p>
+    </div>
+    <div class="gallery" id="gallery"></div>
+  </section>
+
+  <!-- 4 Was nicht einstellbar ist -->
+  <section class="section" aria-labelledby="s4">
+    <div class="section-head">
+      <h2 id="s4"><span class="num">4</span>Was nicht einstellbar ist, und warum</h2>
+    </div>
+    <div class="not">
+      <div>
+        <b>Farben, Schrift, Ecken, Schatten</b
+        ><span
+          >Kommen aus dem System (Abschnitt 1). Würde jeder Bereich seine Farbe wählen, sähe jede Maske anders aus.
+          Änderbar nur zentral in einem Thema, das dann für alle Masken gilt.</span
+        >
+      </div>
+      <div>
+        <b>Abstände innen</b
+        ><span
+          >Folgen der Dichte (Normal 16, Kompakt 12). Ein freier Wert je Bereich bringt krumme Maße und ungleiche Karten
+          nebeneinander.</span
+        >
+      </div>
+      <div>
+        <b>Höhe nach Inhalt</b
+        ><span
+          >Entfällt. Lage und Größe bleiben fest, so die Entscheidung vom 26.10.; der Bauer gibt die Höhe im Raster vor.
+          Nur Listen im Bereich scrollen innen.</span
+        >
+      </div>
+      <div>
+        <b>Farbe des Kopfes</b
+        ><span
+          >Der Titel steht in der Tinte, nicht im Akzent. Der Akzent gehört dem Hauptknopf, dem Fokus und der Auswahl;
+          ein blauer Kopf würde mit ihnen um Aufmerksamkeit streiten.</span
+        >
+      </div>
+      <div>
+        <b>Wortlaut von „Lädt“ und „Fehler“</b
+        ><span
+          >Lädt hat kein Wort. Der Fehlersatz kommt aus der Antwort von SoftEngine; der Bauer kann nur wählen, ob
+          „Erneut laden“ angeboten wird.</span
+        >
+      </div>
+      <div>
+        <b>Position des Zusatzes</b
+        ><span>Steht immer rechts neben dem Titel. Zwei Plätze dafür machen Masken ungleich.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 Tastatur -->
+  <section class="section" aria-labelledby="s5">
+    <div class="section-head">
+      <h2 id="s5"><span class="num">5</span>Tastatur</h2>
+    </div>
+    <div class="keys">
+      <div><kbd>Tab</kbd><span>zum Klapp-Pfeil, dann zu den Knöpfen im Kopf, dann in den Körper</span></div>
+      <div><kbd>Enter</kbd> <kbd>Leertaste</kbd><span>klappt auf dem Pfeil</span></div>
+      <div><kbd>Alt+↑</kbd> <kbd>Alt+↓</kbd><span>von überall im Bereich: klappt den Bereich</span></div>
+      <div><kbd>F1</kbd><span>Tastenhilfe der Maske</span></div>
+    </div>
+  </section>
+
+  <!-- 6 Eine Frage -->
+  <section class="section" aria-labelledby="s6">
+    <div class="question">
+      <b id="s6">Eine Frage, mit Vorschlag</b>
+      <p>
+        Wo soll ein Fehler stehen, der diesen Bereich betrifft (SoftEngine antwortet nicht, lehnt ab)?
+        <b>Vorschlag:</b> als Zeile oben im Körper des Bereichs, mit Grund und „Erneut laden“, wie oben zu sehen; die
+        Leiste unten bleibt nur für den Verbindungsabbruch der ganzen Maske. Die andere Möglichkeit: wie heute allein in
+        der Leiste unten, der Bereich bleibt stumm.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    Beispieldaten. Entwurf zur Freigabe; gebaut wird erst nach dem Ja. Dann: Umbau im Editor, npm run check, Vorschau,
+    Export, Prüfung in SoftEngine, Bild.
+  </footer>
+</div>
+
+<script>
+  (function () {
+    'use strict';
+
+    var ICON = {
+      chev: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>',
+      edit: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.5 2.5l2 2L6 12H4v-2z"/></svg>',
+      more: '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="4" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="12" cy="8" r="1.3"/></svg>',
+      lock: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.2"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>',
+      warn: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 5v3.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>',
+      inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 13h4l1.5 2.5h5L16 13h4"/><path d="M5 5h14l1 8v6H4v-6z"/></svg>',
+      caret: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>',
+      cube: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>',
+      sec: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>'
+    };
+    var PHOTO = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" fill="#D9E4EE"/><circle cx="48" cy="38" r="17" fill="#8FA7BC"/><path d="M14 92c4-20 18-30 34-30s30 10 34 30z" fill="#8FA7BC"/></svg>');
+
+    var opts = { kind: 'headed', state: 'calm', meta: 'value', density: 'normal', foldable: false, folded: false, actions: true, foot: false };
+    try { opts.folded = localStorage.getItem('entwurf-bereich-folded') === '1'; } catch (e) { opts.folded = false; }
+
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+    function fact(k, v, link) {
+      if (!v) return '<div class="fact fact--empty"><span class="fact__k">' + esc(k) + '</span><span class="fact__v">–</span></div>';
+      return '<div class="fact"><span class="fact__k">' + esc(k) + '</span><span class="fact__v">' + (link ? '<a href="#">' + esc(v) + '</a>' : esc(v)) + '</span></div>';
+    }
+    function input(k, v, o) {
+      o = o || {};
+      var cls = 'input' + (o.focus ? ' input--focus' : '') + (o.read ? ' input--read' : '');
+      var val = v ? esc(v) : '<span class="input__v ph">' + esc(o.ph || '') + '</span>';
+      if (v) val = '<span class="input__v">' + val + '</span>';
+      return '<div class="field"><span class="field__k">' + esc(k) + (o.req ? '<span class="req">*</span>' : '') + '</span><div class="' + cls + '">' + val + (o.sign ? '<span class="sign">' + o.sign + '</span>' : '') + '</div></div>';
+    }
+
+    function bodyCalm(o) {
+      var read = o.state === 'locked';
+      return '<div class="col">' +
+        '<div class="person"><span class="avatar"><img src="' + PHOTO + '" alt=""></span><div style="min-width:0"><div class="person__name">Müller, Anna</div><div class="person__sub">Kundin seit 2019 · 10115 Berlin</div></div></div>' +
+        '<div class="facts">' + fact('Telefon', '030 4455 6677') + fact('Mobil', '') + fact('E-Mail', 'anna.mueller@beispiel.de', true) + fact('Kundengruppe', 'Praxis') + '</div>' +
+      '</div>' +
+      '<div class="col">' +
+        '<div class="kpi"><span class="kpi__k">Offene Posten</span><span class="kpi__v danger">1.284,50 €</span></div>' +
+        input('Zahlungsziel', '14 Tage', { read: read, sign: read ? '' : ICON.caret }) +
+        input('Notiz', '', { read: read, ph: read ? '' : 'Notiz zur Kundin …' }) +
+      '</div>';
+    }
+    function bodyLoading() {
+      return '<div class="col"><div class="person"><span class="sk sk-avatar"></span><div class="sk-fact" style="flex:1"><span class="sk sk--v"></span><span class="sk sk--k"></span></div></div>' +
+        '<div class="facts"><div class="sk-fact"><span class="sk sk--k"></span><span class="sk sk--v"></span></div><div class="sk-fact"><span class="sk sk--k"></span><span class="sk sk--v"></span></div><div class="sk-fact"><span class="sk sk--k"></span><span class="sk sk--v"></span></div><div class="sk-fact"><span class="sk sk--k"></span><span class="sk sk--v"></span></div></div></div>' +
+        '<div class="col"><div class="kpi kpi--empty"><span class="kpi__k">Offene Posten</span><span class="kpi__v">&nbsp;</span></div><div class="sk-fact"><span class="sk sk--k"></span><span class="sk" style="height:32px;border-radius:4px"></span></div><div class="sk-fact"><span class="sk sk--k"></span><span class="sk" style="height:32px;border-radius:4px"></span></div></div>';
+    }
+    function bodyEmpty() {
+      return '<div class="empty">' + ICON.inbox + '<span class="empty__t">Keine Kundin gewählt</span><span class="empty__h">Links in der Liste eine Kundin wählen, oder eine neue anlegen.</span><button type="button" class="btn btn--sm">Neue Kundin</button></div>';
+    }
+    function bodyError() {
+      return '<div class="alert">' + ICON.warn + '<span class="alert__t"><b>Nicht geladen.</b> SoftEngine hat nicht geantwortet (20 s).</span><button type="button" class="btn btn--sm" data-retry>Erneut laden</button><button type="button" class="iconbtn" aria-label="Schließen">' + '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>' + '</button></div>' +
+        '<div class="col"><div class="facts">' + fact('Telefon', '') + fact('Mobil', '') + fact('E-Mail', '') + fact('Kundengruppe', '') + '</div></div>' +
+        '<div class="col"><div class="kpi kpi--empty"><span class="kpi__k">Offene Posten</span><span class="kpi__v">–</span></div></div>';
+    }
+
+    function area(o) {
+      var cls = 'area area--' + o.kind + ' area--' + o.density + (o.state === 'selected' ? ' area--selected' : '') + (o.foldable && o.folded ? ' area--folded' : '');
+      var meta = '';
+      if (o.state === 'locked') meta = '<span class="area__meta"><span class="lock" title="Kein Recht zum Ändern">' + ICON.lock + '</span>Nur lesen</span>';
+      else if (o.meta === 'value' && o.state !== 'empty' && o.state !== 'loading' && o.state !== 'error') meta = '<span class="area__meta">Nr. 4711</span>';
+      else if (o.meta === 'count') meta = '<span class="area__meta"><span class="chip">' + (o.state === 'empty' || o.state === 'loading' || o.state === 'error' ? '0' : '3') + ' offene Posten</span></span>';
+      var actions = o.actions && o.state !== 'locked' ? '<div class="area__actions"><button type="button" class="iconbtn" aria-label="Bearbeiten" title="Bearbeiten">' + ICON.edit + '</button><button type="button" class="iconbtn" aria-label="Mehr" title="Mehr">' + ICON.more + '</button></div>' : '';
+      var fold = o.foldable ? '<button type="button" class="area__fold" aria-expanded="' + String(!o.folded) + '" aria-label="Zuklappen" data-fold>' + ICON.chev + '</button>' : '';
+      var head = o.kind === 'headed'
+        ? '<header class="area__head">' + fold + '<h3 class="area__title">Kundin</h3>' + meta + actions + (o.state === 'loading' ? '<span class="area__progress" role="progressbar" aria-label="lädt"><i></i></span>' : '') + '</header>'
+        : '';
+      var body = o.state === 'loading' ? bodyLoading() : o.state === 'empty' ? bodyEmpty() : o.state === 'error' ? bodyError() : bodyCalm(o);
+      var foot = o.foot ? '<footer class="area__foot"><button type="button" class="btn btn--ghost">Abbrechen</button><button type="button" class="btn btn--primary">Speichern</button></footer>' : '';
+      var grips = o.state === 'selected' ? '<span class="grip tl"></span><span class="grip tr"></span><span class="grip bl"></span><span class="grip br"></span>' : '';
+      return '<section class="' + cls + '" aria-label="Kundin">' + head + '<div class="area__body">' + body + '</div>' + foot + grips + '</section>';
+    }
+
+    /* Inspektor: zeigt genau die Einstellungen des Bausteins mit ihren Vorgaben. */
+    function seg(values, current) {
+      return '<span class="seg">' + values.map(function (v) { return '<button type="button" aria-pressed="' + String(v[0] === current) + '" tabindex="-1">' + v[1] + '</button>'; }).join('') + '</span>';
+    }
+    function sw(on) { return '<label class="switch"><input type="checkbox" ' + (on ? 'checked' : '') + ' tabindex="-1" aria-hidden="true"></label>'; }
+    function row(k, v, d) { return '<div class="irow"><span class="k">' + k + '</span><span class="v">' + v + (d ? '<span class="d">' + d + '</span>' : '') + '</span></div>'; }
+    function sec(t, rows) { return '<div class="isec"><div class="isec__t">' + ICON.sec + t + '</div>' + rows + '</div>'; }
+
+    function inspector(o) {
+      return '<div class="inspector__head">' + ICON.cube + '<b>Bereich</b><span>„Kundin“</span></div>' +
+        sec('Was', row('Titel', '<span class="txt">Kundin</span>') + row('Zusatz rechts', seg([['none', 'Keiner'], ['value', 'Wert'], ['count', 'Zähler'], ['text', 'Text']], o.meta)) + (o.meta === 'value' ? row('Wert aus', '<span class="txt">Kundennummer</span>') : o.meta === 'count' ? row('Zählt', '<span class="txt">Offene Posten</span>') : '') + row('Knöpfe im Kopf', sw(o.actions), 'Ketten je Knopf') + row('Fuß', sw(o.foot), 'Haupt- und Nebenknopf')) +
+        sec('Aussehen', row('Art', seg([['plain', 'Frei'], ['card', 'Karte'], ['headed', 'Mit Kopf']], o.kind)) + row('Dichte', seg([['normal', 'Normal'], ['compact', 'Kompakt']], o.density)) + row('Spalten innen', seg([['1', '1'], ['2', '2'], ['3', '3'], ['4', '4']], '2'), 'auf dem 48er-Raster')) +
+        sec('Verhalten', row('Klappbar', sw(o.foldable)) + (o.foldable ? row('Startet', seg([['open', 'Offen'], ['shut', 'Eingeklappt']], 'open')) + row('Merken', sw(true), 'je Anwender') : '') + row('Leer: Satz', '<span class="txt">Keine Kundin gewählt</span>') + row('Leer: Hinweis', '<span class="txt">Links in der Liste …</span>') + row('Leer: Knopf', '<span class="txt">Neue Kundin</span>', 'Kette') + row('Ausblenden wenn leer', sw(false)) + row('Fehler: Erneut', sw(true), '„Erneut laden“ anbieten')) +
+        sec('Wenn', row('Sichtbar wenn', '<span class="txt ph">immer</span>') + row('Änderbar wenn', '<span class="txt ph">immer</span>', 'sonst „Nur lesen“'));
+    }
+
+    var live = document.getElementById('live');
+    var insp = document.getElementById('inspector');
+
+    function render() {
+      live.innerHTML = area(opts);
+      insp.innerHTML = inspector(opts);
+      var f = live.querySelector('[data-fold]');
+      if (f) f.addEventListener('click', function () {
+        opts.folded = !opts.folded;
+        try { localStorage.setItem('entwurf-bereich-folded', opts.folded ? '1' : '0'); } catch (e) { /* ohne Speicher geht es auch */ }
+        render();
+        var again = live.querySelector('[data-fold]'); if (again) again.focus();
+      });
+      var r = live.querySelector('[data-retry]');
+      if (r) r.addEventListener('click', function () { set('state', 'loading'); setTimeout(function () { if (opts.state === 'loading') set('state', 'calm'); }, 1400); });
+    }
+
+    function press(id, value) {
+      var b = document.getElementById(id).querySelectorAll('button');
+      for (var i = 0; i < b.length; i++) b[i].setAttribute('aria-pressed', String(b[i].getAttribute('data-v') === value));
+    }
+    function set(key, value) {
+      opts[key] = value;
+      press(key, value);
+      render();
+    }
+    ['kind', 'state', 'meta', 'density'].forEach(function (id) {
+      document.getElementById(id).addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (b) set(id, b.getAttribute('data-v'));
+      });
+    });
+    document.getElementById('foldable').addEventListener('change', function (e) { opts.foldable = e.target.checked; render(); });
+    document.getElementById('actions').addEventListener('change', function (e) { opts.actions = e.target.checked; render(); });
+    document.getElementById('foot').addEventListener('change', function (e) { opts.foot = e.target.checked; render(); });
+    document.addEventListener('keydown', function (e) {
+      if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') || !opts.foldable) return;
+      if (!live.contains(document.activeElement)) return;
+      e.preventDefault();
+      opts.folded = e.key === 'ArrowUp';
+      render();
+    });
+
+    /* Galerie. */
+    var GALLERY = [
+      ['Ruhig', 'alle Werte, Mobil fehlt und ist still', { state: 'calm' }],
+      ['Lädt', 'Lauflinie, Platzhalter, kein Wort', { state: 'loading' }],
+      ['Leer', 'Zeichen, Satz, Hinweis, Knopf', { state: 'empty' }],
+      ['Fehler', 'Zeile mit Grund und „Erneut laden“', { state: 'error' }],
+      ['Gesperrt', 'Schloss, Eingaben werden Lesewerte', { state: 'locked' }],
+      ['Eingeklappt', 'nur der Kopf, gemerkt je Anwender', { state: 'calm', foldable: true, folded: true }],
+      ['Gewählt im Editor', 'Akzentrahmen und Griffe, sonst wie die Maske', { state: 'selected' }],
+      ['Kompakt, ohne Kopf', 'Art Karte, Dichte kompakt', { state: 'calm', kind: 'card', density: 'compact' }]
+    ];
+    document.getElementById('gallery').innerHTML = GALLERY.map(function (g) {
+      var o = Object.assign({}, opts, { kind: 'headed', meta: 'value', density: 'normal', foldable: false, folded: false, actions: true, foot: false }, g[2]);
+      return '<div class="cell"><div class="cap"><b>' + g[0] + '</b><span>' + g[1] + '</span></div><div class="sheet">' + area(o) + '</div></div>';
+    }).join('');
+
+    render();
+  })();
+</script>
