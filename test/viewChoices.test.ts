@@ -9,6 +9,7 @@ function tableElement(id: string) {
     sortByClick: true,
     renderRoot: document.createElement('div'),
     requestUpdate: () => {},
+    updateComplete: Promise.resolve(true),
   })
   el.setAttribute(BLOCK_ID_ATTR, id)
   return el

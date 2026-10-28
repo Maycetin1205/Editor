@@ -8,6 +8,7 @@ interface ViewElement extends HTMLElement, MeasureTarget {
   editable: boolean
   sortByClick: boolean
   requestUpdate: () => void
+  readonly updateComplete: Promise<boolean>
 }
 
 export class ViewChoices {
@@ -144,7 +145,9 @@ export class ViewChoices {
     this._headMeasured = head
     if (metrics?.fit === this._metrics?.fit) return
     this._metrics = metrics
-    this.el.requestUpdate()
+    // Measured after the list was drawn: drawn again once this update is
+    // through, still before the browser paints.
+    void this.el.updateComplete.then(() => this.el.requestUpdate())
   }
 
   observe(): void {
