@@ -1,7 +1,6 @@
 import './area/Area'
 import './button/Button'
 import './capture/Capture'
-import './datalist/DataList'
 import './formfield/FormField'
 import './kanban/Kanban'
 import './popup/Popup'

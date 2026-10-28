@@ -4,7 +4,6 @@ import {
   AppWindow,
   Image as ImageSign,
   List,
-  ListChecks,
   ListPlus,
   PanelTop,
   RectangleHorizontal,
@@ -19,7 +18,6 @@ import {
 import { Area } from '../blocks/area/Area'
 import { Button } from '../blocks/button/Button'
 import { Capture } from '../blocks/capture/Capture'
-import { DataList } from '../blocks/datalist/DataList'
 import { FormField } from '../blocks/formfield/FormField'
 import { Picture } from '../blocks/image/Picture'
 import { Kanban } from '../blocks/kanban/Kanban'
@@ -34,7 +32,6 @@ export const BLOCK_ICONS: Record<string, Icon> = {
   [Area.type]: PanelTop,
   [Button.type]: RectangleHorizontal,
   [Capture.type]: ListPlus,
-  [DataList.type]: ListChecks,
   [FormField.type]: TextCursorInput,
   [Picture.type]: ImageSign,
   [Kanban.type]: SquareKanban,

@@ -148,13 +148,6 @@ export const NODE = {
     ['path', { d: 'M8 12h13' }],
     ['path', { d: 'M8 19h13' }],
   ],
-  ListChecks: [
-    ['path', { d: 'm3 17 2 2 4-4' }],
-    ['path', { d: 'm3 7 2 2 4-4' }],
-    ['path', { d: 'M13 6h8' }],
-    ['path', { d: 'M13 12h8' }],
-    ['path', { d: 'M13 18h8' }],
-  ],
   ListPlus: [
     ['path', { d: 'M11 12H3' }],
     ['path', { d: 'M16 6H3' }],

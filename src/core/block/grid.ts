@@ -18,14 +18,22 @@ export interface GridMetrics {
   heightFixed: boolean
   // Always, never, or while a condition on the values holds.
   heightFromContent: boolean | Condition
-  grows: boolean
+  // Whether its rows take the room left on the page; also under a condition.
+  grows: boolean | Condition
 }
 
 // Whether the height of a block follows its content; a Text drawn as a
 // divider takes the height it is given.
+function holds(flag: boolean | Condition, values: Readonly<Record<string, PropertyValue>>): boolean {
+  return typeof flag === 'boolean' ? flag : propertyVisible(flag, values)
+}
+
 export function heightFollowsContent(metrics: GridMetrics, values: Readonly<Record<string, PropertyValue>>): boolean {
-  const follows = metrics.heightFromContent
-  return typeof follows === 'boolean' ? follows : propertyVisible(follows, values)
+  return holds(metrics.heightFromContent, values)
+}
+
+export function growsWithPage(metrics: GridMetrics, values: Readonly<Record<string, PropertyValue>>): boolean {
+  return holds(metrics.grows, values)
 }
 
 const GRID_FALLBACK: GridMetrics = {

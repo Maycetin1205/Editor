@@ -8,6 +8,7 @@ import {
   gridSlotRead,
   GRID,
   gridMetricsOf,
+  growsWithPage,
   growRowsTemplate,
   type GridSlot,
 } from './grid'
@@ -60,7 +61,8 @@ function keptInside(tree: MaskTree, areaId: string, columns: number): MaskTree {
   return next
 }
 
-const growsOnPage = (node: BlockNode): boolean => node.parentId === ROOT_ID && gridMetricsOf(blockType(node.type)).grows
+const growsOnPage = (node: BlockNode): boolean =>
+  node.parentId === ROOT_ID && growsWithPage(gridMetricsOf(blockType(node.type)), node.values)
 
 export function pageRowsTemplate(tree: MaskTree): string | null {
   return growRowsTemplate(

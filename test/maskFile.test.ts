@@ -235,6 +235,12 @@ describe('stage 41', () => {
     })
   })
 
+  it('takes a Datenliste over as a Tabelle in the form of a list, with its card and choice', () => {
+    const values = { gridX: 0, gridY: 3, gridW: 24, gridH: 10, source: 'kunden', pick: 'none', headingField: '6_30' }
+    const read = currentState(stage40({ list: { type: 'datalist', values } })) as { tree: MaskTree }
+    expect(read.tree.list).toMatchObject({ type: 'table', values: { ...values, look: 'list' } })
+  })
+
   it('takes over once, and also in a mask of this stage', () => {
     const once = currentState(stage40(dividers))!
     expect(currentState(once)).toEqual(once)

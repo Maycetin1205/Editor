@@ -40,7 +40,8 @@ function liftTo40(tree: unknown): void {
 
 // Stage 41, 28.10.2026: blocks that went into others. The Trennlinie is a
 // Text drawn as a divider, its word the words of the Text; the Datum, which
-// chose the day of the mask, is a Feld of type Tagwahl without a label.
+// chose the day of the mask, is a Feld of type Tagwahl without a label; the
+// Datenliste is a Tabelle in the form of a list, with its card and choice.
 const TAKEN_OVER_41: Readonly<Record<string, (values: Values) => { type: string; values: Values }>> = {
   divider: ({ word, ...rest }) => ({
     type: 'text',
@@ -50,6 +51,7 @@ const TAKEN_OVER_41: Readonly<Record<string, (values: Values) => { type: string;
     type: 'formfield',
     values: { ...values, fieldType: 'day', showLabel: false, label: 'Tag' },
   }),
+  datalist: (values) => ({ type: 'table', values: { ...values, look: 'list' } }),
 }
 
 // A node of a type that went into another is taken over wherever it turns

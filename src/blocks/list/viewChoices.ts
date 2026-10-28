@@ -40,10 +40,18 @@ export class ViewChoices {
   private _focusRow: string | null = null
   private _restoreFocus = false
 
-  constructor(el: ViewElement, columns: () => readonly { key: string }[], subHeight: () => number = () => 0) {
+  private readonly sorts: () => boolean
+
+  constructor(
+    el: ViewElement,
+    columns: () => readonly { key: string }[],
+    subHeight: () => number = () => 0,
+    sorts: () => boolean = () => el.sortByClick,
+  ) {
     this.el = el
     this.columns = columns
     this.subHeight = subHeight
+    this.sorts = sorts
   }
 
   get searchText(): string {
@@ -77,7 +85,7 @@ export class ViewChoices {
   }
 
   get sortColumn(): number {
-    if (!this.el.sortByClick) return -1
+    if (!this.sorts()) return -1
     this.readRemembered()
     return this._sortColumn
   }
@@ -103,7 +111,7 @@ export class ViewChoices {
   }
 
   clickSort(index: number): void {
-    if (this.el.editable || !this.el.sortByClick) return
+    if (this.el.editable || !this.sorts()) return
     this.rememberRowsFocus()
 
     this.readRemembered()

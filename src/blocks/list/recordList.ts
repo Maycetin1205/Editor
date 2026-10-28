@@ -33,13 +33,14 @@ import {
 
 // How the list shows. A table has its head (with search, sorting and the
 // column picker), its foot and empty ruler lines under the records; a plain
-// list only its rows. picks says whether a click or Enter picks a row.
+// list only its rows; a table can be one or the other. picks says whether a
+// click or Enter picks a row.
 interface ListLook {
-  plain: boolean
+  plain: () => boolean
   picks: () => boolean
 }
 
-const TABLE_LOOK: ListLook = { plain: false, picks: () => true }
+const TABLE_LOOK: ListLook = { plain: () => false, picks: () => true }
 
 interface ListElement extends RowsElement, ListSettings, MeasureTarget, ReactiveControllerHost {
   readonly columns: readonly Column[]
@@ -75,10 +76,12 @@ export class RecordList implements ReactiveController {
       writeColumns: (columns) => sendPropChange(el, 'columns', columns),
       report: () => el.requestUpdate(),
     })
+    // A plain list has no head to sort by and no foot to page with.
     this._view = new ViewChoices(
       el,
       () => el.listColumns(),
       () => this.subHeight(),
+      () => el.sortByClick && !this.look.plain(),
     )
     this._choice = new ColumnsChoiceState({
       block: el,
@@ -150,7 +153,7 @@ export class RecordList implements ReactiveController {
   }
 
   private get columnPickerOn(): boolean {
-    return this.el.columnPicker && !this.el.preview && !this.look.plain
+    return this.el.columnPicker && !this.el.preview && !this.look.plain()
   }
 
   private rowKeys(): readonly string[] {
@@ -210,7 +213,7 @@ export class RecordList implements ReactiveController {
     const bottom = this.hooks?.bottom() ?? null
     const decoration = this.decoration()
     const view = this.renderModel(layout, bottom?.count ?? 0)
-    const plain = this.look.plain
+    const plain = this.look.plain()
     return html`<div class=${plain ? `${TABLE_PART.table} ${TABLE_PART.plain}` : TABLE_PART.table} style=${styleMap({
       '--tick': `${view.tick}px`,
       '--row-height': `${view.tick}px`,
@@ -253,7 +256,7 @@ export class RecordList implements ReactiveController {
       measured: this._view.metrics,
       takenRows,
       valueAt: (row, column) => this.cellValue(row, column),
-      paging: el.paging,
+      paging: el.paging && !this.look.plain(),
     })
   }
 
@@ -265,7 +268,7 @@ export class RecordList implements ReactiveController {
   ): BodyPlacement {
     const el = this.el
     const visible = layout.main
-    const plain = this.look.plain
+    const plain = this.look.plain()
     return {
       head: !plain,
       columns: visible.columns,

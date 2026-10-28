@@ -3,10 +3,9 @@ import { TABLE_PART_CSS } from '../list/parts'
 
 const { table, plain, body, row, chosen } = TABLE_PART_CSS
 
-// The table as a plain list keeps the look the data list had before it ran
-// on the table: no frame, larger type, a row of card height with the words
-// 10 px in, the chosen row on the soft accent with the bar.
-export const dataListStyle = css`
+// The table as a list: no frame, larger type, a row of card height with the
+// words 10 px in, the chosen row on the soft accent with the bar.
+export const listLookStyle = css`
   :host { min-width: 0; height: 100%; }
 
   .list { height: 100%; }
