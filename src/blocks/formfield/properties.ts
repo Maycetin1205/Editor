@@ -24,19 +24,24 @@ export const FIELD_TYPES = [
   'group',
   'checkbox',
   'search',
+  'day',
 ] as const
 
 export type FieldType = (typeof FIELD_TYPES)[number]
 
 export const ONLY_LOOKUP: Condition<'lookup'> = { key: 'lookup', equals: true }
 
-export const NOT_CHECKBOX: Condition = { key: 'fieldType', notEquals: 'checkbox' }
+const NOT_CHECKBOX: Condition = { key: 'fieldType', notEquals: 'checkbox' }
 
-// A search field filters the boards of the mask; it holds no field value.
+// A checkbox always holds a value; the Tagwahl always holds a day.
+export const MAY_BE_REQUIRED: Condition = { key: 'fieldType', noneOf: ['checkbox', 'day'] }
+
+// A search field filters the lists of the mask, a Tagwahl chooses its day;
+// neither holds a field value.
 export const WITH_VALUE: Condition<'lookup' | 'fieldType'> = {
   key: 'lookup',
   notEquals: true,
-  and: { key: 'fieldType', notEquals: 'search' },
+  and: { key: 'fieldType', noneOf: ['search', 'day'] },
 }
 
 // The entries of a choice, as the options name them: separated by commas.
@@ -62,6 +67,7 @@ export const formFieldProperties = {
       { value: 'group', name: 'Auswahlgruppe' },
       { value: 'checkbox', name: 'Ankreuzfeld' },
       { value: 'search', name: 'Suche' },
+      { value: 'day', name: 'Tagwahl' },
     ],
     {
       default: 'text',
@@ -169,7 +175,7 @@ export const formFieldProperties = {
     label: 'Pflicht',
     place: 'content',
     attribute: 'required',
-    when: NOT_CHECKBOX,
+    when: MAY_BE_REQUIRED,
   }),
 }
 

@@ -223,6 +223,18 @@ describe('stage 41', () => {
     for (const id of Object.keys(dividers)) expect(read.tree[id].values).not.toHaveProperty('word')
   })
 
+  it('takes a Datum over as a Feld of type Tagwahl without a label', () => {
+    const read = currentState(
+      stage40({ day: { type: 'date', values: { gridX: 30, gridY: 0, gridW: 18, gridH: 2 } } }),
+    ) as {
+      tree: MaskTree
+    }
+    expect(read.tree.day).toMatchObject({
+      type: 'formfield',
+      values: { fieldType: 'day', showLabel: false, gridX: 30, gridW: 18, gridH: 2 },
+    })
+  })
+
   it('takes over once, and also in a mask of this stage', () => {
     const once = currentState(stage40(dividers))!
     expect(currentState(once)).toEqual(once)

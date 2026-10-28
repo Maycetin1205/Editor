@@ -39,11 +39,16 @@ function liftTo40(tree: unknown): void {
 }
 
 // Stage 41, 28.10.2026: blocks that went into others. The Trennlinie is a
-// Text drawn as a divider, its word the words of the Text.
+// Text drawn as a divider, its word the words of the Text; the Datum, which
+// chose the day of the mask, is a Feld of type Tagwahl without a label.
 const TAKEN_OVER_41: Readonly<Record<string, (values: Values) => { type: string; values: Values }>> = {
   divider: ({ word, ...rest }) => ({
     type: 'text',
     values: { ...rest, form: 'divider', text: typeof word === 'string' ? word : '' },
+  }),
+  date: (values) => ({
+    type: 'formfield',
+    values: { ...values, fieldType: 'day', showLabel: false, label: 'Tag' },
   }),
 }
 

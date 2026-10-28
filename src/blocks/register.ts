@@ -1,6 +1,5 @@
 import './area/Area'
 import './button/Button'
-import './date/DatePicker'
 import './capture/Capture'
 import './datalist/DataList'
 import './formfield/FormField'

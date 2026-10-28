@@ -18,11 +18,12 @@ import { tickBoxStyle, tickBoxTpl } from '../parts/tickBox'
 import { symbolTpl } from '../look/symbol'
 import '../table/Table'
 import { disconnectValue, connectValue } from './valueBinding'
-import { choiceGroupStyle, fieldControlTpl } from './fieldControls'
+import { controlStyle, fieldControlTpl } from './fieldControls'
+import { DayChoice } from './dayChoice'
 import { fieldStyle } from './formFieldStyle'
 import { fieldTypeOf, fromInput } from './inputValue'
 import {
-  NOT_CHECKBOX,
+  MAY_BE_REQUIRED,
   ONLY_LOOKUP,
   TICKED,
   UNTICKED,
@@ -51,7 +52,7 @@ export class FormField extends BlockElement implements ValueCarrier {
     fieldStyle,
     tickBoxStyle,
     suggestionStyle,
-    choiceGroupStyle,
+    controlStyle,
   ]
 
   private valueAtFocus = ''
@@ -80,16 +81,19 @@ export class FormField extends BlockElement implements ValueCarrier {
     reportsHeight(this, () => this.renderRoot.querySelector('.field'))
   }
 
+  private readonly _day = new DayChoice(this)
+
+  // Looking up, a search and a Tagwahl fill the field themselves, not from a bound record.
   fillsSelf(): boolean {
-    return this.lookup
+    return this.lookup || this._day.active || fieldTypeOf(this.fieldType) === 'search'
   }
 
   checkOwnValue(): void {
-    if (this.fillsSelf()) this._lookup.checkValue()
+    if (this.lookup) this._lookup.checkValue()
   }
 
   valueRequired(prop: string): boolean {
-    return prop === 'value' && this.required && propertyVisible(NOT_CHECKBOX, { fieldType: this.fieldType })
+    return prop === 'value' && this.required && propertyVisible(MAY_BE_REQUIRED, { fieldType: this.fieldType })
   }
 
   focusValue(): void {
@@ -187,6 +191,7 @@ export class FormField extends BlockElement implements ValueCarrier {
       blur: this.takeTyped,
       choose: this.choose,
       goOn: this.goOn,
+      day: this._day,
     }
     return fieldControlTpl(kind, host, optionsOf(this.options))
   }
