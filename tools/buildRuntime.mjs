@@ -152,9 +152,10 @@ async function bundleBlocks(entries) {
 
 const MODULE_TAG = /^Object\.defineProperty\(exports,Symbol\.toStringTag,\{value:`Module`\}\);?/
 const CHUNK_REQUIRE = /require\(["']\.\/([^"']+)["']\)/g
-const ONE_EXPORT = /Object\.defineProperty\(exports,"([\w$]+)",\{enumerable:!0,get:function\(\)\{return ([^{}]*)\}\}\)/g
+const ONE_EXPORT =
+  /Object\.defineProperty\(exports,"([\w$]+)",\{enumerable:!0,get:function\(\)\{return ?([^{}]*)\}\}\)/g
 const EXPORT_RUN =
-  /(?:Object\.defineProperty\(exports,"[\w$]+",\{enumerable:!0,get:function\(\)\{return [^{}]*\}\}\),?)+/g
+  /(?:Object\.defineProperty\(exports,"[\w$]+",\{enumerable:!0,get:function\(\)\{return ?[^{}]*\}\}\),?)+/g
 
 function foldExports(code) {
   return code.replace(EXPORT_RUN, (run) => {
