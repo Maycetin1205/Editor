@@ -23,10 +23,7 @@ export interface GridMetrics {
 
 // Whether the height of a block follows its content; a Text drawn as a
 // divider takes the height it is given.
-export function heightFollowsContent(
-  metrics: GridMetrics,
-  values: Readonly<Record<string, PropertyValue>>,
-): boolean {
+export function heightFollowsContent(metrics: GridMetrics, values: Readonly<Record<string, PropertyValue>>): boolean {
   const follows = metrics.heightFromContent
   return typeof follows === 'boolean' ? follows : propertyVisible(follows, values)
 }
