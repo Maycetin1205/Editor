@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { startPointerDrag, type PointerDrag } from '../src/editor/canvas/pointerDrag'
+import { startPointerDrag, type PointerDrag } from '../src/editor/canvas/drag/pointerDrag'
 import { onEscape } from '../src/editor/widgets/useCloseOnEscape'
 
 function fire(on: EventTarget, type: string, extra: Record<string, unknown> = {}): Event {
