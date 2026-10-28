@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type RefObject } from 'react'
-import { Check, Search } from '@/editor/icons/icon'
-import { cn } from '@/editor/widgets/cn'
+import { Check, Search } from '../icons/icon'
+import { cn } from './cn'
 import { Badge } from './Badge'
 import { LINE_CHOSEN, LINE_HOVER } from './lineLook'
 

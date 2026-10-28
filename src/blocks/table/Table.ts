@@ -1,4 +1,4 @@
-import { type CSSResultGroup, type TemplateResult } from 'lit'
+import type { CSSResultGroup, TemplateResult } from 'lit'
 import { property } from 'lit/decorators.js'
 import type { Calculation } from '../../core/data/calculation'
 import { BlockElement, defineBlock } from '../base/BlockElement'

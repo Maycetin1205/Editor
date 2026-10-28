@@ -1,9 +1,9 @@
 import { createElement, useLayoutEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { Component } from '@/editor/icons/icon'
+import { Component } from '../icons/icon'
 import { BLOCK_ICONS } from '../blockIcons'
 import { LabelsShown } from './labelsShown'
-import { useCloseOnScrollBeside } from '@/editor/widgets/closeBeside'
+import { useCloseOnScrollBeside } from '../widgets/closeBeside'
 
 const hold = (e: { stopPropagation: () => void }): void => e.stopPropagation()
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp } from '@/editor/icons/icon'
-import { cn } from '@/editor/widgets/cn'
+import { ChevronDown, ChevronUp } from '../icons/icon'
+import { cn } from '../widgets/cn'
 import type { Property } from '../../core/block/property'
 import { narrow } from './narrow'
 

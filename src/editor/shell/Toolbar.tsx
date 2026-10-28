@@ -1,5 +1,5 @@
 import { memo, useEffect, useState } from 'react'
-import { Check, Database, Download, Eye, Redo2, Save, SquareDashed, Undo2 } from '@/editor/icons/icon'
+import { Check, Database, Download, Eye, Redo2, Save, SquareDashed, Undo2 } from '../icons/icon'
 import { frameNumberOf, maskNameOf } from '../../core/block/maskSettings'
 import { PageBar } from '../canvas/PageBar'
 import { exportCurrentMask, exportTargetFolder } from '../commands/exportMask'
@@ -8,11 +8,11 @@ import { saveOrAsk } from '../state/maskFile'
 import { useEditorInstance, useEditorSelect, useView } from '../state/useEditor'
 import type { EditorStore } from '../state/EditorStore'
 import { sameFields, useStoreSelect } from '../state/useStoreSelect'
-import { Button, PRESSED } from '@/editor/widgets/Button'
-import { cn } from '@/editor/widgets/cn'
-import { DoneLabel } from '@/editor/widgets/DoneLabel'
-import { Notice } from '@/editor/widgets/Notice'
-import { Separator } from '@/editor/widgets/Separator'
+import { Button, PRESSED } from '../widgets/Button'
+import { cn } from '../widgets/cn'
+import { DoneLabel } from '../widgets/DoneLabel'
+import { Notice } from '../widgets/Notice'
+import { Separator } from '../widgets/Separator'
 
 const TIME = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' })
 

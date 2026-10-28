@@ -1,5 +1,5 @@
 import { useContext, useRef, useState, type DragEvent, type KeyboardEvent } from 'react'
-import { Trash2 } from '@/editor/icons/icon'
+import { Trash2 } from '../icons/icon'
 import { cn } from './cn'
 import { ColumnsOf, leavesLine, Wraps } from './gridContext'
 import { CELL_TEXT, CELL_TEXT_WRAPPED, inputClass, MARKED, TD, TYPING } from './gridLook'

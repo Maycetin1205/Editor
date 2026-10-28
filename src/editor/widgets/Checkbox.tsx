@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { cn } from '@/editor/widgets/cn'
+import { cn } from './cn'
 import { TickBox } from './TickBox'
 
 interface CheckboxProps {

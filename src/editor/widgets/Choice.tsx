@@ -1,6 +1,6 @@
 import { forwardRef, type SelectHTMLAttributes } from 'react'
-import { ChevronDown } from '@/editor/icons/icon'
-import { cn } from '@/editor/widgets/cn'
+import { ChevronDown } from '../icons/icon'
+import { cn } from './cn'
 import { INPUT_EDGE } from './Field'
 
 export interface ChoiceOption {

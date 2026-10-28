@@ -1,8 +1,8 @@
 import type { ReactNode, RefObject } from 'react'
-import { ChevronDown } from '@/editor/icons/icon'
-import { cn } from '@/editor/widgets/cn'
-import { List, type ListGroup } from '@/editor/widgets/List'
-import { Popover } from '@/editor/widgets/Popover'
+import { ChevronDown } from '../icons/icon'
+import { cn } from '../widgets/cn'
+import { List, type ListGroup } from '../widgets/List'
+import { Popover } from '../widgets/Popover'
 
 export function ChoiceCell({
   label,

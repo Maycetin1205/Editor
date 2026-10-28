@@ -1,6 +1,6 @@
 import { useState, type DragEvent } from 'react'
-import { Plus, X } from '@/editor/icons/icon'
-import { cn } from '@/editor/widgets/cn'
+import { Plus, X } from '../icons/icon'
+import { cn } from '../widgets/cn'
 
 export const SOURCE_DRAG = 'application/x-aufbau-quelle'
 

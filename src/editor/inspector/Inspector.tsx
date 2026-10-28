@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { FoldButton, FoldedColumn, type FoldTab } from '@/editor/widgets/Folded'
+import { FoldButton, FoldedColumn, type FoldTab } from '../widgets/Folded'
 import { blockType } from '../../core/block/registry'
 import { useEditor } from '../state/useEditor'
 import { useStoreSelect } from '../state/useStoreSelect'

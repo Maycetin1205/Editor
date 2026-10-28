@@ -1,5 +1,5 @@
-import { NAME, Strip } from '@/editor/widgets/Grid'
-import { Segment } from '@/editor/widgets/Segment'
+import { NAME, Strip } from '../widgets/Grid'
+import { Segment } from '../widgets/Segment'
 import { PickerControl } from '../controls/PickerControl'
 import type { StepBodyProps } from './stepTypes'
 

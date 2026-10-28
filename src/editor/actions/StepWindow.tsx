@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Button } from '@/editor/widgets/Button'
-import { Window } from '@/editor/widgets/Window'
+import { Button } from '../widgets/Button'
+import { Window } from '../widgets/Window'
 import { resultStepsBefore, withCondition } from '../../core/data/steps/chains'
 import type { Step } from '../../core/data/steps/steps'
 import type { StepCondition } from '../../core/data/steps/stepAdapter'

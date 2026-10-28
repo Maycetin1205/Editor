@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
-import { FolderOpen, Plus } from '@/editor/icons/icon'
-import { cn } from '@/editor/widgets/cn'
-import { DoneLabel } from '@/editor/widgets/DoneLabel'
-import { LINE_CHOSEN, LINE_HOVER } from '@/editor/widgets/lineLook'
+import { FolderOpen, Plus } from '../icons/icon'
+import { cn } from '../widgets/cn'
+import { DoneLabel } from '../widgets/DoneLabel'
+import { LINE_CHOSEN, LINE_HOVER } from '../widgets/lineLook'
 import { TEMPLATE_FOLDER, type MaskEntry } from '../state/maskFolder'
 
 interface Group {

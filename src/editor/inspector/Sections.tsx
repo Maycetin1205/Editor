@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { ChevronDown } from '@/editor/icons/icon'
-import { cn } from '@/editor/widgets/cn'
+import { ChevronDown } from '../icons/icon'
+import { cn } from '../widgets/cn'
 import type { EventDef, LookupWindow } from '../../core/block/capability'
 import type { DeclaredProperty } from '../../core/block/propertyPlace'
 import type { BlockNode } from '../../core/block/tree'

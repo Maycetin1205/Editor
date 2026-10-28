@@ -1,7 +1,7 @@
 import { useCallback, useState, type ReactNode, type RefObject } from 'react'
 import type { MouseEvent as ReactMouseEvent } from 'react'
 import type { BlockNode } from '../../core/block/tree'
-import { type ListBinding } from '../../core/block/blockType'
+import type { ListBinding } from '../../core/block/blockType'
 import type { SpotClick } from '../../blocks/base/BlockElement'
 import type { BindableSpot, LookupWindow } from '../../core/block/capability'
 import type { SourceInReach } from '../../core/data/extraSources'

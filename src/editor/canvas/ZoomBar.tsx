@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react'
-import { Plus } from '@/editor/icons/icon'
-import { Button, PRESSED } from '@/editor/widgets/Button'
-import { cn } from '@/editor/widgets/cn'
-import { MenuRow } from '@/editor/widgets/MenuRow'
-import { Popover } from '@/editor/widgets/Popover'
-import { Separator } from '@/editor/widgets/Separator'
+import { Plus } from '../icons/icon'
+import { Button, PRESSED } from '../widgets/Button'
+import { cn } from '../widgets/cn'
+import { MenuRow } from '../widgets/MenuRow'
+import { Popover } from '../widgets/Popover'
+import { Separator } from '../widgets/Separator'
 import { ZOOM_LEAST, ZOOM_MOST, ZOOM_PRESETS, zoomStep, type SheetZoom } from './sheetZoom'
 
 const PERCENT = new Intl.NumberFormat('de-DE', { style: 'percent', maximumFractionDigits: 0 })

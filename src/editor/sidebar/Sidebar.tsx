@@ -1,5 +1,5 @@
-import { cn } from '@/editor/widgets/cn'
-import { FoldButton, FoldedColumn, type FoldTab } from '@/editor/widgets/Folded'
+import { cn } from '../widgets/cn'
+import { FoldButton, FoldedColumn, type FoldTab } from '../widgets/Folded'
 import type { SideTab } from '../state/editorStore/viewState'
 import { useEditorInstance } from '../state/useEditor'
 import { useStoreSelect } from '../state/useStoreSelect'

@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
-import { Button } from '@/editor/widgets/Button'
+import { Button } from './widgets/Button'
 import { downloadFile } from './state/downloadFile'
 import { LIBRARY_STORAGE_KEY, MASK_STORAGE_KEY } from './state/maskStorage'
 

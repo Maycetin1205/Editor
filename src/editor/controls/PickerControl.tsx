@@ -1,11 +1,11 @@
 import { useRef, useState } from 'react'
-import { ChevronDown } from '@/editor/icons/icon'
-import { cn } from '@/editor/widgets/cn'
-import { INPUT_EDGE } from '@/editor/widgets/Field'
-import { Button } from '@/editor/widgets/Button'
-import { List, type ListGroup } from '@/editor/widgets/List'
-import { POPOVER_WIDTH, Popover } from '@/editor/widgets/Popover'
-import { Row } from '@/editor/widgets/Row'
+import { ChevronDown } from '../icons/icon'
+import { cn } from '../widgets/cn'
+import { INPUT_EDGE } from '../widgets/Field'
+import { Button } from '../widgets/Button'
+import { List, type ListGroup } from '../widgets/List'
+import { POPOVER_WIDTH, Popover } from '../widgets/Popover'
+import { Row } from '../widgets/Row'
 
 interface PickerControlProps {
   label?: string

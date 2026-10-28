@@ -1,4 +1,4 @@
-import { Calculator, ListPlus, Search } from '@/editor/icons/icon'
+import { Calculator, ListPlus, Search } from '../icons/icon'
 import type { ComponentProps } from 'react'
 import {
   entryValues,

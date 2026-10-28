@@ -40,6 +40,12 @@ export default defineConfig([
         tsconfigRootDir: rootDir,
       },
     },
+    // One way to write an import: a module once per file, a type as a type.
+    rules: {
+      'no-duplicate-imports': ['error', { allowSeparateTypeImports: true }],
+      '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports' }],
+      '@typescript-eslint/no-import-type-side-effects': 'error',
+    },
   },
   // Type-aware linting for this one rule only: a forgotten `.catch` on an
   // action chain swallows every error, and a `void` in front of it looks like

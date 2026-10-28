@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Check } from '@/editor/icons/icon'
+import { Check } from '../icons/icon'
 import { cn } from './cn'
 
 export function DoneLabel({

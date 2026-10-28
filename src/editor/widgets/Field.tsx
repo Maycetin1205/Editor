@@ -1,5 +1,5 @@
 import { forwardRef, type InputHTMLAttributes } from 'react'
-import { cn } from '@/editor/widgets/cn'
+import { cn } from './cn'
 
 export const INPUT_EDGE =
   'w-full min-w-0 rounded border border-line bg-control text-ui font-semibold text-ink transition-colors' +

@@ -1,5 +1,5 @@
 import type { BlockNode } from './tree'
-import { type BlockType } from './blockType'
+import type { BlockType } from './blockType'
 import { bindingProp, capability } from './capability'
 import { propertyVisible, type Property, type PropertyPlace } from './property'
 

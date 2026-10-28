@@ -1,5 +1,5 @@
-import { Check } from '@/editor/icons/icon'
-import { cn } from '@/editor/widgets/cn'
+import { Check } from '../icons/icon'
+import { cn } from './cn'
 
 interface ColorSwatchProps {
   color?: string

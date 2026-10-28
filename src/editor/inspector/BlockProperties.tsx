@@ -1,6 +1,6 @@
 import { createElement, useMemo } from 'react'
-import { Component, Trash2 } from '@/editor/icons/icon'
-import { Button } from '@/editor/widgets/Button'
+import { Component, Trash2 } from '../icons/icon'
+import { Button } from '../widgets/Button'
 import type { BlockNode } from '../../core/block/tree'
 import type { BlockType } from '../../core/block/blockType'
 import { blockName } from '../../core/block/blockName'

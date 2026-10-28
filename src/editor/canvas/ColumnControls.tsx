@@ -1,5 +1,5 @@
 import type { PointerEvent as ReactPointerEvent, RefObject } from 'react'
-import { cn } from '@/editor/widgets/cn'
+import { cn } from '../widgets/cn'
 import type { CellPlace, Frame, HeadPlace } from '../../blocks/base/headsReport'
 import type { BlockNode } from '../../core/block/tree'
 import type { ListBinding } from '../../core/block/blockType'

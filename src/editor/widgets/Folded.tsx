@@ -1,4 +1,4 @@
-import { ChevronDown } from '@/editor/icons/icon'
+import { ChevronDown } from '../icons/icon'
 import { cn } from './cn'
 
 export interface FoldTab<K extends string> {

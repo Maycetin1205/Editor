@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { FileText, FolderOpen, X } from '@/editor/icons/icon'
-import { Button, OPENER } from '@/editor/widgets/Button'
-import { Field } from '@/editor/widgets/Field'
+import { FileText, FolderOpen, X } from '../icons/icon'
+import { Button, OPENER } from '../widgets/Button'
+import { Field } from '../widgets/Field'
 import {
   DOCUMENT_FRAME_PROP,
   FRAME_SPOTS,

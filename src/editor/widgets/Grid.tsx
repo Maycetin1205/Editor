@@ -1,5 +1,5 @@
 import { useContext, type ReactNode } from 'react'
-import { Plus } from '@/editor/icons/icon'
+import { Plus } from '../icons/icon'
 import { cn } from './cn'
 import { ColumnsOf, Wraps, type GridColumn } from './gridContext'
 import { TD, TH } from './gridLook'

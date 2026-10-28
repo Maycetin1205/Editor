@@ -1,6 +1,6 @@
 import type { ChoiceOption } from '../../core/block/property'
-import { Segment } from '@/editor/widgets/Segment'
-import { Row } from '@/editor/widgets/Row'
+import { Segment } from '../widgets/Segment'
+import { Row } from '../widgets/Row'
 import { segmentIcon } from './segmentIcon'
 
 interface SegmentControlProps {

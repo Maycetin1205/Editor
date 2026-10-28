@@ -1,4 +1,4 @@
-import type { ListGroup } from '@/editor/widgets/List'
+import type { ListGroup } from '../widgets/List'
 import { DECIMALS_MAX, type Calculation, type Term, type TermOrigin, type UnitsTerm } from '../../core/data/calculation'
 import { numberText } from '../../core/data/number'
 import { decodeOrigin, encodeOrigin, originKey, originName, originOf, originsOf, valueName } from '../origin/origins'

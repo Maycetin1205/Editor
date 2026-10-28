@@ -1,5 +1,5 @@
-import { Link2, X } from '@/editor/icons/icon'
-import { Button } from '@/editor/widgets/Button'
+import { Link2, X } from '../icons/icon'
+import { Button } from '../widgets/Button'
 import type { BlockNode } from '../../core/block/tree'
 import { selectionSourceIdOf } from '../../core/block/treeQuery'
 import type { KeyPair } from '../../core/data/extraSources'

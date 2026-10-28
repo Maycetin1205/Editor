@@ -1,5 +1,5 @@
-import type { ChoiceOption } from '@/editor/widgets/Choice'
-import { Grid, GridAddLine, Strip } from '@/editor/widgets/Grid'
+import type { ChoiceOption } from '../widgets/Choice'
+import { Grid, GridAddLine, Strip } from '../widgets/Grid'
 import type { SplitColumn } from '../../core/data/split'
 import { SplitColumnLine } from './SplitColumnLine'
 import { moved, type SplitDraft } from './splitDraft'

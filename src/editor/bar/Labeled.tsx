@@ -1,7 +1,7 @@
 import { useContext, type ReactNode } from 'react'
-import { cn } from '@/editor/widgets/cn'
-import { Tile } from '@/editor/widgets/Tile'
-import { TickBox } from '@/editor/widgets/TickBox'
+import { cn } from '../widgets/cn'
+import { Tile } from '../widgets/Tile'
+import { TickBox } from '../widgets/TickBox'
 import { LabelsShown } from './labelsShown'
 
 // A control that cannot shrink, like a segment of words, moves under its

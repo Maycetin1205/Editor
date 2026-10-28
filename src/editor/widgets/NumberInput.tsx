@@ -1,5 +1,5 @@
 import { forwardRef, type InputHTMLAttributes } from 'react'
-import { cn } from '@/editor/widgets/cn'
+import { cn } from './cn'
 import { INPUT_EDGE } from './Field'
 
 interface NumberProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'> {

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import { createPortal } from 'react-dom'
-import { Plus } from '@/editor/icons/icon'
+import { Plus } from '../icons/icon'
 import { cssZoomOf } from '../../blocks/base/cssZoom'
 
 const PLUS_SIZE = 20

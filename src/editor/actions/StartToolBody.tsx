@@ -1,5 +1,5 @@
-import { Field } from '@/editor/widgets/Field'
-import { NAME, Strip } from '@/editor/widgets/Grid'
+import { Field } from '../widgets/Field'
+import { NAME, Strip } from '../widgets/Grid'
 import type { RelationTemplate } from '../../core/data/relations'
 import type { StartToolStep } from '../../core/data/steps/startTool'
 import { Places } from './Places'

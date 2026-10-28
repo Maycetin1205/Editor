@@ -1,4 +1,4 @@
-import type { ListGroup } from '@/editor/widgets/List'
+import type { ListGroup } from '../widgets/List'
 import type { Parameter } from '../../core/data/actions'
 import { parameterRole } from '../../core/data/relations'
 import { originParameter, parameterOrigin, type OriginKind, type ValueOrigin } from '../../core/data/valueOrigin'

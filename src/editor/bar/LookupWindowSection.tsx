@@ -1,4 +1,4 @@
-import { Button } from '@/editor/widgets/Button'
+import { Button } from '../widgets/Button'
 import type { BlockNode } from '../../core/block/tree'
 import { propertyVisible } from '../../core/block/property'
 import type { LookupWindow } from '../../core/block/capability'

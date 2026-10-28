@@ -1,5 +1,5 @@
 import { SOURCE_PROPERTY } from '../../core/block/sharedProperties'
-import { declaredValue } from '../../core/block/registry'
+import { blockType, declaredValue } from '../../core/block/registry'
 import { coerceCaptureColumns, windowColumnsIn, type CaptureColumn } from '../../blocks/capture'
 import {
   automaticColumns,
@@ -15,7 +15,6 @@ import type { BlockNode } from '../../core/block/tree'
 import { splitBinding } from '../../core/block/blockType'
 import type { BlockLookupWindow, EntryLookupWindow, LookupWindow } from '../../core/block/capability'
 import { withEntryValue } from '../../core/block/listBinding'
-import { blockType } from '../../core/block/registry'
 import type { EditorStore } from '../state/EditorStore'
 
 export interface WindowState {

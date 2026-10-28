@@ -1,5 +1,5 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
-import { cn } from '@/editor/widgets/cn'
+import { cn } from './cn'
 
 type ButtonKind = 'primary' | 'silent' | 'command' | 'risk'
 

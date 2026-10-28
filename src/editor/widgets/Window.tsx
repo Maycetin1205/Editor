@@ -1,6 +1,6 @@
 import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { X } from '@/editor/icons/icon'
+import { X } from '../icons/icon'
 import { Button } from './Button'
 import { cn } from './cn'
 import { FamilyMember } from './Popover'

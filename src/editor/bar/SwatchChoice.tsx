@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
-import { ChevronDown } from '@/editor/icons/icon'
-import { OPENER } from '@/editor/widgets/Button'
-import { ColorSwatch } from '@/editor/widgets/ColorSwatch'
-import { Popover } from '@/editor/widgets/Popover'
+import { ChevronDown } from '../icons/icon'
+import { OPENER } from '../widgets/Button'
+import { ColorSwatch } from '../widgets/ColorSwatch'
+import { Popover } from '../widgets/Popover'
 import type { ChoiceOption } from '../../core/block/property'
 import { Labeled } from './Labeled'
 

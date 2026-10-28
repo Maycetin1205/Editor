@@ -1,5 +1,5 @@
-import { Check } from '@/editor/icons/icon'
-import { cn } from '@/editor/widgets/cn'
+import { Check } from '../icons/icon'
+import { cn } from './cn'
 
 export function TickBox({ on, className }: { on: boolean; className?: string }) {
   return (

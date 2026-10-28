@@ -1,5 +1,5 @@
 import type { RefObject } from 'react'
-import { LEVEL_OVER_MASK_WINDOW } from '@/editor/widgets/Popover'
+import { LEVEL_OVER_MASK_WINDOW } from '../widgets/Popover'
 import { DEFAULT_TITLE } from '../../blocks/parts/column'
 import { fieldOf, sourcesKey, type DataSource } from '../../core/data/dataSources'
 import { widthFromLength } from './fieldWidth'

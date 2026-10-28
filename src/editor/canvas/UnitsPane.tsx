@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { cn } from '@/editor/widgets/cn'
-import { Grid, GridLine, GridNewLine, NAME, SETTINGS, Strip } from '@/editor/widgets/Grid'
+import { cn } from '../widgets/cn'
+import { Grid, GridLine, GridNewLine, NAME, SETTINGS, Strip } from '../widgets/Grid'
 import { DECIMALS_MAX, type UnitsTerm } from '../../core/data/calculation'
 import { asNumber, numberText } from '../../core/data/number'
 import { PickerControl } from '../controls/PickerControl'

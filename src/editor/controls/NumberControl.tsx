@@ -2,8 +2,8 @@ import { useState } from 'react'
 import type { Property } from '../../core/block/property'
 import { narrow } from './narrow'
 import { useInputSession } from './useInputSession'
-import { NumberInput } from '@/editor/widgets/NumberInput'
-import { Row } from '@/editor/widgets/Row'
+import { NumberInput } from '../widgets/NumberInput'
+import { Row } from '../widgets/Row'
 
 interface NumberControlProps {
   property: Property<unknown>

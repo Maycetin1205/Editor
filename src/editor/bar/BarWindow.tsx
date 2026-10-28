@@ -1,7 +1,7 @@
 import { createElement, useEffect, useRef, useState, type ReactNode } from 'react'
-import { type Icon } from '@/editor/icons/icon'
-import { Button, PRESSED } from '@/editor/widgets/Button'
-import { Popover } from '@/editor/widgets/Popover'
+import type { Icon } from '../icons/icon'
+import { Button, PRESSED } from '../widgets/Button'
+import { Popover } from '../widgets/Popover'
 import { LabelsShown } from './labelsShown'
 
 export function BarWindow({

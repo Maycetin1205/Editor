@@ -1,8 +1,8 @@
 import { createElement, useMemo, useRef, useState, type ComponentProps } from 'react'
-import { ArrowRight, ChevronDown, Trash2, type Icon } from '@/editor/icons/icon'
-import { Button, OPENER } from '@/editor/widgets/Button'
-import { Separator } from '@/editor/widgets/Separator'
-import { useCloseOnEscape } from '@/editor/widgets/useCloseOnEscape'
+import { ArrowRight, ChevronDown, Trash2, type Icon } from '../icons/icon'
+import { Button, OPENER } from '../widgets/Button'
+import { Separator } from '../widgets/Separator'
+import { useCloseOnEscape } from '../widgets/useCloseOnEscape'
 import type { BlockNode } from '../../core/block/tree'
 import type { Property } from '../../core/block/property'
 import type { DataSource } from '../../core/data/dataSources'
@@ -13,7 +13,7 @@ import { Labeled, Switch } from './Labeled'
 import { BarFrame, BarSign } from './BarFrame'
 import { BarWindow } from './BarWindow'
 import { controlShown } from './controlShown'
-import { useCloseOnPressBeside } from '@/editor/widgets/closeBeside'
+import { useCloseOnPressBeside } from '../widgets/closeBeside'
 
 const BAR_PARTS = 7
 

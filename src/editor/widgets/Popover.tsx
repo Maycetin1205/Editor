@@ -10,7 +10,7 @@ import {
   type RefObject,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { cn } from '@/editor/widgets/cn'
+import { cn } from './cn'
 import { useCloseOnEscape } from './useCloseOnEscape'
 
 const EDGE = 8

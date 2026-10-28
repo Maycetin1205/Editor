@@ -1,8 +1,8 @@
-import { ChevronDown, ChevronUp, Trash2 } from '@/editor/icons/icon'
-import { Button } from '@/editor/widgets/Button'
-import { Choice, type ChoiceOption } from '@/editor/widgets/Choice'
-import { cn } from '@/editor/widgets/cn'
-import { INPUT, TD } from '@/editor/widgets/Grid'
+import { ChevronDown, ChevronUp, Trash2 } from '../icons/icon'
+import { Button } from '../widgets/Button'
+import { Choice, type ChoiceOption } from '../widgets/Choice'
+import { cn } from '../widgets/cn'
+import { INPUT, TD } from '../widgets/Grid'
 import { SOON_DAYS_MAX, type SplitColumn } from '../../core/data/split'
 import { wholeOrNone } from './splitDraft'
 

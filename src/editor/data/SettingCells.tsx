@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
-import { cn } from '@/editor/widgets/cn'
-import { INPUT_EDGE } from '@/editor/widgets/Field'
-import { NAME } from '@/editor/widgets/Grid'
+import { cn } from '../widgets/cn'
+import { INPUT_EDGE } from '../widgets/Field'
+import { NAME } from '../widgets/Grid'
 
 // The height of every control in the settings bar of a source.
 export const PICKER = 'h-[28px]'

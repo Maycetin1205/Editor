@@ -1,5 +1,5 @@
 import type { PointerEvent as ReactPointerEvent } from 'react'
-import { cn } from '@/editor/widgets/cn'
+import { cn } from '../widgets/cn'
 import { usePointerDrag, type PointerDrag } from './pointerDrag'
 import type { Edge } from './useBlockResize'
 

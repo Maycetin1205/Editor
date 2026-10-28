@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import { cn } from '@/editor/widgets/cn'
+import { cn } from './cn'
 import { LINE_CHOSEN, LINE_HOVER } from './lineLook'
 
 interface MenuRowProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {

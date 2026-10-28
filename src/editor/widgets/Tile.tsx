@@ -1,4 +1,4 @@
-import { cn } from '@/editor/widgets/cn'
+import { cn } from './cn'
 import { TickBox } from './TickBox'
 
 interface TileProps {

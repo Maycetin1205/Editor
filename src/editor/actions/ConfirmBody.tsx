@@ -1,4 +1,4 @@
-import { Strip } from '@/editor/widgets/Grid'
+import { Strip } from '../widgets/Grid'
 import type { StepBodyProps } from './stepTypes'
 
 export function ConfirmBody({ step }: StepBodyProps) {
