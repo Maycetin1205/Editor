@@ -23,59 +23,61 @@ body {
 
 .unterzeile {
   display: flex;
-  gap: var(--abstand-4);
+  gap: var(--abstand-3);
+  color: var(--tinte-3);
+  font-size: var(--text-klein);
 }
 
 .suche {
   width: 15rem;
+  background: var(--flaeche-leise);
+}
+
+.suche:focus {
+  background: var(--flaeche);
 }
 
 .uhr {
+  min-width: 3rem;
   color: var(--tinte-2);
-  font-size: var(--zahl-gross);
-}
-
-.arbeitsflaeche {
-  display: flex;
-  flex: 1;
-  min-height: 0;
+  font-weight: var(--halbfett);
+  text-align: right;
 }
 
 .tafel {
   display: grid;
   flex: 1;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--abstand-4);
-  min-width: 0;
-  padding: var(--abstand-4);
+  gap: var(--abstand-5);
+  min-height: 0;
+  padding: var(--abstand-5);
   user-select: none;
 }
 
-/* Eine Spalte: Kopf mit Name und Zahl, darunter die Karten */
+/* Eine Spalte: Kopf mit Titel und Zähler, darunter die Karten */
 .spalte {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border: var(--rand) solid var(--linie);
-  border-radius: var(--radius-gross);
+  border-radius: var(--radius-spalte);
   background: var(--grund-tief);
 }
 
 .spalte-kopf {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: var(--abstand-3);
-  padding: var(--abstand-3) var(--abstand-4);
+  gap: var(--abstand-2);
+  padding: var(--abstand-4) var(--abstand-4) var(--abstand-3);
 }
 
 .spalte-titel {
-  font-size: var(--text-titel);
+  font-size: var(--text);
 }
 
 .spalte-zahl {
-  color: var(--tinte-2);
-  font-size: var(--text-titel);
+  color: var(--tinte-3);
+  font-size: var(--text-neben);
+  font-weight: var(--halbfett);
 }
 
 .spalte-inhalt {
@@ -86,27 +88,35 @@ body {
   min-height: 0;
   padding: 0 var(--abstand-3) var(--abstand-3);
   overflow-y: auto;
-  border-radius: var(--radius-gross);
+  border-radius: var(--radius-spalte);
+  transition: background-color var(--dauer);
 }
 
 .ziel {
-  outline: var(--fokus) solid var(--tinte-3);
-  outline-offset: calc(var(--fokus) * -1);
+  background: var(--akzent-flaeche);
 }
 
 /* Eine Karte */
 .karte {
   flex: none;
-  padding: var(--abstand-3);
+  padding: var(--abstand-4);
   border: var(--rand) solid var(--linie);
   border-radius: var(--radius-gross);
   background: var(--flaeche);
+  box-shadow: var(--schatten-karte);
   cursor: grab;
+  transition: border-color var(--dauer);
 }
 
 .karte:hover,
 .karte.offen {
   border-color: var(--linie-stark);
+}
+
+.karte:focus-visible {
+  outline: none;
+  border-color: var(--akzent);
+  box-shadow: var(--fokus-ring);
 }
 
 .karte.gezogen {
@@ -128,36 +138,33 @@ body {
 }
 
 .karte-name {
-  font-size: var(--text-gross);
   font-weight: var(--halbfett);
-  line-height: var(--zeile-eng);
   letter-spacing: var(--laufweite-eng);
 }
 
 .karte-art {
   margin-left: var(--abstand-2);
   color: var(--tinte-3);
-  font-size: var(--text);
+  font-size: var(--text-neben);
   font-weight: normal;
   letter-spacing: normal;
 }
 
 .karte-besitzer {
   color: var(--tinte-2);
+  font-size: var(--text-neben);
 }
 
-.karte-wert {
+.karte-kopf .marke {
   align-self: start;
-  font-size: var(--zahl-gross);
-  line-height: var(--zeile-eng);
-  white-space: nowrap;
 }
 
 .karte-grund {
   display: -webkit-box;
-  margin-top: var(--abstand-2);
+  margin-top: var(--abstand-3);
   overflow: hidden;
   color: var(--tinte-2);
+  font-size: var(--text-neben);
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -170,6 +177,8 @@ body {
   margin-top: var(--abstand-3);
   padding-top: var(--abstand-3);
   border-top: var(--rand) solid var(--linie);
+  color: var(--tinte-3);
+  font-size: var(--text-klein);
 }
 
 /* Die Zimmer der Spalte Behandlung: Ablage mit Belegt oder Frei */
@@ -178,10 +187,11 @@ body {
   flex: none;
   flex-direction: column;
   gap: var(--abstand-2);
-  min-height: 5rem;
-  padding: var(--abstand-2) var(--abstand-3) var(--abstand-3);
-  border: var(--rand) solid var(--linie-stark);
+  padding: var(--abstand-3);
+  border: var(--rand) solid var(--linie);
   border-radius: var(--radius-gross);
+  background: var(--flaeche-leise);
+  transition: background-color var(--dauer);
 }
 
 .zimmer-kopf {
@@ -189,6 +199,8 @@ body {
   align-items: baseline;
   justify-content: space-between;
   gap: var(--abstand-3);
+  padding: 0 var(--abstand-1);
+  font-size: var(--text-neben);
 }
 
 .zimmer-zusatz {
@@ -198,10 +210,21 @@ body {
   letter-spacing: normal;
 }
 
+.zimmer-stand {
+  color: var(--tinte-3);
+  font-size: var(--text-klein);
+}
+
+.zimmer-leer {
+  min-height: 3.5rem;
+  border-radius: var(--radius);
+  background: var(--flaeche);
+}
+
 /* Termin anlegen */
 .tier-liste {
   display: grid;
-  gap: var(--abstand-1);
+  gap: var(--abstand-2);
 }
 
 .neues-tier {
@@ -225,7 +248,7 @@ body {
   <header class="kopf">
     <div>
       <h1 class="kopf-titel" id="praxis"></h1>
-      <p class="leise unterzeile"><span id="datum"></span><span id="verbindung"></span></p>
+      <p class="unterzeile"><span>Empfang</span><span id="datum"></span><span id="verbindung"></span></p>
     </div>
     <div class="kennzahlen">
       <p class="kennzahl">Nicht zugewiesen <span class="kennzahl-wert" id="kennzahl-termin"></span></p>
@@ -234,53 +257,53 @@ body {
       <p class="kennzahl">Abrechnung <span class="kennzahl-wert" id="kennzahl-abrechnung"></span></p>
     </div>
     <div class="kopf-rechts">
-      <input class="eingabe suche" id="suche" type="search" placeholder="Suchen" aria-label="Suchen" autocomplete="off">
-      <button class="knopf knopf-haupt" id="terminAnlegen" type="button" aria-controls="seitenleiste" aria-expanded="false">Termin anlegen</button>
+      <input class="eingabe suche" id="suche" type="search" placeholder="Tier oder Besitzer suchen" aria-label="Suchen" autocomplete="off">
+      <button class="knopf knopf-haupt" id="terminAnlegen" type="button" aria-haspopup="dialog">Termin anlegen</button>
       <span class="uhr zahl" id="uhr"></span>
     </div>
   </header>
 
-  <div class="arbeitsflaeche">
-    <main class="tafel" id="tafel">
-      <section class="spalte" aria-labelledby="titel-termin">
-        <header class="spalte-kopf">
-          <h2 class="spalte-titel" id="titel-termin">Nicht zugewiesen</h2>
-          <span class="spalte-zahl zahl" id="zahl-termin"></span>
-        </header>
-        <div class="spalte-inhalt" id="inhalt-termin" data-ziel="termin"></div>
-      </section>
-      <section class="spalte" aria-labelledby="titel-wartezimmer">
-        <header class="spalte-kopf">
-          <h2 class="spalte-titel" id="titel-wartezimmer">Wartezimmer</h2>
-          <span class="spalte-zahl zahl" id="zahl-wartezimmer"></span>
-        </header>
-        <div class="spalte-inhalt" id="inhalt-wartezimmer" data-ziel="wartezimmer"></div>
-      </section>
-      <section class="spalte" aria-labelledby="titel-behandlung">
-        <header class="spalte-kopf">
-          <h2 class="spalte-titel" id="titel-behandlung">Behandlung</h2>
-          <span class="spalte-zahl zahl" id="zahl-behandlung"></span>
-        </header>
-        <div class="spalte-inhalt" id="inhalt-behandlung" data-ziel="behandlung"></div>
-      </section>
-      <section class="spalte" aria-labelledby="titel-abrechnung">
-        <header class="spalte-kopf">
-          <h2 class="spalte-titel" id="titel-abrechnung">Abrechnung</h2>
-          <span class="spalte-zahl zahl" id="zahl-abrechnung"></span>
-        </header>
-        <div class="spalte-inhalt" id="inhalt-abrechnung" data-ziel="abrechnung"></div>
-      </section>
-    </main>
+  <main class="tafel" id="tafel">
+    <section class="spalte" aria-labelledby="titel-termin">
+      <header class="spalte-kopf">
+        <h2 class="spalte-titel" id="titel-termin">Nicht zugewiesen</h2>
+        <span class="spalte-zahl" id="zahl-termin"></span>
+      </header>
+      <div class="spalte-inhalt" id="inhalt-termin" data-ziel="termin"></div>
+    </section>
+    <section class="spalte" aria-labelledby="titel-wartezimmer">
+      <header class="spalte-kopf">
+        <h2 class="spalte-titel" id="titel-wartezimmer">Wartezimmer</h2>
+        <span class="spalte-zahl" id="zahl-wartezimmer"></span>
+      </header>
+      <div class="spalte-inhalt" id="inhalt-wartezimmer" data-ziel="wartezimmer"></div>
+    </section>
+    <section class="spalte" aria-labelledby="titel-behandlung">
+      <header class="spalte-kopf">
+        <h2 class="spalte-titel" id="titel-behandlung">Behandlung</h2>
+        <span class="spalte-zahl" id="zahl-behandlung"></span>
+      </header>
+      <div class="spalte-inhalt" id="inhalt-behandlung" data-ziel="behandlung"></div>
+    </section>
+    <section class="spalte" aria-labelledby="titel-abrechnung">
+      <header class="spalte-kopf">
+        <h2 class="spalte-titel" id="titel-abrechnung">Abrechnung</h2>
+        <span class="spalte-zahl" id="zahl-abrechnung"></span>
+      </header>
+      <div class="spalte-inhalt" id="inhalt-abrechnung" data-ziel="abrechnung"></div>
+    </section>
+  </main>
 
-    <aside class="seitenleiste" id="seitenleiste" aria-labelledby="seitenleisteTitel" hidden>
-      <header class="seitenleiste-kopf">
-        <h2 class="seitenleiste-titel" id="seitenleisteTitel">Termin anlegen</h2>
+  <dialog class="lade" id="lade" aria-labelledby="ladeTitel">
+    <form class="lade-form" id="formular" novalidate>
+      <header class="lade-kopf">
+        <h2 class="lade-titel" id="ladeTitel">Termin anlegen</h2>
         <button class="knopf knopf-leise" id="schliessen" type="button">Schließen</button>
       </header>
-      <form class="seitenleiste-inhalt" id="formular" novalidate>
+      <div class="lade-inhalt">
         <div class="feld">
           <label class="feld-name" for="besitzer">Besitzer</label>
-          <input class="eingabe" id="besitzer" maxlength="60" autocomplete="off" role="combobox"
+          <input class="eingabe" id="besitzer" maxlength="60" autocomplete="off" role="combobox" autofocus
                  aria-autocomplete="list" aria-expanded="false" aria-controls="besitzerListe">
           <ul class="vorschlaege" id="besitzerListe" role="listbox" hidden></ul>
         </div>
@@ -302,13 +325,18 @@ body {
         </div>
         <fieldset class="gruppe">
           <legend class="feld-name">Wohin</legend>
-          <label class="wahl"><input type="radio" name="wohin" value="termin" checked>Nicht zugewiesen</label>
-          <label class="wahl"><input type="radio" name="wohin" value="wartezimmer">Wartezimmer</label>
+          <div class="reihe">
+            <label class="wahl"><input type="radio" name="wohin" value="termin" checked>Nicht zugewiesen</label>
+            <label class="wahl"><input type="radio" name="wohin" value="wartezimmer">Wartezimmer</label>
+          </div>
         </fieldset>
+      </div>
+      <footer class="lade-fuss">
+        <p class="lade-fehler dringend" id="formFehler" role="alert" hidden></p>
         <button class="knopf knopf-haupt knopf-breit" id="anlegen" type="submit">Eintragen</button>
-      </form>
-    </aside>
-  </div>
+      </footer>
+    </form>
+  </dialog>
 
   <div class="menue" id="menue" role="menu" hidden></div>
   <div class="meldungen" id="meldungen" aria-live="polite"></div>
@@ -1256,13 +1284,13 @@ body {
       return searchText.split(/\s+/).map(plain).every(function (word) { return text.includes(word); });
     }
 
-    // Die Angabe oben rechts: Uhrzeit, Wartezeit, Minuten im Zimmer oder Betrag.
+    // Die Marke oben rechts: Uhrzeit, Wartezeit, Minuten im Zimmer oder Betrag.
     function valueOf(a) {
       if (a.spalte === 'termin') return { text: a.uhrzeit, ton: isLate(a) ? 'warnen' : '' };
       if (a.spalte === 'abrechnung' && a.betrag) return { text: a.betrag, ton: '' };
       const minutes = minutesSince(a);
-      if (minutes === null) return { text: a.uhrzeit, ton: 'leise' };
-      return { text: minutes + ' min', ton: a.spalte === 'wartezimmer' ? waitTone(minutes) : 'leise' };
+      if (minutes === null) return { text: a.uhrzeit, ton: '' };
+      return { text: minutes + ' min', ton: a.spalte === 'wartezimmer' ? waitTone(minutes) : '' };
     }
 
     // Die eine Aktion im Fuß der Karte, je Spalte.
@@ -1285,12 +1313,12 @@ body {
         + '<p class="karte-name">' + esc(a.name) + (kind ? '<span class="karte-art">' + esc(kind) + '</span>' : '') + '</p>'
         + (a.besitzer ? '<p class="karte-besitzer">' + esc(a.besitzer) + '</p>' : '')
         + '</div>'
-        + '<p class="karte-wert zahl ' + value.ton + '">' + esc(value.text) + '</p>'
+        + (value.text ? '<span class="marke ' + value.ton + '">' + esc(value.text) + '</span>' : '')
         + '</div>'
         + (reason ? '<p class="karte-grund">' + reason + '</p>' : '')
         + '<div class="karte-fuss">'
-        + '<span class="leise">' + esc(origin) + '</span>'
-        + '<button class="knopf knopf-klein" type="button" tabindex="-1" data-aktion>' + AKTIONEN[a.spalte] + '</button>'
+        + '<span>' + esc(origin) + '</span>'
+        + '<button class="knopf knopf-klein knopf-weich" type="button" tabindex="-1" data-aktion>' + AKTIONEN[a.spalte] + '</button>'
         + '</div>'
         + '</article>';
     }
@@ -1307,11 +1335,12 @@ body {
     function treatmentHtml(all, shown) {
       return roomsOf(all).map(function (room) {
         const busy = all.some(function (a) { return a.zimmer === room.name; });
+        const cards = shown.filter(function (a) { return a.zimmer === room.name; }).map(cardHtml).join('');
         return '<section class="zimmer" data-ziel="behandlung" data-zimmer="' + esc(room.name) + '">'
           + '<header class="zimmer-kopf"><h3>' + esc(room.name)
           + (room.zusatz ? '<span class="zimmer-zusatz">' + esc(room.zusatz) + '</span>' : '') + '</h3>'
-          + '<span class="leise">' + (busy ? 'Belegt' : 'Frei') + '</span></header>'
-          + shown.filter(function (a) { return a.zimmer === room.name; }).map(cardHtml).join('')
+          + '<span class="zimmer-stand">' + (busy ? 'Belegt' : 'Frei') + '</span></header>'
+          + (cards || '<div class="zimmer-leer"></div>')
           + '</section>';
       }).join('');
     }
@@ -1626,42 +1655,34 @@ body {
     });
 
     // ---------------------------------------------------------------------
-    //  Termin anlegen: die Seitenleiste rechts
+    //  Termin anlegen: die Lade von rechts über der Tafel
     // ---------------------------------------------------------------------
-    const sidebar = document.getElementById('seitenleiste');
-    const sidebarButton = document.getElementById('terminAnlegen');
+    const drawer = document.getElementById('lade');
     const ownerInput = document.getElementById('besitzer');
     const ownerList = document.getElementById('besitzerListe');
     const form = { customer: null, hits: [], active: -1, creating: false };
-    const SEITENLEISTE_MERKEN = 'empfang-seitenleiste';
 
     function resetForm() {
       document.getElementById('formular').reset();
+      document.getElementById('formFehler').hidden = true;
       form.customer = null;
       document.getElementById('uhrzeit').value = nextQuarterHour();
       showHits([]);
       showPets();
     }
 
-    // Öffnen und Schließen von Hand merkt sich dieser Rechner; ohne Merkwert ist sie bei breitem Bildschirm offen.
-    function showSidebar(open, byHand) {
-      sidebar.hidden = !open;
-      sidebarButton.setAttribute('aria-expanded', String(open));
-      if (byHand) {
-        try { localStorage.setItem(SEITENLEISTE_MERKEN, open ? '1' : '0'); } catch (e) { /* ohne Speicher */ }
-      }
-      if (!open) return;
+    // Escape schließt die Lade von selbst, ein Klick neben sie auch.
+    function openDrawer() {
+      closeMenu(false);
+      resetForm();
+      drawer.showModal();
+      ownerInput.focus();
       if (lookup.customers === null) loadLookup();
-      if (byHand) ownerInput.focus();
     }
 
-    function sidebarWanted() {
-      try {
-        const saved = localStorage.getItem(SEITENLEISTE_MERKEN);
-        if (saved !== null) return saved === '1';
-      } catch (e) { /* ohne Speicher */ }
-      return window.innerWidth >= 1600;
-    }
+    drawer.addEventListener('click', function (e) {
+      if (e.target === drawer) drawer.close();
+    });
 
     function customerHits(text) {
       const words = text.trim().split(/\s+/).map(plain).filter(Boolean);
@@ -1783,10 +1804,7 @@ body {
       }
     });
 
-    document.getElementById('schliessen').addEventListener('click', function () {
-      showSidebar(false, true);
-      sidebarButton.focus();
-    });
+    document.getElementById('schliessen').addEventListener('click', function () { drawer.close(); });
 
     document.getElementById('formular').addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -1849,8 +1867,7 @@ body {
       }
       setCreating(false);
       if (made === 0) return;
-      resetForm();
-      ownerInput.focus();
+      drawer.close();
       requestFreshData();
     });
 
@@ -1864,8 +1881,15 @@ body {
     // ---------------------------------------------------------------------
     //  Fehler melden und Start
     // ---------------------------------------------------------------------
-    // Gemeldet wird nur, was schiefging: eine Zeile, nach fünf Sekunden weg.
+    // Gemeldet wird nur, was schiefging: in der offenen Lade über "Eintragen",
+    // sonst eine Zeile unten, nach fünf Sekunden weg.
     function showError(text) {
+      if (drawer.open) {
+        const line = document.getElementById('formFehler');
+        line.textContent = text;
+        line.hidden = false;
+        return;
+      }
       const el = document.createElement('div');
       el.className = 'meldung fehler';
       el.textContent = text;
@@ -1881,15 +1905,13 @@ body {
       render();
     });
 
-    sidebarButton.addEventListener('click', function () { showSidebar(sidebar.hidden, true); });
+    document.getElementById('terminAnlegen').addEventListener('click', openDrawer);
 
     window.addEventListener('load', function () {
       beispiel = !hasSoftEngine() && typeof window.basisHTML_REGISTER !== 'function' && !(window.SEDATA && window.SEDATA.Daten);
       document.getElementById('praxis').textContent = CONFIG.praxis;
       showClock();
       showConnection();
-      resetForm();
-      showSidebar(sidebarWanted(), false);
       if (beispiel) {
         sample.rows = sampleRows();
         window.SEDATA = { Daten: { SEFileLoop: [{ ALIAS: CONFIG.quelle, Zeilen: sample.rows }] } };
