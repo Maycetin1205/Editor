@@ -21,6 +21,15 @@
         "const h=require('http'),f=require('fs'),p=require('path');const d='C:/Users/mu.aycetin/Desktop/Kleintierpraxis-Kanban-SoftEngine';h.createServer((q,r)=>{const n=decodeURIComponent(q.url.split('?')[0]);const x=p.join(d,n==='/'?'index.basis.source.html':n);if(!x.startsWith(p.normalize(d))||!f.existsSync(x)||f.statSync(x).isDirectory()){r.writeHead(404);r.end();return}r.writeHead(200,{'Content-Type':x.endsWith('.html')?'text/html; charset=utf-8':'application/octet-stream'});f.createReadStream(x).pipe(r)}).listen(5310)"
       ],
       "port": 5310
+    },
+    {
+      "name": "masken-ansicht",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "-e",
+        "const h=require('http'),f=require('fs'),p=require('path');const d=p.resolve('masken');const t={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8'};h.createServer((q,r)=>{const n=decodeURIComponent(q.url.split('?')[0]);const x=p.join(d,n==='/'?'kanban/index.basis.source.html':n);if(!x.startsWith(d)||!f.existsSync(x)||f.statSync(x).isDirectory()){r.writeHead(404);r.end();return}r.writeHead(200,{'Content-Type':t[p.extname(x)]||'application/octet-stream','Cache-Control':'no-store'});f.createReadStream(x).pipe(r)}).listen(5311)"
+      ],
+      "port": 5311
     }
   ]
 }

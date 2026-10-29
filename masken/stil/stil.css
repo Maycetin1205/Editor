@@ -1,0 +1,426 @@
+/* Gemeinsamer Stil der Masken der Kleintierpraxis.
+   Eine Maske benutzt nur diese Variablen und Bausteine und schreibt keine eigene
+   Farbe, Schrift oder Größe; masken/bauen.mjs prüft das beim Bauen. */
+
+:root {
+  /* Papier und Tinte */
+  --grund: #f6f5f1;
+  --grund-tief: #ebe8e1;
+  --flaeche: #ffffff;
+  --linie: #dfdbd2;
+  --linie-stark: #c3beb2;
+  --tinte: #1c1b19;
+  --tinte-2: #55524b;
+  --tinte-3: #85817a;
+
+  /* Akzent: Hauptknopf, Fokus, Auswahl, Ablegen */
+  --akzent: #2b5a8c;
+  --akzent-dunkel: #214a75;
+  --akzent-flaeche: #e2e9f2;
+  --auf-akzent: #ffffff;
+
+  /* Bedeutung */
+  --warnen: #8a5300;
+  --dringend: #a3292b;
+  --frei: #2e6a44;
+
+  /* Schrift: Text in Segoe UI, Zahlen in Bahnschrift (beide bei Windows dabei) */
+  --schrift: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --schrift-zahl: Bahnschrift, 'Segoe UI', system-ui, sans-serif;
+  --text-klein: 0.875rem;
+  --text: 1rem;
+  --text-titel: 1.125rem;
+  --text-gross: 1.3125rem;
+  --zahl-gross: 1.5rem;
+  --zahl-anzeige: 2.25rem;
+  --halbfett: 600;
+  --zeile: 1.4;
+  --zeile-eng: 1.2;
+
+  /* Abstände */
+  --abstand-1: 0.25rem;
+  --abstand-2: 0.5rem;
+  --abstand-3: 0.75rem;
+  --abstand-4: 1rem;
+  --abstand-5: 1.5rem;
+  --abstand-6: 2rem;
+
+  /* Maße */
+  --bedienhoehe: 2.5rem;
+  --foto: 3.5rem;
+  --radius: 4px;
+  --radius-gross: 8px;
+  --rand: 1px;
+  --fokus: 2px;
+  --markierung: 3px;
+  --schatten: 0 12px 32px rgb(28 27 25 / 0.16), 0 2px 6px rgb(28 27 25 / 0.08);
+  --abdunkeln: rgb(28 27 25 / 0.3);
+  --dauer: 120ms;
+}
+
+/* Die Schrift wächst mit der Breite: 14px bei 1366, 16px bei 1920. */
+html {
+  font-size: clamp(14px, 0.42vw + 8px, 17px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--grund);
+  color: var(--tinte);
+  font-family: var(--schrift);
+  font-size: var(--text);
+  line-height: var(--zeile);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+  font-size: inherit;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: var(--halbfett);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: var(--fokus) solid var(--akzent);
+  outline-offset: var(--fokus);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Zahlen: gleich breite Ziffern, damit Uhrzeiten untereinander stehen */
+.zahl {
+  font-family: var(--schrift-zahl);
+  font-variant-numeric: tabular-nums;
+}
+
+.neben {
+  color: var(--tinte-2);
+}
+
+.leise {
+  color: var(--tinte-3);
+}
+
+.warnen {
+  color: var(--warnen);
+}
+
+.dringend {
+  color: var(--dringend);
+}
+
+.frei {
+  color: var(--frei);
+}
+
+.warnen,
+.dringend,
+.frei {
+  font-weight: var(--halbfett);
+}
+
+/* Kopf einer Maske */
+.kopf {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-5);
+  padding: var(--abstand-3) var(--abstand-5);
+  border-bottom: var(--rand) solid var(--linie-stark);
+}
+
+.kopf-titel {
+  font-size: var(--text-titel);
+}
+
+.kopf-rechts {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-4);
+  margin-left: auto;
+}
+
+/* Knöpfe */
+.knopf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--bedienhoehe);
+  padding: 0 var(--abstand-4);
+  border: var(--rand) solid var(--linie-stark);
+  border-radius: var(--radius);
+  background: var(--flaeche);
+  font-weight: var(--halbfett);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--dauer),
+    border-color var(--dauer);
+}
+
+.knopf:hover {
+  background: var(--grund-tief);
+}
+
+.knopf:disabled {
+  color: var(--tinte-3);
+  background: var(--flaeche);
+  cursor: default;
+}
+
+.knopf-haupt {
+  border-color: var(--akzent);
+  background: var(--akzent);
+  color: var(--auf-akzent);
+}
+
+.knopf-haupt:hover {
+  border-color: var(--akzent-dunkel);
+  background: var(--akzent-dunkel);
+}
+
+.knopf-haupt:disabled {
+  border-color: var(--tinte-3);
+  background: var(--tinte-3);
+  color: var(--auf-akzent);
+}
+
+/* Eingaben */
+.feld {
+  display: grid;
+  gap: var(--abstand-1);
+  min-width: 0;
+}
+
+.feld-name {
+  padding: 0;
+  color: var(--tinte-2);
+  font-size: var(--text-klein);
+  font-weight: var(--halbfett);
+}
+
+.eingabe {
+  width: 100%;
+  height: var(--bedienhoehe);
+  padding: 0 var(--abstand-3);
+  border: var(--rand) solid var(--linie-stark);
+  border-radius: var(--radius);
+  background: var(--flaeche);
+}
+
+.eingabe:focus {
+  outline: none;
+  border-color: var(--akzent);
+  box-shadow: inset 0 0 0 var(--rand) var(--akzent);
+}
+
+.eingabe::placeholder {
+  color: var(--tinte-3);
+}
+
+.gruppe {
+  display: grid;
+  gap: var(--abstand-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.reihe {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: var(--abstand-4);
+  align-items: end;
+}
+
+/* Eine Wahl: Kästchen oder Punkt mit Text */
+.wahl {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+  min-height: var(--bedienhoehe);
+  padding: 0 var(--abstand-3);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.wahl:hover {
+  background: var(--grund);
+}
+
+.wahl input {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  accent-color: var(--akzent);
+}
+
+/* Vorschläge unter einem Eingabefeld */
+.vorschlaege {
+  max-height: 16rem;
+  margin: 0;
+  padding: var(--abstand-1);
+  overflow-y: auto;
+  border: var(--rand) solid var(--linie);
+  border-radius: var(--radius);
+  background: var(--flaeche);
+  list-style: none;
+}
+
+.vorschlag {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--abstand-4);
+  padding: var(--abstand-2) var(--abstand-3);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.vorschlag:hover,
+.vorschlag[aria-selected='true'] {
+  background: var(--akzent-flaeche);
+}
+
+/* Menü an einer Zeile */
+.menue {
+  position: fixed;
+  z-index: 20;
+  min-width: 16rem;
+  max-width: 24rem;
+  padding: var(--abstand-1);
+  border: var(--rand) solid var(--linie);
+  border-radius: var(--radius-gross);
+  background: var(--flaeche);
+  box-shadow: var(--schatten);
+}
+
+.menue-titel {
+  padding: var(--abstand-2) var(--abstand-3) var(--abstand-1);
+  color: var(--tinte-3);
+  font-size: var(--text-klein);
+  font-weight: var(--halbfett);
+}
+
+.menue-eintrag {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--abstand-5);
+  width: 100%;
+  min-height: var(--bedienhoehe);
+  padding: var(--abstand-2) var(--abstand-3);
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menue-eintrag:hover,
+.menue-eintrag:focus-visible {
+  outline: none;
+  background: var(--akzent-flaeche);
+}
+
+/* Dialog */
+.dialog {
+  width: min(36rem, calc(100vw - 2 * var(--abstand-5)));
+  max-height: calc(100vh - 2 * var(--abstand-5));
+  padding: 0;
+  border: var(--rand) solid var(--linie);
+  border-radius: var(--radius-gross);
+  background: var(--flaeche);
+  color: var(--tinte);
+  box-shadow: var(--schatten);
+}
+
+.dialog::backdrop {
+  background: var(--abdunkeln);
+}
+
+.dialog-kopf {
+  padding: var(--abstand-4) var(--abstand-5);
+  border-bottom: var(--rand) solid var(--linie);
+  font-size: var(--text-titel);
+}
+
+.dialog-inhalt {
+  display: grid;
+  gap: var(--abstand-5);
+  padding: var(--abstand-5);
+}
+
+.dialog-fuss {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--abstand-3);
+  padding: var(--abstand-4) var(--abstand-5);
+  border-top: var(--rand) solid var(--linie);
+}
+
+/* Kurze Meldungen unten in der Mitte */
+.meldungen {
+  position: fixed;
+  bottom: var(--abstand-5);
+  left: 50%;
+  z-index: 30;
+  display: grid;
+  justify-items: center;
+  gap: var(--abstand-2);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.meldung {
+  padding: var(--abstand-3) var(--abstand-4);
+  border-radius: var(--radius);
+  background: var(--tinte);
+  color: var(--flaeche);
+  box-shadow: var(--schatten);
+  transition: opacity 300ms;
+}
+
+.meldung.fehler {
+  background: var(--dringend);
+}
+
+.meldung.weg {
+  opacity: 0;
+}
+
+/* Foto eines Tiers; ohne Foto der erste Buchstabe des Namens */
+.foto {
+  display: grid;
+  place-items: center;
+  width: var(--foto);
+  height: var(--foto);
+  border-radius: var(--radius);
+  background: var(--grund-tief);
+  color: var(--tinte-3);
+  font-size: var(--text-gross);
+  font-weight: var(--halbfett);
+  object-fit: cover;
+}

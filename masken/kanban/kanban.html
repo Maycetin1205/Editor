@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Empfang</title>
+  <!-- Verbindung zu SoftEngine: SoftEngine setzt EditorPfad beim Öffnen ein. -->
+  <script src="<!--SOFTENGINE-VAR!EditorPfad-->/JS/JS/basis.html.interface.js"></script>
+  <style>
+/*STIL*/
+
+/* Empfang: Anordnung der Tafel. Alle Werte kommen aus dem gemeinsamen Stil. */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.suche {
+  width: 16rem;
+}
+
+.uhr {
+  font-size: var(--zahl-anzeige);
+  line-height: var(--zeile-eng);
+}
+
+.tafel {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  min-height: 0;
+  user-select: none;
+}
+
+.spalte {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: var(--rand) solid var(--linie);
+}
+
+.spalte:last-child {
+  border-right: 0;
+}
+
+.spalte-kopf {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--abstand-3);
+  padding: var(--abstand-4) var(--abstand-5) var(--abstand-3);
+  border-bottom: var(--rand) solid var(--linie-stark);
+}
+
+.spalte-titel {
+  font-size: var(--text-titel);
+}
+
+.spalte-uebersicht {
+  min-height: calc(var(--text-klein) * var(--zeile));
+  color: var(--tinte-2);
+  font-size: var(--text-klein);
+}
+
+.spalte-zahl {
+  color: var(--tinte-2);
+  font-size: var(--zahl-anzeige);
+  line-height: 1;
+}
+
+.spalte-inhalt {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  transition: background-color var(--dauer);
+}
+
+.ziel {
+  background: var(--akzent-flaeche);
+}
+
+/* Ein Termin: Foto, Text, Zahl rechts */
+.termin {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--foto) minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: var(--abstand-4);
+  padding: var(--abstand-3) var(--abstand-5);
+  border-bottom: var(--rand) solid var(--linie);
+  cursor: pointer;
+}
+
+.termin:hover {
+  background: var(--flaeche);
+}
+
+.termin:focus-visible {
+  outline-offset: calc(var(--fokus) * -1);
+}
+
+.termin.offen {
+  background: var(--akzent-flaeche);
+}
+
+.termin.gezogen {
+  opacity: 0.4;
+}
+
+.termin.notfall::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--markierung);
+  background: var(--dringend);
+  content: '';
+}
+
+.termin-name {
+  margin-bottom: var(--abstand-1);
+  font-size: var(--text-gross);
+  font-weight: var(--halbfett);
+  line-height: var(--zeile-eng);
+}
+
+.termin-name,
+.termin-zeile {
+  overflow: hidden;
+  color: var(--tinte-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.termin-grund {
+  color: var(--tinte-3);
+}
+
+.termin-wert {
+  text-align: right;
+}
+
+.termin-zahl {
+  font-size: var(--zahl-gross);
+  line-height: var(--zeile-eng);
+  white-space: nowrap;
+}
+
+/* Die Zimmer der Spalte Behandlung */
+.zimmer {
+  border-bottom: var(--rand) solid var(--linie-stark);
+  transition: background-color var(--dauer);
+}
+
+.zimmer-kopf {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--abstand-3);
+  padding: var(--abstand-2) var(--abstand-5);
+  background: var(--grund-tief);
+}
+
+.zimmer.ziel .zimmer-kopf {
+  background: transparent;
+}
+
+.zimmer-zusatz {
+  margin-left: var(--abstand-2);
+  color: var(--tinte-2);
+  font-weight: normal;
+}
+
+.zimmer .termin:last-child {
+  border-bottom: 0;
+}
+
+/* Neuer Termin */
+.neues-tier {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--abstand-3);
+}
+  </style>
+</head>
+<body>
+  <header class="kopf">
+    <h1 class="kopf-titel">Empfang</h1>
+    <p class="neben" id="datum"></p>
+    <p id="verbindung"></p>
+    <div class="kopf-rechts">
+      <input class="eingabe suche" id="suche" type="search" placeholder="Suchen" aria-label="Suchen" autocomplete="off">
+      <button class="knopf knopf-haupt" id="neuerTermin" type="button">Neuer Termin</button>
+      <span class="uhr zahl" id="uhr"></span>
+    </div>
+  </header>
+
+  <main class="tafel" id="tafel">
+    <section class="spalte" aria-labelledby="titel-termin">
+      <header class="spalte-kopf">
+        <div>
+          <h2 class="spalte-titel" id="titel-termin">Termine</h2>
+          <p class="spalte-uebersicht" id="uebersicht-termin"></p>
+        </div>
+        <span class="spalte-zahl zahl" id="zahl-termin"></span>
+      </header>
+      <div class="spalte-inhalt" id="inhalt-termin" data-ziel="termin"></div>
+    </section>
+    <section class="spalte" aria-labelledby="titel-wartezimmer">
+      <header class="spalte-kopf">
+        <div>
+          <h2 class="spalte-titel" id="titel-wartezimmer">Wartezimmer</h2>
+          <p class="spalte-uebersicht" id="uebersicht-wartezimmer"></p>
+        </div>
+        <span class="spalte-zahl zahl" id="zahl-wartezimmer"></span>
+      </header>
+      <div class="spalte-inhalt" id="inhalt-wartezimmer" data-ziel="wartezimmer"></div>
+    </section>
+    <section class="spalte" aria-labelledby="titel-behandlung">
+      <header class="spalte-kopf">
+        <div>
+          <h2 class="spalte-titel" id="titel-behandlung">Behandlung</h2>
+          <p class="spalte-uebersicht" id="uebersicht-behandlung"></p>
+        </div>
+        <span class="spalte-zahl zahl" id="zahl-behandlung"></span>
+      </header>
+      <div class="spalte-inhalt" id="inhalt-behandlung" data-ziel="behandlung"></div>
+    </section>
+    <section class="spalte" aria-labelledby="titel-abrechnung">
+      <header class="spalte-kopf">
+        <div>
+          <h2 class="spalte-titel" id="titel-abrechnung">Abrechnung</h2>
+          <p class="spalte-uebersicht" id="uebersicht-abrechnung"></p>
+        </div>
+        <span class="spalte-zahl zahl" id="zahl-abrechnung"></span>
+      </header>
+      <div class="spalte-inhalt" id="inhalt-abrechnung" data-ziel="abrechnung"></div>
+    </section>
+  </main>
+
+  <div class="menue" id="menue" role="menu" hidden></div>
+  <div class="meldungen" id="meldungen" aria-live="polite"></div>
+
+  <dialog class="dialog" id="dialog" aria-labelledby="dialogTitel">
+    <form id="formular" novalidate>
+      <h2 class="dialog-kopf" id="dialogTitel">Neuer Termin</h2>
+      <div class="dialog-inhalt">
+        <div class="feld">
+          <label class="feld-name" for="besitzer">Besitzer</label>
+          <input class="eingabe" id="besitzer" maxlength="60" autocomplete="off" role="combobox"
+                 aria-autocomplete="list" aria-expanded="false" aria-controls="besitzerListe">
+          <ul class="vorschlaege" id="besitzerListe" role="listbox" hidden></ul>
+        </div>
+        <fieldset class="gruppe">
+          <legend class="feld-name">Tier</legend>
+          <div class="gruppe" id="tierListe"></div>
+          <div class="neues-tier" id="neuesTier">
+            <label class="feld"><span class="feld-name">Name</span><input class="eingabe" id="tierName" maxlength="30" autocomplete="off"></label>
+            <label class="feld"><span class="feld-name">Tierart</span><input class="eingabe" id="tierArt" maxlength="30" list="tierarten" autocomplete="off"></label>
+            <label class="feld"><span class="feld-name">Rasse</span><input class="eingabe" id="tierRasse" maxlength="30" list="rassen" autocomplete="off"></label>
+          </div>
+          <datalist id="tierarten"></datalist>
+          <datalist id="rassen"></datalist>
+        </fieldset>
+        <label class="feld"><span class="feld-name">Behandlung</span><input class="eingabe" id="behandlung" maxlength="150" autocomplete="off"></label>
+        <div class="reihe">
+          <label class="feld"><span class="feld-name">Uhrzeit</span><input class="eingabe zahl" id="uhrzeit" type="time"></label>
+          <label class="wahl"><input type="checkbox" id="notfall">Notfall</label>
+        </div>
+        <fieldset class="gruppe">
+          <legend class="feld-name">Wohin</legend>
+          <div class="reihe">
+            <label class="wahl"><input type="radio" name="wohin" value="wartezimmer" checked>Wartezimmer</label>
+            <label class="wahl"><input type="radio" name="wohin" value="termin">Termine</label>
+          </div>
+        </fieldset>
+      </div>
+      <div class="dialog-fuss">
+        <button class="knopf" id="abbrechen" type="button">Abbrechen</button>
+        <button class="knopf knopf-haupt" id="anlegen" type="submit">Anlegen</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    // =====================================================================
+    //  EINSTELLUNGEN FÜR SOFTENGINE
+    //  Alles, was diese Maske über SoftEngine wissen muss, steht hier.
+    //  Passt beim Test etwas nicht, wird nur hier eine Zeile geändert.
+    // =====================================================================
+    const CONFIG = {
+      // Name der Liste in index.basis.SEvariablen.json (ALIAS beim SEFILELOOP).
+      quelle: 'Termine',
+
+      // Die IDB-Tabelle des Terminplaners, wie PUT_RELATION 174 und GET_RELATION 640 sie nennen.
+      idb: 'ID0021',
+
+      // Felder des Terminplaners (IDB 0021) als Position_Länge, aus der Bibliothek des Editors.
+      // Jedes gelesene Feld steht auch in FELDER von index.basis.SEvariablen.json.
+      felder: {
+        satz: '0_10',            // Index = Satznummer
+        kunde: '10_8',           // Kundennummer
+        tierart: '18_30',
+        rasse: '48_30',          // Unterart
+        tiername: '78_30',
+        geburtsdatum: '108_10',
+        uhrzeit: '118_5',
+        behandlung: '123_150',
+        datum: '273_10',         // Termindatum
+        vorname: '283_30',       // Vorname Kunde
+        nachname: '313_30',      // Nachname Kunde
+        status: '343_30',        // Zimmer/Status: steuert die Spalte, siehe status
+        prioritaet: '373_12',
+        belegnummer: '385_12',
+        geaendertAm: '418_10',
+        geaendertUm: '428_5',    // daraus die Minuten in der Spalte (Wartezeit)
+        zimmer: '444_30',        // welches Zimmer, siehe zimmer
+      },
+
+      // Feldart je Feld beim Schreiben: L Text, D Datum, Z Uhrzeit, R Zahl. Nicht genannte Felder sind Text.
+      feldarten: { '10_8': 'R', '108_10': 'D', '118_5': 'Z', '273_10': 'D' },
+
+      // Was im Feld Zimmer/Status steht. Leer und Unbekanntes zählen als Termin.
+      // Steht dort der Wert eines Zimmers, zählt der Termin als Behandlung in diesem Zimmer.
+      status: {
+        termin: 'Termin',
+        wartezimmer: 'Wartezimmer',
+        behandlung: 'Behandlung',
+        abrechnung: 'Abrechnung',
+        fertig: 'Fertig',          // nach "Kassiert": der Termin verschwindet von der Tafel
+      },
+
+      // Was im Feld Priorität einen Notfall kennzeichnet.
+      notfall: 'Notfall',
+
+      // Die Zimmer der Spalte Behandlung: name zeigt die Maske, wert steht im Feld zimmer.
+      zimmer: [
+        { name: 'Zimmer 1', wert: 'Zimmer 1', zusatz: 'Dr. Weber' },
+        { name: 'Zimmer 2', wert: 'Zimmer 2', zusatz: 'Dr. Lindner' },
+        { name: 'Zimmer 3', wert: 'Zimmer 3', zusatz: 'Röntgen, Labor' },
+        { name: 'Zimmer 4', wert: 'Zimmer 4', zusatz: 'OP' },
+      ],
+
+      // Ab wie vielen Minuten im Wartezimmer die Wartezeit auffällt.
+      wartezeit: { warnen: 15, dringend: 30 },
+
+      // Ab wie vielen Minuten nach der Uhrzeit ein Termin auffällt, der noch nicht da ist.
+      verspaetet: 10,
+
+      // Feld eines Termins schreiben: PUT_RELATION 174 [POS, LEN, Feldart, Satznummer, IDB, Wert],
+      // einer nach dem anderen im Abstand von 100 ms.
+      feldSchreiben: { nr: '174', abstand: 100 },
+
+      // Neuen Termin anlegen: GET_RELATION 640 [IDB], Antwort = neue Satznummer.
+      satzAnlegen: { nr: '640' },
+
+      // Kunden für "Neuer Termin": der Adressstamm (ERPAPICALL beim ersten Laden).
+      kunden: {
+        abfrage: 'ADRESSE.GET',
+        felder: { nummer: 'ADR_2_8', vorname: 'ADR_3292_30', nachname: 'ADR_3322_40', ort: 'ADR_2233_40' },
+      },
+
+      // Tiere: die Lieferadressen. Die Bibliothek kennt zwei Feldsätze; gelesen wird jeweils
+      // das erste Feld, das etwas enthält. medien: Nummer des Fotos, leer = keine Fotos.
+      tiere: {
+        abfrage: 'LIEFERADRESSE.GET',
+        felder: {
+          nummer: 'LFA_2_8',
+          kunde: 'LFA_10_8',
+          tiername: ['LFA_400_30', 'LFA_20_30'],
+          tierart: ['LFA_971_30', 'LFA_2000_20'],
+          rasse: ['LFA_430_30', 'LFA_2020_30'],
+          geburtsdatum: ['LFA_960_10', 'LFA_2062_10'],
+          medien: '',
+        },
+      },
+
+      // Foto eines Tiers: GET_RELATION 1912 [Medien-Nummer, J], wie SoftEngine das Bild einer Adresse holt.
+      tierfoto: { nr: '1912', zusatz: 'J', warten: 5000 },
+
+      // Werkzeug, das "Kassiert" zusätzlich in SoftEngine startet (z. B. die Kasse). Leer = keins.
+      kassenWerkzeug: '',
+
+      // Nur Termine von heute zeigen (nach Termindatum).
+      nurHeute: true,
+
+      // Alle wie viele Sekunden frische Daten von SoftEngine geholt werden. 0 = nur nach eigenem Schreiben.
+      neuLaden: 60,
+
+      // Wie lange auf eine Antwort von SoftEngine gewartet wird (Millisekunden).
+      antwortWarten: 20000,
+
+      // Jede Nachricht an und von SoftEngine in der Konsole zeigen (F12).
+      // Geht auch ohne Ändern: in der Konsole localStorage.setItem('ff-debug','1') und neu laden.
+      protokoll: false,
+    };
+
+    // Beispieldaten für den Browser ohne SoftEngine, so geformt, wie SoftEngine sie liefert.
+    const BEISPIEL = {
+      // Nummer, Vorname, Nachname, Ort
+      kunden: [
+        ['10023', 'Anna', 'Wagner', 'Köln'],
+        ['10041', 'Thomas', 'Becker', 'Hürth'],
+        ['10057', 'Sabine', 'Krüger', 'Köln'],
+        ['10062', 'Mehmet', 'Yılmaz', 'Frechen'],
+        ['10078', 'Julia', 'Hoffmann', 'Köln'],
+        ['10085', 'Peter', 'Schulz', 'Pulheim'],
+        ['10091', 'Lena', 'Fischer', 'Köln'],
+        ['10103', 'Karin', 'Neumann', 'Brühl'],
+        ['10110', 'Stefan', 'Wolf', 'Köln'],
+        ['10124', 'Ayşe', 'Demir', 'Hürth'],
+      ],
+      // Nummer, Kunde, Name, Tierart, Rasse, Geburtsdatum, Foto
+      tiere: [
+        ['20001', '10023', 'Bello', 'Hund', 'Labrador', '12.03.2018', 'Hund_Labrador'],
+        ['20002', '10023', 'Minka', 'Katze', 'Hauskatze', '02.07.2015', ''],
+        ['20003', '10041', 'Rocky', 'Hund', 'Dackel', '21.09.2020', 'Hund_Dackel'],
+        ['20004', '10057', 'Luna', 'Katze', 'Maine Coon', '14.05.2019', 'Katze_MaineCoon'],
+        ['20005', '10057', 'Krümel', 'Hamster', 'Goldhamster', '03.02.2025', ''],
+        ['20006', '10062', 'Balu', 'Hund', 'Golden Retriever', '30.11.2014', ''],
+        ['20007', '10078', 'Nala', 'Katze', 'Britisch Kurzhaar', '08.08.2021', 'Katze_BritischKurzhaar'],
+        ['20008', '10085', 'Max', 'Hund', 'Beagle', '17.04.2017', ''],
+        ['20009', '10091', 'Pünktchen', 'Katze', 'Hauskatze', '22.06.2012', ''],
+        ['20010', '10103', 'Oskar', 'Hund', 'Border Collie', '05.01.2023', ''],
+        ['20011', '10110', 'Mia', 'Katze', 'Siam', '19.10.2019', ''],
+        ['20012', '10124', 'Simba', 'Katze', 'Bengal', '11.12.2020', ''],
+      ],
+      // Tier, Minuten von jetzt bis zur Uhrzeit, Spalte, Minuten in der Spalte, Behandlung, Notfall, Zimmer
+      termine: [
+        ['20003', -40, 'behandlung', 22, 'Lahmt vorne links', false, 'Zimmer 1'],
+        ['20011', -25, 'behandlung', 9, 'Zahnkontrolle', false, 'Zimmer 3'],
+        ['20004', -35, 'abrechnung', 4, 'Impfung', false, 'Zimmer 2'],
+        ['20001', -20, 'wartezimmer', 34, 'Ohrenentzündung, Nachkontrolle', false, ''],
+        ['20012', -10, 'wartezimmer', 18, 'Frisst seit zwei Tagen nicht', false, ''],
+        ['20006', 0, 'wartezimmer', 6, 'Schnittwunde an der Pfote', true, ''],
+        ['20005', -15, 'termin', 0, 'Gewichtskontrolle', false, ''],
+        ['20007', 5, 'termin', 0, 'Impfung', false, ''],
+        ['20008', 15, 'termin', 0, 'Blutabnahme', false, ''],
+        ['20002', 30, 'termin', 0, 'Krallen schneiden', false, ''],
+        ['20010', 45, 'termin', 0, 'Erstuntersuchung', false, ''],
+        ['20009', 60, 'termin', 0, 'Schilddrüse, Kontrolle', false, ''],
+      ],
+    };
+
+    // Fotos der Beispieltiere (beim Bauen aus beispielfotos.json eingesetzt).
+    const BEISPIEL_FOTOS = /*DATEI:beispielfotos.json*/ null;
+
+    const PROTOKOLL = CONFIG.protokoll || readDebugFlag();
+
+    function readDebugFlag() {
+      try { return localStorage.getItem('ff-debug') === '1'; } catch (e) { return false; }
+    }
+
+    function log(...args) {
+      if (PROTOKOLL) console.log('[Empfang]', ...args);
+    }
+
+    // ---------------------------------------------------------------------
+    //  Hilfen: Text, Datum, Uhrzeit
+    // ---------------------------------------------------------------------
+    function esc(text) {
+      return String(text == null ? '' : text)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // Zum Vergleichen beim Suchen: klein, ohne Umlaute und Zeichen.
+    function plain(text) {
+      return String(text || '').toLowerCase()
+        .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]/g, '');
+    }
+
+    function same(a, b) {
+      return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+    }
+
+    function plainNumber(n) {
+      return String(n || '').trim().replace(/^0+/, '');
+    }
+
+    function pad2(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    function todayText() {
+      const d = new Date();
+      return pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.' + d.getFullYear();
+    }
+
+    // Tag eines Datums als "JJJJ-MM-TT".
+    function dayKey(text) {
+      const t = String(text || '').trim();
+      let m = /^(\d{1,2})\.(\d{1,2})\.(\d{4}|\d{2})/.exec(t);
+      if (m) {
+        let y = Number(m[3]);
+        if (m[3].length === 2) y += y <= 69 ? 2000 : 1900;
+        return y + '-' + pad2(m[2]) + '-' + pad2(m[1]);
+      }
+      m = /^(\d{4})-?(\d{2})-?(\d{2})/.exec(t);
+      return m ? m[1] + '-' + m[2] + '-' + m[3] : '';
+    }
+
+    function todayKey() {
+      const d = new Date();
+      return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+    }
+
+    // Minute des Tages aus "10:30", "10.30" oder "1030".
+    function minuteOf(text) {
+      const m = /(\d{1,2})[:.]?(\d{2})/.exec(String(text || '').trim());
+      if (!m) return null;
+      const h = Number(m[1]);
+      const min = Number(m[2]);
+      return h < 24 && min < 60 ? h * 60 + min : null;
+    }
+
+    function timeOfMinute(minute) {
+      return pad2(Math.floor(minute / 60) % 24) + ':' + pad2(minute % 60);
+    }
+
+    function timeText(text) {
+      const minute = minuteOf(text);
+      return minute === null ? '' : timeOfMinute(minute);
+    }
+
+    function nowMinute() {
+      const d = new Date();
+      return d.getHours() * 60 + d.getMinutes();
+    }
+
+    function nextQuarterHour() {
+      return timeOfMinute((Math.ceil((nowMinute() + 1) / 15) * 15) % (24 * 60));
+    }
+
+    // Alter aus dem Geburtsdatum: "8 Monate", "1 Jahr", "7 Jahre".
+    function ageText(birth) {
+      const key = dayKey(birth);
+      if (key === '') return '';
+      const [y, m, d] = key.split('-').map(Number);
+      const now = new Date();
+      const months = (now.getFullYear() - y) * 12 + now.getMonth() + 1 - m - (now.getDate() < d ? 1 : 0);
+      if (months < 0) return '';
+      if (months < 12) return months === 1 ? '1 Monat' : months + ' Monate';
+      const years = Math.floor(months / 12);
+      return years === 1 ? '1 Jahr' : years + ' Jahre';
+    }
+
+    // ---------------------------------------------------------------------
+    //  Felder aus einer Zeile von SoftEngine lesen
+    // ---------------------------------------------------------------------
+    const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', auml: 'ä', ouml: 'ö', uuml: 'ü', Auml: 'Ä', Ouml: 'Ö', Uuml: 'Ü', szlig: 'ß', euro: '€' };
+
+    function decodeEntities(s) {
+      if (s.indexOf('&') < 0) return s;
+      return s.replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z]+);/gi, function (whole, body) {
+        if (body[0] === '#') return String.fromCodePoint(body[1] === 'x' || body[1] === 'X' ? parseInt(body.slice(2), 16) : Number(body.slice(1)));
+        return ENTITIES[body] != null ? ENTITIES[body] : whole;
+      });
+    }
+
+    function cellText(v) {
+      if (v == null) return '';
+      if (typeof v === 'object') return v.WERT == null || typeof v.WERT === 'object' ? '' : String(v.WERT).trim();
+      return String(v).trim();
+    }
+
+    // Ein Feld oder das erste von mehreren, das etwas enthält.
+    function readField(row, codes) {
+      for (const code of [].concat(codes)) {
+        const v = readOne(row, code);
+        if (v !== '') return v;
+      }
+      return '';
+    }
+
+    // Der Wert steht unter dem Code ("78_30"), mit Vorsatz ("IDB_78_30") oder im ganzen Satz.
+    function readOne(row, code) {
+      if (!row || typeof row !== 'object' || !code) return '';
+      const direct = cellText(row[code]);
+      if (direct !== '') return decodeEntities(direct);
+      for (const key of Object.keys(row)) {
+        if (key.endsWith('_' + code) || key.startsWith(code + '_')) {
+          const v = cellText(row[key]);
+          if (v !== '') return decodeEntities(v);
+        }
+      }
+      const m = /^(\d+)_(\d+)$/.exec(code);
+      const raw = row.SATZNEU != null ? row.SATZNEU : row.SATZ != null ? row.SATZ : row.RAW;
+      if (!m || raw == null) return '';
+      return decodeEntities(String(raw).substr(Number(m[1]), Number(m[2])).trim());
+    }
+
+    function rowsOfEntry(entry) {
+      if (Array.isArray(entry)) return entry;
+      if (!entry || typeof entry !== 'object') return [];
+      const lists = [entry.Zeilen, entry.zeilen, entry.Saetze, entry.saetze, entry.Rows, entry.rows, entry.Daten, entry.daten];
+      for (const list of lists) {
+        if (Array.isArray(list)) return list;
+        if (typeof list === 'string') {
+          try { const parsed = JSON.parse(list); if (Array.isArray(parsed)) return parsed; } catch (e) { /* kein JSON */ }
+        }
+      }
+      return [];
+    }
+
+    // Die Zeilen des Terminplaners aus dem, was SoftEngine geliefert hat. null: Liste fehlt.
+    function terminRows(daten) {
+      if (!daten || typeof daten !== 'object') return null;
+      const loop = daten.SEFileLoop;
+      const entries = Array.isArray(loop) ? loop : loop && typeof loop === 'object'
+        ? Object.keys(loop).map(function (key) { const e = loop[key]; return e && typeof e === 'object' && !Array.isArray(e) ? Object.assign({ ALIAS: key }, e) : { ALIAS: key, Zeilen: e }; })
+        : [];
+      for (const entry of entries) {
+        if (entry && (same(entry.ALIAS, CONFIG.quelle) || same(entry.alias, CONFIG.quelle))) return rowsOfEntry(entry);
+      }
+      for (const key of ['ErpApiCall', 'ERPAPICALL', 'Tabellen']) {
+        const block = daten[key];
+        if (!block || typeof block !== 'object') continue;
+        for (const name of Object.keys(block)) if (same(name, CONFIG.quelle)) return rowsOfEntry(block[name]);
+      }
+      return null;
+    }
+
+    // Alle Codes einer Feldliste, für FELDER einer Abfrage.
+    function codesOf(felder) {
+      return Object.values(felder).flatMap(function (c) { return [].concat(c); }).filter(Boolean);
+    }
+
+    // ---------------------------------------------------------------------
+    //  Termine: aus den Zeilen, dazu was gerade geschrieben wird
+    // ---------------------------------------------------------------------
+    const SPALTEN = ['termin', 'wartezimmer', 'behandlung', 'abrechnung'];
+
+    let beispiel = false;          // true: kein SoftEngine, die Maske zeigt Beispieldaten
+    let appointments = [];
+    let loadedRows = null;         // null: noch keine Daten
+    let searchText = '';
+
+    // Was die Maske geschrieben hat und SoftEngine noch nicht zurückgeliefert hat:
+    // so springt ein Termin nicht zurück, bis die frischen Daten da sind.
+    const pending = new Map();
+    const PENDING_MS = 30000;
+
+    function roomOf(value) {
+      const v = String(value || '').trim();
+      if (v === '') return null;
+      return CONFIG.zimmer.find(function (z) { return same(z.wert, v) || same(z.name, v); }) || null;
+    }
+
+    function roomName(value) {
+      const room = roomOf(value);
+      return room ? room.name : String(value || '').trim();
+    }
+
+    // Spalte und Zimmer aus den Feldern Zimmer/Status und Zimmer.
+    function placeOf(statusValue, roomValue) {
+      const v = String(statusValue || '').trim();
+      const s = CONFIG.status;
+      const statusRoom = roomOf(v);
+      if (statusRoom) return { spalte: 'behandlung', zimmer: statusRoom.name };
+      if (v === '') return { spalte: 'termin', zimmer: null };
+      for (const key of ['wartezimmer', 'abrechnung', 'fertig']) if (same(v, s[key])) return { spalte: key, zimmer: null };
+      if (same(v, s.behandlung)) {
+        const name = roomName(roomValue) || (CONFIG.zimmer[0] ? CONFIG.zimmer[0].name : '');
+        return { spalte: 'behandlung', zimmer: name };
+      }
+      return { spalte: 'termin', zimmer: null };
+    }
+
+    function appointmentOf(row, i) {
+      const f = CONFIG.felder;
+      const id = readField(row, f.satz);
+      const roomValue = readField(row, f.zimmer);
+      const place = placeOf(readField(row, f.status), roomValue);
+      const time = timeText(readField(row, f.uhrzeit));
+      const changedOn = readField(row, f.geaendertAm);
+      const customerNo = readField(row, f.kunde);
+      const name = readField(row, f.tiername);
+      return {
+        id: id !== '' ? id : 'zeile-' + i,
+        record: id,
+        name: name || 'Ohne Namen',
+        kunde: customerNo,
+        tierart: readField(row, f.tierart),
+        rasse: readField(row, f.rasse),
+        alter: ageText(readField(row, f.geburtsdatum)),
+        besitzer: [readField(row, f.vorname), readField(row, f.nachname)].filter(Boolean).join(' ') || (customerNo !== '' ? 'Kunde ' + customerNo : ''),
+        behandlung: readField(row, f.behandlung),
+        notfall: CONFIG.notfall !== '' && same(readField(row, f.prioritaet), CONFIG.notfall),
+        spalte: place.spalte,
+        zimmer: place.zimmer,
+        letztesZimmer: roomName(roomValue),
+        uhrzeit: time,
+        minute: minuteOf(time),
+        seit: changedOn === '' || dayKey(changedOn) === todayKey() ? minuteOf(readField(row, f.geaendertUm)) : null,
+        foto: photoOf(customerNo, name),
+      };
+    }
+
+    function withPending(a) {
+      const own = pending.get(a.id);
+      if (!own) return a;
+      const arrived = own.spalte === a.spalte && (own.spalte !== 'behandlung' || own.zimmer === a.zimmer);
+      if (arrived || Date.now() > own.until) {
+        pending.delete(a.id);
+        return a;
+      }
+      return Object.assign({}, a, { spalte: own.spalte, zimmer: own.zimmer, letztesZimmer: own.letztesZimmer, seit: own.seit });
+    }
+
+    function byTime(a, b) {
+      return (a.minute == null ? 9999 : a.minute) - (b.minute == null ? 9999 : b.minute);
+    }
+
+    function takeRows(rows) {
+      loadedRows = rows;
+      const today = todayKey();
+      appointments = rows
+        .filter(function (row) { return !CONFIG.nurHeute || dayKey(readField(row, CONFIG.felder.datum)) === today; })
+        .map(appointmentOf)
+        .map(withPending)
+        .filter(function (a) { return a.spalte !== 'fertig'; })
+        .sort(byTime);
+      render();
+      showConnection();
+    }
+
+    function dataArrived() {
+      const rows = terminRows(window.SEDATA && window.SEDATA.Daten);
+      if (rows === null) {
+        log('Daten ohne Liste "' + CONFIG.quelle + '"', window.SEDATA);
+        if (loadedRows === null) takeRows([]);
+      } else {
+        takeRows(rows);
+      }
+      // Beim ersten Mal Kunden und Tiere holen: für Fotos und "Neuer Termin".
+      if (lookup.loadedAt === 0) loadLookup();
+    }
+
+    // ---------------------------------------------------------------------
+    //  Verbindung zu SoftEngine
+    // ---------------------------------------------------------------------
+    const answerWaiters = [];
+
+    function hasSoftEngine() {
+      return typeof window.basisHTML_SND_MSG === 'function';
+    }
+
+    function send(verb, message) {
+      log('an SoftEngine:', verb, message);
+      if (!hasSoftEngine()) return false;
+      try {
+        window.basisHTML_SND_MSG(verb, message);
+        return true;
+      } catch (e) {
+        console.warn('[Empfang] Senden an SoftEngine gescheitert', e);
+        return false;
+      }
+    }
+
+    function dataOf(payload) {
+      let data = payload;
+      if (typeof data === 'string') {
+        try { data = JSON.parse(data); } catch (e) { return null; }
+      }
+      return data && typeof data === 'object' && data.Daten && typeof data.Daten === 'object' ? data.Daten : null;
+    }
+
+    // Alles, was SoftEngine an die Maske schickt.
+    function fromSoftEngine(payload) {
+      log('von SoftEngine:', payload);
+      const daten = dataOf(payload);
+      if (daten) {
+        window.SEDATA = window.SEDATA && typeof window.SEDATA === 'object' ? window.SEDATA : {};
+        window.SEDATA.Daten = daten;
+        dataArrived();
+        return;
+      }
+      // Wie selib: eine Antwort mit RESULT gehört zu einer Relation, eine mit ELEMENTNAME
+      // (oder ...LISTE) zu einer Listen-Abfrage; jede geht an die älteste offene Frage ihrer Art.
+      const kind = answerKind(payload);
+      if (kind === null && answerValue(payload) === undefined) return;
+      const waiter = answerWaiters.find(function (w) { return w.kind === (kind || 'relation'); });
+      if (waiter) waiter.take(payload);
+    }
+
+    function asObject(raw) {
+      if (typeof raw !== 'string') return raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : null;
+      try { const parsed = JSON.parse(raw); return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null; } catch (e) { return null; }
+    }
+
+    function answerKind(raw) {
+      const a = asObject(raw);
+      if (!a) return null;
+      if ('ELEMENTNAME' in a || Object.keys(a).some(function (k) { return /LISTE$/i.test(k); })) return 'list';
+      if ('RESULT' in a || 'result' in a) return 'relation';
+      return null;
+    }
+
+    // Die Zeilen einer Antwort auf ERPAPICALL: {LISTENNAME, ELEMENTNAME, <Liste>: {<Element>: [...]}}.
+    function queryRows(raw) {
+      const a = asObject(raw);
+      if (!a) return null;
+      const isRow = function (v) { return v && typeof v === 'object' && !Array.isArray(v); };
+      if (typeof a.LISTENNAME === 'string' && typeof a.ELEMENTNAME === 'string') {
+        const named = a[a.LISTENNAME];
+        const rows = isRow(named) ? named[a.ELEMENTNAME] : undefined;
+        if (Array.isArray(rows)) return rows.filter(isRow);
+        return isRow(rows) ? [rows] : [];
+      }
+      const key = Object.keys(a).find(function (k) { return /LISTE$/i.test(k); });
+      if (key === undefined) return null;
+      const list = a[key];
+      if (Array.isArray(list)) return list.filter(isRow);
+      if (!isRow(list)) return [];
+      const contents = Object.keys(list).filter(function (k) { return k !== 'SAT' && k !== 'TFELD'; }).map(function (k) { return list[k]; });
+      const many = contents.find(Array.isArray);
+      if (many) return many.filter(isRow);
+      const one = contents.find(isRow);
+      return one === undefined ? [] : [one];
+    }
+
+    // Eine Liste von SoftEngine holen (ERPAPICALL). null: keine Antwort.
+    function askList(id, alias, fields) {
+      if (beispiel) return Promise.resolve(sampleList(id));
+      return new Promise(function (resolve) {
+        let done = false;
+        const finish = function (rows) {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          const at = answerWaiters.indexOf(waiter);
+          if (at >= 0) answerWaiters.splice(at, 1);
+          log('Liste ' + id + ':', rows === null ? 'keine Antwort' : rows.length + ' Zeilen');
+          resolve(rows);
+        };
+        const waiter = { kind: 'list', take: function (raw) { finish(queryRows(raw) || []); } };
+        answerWaiters.push(waiter);
+        const timer = setTimeout(function () { finish(null); }, CONFIG.antwortWarten);
+        if (!send('ERPAPICALL', { ID: id, ALIAS: alias, FELDER: fields.join(',') })) finish(null);
+      });
+    }
+
+    // Der Wert einer Antwort: RESULT, PINDEX, INDEX oder VALUE, sonst der Text selbst.
+    function answerValue(raw, depth) {
+      depth = depth || 0;
+      if (raw == null || depth > 8) return undefined;
+      if (typeof raw === 'string') {
+        const t = raw.trim();
+        if (t === '') return undefined;
+        try { const parsed = JSON.parse(t); if (parsed && typeof parsed === 'object') return answerValue(parsed, depth + 1); } catch (e) { /* Text */ }
+        return t;
+      }
+      if (typeof raw === 'number') return String(raw);
+      if (Array.isArray(raw)) {
+        for (const item of raw) { const v = answerValue(item, depth + 1); if (v !== undefined) return v; }
+        return undefined;
+      }
+      if (typeof raw === 'object') {
+        for (const key of ['RESULT', 'result', 'PINDEX', 'pindex', 'INDEX', 'index', 'VALUE', 'value', '0_10']) {
+          if (key in raw) { const v = answerValue(raw[key], depth + 1); if (v !== undefined) return v; }
+        }
+        if (raw.MSG && raw.MSG.DATA !== undefined) return answerValue(raw.MSG.DATA, depth + 1);
+      }
+      return undefined;
+    }
+
+    // Eine Frage an SoftEngine, deren Antwort gebraucht wird (GET_RELATION). Es ist immer nur
+    // eine unterwegs, so kann keine Antwort an die falsche Frage gehen. vorne: vor die wartenden.
+    const relationQueue = [];
+    let relationBusy = false;
+
+    function ask(nr, params, options) {
+      const o = options || {};
+      return new Promise(function (resolve) {
+        const job = { nr: nr, params: params, wait: o.wait || CONFIG.antwortWarten, resolve: resolve };
+        if (o.vorne) relationQueue.unshift(job);
+        else relationQueue.push(job);
+        pumpRelations();
+      });
+    }
+
+    function pumpRelations() {
+      if (relationBusy) return;
+      const job = relationQueue.shift();
+      if (!job) return;
+      relationBusy = true;
+      askNow(job.nr, job.params, job.wait).then(function (value) {
+        relationBusy = false;
+        job.resolve(value);
+        pumpRelations();
+      });
+    }
+
+    function askNow(nr, params, wait) {
+      return new Promise(function (resolve) {
+        let done = false;
+        const seen = new Set(messageKeys());
+        const finish = function (value) {
+          if (done) return;
+          done = true;
+          clearInterval(poll);
+          clearTimeout(timer);
+          const at = answerWaiters.indexOf(waiter);
+          if (at >= 0) answerWaiters.splice(at, 1);
+          log('Antwort auf Relation ' + nr + ':', value);
+          resolve(value);
+        };
+        const waiter = { kind: 'relation', take: function (raw) { finish(answerValue(raw)); } };
+        answerWaiters.push(waiter);
+        // Manche SoftEngine-Fassungen legen die Antwort als MessageN in SEDATA ab.
+        const poll = setInterval(function () {
+          const fresh = messageKeys().filter(function (k) { return !seen.has(k); });
+          if (fresh.length > 0) finish(answerValue(window.SEDATA[fresh[fresh.length - 1]]));
+        }, 100);
+        const timer = setTimeout(function () { finish(undefined); }, wait);
+        if (!send('GET_RELATION', { NR: nr, PARAMS: params })) finish(undefined);
+      });
+    }
+
+    function messageKeys() {
+      const se = window.SEDATA;
+      return se && typeof se === 'object' ? Object.keys(se).filter(function (k) { return /^Message\d+$/.test(k); }) : [];
+    }
+
+    // Ein Feld eines Termins schreiben: PUT_RELATION 174. Die Befehle gehen einer nach dem
+    // anderen hinaus, im Abstand von CONFIG.feldSchreiben.abstand.
+    const putQueue = [];
+    let putBusy = false;
+
+    function writeField(record, code, value) {
+      const m = /^(\d+)_(\d+)$/.exec(code);
+      if (!m) return false;
+      const text = String(value).slice(0, Number(m[2]));
+      if (beispiel) return sampleWrite(record, code, text);
+      if (!hasSoftEngine()) return false;
+      const kind = CONFIG.feldarten[code] || 'L';
+      putQueue.push({ NR: CONFIG.feldSchreiben.nr, PARAMS: [m[1], m[2], kind, String(record).trim(), CONFIG.idb, text] });
+      pumpPuts();
+      return true;
+    }
+
+    function pumpPuts() {
+      if (putBusy) return;
+      const next = putQueue.shift();
+      if (!next) {
+        if (reloadWanted) scheduleReload();
+        return;
+      }
+      putBusy = true;
+      send('PUT_RELATION', next);
+      setTimeout(function () { putBusy = false; pumpPuts(); }, CONFIG.feldSchreiben.abstand);
+    }
+
+    // Einen neuen Termin anlegen: die Satznummer, sonst null.
+    async function createRecord() {
+      if (beispiel) return sampleCreate();
+      const answer = await ask(CONFIG.satzAnlegen.nr, [CONFIG.idb], { vorne: true });
+      const record = String(answer || '').trim();
+      if (record === '' || record.length > 10 || /fehler|error|nicht|ungültig/i.test(record)) return null;
+      return record;
+    }
+
+    // Nach dem Schreiben frische Daten holen, wenn alle Befehle draußen sind.
+    let reloadWanted = false;
+    let reloadTimer = null;
+
+    function requestFreshData() {
+      reloadWanted = true;
+      if (!putBusy && putQueue.length === 0) scheduleReload();
+    }
+
+    function scheduleReload() {
+      reloadWanted = false;
+      clearTimeout(reloadTimer);
+      if (beispiel) {
+        dataArrived();
+        return;
+      }
+      reloadTimer = setTimeout(function () {
+        if (typeof window.ReloadInputJSON !== 'function') return;
+        try { window.ReloadInputJSON(); log('frische Daten angefordert'); } catch (e) { console.warn('[Empfang] ReloadInputJSON gescheitert', e); }
+      }, 400);
+    }
+
+    function connect() {
+      try { if (window.selib && window.selib.Json && window.selib.Json.InitializeERPConnection) window.selib.Json.InitializeERPConnection(); } catch (e) { /* nicht da */ }
+      try { if (typeof window.InitialisiereSchnittstelle === 'function') window.InitialisiereSchnittstelle(); } catch (e) { /* nicht da */ }
+      if (PROTOKOLL && typeof window.basisHTML_SetConsoleLog === 'function') window.basisHTML_SetConsoleLog(true, true);
+
+      // SoftEngine ruft diese Namen auf, wenn SEDATA gefüllt ist.
+      window.Erstellen = dataArrived;
+      window.initData = dataArrived;
+      window.ReloadData = dataArrived;
+
+      let tries = 0;
+      (function register() {
+        if (typeof window.basisHTML_REGISTER === 'function') {
+          try { window.basisHTML_REGISTER(fromSoftEngine, document.title, '1.0'); return; } catch (e) { console.warn('[Empfang] Anmelden bei SoftEngine gescheitert', e); }
+        }
+        if (++tries < 400) setTimeout(register, 25);
+      })();
+
+      // Steht SEDATA schon da, ohne dass jemand Bescheid sagt: selbst nachsehen.
+      let looks = 0;
+      const look = setInterval(function () {
+        looks++;
+        if (window.SEDATA && window.SEDATA.Daten && loadedRows === null) dataArrived();
+        if (loadedRows !== null || looks > 100) clearInterval(look);
+      }, 300);
+
+      // Was andere Plätze ändern, kommt mit dem regelmäßigen Neuladen.
+      if (CONFIG.neuLaden > 0) {
+        setInterval(function () {
+          if (putBusy || putQueue.length > 0 || dragId !== null) return;
+          scheduleReload();
+        }, CONFIG.neuLaden * 1000);
+      }
+    }
+
+    // ---------------------------------------------------------------------
+    //  Beispielbetrieb: ohne SoftEngine schreibt die Maske in die Beispielzeilen
+    // ---------------------------------------------------------------------
+    const sample = { rows: [] };
+
+    function sampleRows() {
+      const f = CONFIG.felder;
+      const now = nowMinute();
+      const customers = new Map(BEISPIEL.kunden.map(function (k) { return [k[0], k]; }));
+      const pets = new Map(BEISPIEL.tiere.map(function (t) { return [t[0], t]; }));
+      return BEISPIEL.termine.map(function (t, i) {
+        const pet = pets.get(t[0]);
+        const customer = customers.get(pet[1]);
+        const time = Math.max(0, Math.min(23 * 60 + 55, Math.round((now + t[1]) / 5) * 5));
+        const row = {};
+        row[f.satz] = String(i + 1);
+        row[f.kunde] = customer[0];
+        row[f.vorname] = customer[1];
+        row[f.nachname] = customer[2];
+        row[f.tiername] = pet[2];
+        row[f.tierart] = pet[3];
+        row[f.rasse] = pet[4];
+        row[f.geburtsdatum] = pet[5];
+        row[f.uhrzeit] = timeOfMinute(time);
+        row[f.datum] = todayText();
+        row[f.behandlung] = t[4];
+        row[f.status] = CONFIG.status[t[2]];
+        row[f.prioritaet] = t[5] ? CONFIG.notfall : '';
+        row[f.zimmer] = t[6];
+        row[f.geaendertAm] = todayText();
+        row[f.geaendertUm] = timeOfMinute(Math.max(0, now - t[3]));
+        return row;
+      });
+    }
+
+    function sampleList(id) {
+      const first = function (codes) { return [].concat(codes)[0]; };
+      if (id === CONFIG.kunden.abfrage) {
+        const f = CONFIG.kunden.felder;
+        return BEISPIEL.kunden.map(function (k) {
+          const row = {};
+          row[f.nummer] = k[0];
+          row[f.vorname] = k[1];
+          row[f.nachname] = k[2];
+          row[f.ort] = k[3];
+          return row;
+        });
+      }
+      if (id === CONFIG.tiere.abfrage) {
+        const f = CONFIG.tiere.felder;
+        return BEISPIEL.tiere.map(function (t) {
+          const row = { BEISPIELFOTO: t[6] };
+          row[first(f.nummer)] = t[0];
+          row[first(f.kunde)] = t[1];
+          row[first(f.tiername)] = t[2];
+          row[first(f.tierart)] = t[3];
+          row[first(f.rasse)] = t[4];
+          row[first(f.geburtsdatum)] = t[5];
+          return row;
+        });
+      }
+      return [];
+    }
+
+    // SoftEngine setzt "Geändert am/um" beim Schreiben, so nimmt es die Maske an; das Beispiel tut es auch.
+    function sampleWrite(record, code, value) {
+      const f = CONFIG.felder;
+      const row = sample.rows.find(function (r) { return same(r[f.satz], record); });
+      if (!row) return false;
+      row[code] = value;
+      row[f.geaendertAm] = todayText();
+      row[f.geaendertUm] = timeOfMinute(nowMinute());
+      return true;
+    }
+
+    function sampleCreate() {
+      const f = CONFIG.felder;
+      const record = String(sample.rows.reduce(function (max, r) { return Math.max(max, Number(r[f.satz]) || 0); }, 0) + 1);
+      const row = {};
+      row[f.satz] = record;
+      sample.rows.push(row);
+      return record;
+    }
+
+    // ---------------------------------------------------------------------
+    //  Kunden und Tiere: für die Fotos und für "Neuer Termin"
+    // ---------------------------------------------------------------------
+    const lookup = {
+      customers: null,             // null: noch nicht geladen
+      pets: null,
+      petByKey: new Map(),         // Kundennummer|Tiername -> Tier
+      loading: null,
+      loadedAt: 0,
+    };
+
+    function petKey(customerNo, name) {
+      return plainNumber(customerNo) + '|' + plain(name);
+    }
+
+    function customerOf(row) {
+      const f = CONFIG.kunden.felder;
+      const c = { nummer: readField(row, f.nummer), vorname: readField(row, f.vorname), nachname: readField(row, f.nachname), ort: readField(row, f.ort) };
+      c.anzeige = [c.vorname, c.nachname].filter(Boolean).join(' ');
+      c.suche = plain([c.nummer, c.vorname, c.nachname, c.ort].join(' '));
+      return c;
+    }
+
+    function petOf(row) {
+      const f = CONFIG.tiere.felder;
+      return {
+        nummer: readField(row, f.nummer),
+        kunde: readField(row, f.kunde),
+        name: readField(row, f.tiername),
+        art: readField(row, f.tierart),
+        rasse: readField(row, f.rasse),
+        geburtsdatum: readField(row, f.geburtsdatum),
+        medien: readField(row, f.medien),
+        beispielfoto: row.BEISPIELFOTO || '',
+      };
+    }
+
+    // Kunden und Tiere einmal laden, nacheinander; danach zeigt die Tafel die Fotos.
+    function loadLookup() {
+      if (lookup.loading) return lookup.loading;
+      lookup.loading = (async function () {
+        const k = CONFIG.kunden;
+        const t = CONFIG.tiere;
+        const customers = await askList(k.abfrage, 'Kunden', codesOf(k.felder));
+        const pets = await askList(t.abfrage, 'Tiere', codesOf(t.felder));
+        if (customers) lookup.customers = customers.map(customerOf).filter(function (c) { return c.anzeige !== ''; });
+        if (pets) {
+          lookup.pets = pets.map(petOf).filter(function (p) { return p.name !== ''; });
+          lookup.petByKey = new Map(lookup.pets.map(function (p) { return [petKey(p.kunde, p.name), p]; }));
+        }
+        lookup.loadedAt = Date.now();
+        lookup.loading = null;
+        fillSpeciesLists();
+        if (loadedRows !== null) takeRows(loadedRows);
+      })();
+      return lookup.loading;
+    }
+
+    // Das Foto kommt vom Tier: aus den Beispielfotos oder über seine Medien-Nummer von SoftEngine.
+    const petPhotos = new Map();
+
+    function photoOf(customerNo, name) {
+      const pet = lookup.petByKey.get(petKey(customerNo, name));
+      if (!pet) return null;
+      if (beispiel) return (BEISPIEL_FOTOS && BEISPIEL_FOTOS[pet.beispielfoto]) || null;
+      const number = plainNumber(pet.medien);
+      if (!/^\d+$/.test(number)) return null;
+      if (petPhotos.has(number)) return petPhotos.get(number) || null;
+      petPhotos.set(number, '');
+      const t = CONFIG.tierfoto;
+      ask(t.nr, [pet.medien, t.zusatz], { wait: t.warten }).then(function (answer) {
+        const url = photoAddress(answer);
+        if (!url) return;
+        petPhotos.set(number, url);
+        if (loadedRows !== null) takeRows(loadedRows);
+      });
+      return null;
+    }
+
+    // Was Relation 1912 liefert: eine Adresse, ein Dateipfad oder das Bild selbst (Base64).
+    function photoAddress(answer) {
+      const v = String(answer || '').trim();
+      if (v === '') return '';
+      if (/^(https?:|data:image\/|file:)/i.test(v)) return v;
+      if (/^[a-z]:[\\/]/i.test(v) || v.indexOf('\\\\') === 0) return 'file:///' + v.replace(/\\/g, '/');
+      if (v.length > 200 && /^[A-Za-z0-9+/=\s]+$/.test(v)) return 'data:image/jpeg;base64,' + v.replace(/\s/g, '');
+      return '';
+    }
+
+    // ---------------------------------------------------------------------
+    //  Die Tafel zeichnen
+    // ---------------------------------------------------------------------
+    const tafel = document.getElementById('tafel');
+    let renderLater = false;
+    let dragId = null;
+
+    function minutesSince(a) {
+      return a.seit === null ? null : Math.max(0, nowMinute() - a.seit);
+    }
+
+    function waitTone(minutes) {
+      if (minutes === null) return '';
+      return minutes >= CONFIG.wartezeit.dringend ? 'dringend' : minutes >= CONFIG.wartezeit.warnen ? 'warnen' : '';
+    }
+
+    function isLate(a) {
+      return a.minute !== null && nowMinute() - a.minute > CONFIG.verspaetet;
+    }
+
+    function matchesSearch(a) {
+      if (searchText === '') return true;
+      const text = plain([a.name, a.besitzer, a.behandlung, a.tierart, a.rasse].join(' '));
+      return searchText.split(/\s+/).map(plain).every(function (word) { return text.includes(word); });
+    }
+
+    // Die Zahl rechts: Uhrzeit bei Terminen, sonst die Minuten in der Spalte.
+    function valueOf(a) {
+      if (a.spalte === 'termin') return { gross: a.uhrzeit, klein: '', ton: isLate(a) ? 'warnen' : '' };
+      const minutes = minutesSince(a);
+      if (minutes === null) return { gross: a.uhrzeit, klein: '', ton: '' };
+      return {
+        gross: minutes + ' min',
+        klein: a.spalte === 'abrechnung' ? a.letztesZimmer : '',
+        ton: a.spalte === 'wartezimmer' ? waitTone(minutes) : '',
+      };
+    }
+
+    function photoHtml(a) {
+      if (a.foto) return '<img class="foto" src="' + esc(a.foto) + '" alt="">';
+      return '<span class="foto" aria-hidden="true">' + esc(a.name.charAt(0).toUpperCase()) + '</span>';
+    }
+
+    function appointmentHtml(a) {
+      const value = valueOf(a);
+      const kind = [a.rasse || a.tierart, a.alter].filter(Boolean).join(', ');
+      const reason = (a.notfall ? '<span class="dringend">Notfall</span> ' : '') + esc(a.behandlung);
+      return '<div class="termin' + (a.notfall ? ' notfall' : '') + '" tabindex="0" draggable="true" role="button" aria-haspopup="menu" data-id="' + esc(a.id) + '">'
+        + photoHtml(a)
+        + '<div>'
+        + '<p class="termin-name">' + esc(a.name) + '</p>'
+        + (kind ? '<p class="termin-zeile">' + esc(kind) + '</p>' : '')
+        + (a.besitzer ? '<p class="termin-zeile">' + esc(a.besitzer) + '</p>' : '')
+        + (reason ? '<p class="termin-zeile termin-grund">' + reason + '</p>' : '')
+        + '</div>'
+        + '<div class="termin-wert">'
+        + '<p class="termin-zahl zahl ' + value.ton + '">' + esc(value.gross) + '</p>'
+        + (value.klein ? '<p class="leise">' + esc(value.klein) + '</p>' : '')
+        + '</div>'
+        + '</div>';
+    }
+
+    // Die eingestellten Zimmer, dazu jedes unbekannte, in dem gerade jemand ist.
+    function roomsOf(list) {
+      const rooms = CONFIG.zimmer.slice();
+      list.forEach(function (a) {
+        if (a.zimmer && !rooms.some(function (z) { return z.name === a.zimmer; })) rooms.push({ name: a.zimmer, wert: a.zimmer, zusatz: '' });
+      });
+      return rooms;
+    }
+
+    function treatmentHtml(all, shown) {
+      return roomsOf(all).map(function (room) {
+        const busy = all.some(function (a) { return a.zimmer === room.name; });
+        return '<section class="zimmer" data-ziel="behandlung" data-zimmer="' + esc(room.name) + '">'
+          + '<header class="zimmer-kopf"><h3>' + esc(room.name)
+          + (room.zusatz ? '<span class="zimmer-zusatz">' + esc(room.zusatz) + '</span>' : '') + '</h3>'
+          + (busy ? '' : '<span class="frei">frei</span>') + '</header>'
+          + shown.filter(function (a) { return a.zimmer === room.name; }).map(appointmentHtml).join('')
+          + '</section>';
+      }).join('');
+    }
+
+    function freeRooms(all) {
+      return roomsOf(all).filter(function (room) { return !all.some(function (a) { return a.zimmer === room.name; }); });
+    }
+
+    function overviewHtml(spalte, all) {
+      if (spalte === 'termin') {
+        const late = all.filter(isLate).length;
+        return late > 0 ? '<span class="warnen">' + late + ' verspätet</span>' : '';
+      }
+      if (spalte === 'wartezimmer') {
+        const longest = all.reduce(function (max, a) { const m = minutesSince(a); return m !== null && m > max ? m : max; }, -1);
+        return longest < 0 ? '' : 'längste <span class="' + (waitTone(longest) || 'neben') + '">' + longest + ' min</span>';
+      }
+      if (spalte === 'behandlung') {
+        const free = freeRooms(all).length;
+        return free === 0 ? 'alle Zimmer belegt' : '<span class="frei">' + free + ' Zimmer frei</span>';
+      }
+      return '';
+    }
+
+    function render() {
+      if (dragId !== null || menu.forId !== null) {
+        renderLater = true;
+        return;
+      }
+      renderLater = false;
+      const focused = document.activeElement && document.activeElement.classList.contains('termin') ? document.activeElement.dataset.id : null;
+      SPALTEN.forEach(function (spalte) {
+        const all = appointments.filter(function (a) { return a.spalte === spalte; });
+        const shown = all.filter(matchesSearch);
+        document.getElementById('inhalt-' + spalte).innerHTML = spalte === 'behandlung' ? treatmentHtml(all, shown) : shown.map(appointmentHtml).join('');
+        document.getElementById('zahl-' + spalte).textContent = String(all.length);
+        document.getElementById('uebersicht-' + spalte).innerHTML = overviewHtml(spalte, all);
+      });
+      if (focused !== null) {
+        const row = rowOf(focused);
+        if (row) row.focus();
+      }
+    }
+
+    function rowOf(id) {
+      return tafel.querySelector('.termin[data-id="' + CSS.escape(id) + '"]');
+    }
+
+    function showConnection() {
+      const el = document.getElementById('verbindung');
+      if (beispiel) {
+        el.className = 'leise';
+        el.textContent = 'Beispieldaten';
+      } else if (loadedRows === null) {
+        el.className = 'warnen';
+        el.textContent = 'Warte auf SoftEngine';
+      } else {
+        el.textContent = '';
+      }
+    }
+
+    function showClock() {
+      document.getElementById('uhr').textContent = timeOfMinute(nowMinute());
+      document.getElementById('datum').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    // ---------------------------------------------------------------------
+    //  Verschieben: über das Menü einer Zeile oder durch Ziehen
+    // ---------------------------------------------------------------------
+    function moveTo(id, target) {
+      const a = appointments.find(function (item) { return item.id === id; });
+      if (!a) return;
+      if (target.spalte === 'fertig') {
+        checkout(a);
+        return;
+      }
+      if (target.spalte === 'behandlung' && !target.zimmer) {
+        const free = freeRooms(appointments.filter(function (item) { return item.spalte === 'behandlung'; }));
+        target = { spalte: 'behandlung', zimmer: free.length > 0 ? free[0].name : CONFIG.zimmer[0].name };
+      }
+      if (a.spalte === target.spalte && (target.spalte !== 'behandlung' || a.zimmer === target.zimmer)) return;
+      if (a.record === '') {
+        toast(a.name + ': Satznummer fehlt, nicht gespeichert', true);
+        return;
+      }
+      if (!writeField(a.record, CONFIG.felder.status, CONFIG.status[target.spalte])) {
+        toast('Keine Verbindung zu SoftEngine, nicht gespeichert', true);
+        return;
+      }
+      // Das Zimmer bleibt im Feld stehen, für "Zimmer 2" in der Abrechnung.
+      if (target.spalte === 'behandlung') {
+        const room = roomOf(target.zimmer);
+        writeField(a.record, CONFIG.felder.zimmer, room ? room.wert : target.zimmer);
+      }
+      a.spalte = target.spalte;
+      a.zimmer = target.spalte === 'behandlung' ? target.zimmer : null;
+      a.letztesZimmer = a.zimmer || a.letztesZimmer;
+      a.seit = nowMinute();
+      pending.set(a.id, { spalte: a.spalte, zimmer: a.zimmer, letztesZimmer: a.letztesZimmer, seit: a.seit, until: Date.now() + PENDING_MS });
+      const where = { termin: 'zurück zu den Terminen', wartezimmer: 'im Wartezimmer', behandlung: 'in ' + a.zimmer, abrechnung: 'zur Abrechnung' };
+      toast(a.name + ' ' + where[a.spalte]);
+      render();
+      requestFreshData();
+    }
+
+    function checkout(a) {
+      if (a.record === '' || !writeField(a.record, CONFIG.felder.status, CONFIG.status.fertig)) {
+        toast('Keine Verbindung zu SoftEngine, nicht gespeichert', true);
+        return;
+      }
+      if (CONFIG.kassenWerkzeug !== '') send('START_TOOL', { NR: CONFIG.kassenWerkzeug });
+      pending.set(a.id, { spalte: 'fertig', zimmer: null, letztesZimmer: a.letztesZimmer, seit: nowMinute(), until: Date.now() + PENDING_MS });
+      appointments = appointments.filter(function (item) { return item.id !== a.id; });
+      toast(a.name + ' kassiert');
+      render();
+      requestFreshData();
+    }
+
+    // Wohin ein Termin gehen kann, in der Reihenfolge des Ablaufs; next ist der übliche nächste Schritt.
+    function targetsOf(a) {
+      const all = appointments.filter(function (item) { return item.spalte === 'behandlung'; });
+      const free = freeRooms(all);
+      const targets = [];
+      if (a.spalte !== 'termin') targets.push({ spalte: 'termin', text: 'Termine' });
+      if (a.spalte !== 'wartezimmer') targets.push({ spalte: 'wartezimmer', text: 'Wartezimmer', next: a.spalte === 'termin' });
+      roomsOf(all).forEach(function (room) {
+        if (a.spalte === 'behandlung' && a.zimmer === room.name) return;
+        const inside = all.filter(function (item) { return item.zimmer === room.name; }).map(function (item) { return item.name; });
+        targets.push({
+          spalte: 'behandlung',
+          zimmer: room.name,
+          text: room.name,
+          zusatz: inside.length > 0 ? inside.join(', ') : 'frei',
+          ton: inside.length > 0 ? 'leise' : 'frei',
+          next: a.spalte === 'wartezimmer' && free.length > 0 && free[0].name === room.name,
+        });
+      });
+      if (a.spalte !== 'abrechnung') targets.push({ spalte: 'abrechnung', text: 'Abrechnung', next: a.spalte === 'behandlung' });
+      if (a.spalte === 'abrechnung') targets.push({ spalte: 'fertig', text: 'Kassiert', next: true });
+      return targets;
+    }
+
+    const menuEl = document.getElementById('menue');
+    const menu = { forId: null, targets: [] };
+
+    function openMenu(row, point) {
+      const a = appointments.find(function (item) { return item.id === row.dataset.id; });
+      if (!a) return;
+      closeMenu(false);
+      menu.forId = a.id;
+      menu.targets = targetsOf(a);
+      menuEl.innerHTML = '<p class="menue-titel">' + esc(a.name) + '</p>' + menu.targets.map(function (t, i) {
+        return '<button class="menue-eintrag" type="button" role="menuitem" data-i="' + i + '">'
+          + '<span>' + esc(t.text) + '</span>'
+          + (t.zusatz ? '<span class="' + t.ton + '">' + esc(t.zusatz) + '</span>' : '')
+          + '</button>';
+      }).join('');
+      row.classList.add('offen');
+      menuEl.hidden = false;
+      const box = row.getBoundingClientRect();
+      const width = menuEl.offsetWidth;
+      const height = menuEl.offsetHeight;
+      const left = point ? point.x : box.left + box.width / 2;
+      let top = point ? point.y : box.bottom;
+      if (top + height > window.innerHeight - 8) top = Math.max(8, (point ? point.y : box.top) - height);
+      menuEl.style.left = Math.max(8, Math.min(left, window.innerWidth - width - 8)) + 'px';
+      menuEl.style.top = top + 'px';
+      const next = menu.targets.findIndex(function (t) { return t.next; });
+      menuEl.querySelectorAll('.menue-eintrag')[Math.max(0, next)].focus();
+    }
+
+    function closeMenu(refocus) {
+      if (menu.forId === null) return;
+      const id = menu.forId;
+      menu.forId = null;
+      menuEl.hidden = true;
+      menuEl.innerHTML = '';
+      const row = rowOf(id);
+      if (row) {
+        row.classList.remove('offen');
+        if (refocus) row.focus();
+      }
+      if (renderLater) render();
+    }
+
+    menuEl.addEventListener('click', function (e) {
+      const item = e.target.closest('.menue-eintrag');
+      if (!item) return;
+      const id = menu.forId;
+      const target = menu.targets[Number(item.dataset.i)];
+      closeMenu(true);
+      moveTo(id, target);
+    });
+
+    menuEl.addEventListener('keydown', function (e) {
+      const items = Array.from(menuEl.querySelectorAll('.menue-eintrag'));
+      const at = items.indexOf(document.activeElement);
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeMenu(true);
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        items[(at + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus();
+      } else if (e.key === 'Home' || e.key === 'End') {
+        e.preventDefault();
+        items[e.key === 'Home' ? 0 : items.length - 1].focus();
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        closeMenu(true);
+      }
+    });
+
+    document.addEventListener('mousedown', function (e) {
+      if (menu.forId !== null && !menuEl.contains(e.target)) closeMenu(false);
+    }, true);
+    window.addEventListener('resize', function () { closeMenu(false); });
+    tafel.addEventListener('scroll', function () { closeMenu(false); }, true);
+
+    tafel.addEventListener('click', function (e) {
+      const row = e.target.closest('.termin');
+      if (row) openMenu(row, { x: e.clientX, y: e.clientY });
+    });
+
+    tafel.addEventListener('contextmenu', function (e) {
+      const row = e.target.closest('.termin');
+      if (!row) return;
+      e.preventDefault();
+      openMenu(row, { x: e.clientX, y: e.clientY });
+    });
+
+    // Tastatur: Enter öffnet das Menü, die Pfeiltasten gehen von Zeile zu Zeile und von Spalte zu Spalte.
+    tafel.addEventListener('keydown', function (e) {
+      const row = e.target.closest('.termin');
+      if (!row || e.target !== row) return;
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ContextMenu') {
+        e.preventDefault();
+        openMenu(row, null);
+        return;
+      }
+      if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+      e.preventDefault();
+      const lanes = SPALTEN.map(function (spalte) { return Array.from(document.getElementById('inhalt-' + spalte).querySelectorAll('.termin')); });
+      const lane = lanes.findIndex(function (rows) { return rows.includes(row); });
+      const index = lanes[lane].indexOf(row);
+      let next = null;
+      if (e.key === 'ArrowUp') next = lanes[lane][index - 1];
+      else if (e.key === 'ArrowDown') next = lanes[lane][index + 1];
+      else {
+        const step = e.key === 'ArrowLeft' ? -1 : 1;
+        for (let l = lane + step; l >= 0 && l < lanes.length && !next; l += step) {
+          if (lanes[l].length > 0) next = lanes[l][Math.min(index, lanes[l].length - 1)];
+        }
+      }
+      if (next) next.focus();
+    });
+
+    // Ziehen und Ablegen: auf eine Spalte oder ein Zimmer.
+    function dropZone(el) {
+      return el && el.closest ? el.closest('[data-ziel]') : null;
+    }
+
+    function clearZones() {
+      tafel.querySelectorAll('.ziel').forEach(function (el) { el.classList.remove('ziel'); });
+    }
+
+    tafel.addEventListener('dragstart', function (e) {
+      const row = e.target.closest('.termin');
+      if (!row) return;
+      closeMenu(false);
+      dragId = row.dataset.id;
+      row.classList.add('gezogen');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', dragId);
+    });
+
+    tafel.addEventListener('dragend', function () {
+      dragId = null;
+      clearZones();
+      tafel.querySelectorAll('.gezogen').forEach(function (el) { el.classList.remove('gezogen'); });
+      if (renderLater) render();
+    });
+
+    tafel.addEventListener('dragover', function (e) {
+      const zone = dropZone(e.target);
+      if (dragId === null || !zone) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (!zone.classList.contains('ziel')) {
+        clearZones();
+        zone.classList.add('ziel');
+      }
+    });
+
+    tafel.addEventListener('dragleave', function (e) {
+      const zone = dropZone(e.target);
+      if (zone && !zone.contains(e.relatedTarget)) zone.classList.remove('ziel');
+    });
+
+    tafel.addEventListener('drop', function (e) {
+      const zone = dropZone(e.target);
+      if (dragId === null || !zone) return;
+      e.preventDefault();
+      const id = dragId;
+      dragId = null;
+      clearZones();
+      moveTo(id, { spalte: zone.dataset.ziel, zimmer: zone.dataset.zimmer || null });
+    });
+
+    // ---------------------------------------------------------------------
+    //  Neuer Termin
+    // ---------------------------------------------------------------------
+    const dialog = document.getElementById('dialog');
+    const ownerInput = document.getElementById('besitzer');
+    const ownerList = document.getElementById('besitzerListe');
+    const form = { customer: null, hits: [], active: -1, creating: false };
+
+    function openDialog() {
+      closeMenu(false);
+      document.getElementById('formular').reset();
+      form.customer = null;
+      document.getElementById('uhrzeit').value = nextQuarterHour();
+      showHits([]);
+      showPets();
+      dialog.showModal();
+      ownerInput.focus();
+      if (lookup.customers === null) loadLookup();
+    }
+
+    function customerHits(text) {
+      const words = text.trim().split(/\s+/).map(plain).filter(Boolean);
+      if (!lookup.customers || words.length === 0) return [];
+      return lookup.customers
+        .filter(function (c) { return words.every(function (w) { return c.suche.includes(w); }); })
+        .sort(function (a, b) { return a.nachname.localeCompare(b.nachname, 'de') || a.vorname.localeCompare(b.vorname, 'de'); })
+        .slice(0, 8);
+    }
+
+    function showHits(hits) {
+      form.hits = hits;
+      form.active = hits.length > 0 ? 0 : -1;
+      ownerList.innerHTML = hits.map(function (c, i) {
+        return '<li class="vorschlag" role="option" id="vorschlag-' + i + '" data-i="' + i + '" aria-selected="' + (i === form.active) + '">'
+          + '<span>' + esc(c.anzeige) + '</span><span class="leise">' + esc([c.nummer, c.ort].filter(Boolean).join(', ')) + '</span></li>';
+      }).join('');
+      ownerList.hidden = hits.length === 0;
+      ownerInput.setAttribute('aria-expanded', String(hits.length > 0));
+      markActive();
+    }
+
+    function markActive() {
+      ownerList.querySelectorAll('.vorschlag').forEach(function (li, i) { li.setAttribute('aria-selected', String(i === form.active)); });
+      if (form.active >= 0) ownerInput.setAttribute('aria-activedescendant', 'vorschlag-' + form.active);
+      else ownerInput.removeAttribute('aria-activedescendant');
+    }
+
+    function chooseCustomer(c) {
+      form.customer = c;
+      ownerInput.value = c.anzeige;
+      showHits([]);
+      showPets();
+    }
+
+    function petsOf(customer) {
+      if (!customer || !lookup.pets) return [];
+      return lookup.pets
+        .filter(function (p) { return plainNumber(p.kunde) === plainNumber(customer.nummer); })
+        .sort(function (a, b) { return a.name.localeCompare(b.name, 'de'); });
+    }
+
+    // Die Tiere des gewählten Kunden zum Ankreuzen; ein neues Tier ohne Kunden oder auf Wunsch.
+    function showPets() {
+      const pets = petsOf(form.customer);
+      const list = document.getElementById('tierListe');
+      list.innerHTML = pets.map(function (p, i) {
+        const kind = [p.rasse || p.art, ageText(p.geburtsdatum)].filter(Boolean).join(', ');
+        return '<label class="wahl"><input type="checkbox" name="tier" value="' + i + '"' + (pets.length === 1 ? ' checked' : '') + '>'
+          + '<span>' + esc(p.name) + (kind ? ' <span class="leise">' + esc(kind) + '</span>' : '') + '</span></label>';
+      }).join('') + (pets.length > 0 ? '<label class="wahl"><input type="checkbox" id="neuesTierWahl">Neues Tier</label>' : '');
+      list.hidden = pets.length === 0;
+      form.pets = pets;
+      showNewPet();
+    }
+
+    function wantsNewPet() {
+      const choice = document.getElementById('neuesTierWahl');
+      return choice ? choice.checked : true;
+    }
+
+    function showNewPet() {
+      document.getElementById('neuesTier').hidden = !wantsNewPet();
+    }
+
+    function fillSpeciesLists() {
+      const pets = lookup.pets || [];
+      const options = function (values) {
+        return Array.from(new Set(values.filter(Boolean))).sort(function (a, b) { return a.localeCompare(b, 'de'); })
+          .map(function (v) { return '<option value="' + esc(v) + '">'; }).join('');
+      };
+      document.getElementById('tierarten').innerHTML = options(pets.map(function (p) { return p.art; }));
+      document.getElementById('rassen').innerHTML = options(pets.map(function (p) { return p.rasse; }));
+    }
+
+    // Ein Name ohne Kunden: "Nachname, Vorname" oder "Vorname Nachname".
+    function splitName(text) {
+      const t = text.trim();
+      if (t.includes(',')) {
+        const parts = t.split(',');
+        return { vorname: parts.slice(1).join(',').trim(), nachname: parts[0].trim() };
+      }
+      const words = t.split(/\s+/);
+      return { vorname: words.slice(0, -1).join(' '), nachname: words[words.length - 1] || '' };
+    }
+
+    ownerInput.addEventListener('input', function () {
+      form.customer = null;
+      showHits(customerHits(ownerInput.value));
+      showPets();
+    });
+
+    ownerInput.addEventListener('keydown', function (e) {
+      if (ownerList.hidden) return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        form.active = (form.active + (e.key === 'ArrowDown' ? 1 : form.hits.length - 1)) % form.hits.length;
+        markActive();
+      } else if (e.key === 'Enter' && form.active >= 0) {
+        e.preventDefault();
+        chooseCustomer(form.hits[form.active]);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        showHits([]);
+      }
+    });
+
+    ownerList.addEventListener('mousedown', function (e) {
+      const li = e.target.closest('.vorschlag');
+      if (!li) return;
+      e.preventDefault();
+      chooseCustomer(form.hits[Number(li.dataset.i)]);
+    });
+
+    document.getElementById('tierListe').addEventListener('change', function (e) {
+      if (e.target.id === 'neuesTierWahl') {
+        showNewPet();
+        if (e.target.checked) document.getElementById('tierName').focus();
+      }
+    });
+
+    document.getElementById('abbrechen').addEventListener('click', function () { dialog.close(); });
+
+    document.getElementById('formular').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (form.creating) return;
+      const ownerText = ownerInput.value.trim();
+      const chosen = Array.from(document.querySelectorAll('input[name="tier"]:checked')).map(function (box) { return form.pets[Number(box.value)]; });
+      const fresh = wantsNewPet()
+        ? { name: document.getElementById('tierName').value.trim(), art: document.getElementById('tierArt').value.trim(), rasse: document.getElementById('tierRasse').value.trim(), geburtsdatum: '' }
+        : null;
+      if (ownerText === '') {
+        toast('Besitzer fehlt', true);
+        ownerInput.focus();
+        return;
+      }
+      if (fresh && fresh.name === '') {
+        toast('Name des Tiers fehlt', true);
+        document.getElementById('tierName').focus();
+        return;
+      }
+      const pets = chosen.concat(fresh ? [fresh] : []);
+      if (pets.length === 0) {
+        toast('Kein Tier gewählt', true);
+        return;
+      }
+      if (!beispiel && !hasSoftEngine()) {
+        toast('Keine Verbindung zu SoftEngine, Termin nicht angelegt', true);
+        return;
+      }
+      const customer = form.customer;
+      const names = customer ? { vorname: customer.vorname, nachname: customer.nachname } : splitName(ownerText);
+      const spalte = document.querySelector('input[name="wohin"]:checked').value;
+      const time = document.getElementById('uhrzeit').value || nextQuarterHour();
+      const reason = document.getElementById('behandlung').value.trim();
+      const urgent = document.getElementById('notfall').checked;
+      const f = CONFIG.felder;
+
+      setCreating(true);
+      let made = 0;
+      for (const pet of pets) {
+        const record = await createRecord();
+        if (record === null) {
+          toast('Termin nicht angelegt: keine Satznummer von SoftEngine', true);
+          break;
+        }
+        [
+          [f.kunde, customer ? customer.nummer : ''],
+          [f.vorname, names.vorname],
+          [f.nachname, names.nachname],
+          [f.tiername, pet.name],
+          [f.tierart, pet.art],
+          [f.rasse, pet.rasse],
+          [f.geburtsdatum, pet.geburtsdatum],
+          [f.datum, todayText()],
+          [f.uhrzeit, time],
+          [f.behandlung, reason],
+          [f.status, CONFIG.status[spalte]],
+          [f.prioritaet, urgent ? CONFIG.notfall : ''],
+        ].forEach(function (pair) { if (pair[1] !== '') writeField(record, pair[0], pair[1]); });
+        made++;
+      }
+      setCreating(false);
+      if (made === 0) return;
+      dialog.close();
+      toast(made === 1 ? 'Termin für ' + pets[0].name + ' angelegt' : made + ' Termine angelegt');
+      requestFreshData();
+    });
+
+    function setCreating(on) {
+      form.creating = on;
+      const button = document.getElementById('anlegen');
+      button.disabled = on;
+      button.textContent = on ? 'Wird angelegt' : 'Anlegen';
+    }
+
+    // ---------------------------------------------------------------------
+    //  Meldungen und Start
+    // ---------------------------------------------------------------------
+    function toast(text, error) {
+      const el = document.createElement('div');
+      el.className = 'meldung' + (error ? ' fehler' : '');
+      el.textContent = text;
+      document.getElementById('meldungen').appendChild(el);
+      setTimeout(function () {
+        el.classList.add('weg');
+        setTimeout(function () { el.remove(); }, 300);
+      }, error ? 5000 : 2500);
+    }
+
+    document.getElementById('suche').addEventListener('input', function (e) {
+      searchText = e.target.value.trim();
+      render();
+    });
+
+    document.getElementById('neuerTermin').addEventListener('click', openDialog);
+
+    window.addEventListener('load', function () {
+      beispiel = !hasSoftEngine() && typeof window.basisHTML_REGISTER !== 'function' && !(window.SEDATA && window.SEDATA.Daten);
+      showClock();
+      showConnection();
+      if (beispiel) {
+        sample.rows = sampleRows();
+        window.SEDATA = { Daten: { SEFileLoop: [{ ALIAS: CONFIG.quelle, Zeilen: sample.rows }] } };
+        dataArrived();
+      } else {
+        connect();
+      }
+      // Uhr und Minuten laufen weiter.
+      let shownMinute = nowMinute();
+      setInterval(function () {
+        if (nowMinute() === shownMinute) return;
+        shownMinute = nowMinute();
+        showClock();
+        if (loadedRows !== null) takeRows(loadedRows);
+      }, 5000);
+    });
+  </script>
+</body>
+</html>
