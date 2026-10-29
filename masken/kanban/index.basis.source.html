@@ -1419,12 +1419,12 @@ body {
         nachname: '313_30',      // Nachname Kunde
         status: '343_30',        // Zimmer/Status: steuert die Spalte, siehe status
         geaendertAm: '418_10',
-        geaendertUm: '428_5',    // daraus die Minuten in der Spalte (Wartezeit)
+        geaendertUm: '428_5',    // daraus die Minuten in der Spalte (Wartezeit); die Maske setzt es beim Verschieben
         zimmer: '444_30',        // welches Zimmer, siehe zimmer
       },
 
       // Feldart je Feld beim Schreiben: L Text, D Datum, Z Uhrzeit, R Zahl. Nicht genannte Felder sind Text.
-      feldarten: { '10_8': 'R', '108_10': 'D', '118_5': 'Z', '273_10': 'D' },
+      feldarten: { '10_8': 'R', '108_10': 'D', '118_5': 'Z', '273_10': 'D', '418_10': 'D', '428_5': 'Z' },
 
       // Was im Feld Zimmer/Status steht. Leer und Unbekanntes z\u00E4hlen als Termin.
       // Steht dort der Wert eines Zimmers, z\u00E4hlt der Termin als Behandlung in diesem Zimmer.
@@ -2043,6 +2043,13 @@ body {
       setTimeout(function () { putBusy = false; pumpPuts(); }, CONFIG.feldSchreiben.abstand);
     }
 
+    // "Ge\u00E4ndert am/um" setzt die Maske beim Anlegen und Verschieben selbst: daraus rechnet die Tafel
+    // die Minuten in der Spalte. Ob SoftEngine diese Felder beim Schreiben auch setzt, ist nicht belegt.
+    function stampChange(record) {
+      writeField(record, CONFIG.felder.geaendertAm, todayText());
+      writeField(record, CONFIG.felder.geaendertUm, timeOfMinute(nowMinute()));
+    }
+
     // Einen neuen Termin anlegen: die Satznummer, sonst null.
     async function createRecord() {
       if (beispiel) return sampleCreate();
@@ -2173,14 +2180,11 @@ body {
       return [];
     }
 
-    // SoftEngine setzt "Ge\u00E4ndert am/um" beim Schreiben, so nimmt es die Maske an; das Beispiel tut es auch.
     function sampleWrite(record, code, value) {
       const f = CONFIG.felder;
       const row = sample.rows.find(function (r) { return same(r[f.satz], record); });
       if (!row) return false;
       row[code] = value;
-      row[f.geaendertAm] = todayText();
-      row[f.geaendertUm] = timeOfMinute(nowMinute());
       return true;
     }
 
@@ -2476,6 +2480,7 @@ body {
         const room = roomOf(target.zimmer);
         writeField(a.record, CONFIG.felder.zimmer, room ? room.wert : target.zimmer);
       }
+      stampChange(a.record);
       a.spalte = target.spalte;
       a.zimmer = target.spalte === 'behandlung' ? target.zimmer : null;
       a.letztesZimmer = a.zimmer || a.letztesZimmer;
@@ -2909,6 +2914,7 @@ body {
         [f.behandlung, reason],
         [f.status, CONFIG.status[spalte]],
       ].forEach(function (pair) { if (pair[1] !== '') writeField(record, pair[0], pair[1]); });
+      stampChange(record);
       formWindow.close();
       showToast(pet.name + ' angelegt');
       requestFreshData();
