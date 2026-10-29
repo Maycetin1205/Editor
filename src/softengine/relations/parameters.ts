@@ -37,7 +37,7 @@ export function parameterResolve(binding: Parameter, values: RuntimeValues, runt
     return values.rowsCell?.(binding.blockId ?? '', index) ?? ''
   }
   if (binding.source === 'splitCell') {
-    const pick = values.pick
+    const pick = binding.pick === undefined ? values.pick : values.picks?.[binding.pick]
     if (pick === undefined) return ''
     return binding.value === '' ? pick.amount : pick.read(binding.value)
   }

@@ -15,6 +15,7 @@ export interface RunRow {
   key: string
   values: readonly string[]
   picks?: readonly CapturedPick[]
+  pickedFrom?: string
 }
 
 export interface RunResult {
@@ -48,8 +49,11 @@ export interface Transcript {
   previousResult: string
 }
 
-async function conditionHolds(condition: StepCondition | undefined): Promise<boolean> {
+// While a captured row runs, a condition on the source its picks come from
+// asks whether that row got any, not what the source shows now.
+async function conditionHolds(condition: StepCondition | undefined, run: StepsRun): Promise<boolean> {
   if (condition === undefined) return true
+  if (condition.sourceId === run.pickedFrom) return run.picks.length > 0 === condition.rows
   await sourceSettled(condition.sourceId)
   const source = maskHost().source(condition.sourceId)
   const rows = source === undefined ? 0 : maskHost().rows(source).length
@@ -59,7 +63,7 @@ async function conditionHolds(condition: StepCondition | undefined): Promise<boo
 function readsPick(step: RuntimeStep): boolean {
   return stepAdapter(step.kind)
     .bindings(step)
-    .some((b) => b.source === 'splitCell')
+    .some((b) => b.source === 'splitCell' && b.pick === undefined)
 }
 
 function pickValues(pick: CapturedPick): PickValues {
@@ -121,6 +125,7 @@ interface StepsRun {
   only: ReadonlySet<number> | undefined
   rowKey: string | undefined
   picks: readonly CapturedPick[]
+  pickedFrom: string
   values: Record<string, string | undefined>
   stepResults: string[]
   rawResults: unknown[]
@@ -145,6 +150,7 @@ function stepRun(run: StepsRun, slot: number, previousResult: string, pick: Capt
       stepResults: run.stepResults,
       stepRawResults: run.rawResults,
       chosenRow: run.chosenRow,
+      picks: run.picks.map(pickValues),
       ...(run.rowsCell ? { rowsCell: run.rowsCell } : {}),
       ...(pick === undefined ? {} : { pick: pickValues(pick) }),
     },
@@ -164,6 +170,8 @@ export async function runSteps(
   rowKey?: string,
 
   picks: readonly CapturedPick[] = [],
+
+  pickedFrom = '',
 ): Promise<RunResult> {
   const values: Record<string, string | undefined> = {
     ...start?.values,
@@ -188,6 +196,7 @@ export async function runSteps(
     only,
     rowKey,
     picks,
+    pickedFrom,
     values,
     stepResults,
     rawResults,
@@ -196,7 +205,7 @@ export async function runSteps(
 
   for (const [slot, step] of steps.entries()) {
     if (only && !only.has(slot)) continue
-    if (!(await conditionHolds(step.onlyIf))) continue
+    if (!(await conditionHolds(step.onlyIf, run))) continue
     const rounds: (CapturedPick | undefined)[] = readsPick(step) ? [...picks] : [undefined]
     for (const pick of rounds) {
       const outcome = await stepRunner(step.kind).run(step, stepRun(run, slot, previousResult, pick))

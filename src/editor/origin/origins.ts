@@ -27,7 +27,10 @@ const EVENT_VALUES: Readonly<Record<string, string>> = {
   NOW_TIME: 'Aktuelle Uhrzeit',
 }
 
-const ORIGIN_FIELDS = ['kind', 'sourceId', 'blockId', 'prop', 'stepId', 'field', 'value']
+const ORIGIN_FIELDS = ['kind', 'sourceId', 'blockId', 'prop', 'stepId', 'field', 'value', 'pick']
+
+// How many distributed rows a single step can name one by one.
+const SPLIT_PICKS = [0, 1, 2, 3, 4]
 
 export const encodeOrigin = (o: ValueOrigin): string => JSON.stringify(o, ORIGIN_FIELDS)
 
@@ -42,10 +45,11 @@ export function originKey(o: ValueOrigin): string {
       return `${o.kind}:${o.sourceId}`
     case 'formField':
       return `formField:${o.blockId}:${o.prop}`
+    case 'split':
+      return o.pick === undefined ? `split:${o.blockId}` : `split:${o.blockId}:${o.pick}`
     case 'chosenRow':
     case 'captured':
     case 'changed':
-    case 'split':
     case 'sum':
       return `${o.kind}:${o.blockId}`
     case 'step':
@@ -90,6 +94,16 @@ export function originsOf(reach: Reach): Origin[] {
     ),
     ...(reach.splits ?? []).map((g) =>
       origin(`Verteilt: ${g.name}`, g.entries, (value) => ({ kind: 'split', blockId: g.id, value })),
+    ),
+    ...(reach.splits ?? []).flatMap((g) =>
+      SPLIT_PICKS.map((pick) =>
+        origin(`Verteilt, ${pick + 1}. Zeile: ${g.name}`, g.entries, (value) => ({
+          kind: 'split',
+          blockId: g.id,
+          value,
+          pick,
+        })),
+      ),
     ),
     ...(reach.givers ?? []).map((g) =>
       origin(`Gewählte Zeile: ${g.name}`, g.entries, (value) => ({ kind: 'chosenRow', blockId: g.id, value })),
