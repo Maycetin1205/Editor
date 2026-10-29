@@ -3,34 +3,25 @@
    Farbe, Schrift oder Größe; masken/bauen.mjs prüft das beim Bauen. */
 
 :root {
-  /* Flächen: heller Grund, weiße Karten */
-  --grund: #f7f8fa;
-  --grund-tief: #eef1f5;
+  /* Farben aus dem ersten Entwurf: Grautöne und eine einzige Buntfarbe */
+  --grund: #f8fafc;
+  --grund-tief: #f1f5f9;
   --flaeche: #ffffff;
-  --flaeche-leise: #f3f5f8;
-  --flaeche-hover: #e8ecf1;
+  --flaeche-leise: #f1f5f9;
+  --flaeche-hover: #e2e8f0;
 
-  /* Linien: helle Haarlinien */
-  --linie: #e3e7ed;
-  --linie-stark: #d2d8e0;
+  --linie: #e2e8f0;
+  --linie-stark: #cbd5e1;
 
-  /* Text */
-  --tinte: #18202c;
-  --tinte-2: #5a6474;
-  --tinte-3: #8a93a2;
+  --tinte: #0f172a;
+  --tinte-2: #64748b;
+  --tinte-3: #94a3b8;
 
-  /* Akzent: Hauptaktion, Fokus, Auswahl */
+  /* Akzent: nur Hauptaktion und Fokus */
   --akzent: #0f766e;
   --akzent-dunkel: #115e59;
-  --akzent-flaeche: #e6f2f0;
   --akzent-ring: rgb(15 118 110 / 0.18);
   --auf-akzent: #ffffff;
-
-  /* Bedeutung */
-  --warnen: #92400e;
-  --warnen-flaeche: #fdf3dc;
-  --dringend: #b42318;
-  --dringend-flaeche: #fde8e6;
 
   /* Schrift: Inter, wenn eingebaut, sonst die Schrift von Windows */
   --schrift: Inter, 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
@@ -139,17 +130,18 @@ textarea {
   color: var(--tinte-3);
 }
 
-.warnen {
-  color: var(--warnen);
-}
-
-.dringend {
-  color: var(--dringend);
-}
-
+/* Bedeutung ohne Farbe: Auffälliges wird dunkler und kräftiger, Dringendes kehrt sich um */
 .warnen,
 .dringend {
+  color: var(--tinte);
+}
+
+.warnen {
   font-weight: var(--halbfett);
+}
+
+.dringend {
+  font-weight: var(--fett);
 }
 
 /* Eine Marke: höchstens eine je Karte, für Uhrzeit, Minuten oder Betrag */
@@ -168,11 +160,24 @@ textarea {
 }
 
 .marke.warnen {
-  background: var(--warnen-flaeche);
+  background: var(--flaeche-hover);
 }
 
 .marke.dringend {
-  background: var(--dringend-flaeche);
+  background: var(--tinte);
+  color: var(--flaeche);
+}
+
+/* Symbole nur dort, wo man etwas bedient: Strichzeichnung in Textfarbe */
+.symbol {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
 }
 
 /* Kopf einer Maske */
@@ -287,6 +292,12 @@ textarea {
   color: var(--tinte-2);
 }
 
+/* Nur ein Symbol, zum Beispiel das Schließen-Kreuz */
+.knopf-symbol {
+  width: var(--bedienhoehe);
+  padding: 0;
+}
+
 .knopf-klein {
   height: var(--bedienhoehe-klein);
   padding: 0 var(--abstand-3);
@@ -315,12 +326,16 @@ textarea {
   width: 100%;
   height: var(--bedienhoehe);
   padding: 0 var(--abstand-3);
-  border: var(--rand) solid var(--linie-stark);
+  border: var(--rand) solid var(--linie);
   border-radius: var(--radius);
   background: var(--flaeche);
   transition:
     border-color var(--dauer),
     box-shadow var(--dauer);
+}
+
+.eingabe:hover {
+  border-color: var(--linie-stark);
 }
 
 .eingabe:focus {
@@ -331,6 +346,25 @@ textarea {
 
 .eingabe::placeholder {
   color: var(--tinte-3);
+}
+
+/* Suchfeld mit Lupe */
+.suchfeld {
+  position: relative;
+  display: block;
+}
+
+.suchfeld .symbol {
+  position: absolute;
+  top: 50%;
+  left: var(--abstand-3);
+  color: var(--tinte-2);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.suchfeld .eingabe {
+  padding-left: calc(var(--abstand-3) * 2 + 16px);
 }
 
 .gruppe {
@@ -373,15 +407,14 @@ textarea {
 }
 
 .wahl:has(:checked) {
-  border-color: var(--akzent);
-  background: var(--akzent-flaeche);
+  border-color: var(--tinte);
 }
 
 .wahl input {
   width: 1rem;
   height: 1rem;
   margin: 0;
-  accent-color: var(--akzent);
+  accent-color: var(--tinte);
 }
 
 /* Vorschläge unter einem Eingabefeld */
@@ -557,10 +590,6 @@ textarea {
   transition: opacity 300ms;
 }
 
-.meldung.fehler {
-  background: var(--dringend);
-}
-
 .meldung.weg {
   opacity: 0;
 }
@@ -575,7 +604,7 @@ textarea {
   border-radius: var(--radius-gross);
   background: var(--flaeche-leise);
   color: var(--tinte-2);
-  font-size: var(--text-titel);
+  font-size: var(--text-neben);
   font-weight: var(--halbfett);
   object-fit: cover;
 }

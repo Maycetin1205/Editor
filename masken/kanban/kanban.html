@@ -30,10 +30,13 @@ body {
 
 .suche {
   width: 15rem;
-  background: var(--flaeche-leise);
 }
 
-.suche:focus {
+.suche .eingabe {
+  background: var(--grund);
+}
+
+.suche .eingabe:focus {
   background: var(--flaeche);
 }
 
@@ -93,7 +96,9 @@ body {
 }
 
 .ziel {
-  background: var(--akzent-flaeche);
+  background: var(--flaeche-hover);
+  outline: var(--fokus) solid var(--linie-stark);
+  outline-offset: calc(var(--fokus) * -1);
 }
 
 /* Eine Karte */
@@ -257,7 +262,10 @@ body {
       <p class="kennzahl">Abrechnung <span class="kennzahl-wert" id="kennzahl-abrechnung"></span></p>
     </div>
     <div class="kopf-rechts">
-      <input class="eingabe suche" id="suche" type="search" placeholder="Tier oder Besitzer suchen" aria-label="Suchen" autocomplete="off">
+      <label class="suchfeld suche">
+        <svg class="symbol" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+        <input class="eingabe" id="suche" type="search" placeholder="Tier oder Besitzer suchen" aria-label="Suchen" autocomplete="off">
+      </label>
       <button class="knopf knopf-haupt" id="terminAnlegen" type="button" aria-haspopup="dialog">Termin anlegen</button>
       <span class="uhr zahl" id="uhr"></span>
     </div>
@@ -298,7 +306,9 @@ body {
     <form class="lade-form" id="formular" novalidate>
       <header class="lade-kopf">
         <h2 class="lade-titel" id="ladeTitel">Termin anlegen</h2>
-        <button class="knopf knopf-leise" id="schliessen" type="button">Schließen</button>
+        <button class="knopf knopf-leise knopf-symbol" id="schliessen" type="button" aria-label="Schließen">
+          <svg class="symbol" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+        </button>
       </header>
       <div class="lade-inhalt">
         <div class="feld">
@@ -1296,9 +1306,16 @@ body {
     // Die eine Aktion im Fuß der Karte, je Spalte.
     const AKTIONEN = { termin: 'Ins Wartezimmer', wartezimmer: 'Aufrufen', behandlung: 'Zur Abrechnung', abrechnung: 'Kassieren' };
 
+    // Ohne Foto zwei Initialen: aus zwei Wörtern je der erste Buchstabe, sonst die ersten zwei.
+    function initials(name) {
+      const words = String(name || '').trim().split(/\s+/).filter(Boolean);
+      const text = words.length > 1 ? words[0].charAt(0) + words[1].charAt(0) : (words[0] || '').slice(0, 2);
+      return text.toUpperCase();
+    }
+
     function photoHtml(a) {
       if (a.foto) return '<img class="foto" src="' + esc(a.foto) + '" alt="">';
-      return '<span class="foto" aria-hidden="true">' + esc(a.name.charAt(0).toUpperCase()) + '</span>';
+      return '<span class="foto" aria-hidden="true">' + esc(initials(a.name)) + '</span>';
     }
 
     function cardHtml(a) {
@@ -1891,7 +1908,7 @@ body {
         return;
       }
       const el = document.createElement('div');
-      el.className = 'meldung fehler';
+      el.className = 'meldung';
       el.textContent = text;
       document.getElementById('meldungen').appendChild(el);
       setTimeout(function () {
