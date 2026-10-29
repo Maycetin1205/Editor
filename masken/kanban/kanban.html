@@ -197,10 +197,10 @@ body {
       // Feldart je Feld beim Schreiben: L Text, D Datum, Z Uhrzeit, R Zahl. Nicht genannte Felder sind Text.
       feldarten: { '10_8': 'R', '108_10': 'D', '118_5': 'Z', '273_10': 'D', '418_10': 'D', '428_5': 'Z' },
 
-      // Was im Feld Zimmer/Status steht. Leer und Unbekanntes zählen als Termin.
+      // Was im Feld Zimmer/Status steht. Leer heißt "Nicht zugewiesen", Unbekanntes zählt auch dorthin.
       // Steht dort der Wert eines Zimmers, zählt der Termin als Behandlung in diesem Zimmer.
       status: {
-        termin: 'Termin',
+        termin: '',
         wartezimmer: 'Wartezimmer',
         behandlung: 'Behandlung',
         abrechnung: 'Abrechnung',
