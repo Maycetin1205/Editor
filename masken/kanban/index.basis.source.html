@@ -1393,6 +1393,69 @@ body {
     //  Alles, was diese Maske \u00FCber SoftEngine wissen muss, steht hier.
     //  Passt beim Test etwas nicht, wird nur hier eine Zeile ge\u00E4ndert.
     // =====================================================================
+
+    // Die zwei bekannten Termin-Tabellen. Welche die Maske benutzt, steht in CONFIG.termine;
+    // index.basis.SEvariablen.json nennt dieselbe Tabelle (ID) mit den Feldern aus der Zeile "SEvariablen".
+    // Felder als Position_L\u00E4nge. Ein Feld, das eine Tabelle nicht hat, fehlt in ihrer Liste.
+    // Feldart beim Schreiben: L Text, D Datum, Z Uhrzeit, R Zahl; nicht genannte Felder sind Text.
+    const TABELLEN = {
+      // Terminplaner, IDB 0021, wie in der Bibliothek des Editors. In der Testinstallation V7 gibt es ihn nicht.
+      // SEvariablen: ID IDBID0021, FELDER 0_10,10_8,18_30,48_30,78_30,118_5,123_150,273_10,283_30,313_30,343_30,418_10,428_5,444_30
+      terminplaner: {
+        idb: 'ID0021',
+        felder: {
+          satz: '0_10',            // Index = Satznummer
+          kunde: '10_8',           // Kundennummer
+          tierart: '18_30',
+          rasse: '48_30',          // Unterart
+          tiername: '78_30',
+          geburtsdatum: '108_10',
+          uhrzeit: '118_5',
+          behandlung: '123_150',
+          datum: '273_10',         // Termindatum
+          vorname: '283_30',       // Vorname Kunde
+          nachname: '313_30',      // Nachname Kunde
+          status: '343_30',        // Zimmer/Status: steuert die Spalte, siehe status
+          zimmer: '444_30',
+          seitDatum: '418_10',     // Ge\u00E4ndert am
+          seit: '428_5',           // Ge\u00E4ndert um: ab hier z\u00E4hlt die Wartezeit
+        },
+        feldarten: { '10_8': 'R', '108_10': 'D', '118_5': 'Z', '273_10': 'D', '418_10': 'D', '428_5': 'Z' },
+        // Was im Statusfeld steht. Leer und Unbekanntes hei\u00DFen "Nicht zugewiesen";
+        // steht dort ein Zimmer, z\u00E4hlt der Termin als Behandlung in diesem Zimmer.
+        status: { termin: '', wartezimmer: 'Wartezimmer', behandlung: 'Behandlung', abrechnung: 'Abrechnung', fertig: 'Fertig' },
+        // Was im Feld Zimmer f\u00FCr ein Zimmer steht; fehlt es hier, steht dort sein Name.
+        zimmerwerte: {},
+        // Was ein neuer Termin au\u00DFerdem bekommt.
+        neu: {},
+      },
+
+      // Testtermine in SoftEngine V7, IDB 0001, am 14.10.2026 angelegt (V7\APP\Debug\Debugprotokoll-14.10.2026-14-59-45.txt).
+      // Kunde und Tier stehen nur als Nummer drin; die Namen kommen aus dem Adressstamm und den Lieferadressen.
+      // SEvariablen: ID IDBID0001, FELDER 0_10,10_8,18_8,26_10,36_5,75_30,135_60,195_1,197_5,214_60
+      test: {
+        idb: 'ID0001',
+        felder: {
+          satz: '0_10',
+          kunde: '10_8',           // Kundennummer (Adressstamm)
+          tier: '18_8',            // Haustiernummer = Nummer der Lieferadresse
+          datum: '26_10',
+          uhrzeit: '36_5',
+          zimmer: '75_30',         // "Behandlung 1" bis "Behandlung 4", siehe zimmerwerte
+          behandlung: '135_60',    // Grund
+          status: '195_1',
+          seit: '197_5',           // Ankunft: ab hier z\u00E4hlt die Wartezeit
+          notiz: '214_60',         // ein neues Tier ohne Nummer: "Neu: Name |  | Tierart | Rasse | Besitzer"
+        },
+        feldarten: { '10_8': 'R', '18_8': 'R', '26_10': 'D', '36_5': 'Z', '41_4': 'R', '197_5': 'Z' },
+        // G und F stehen in den Testterminen vom 14.10.; W, B und A hat das erste Hand-Kanban festgelegt.
+        status: { termin: 'G', wartezimmer: 'W', behandlung: 'B', abrechnung: 'A', fertig: 'F' },
+        zimmerwerte: { 'Zimmer 1': 'Behandlung 1', 'Zimmer 2': 'Behandlung 2', 'Zimmer 3': 'Behandlung 3', 'Zimmer 4': 'Behandlung 4' },
+        // Dauer 15 Minuten (41_4), kein Notfall (196_1), wie die Testtermine.
+        neu: { '41_4': '15', '196_1': 'N' },
+      },
+    };
+
     const CONFIG = {
       // Name der Praxis oben links.
       praxis: 'Kleintierpraxis am Stadtpark',
@@ -1400,48 +1463,15 @@ body {
       // Name der Liste in index.basis.SEvariablen.json (ALIAS beim SEFILELOOP).
       quelle: 'Termine',
 
-      // Die IDB-Tabelle des Terminplaners, wie PUT_RELATION 174 und GET_RELATION 640 sie nennen.
-      idb: 'ID0021',
+      // Die Termin-Tabelle: TABELLEN.test f\u00FCr den Test in V7, TABELLEN.terminplaner f\u00FCr den Terminplaner 0021.
+      termine: TABELLEN.test,
 
-      // Felder des Terminplaners (IDB 0021) als Position_L\u00E4nge, aus der Bibliothek des Editors.
-      // Jedes gelesene Feld steht auch in FELDER von index.basis.SEvariablen.json.
-      felder: {
-        satz: '0_10',            // Index = Satznummer
-        kunde: '10_8',           // Kundennummer
-        tierart: '18_30',
-        rasse: '48_30',          // Unterart
-        tiername: '78_30',
-        geburtsdatum: '108_10',
-        uhrzeit: '118_5',
-        behandlung: '123_150',
-        datum: '273_10',         // Termindatum
-        vorname: '283_30',       // Vorname Kunde
-        nachname: '313_30',      // Nachname Kunde
-        status: '343_30',        // Zimmer/Status: steuert die Spalte, siehe status
-        geaendertAm: '418_10',
-        geaendertUm: '428_5',    // daraus die Minuten in der Spalte (Wartezeit); die Maske setzt es beim Verschieben
-        zimmer: '444_30',        // welches Zimmer, siehe zimmer
-      },
-
-      // Feldart je Feld beim Schreiben: L Text, D Datum, Z Uhrzeit, R Zahl. Nicht genannte Felder sind Text.
-      feldarten: { '10_8': 'R', '108_10': 'D', '118_5': 'Z', '273_10': 'D', '418_10': 'D', '428_5': 'Z' },
-
-      // Was im Feld Zimmer/Status steht. Leer hei\u00DFt "Nicht zugewiesen", Unbekanntes z\u00E4hlt auch dorthin.
-      // Steht dort der Wert eines Zimmers, z\u00E4hlt der Termin als Behandlung in diesem Zimmer.
-      status: {
-        termin: '',
-        wartezimmer: 'Wartezimmer',
-        behandlung: 'Behandlung',
-        abrechnung: 'Abrechnung',
-        fertig: 'Fertig',          // nach "Kassieren": der Termin verschwindet von der Tafel
-      },
-
-      // Die Zimmer der Spalte Behandlung: name zeigt die Maske, wert steht im Feld zimmer.
+      // Die Zimmer der Spalte Behandlung.
       zimmer: [
-        { name: 'Zimmer 1', wert: 'Zimmer 1', zusatz: 'Dr. Weber (Sprechstunde)' },
-        { name: 'Zimmer 2', wert: 'Zimmer 2', zusatz: 'Dr. Lindner (Sprechstunde)' },
-        { name: 'Zimmer 3', wert: 'Zimmer 3', zusatz: 'R\u00F6ntgen / Ultraschall / Labor' },
-        { name: 'Zimmer 4', wert: 'Zimmer 4', zusatz: 'OP / Zahnstation' },
+        { name: 'Zimmer 1', zusatz: 'Dr. Weber (Sprechstunde)' },
+        { name: 'Zimmer 2', zusatz: 'Dr. Lindner (Sprechstunde)' },
+        { name: 'Zimmer 3', zusatz: 'R\u00F6ntgen / Ultraschall / Labor' },
+        { name: 'Zimmer 4', zusatz: 'OP / Zahnstation' },
       ],
 
       // Feld eines Termins schreiben: PUT_RELATION 174 [POS, LEN, Feldart, Satznummer, IDB, Wert],
@@ -1451,10 +1481,10 @@ body {
       // Neuen Termin anlegen: GET_RELATION 640 [IDB], Antwort = neue Satznummer.
       satzAnlegen: { nr: '640' },
 
-      // Kunden f\u00FCr "Neuer Termin": der Adressstamm (ERPAPICALL beim ersten Laden).
+      // Kunden: der Adressstamm (ERPAPICALL beim ersten Laden). Nachname, sonst der Name der Adresse.
       kunden: {
         abfrage: 'ADRESSE.GET',
-        felder: { nummer: 'ADR_2_8', vorname: 'ADR_3292_30', nachname: 'ADR_3322_40', ort: 'ADR_2233_40' },
+        felder: { nummer: 'ADR_2_8', vorname: 'ADR_3292_30', nachname: ['ADR_3322_40', 'ADR_3460_60'], ort: 'ADR_2233_40' },
       },
 
       // Tiere: die Lieferadressen. Die Bibliothek kennt zwei Felds\u00E4tze; gelesen wird jeweils
@@ -1475,7 +1505,7 @@ body {
       // Foto eines Tiers: GET_RELATION 1912 [Medien-Nummer, J], wie SoftEngine das Bild einer Adresse holt.
       tierfoto: { nr: '1912', zusatz: 'J', warten: 5000 },
 
-      // Werkzeug, das "Kassiert" zus\u00E4tzlich in SoftEngine startet (z. B. die Kasse). Leer = keins.
+      // Werkzeug, das "Kassieren" zus\u00E4tzlich in SoftEngine startet (z. B. die Kasse). Leer = keins.
       kassenWerkzeug: '',
 
       // Nur Termine von heute zeigen (nach Termindatum).
@@ -1732,10 +1762,15 @@ body {
     const pending = new Map();
     const PENDING_MS = 30000;
 
+    // Was im Feld Zimmer f\u00FCr ein Zimmer steht.
+    function roomValue(room) {
+      return CONFIG.termine.zimmerwerte[room.name] || room.name;
+    }
+
     function roomOf(value) {
       const v = String(value || '').trim();
       if (v === '') return null;
-      return CONFIG.zimmer.find(function (z) { return same(z.wert, v) || same(z.name, v); }) || null;
+      return CONFIG.zimmer.find(function (z) { return same(roomValue(z), v) || same(z.name, v); }) || null;
     }
 
     function roomName(value) {
@@ -1743,46 +1778,67 @@ body {
       return room ? room.name : String(value || '').trim();
     }
 
-    // Spalte und Zimmer aus den Feldern Zimmer/Status und Zimmer.
-    function placeOf(statusValue, roomValue) {
+    // Spalte und Zimmer aus dem Statusfeld und dem Feld Zimmer.
+    function placeOf(statusValue, roomField) {
       const v = String(statusValue || '').trim();
-      const s = CONFIG.status;
+      const s = CONFIG.termine.status;
       const statusRoom = roomOf(v);
       if (statusRoom) return { spalte: 'behandlung', zimmer: statusRoom.name };
       if (v === '') return { spalte: 'termin', zimmer: null };
       for (const key of ['wartezimmer', 'abrechnung', 'fertig']) if (same(v, s[key])) return { spalte: key, zimmer: null };
       if (same(v, s.behandlung)) {
-        const name = roomName(roomValue) || (CONFIG.zimmer[0] ? CONFIG.zimmer[0].name : '');
+        const name = roomName(roomField) || (CONFIG.zimmer[0] ? CONFIG.zimmer[0].name : '');
         return { spalte: 'behandlung', zimmer: name };
       }
       return { spalte: 'termin', zimmer: null };
     }
 
+    // Ein neues Tier ohne Nummer steht in der Notiz: "Neu: Name | Foto | Tierart | Rasse | Besitzer".
+    // So hat es auch das erste Hand-Kanban geschrieben; das Foto bleibt hier leer.
+    function newPetOf(note) {
+      const m = /^Neu:\s*(.*)$/.exec(String(note || '').trim());
+      if (!m) return null;
+      const parts = m[1].split('|').map(function (s) { return s.trim(); });
+      return { name: parts[0] || '', art: parts[2] || '', rasse: parts[3] || '', besitzer: parts[4] || '' };
+    }
+
+    function newPetNote(name, art, rasse, owner) {
+      return ('Neu: ' + [name, '', art, rasse, owner].join(' | ')).slice(0, 60);
+    }
+
+    // Ein Termin aus einer Zeile. Was die Zeile nicht selbst nennt (Namen, Tierart, Rasse),
+    // kommt \u00FCber die Kunden- und Tiernummer aus den Listen von SoftEngine.
     function appointmentOf(row, i) {
-      const f = CONFIG.felder;
+      const f = CONFIG.termine.felder;
       const id = readField(row, f.satz);
-      const roomValue = readField(row, f.zimmer);
-      const place = placeOf(readField(row, f.status), roomValue);
+      const roomField = readField(row, f.zimmer);
+      const place = placeOf(readField(row, f.status), roomField);
       const time = timeText(readField(row, f.uhrzeit));
-      const changedOn = readField(row, f.geaendertAm);
+      const sinceDay = readField(row, f.seitDatum);
       const customerNo = readField(row, f.kunde);
-      const name = readField(row, f.tiername);
+      const petNo = readField(row, f.tier);
+      const customer = customerNo === '' ? null : customerByNumber(customerNo);
+      const fresh = newPetOf(readField(row, f.notiz));
+      const name = readField(row, f.tiername) || (petNo !== '' && petByNumber(petNo) ? petByNumber(petNo).name : '') || (fresh ? fresh.name : '');
+      const pet = (petNo !== '' ? petByNumber(petNo) : null) || petByKey(customerNo, name);
+      if ((customerNo !== '' && !customer) || (petNo !== '' && !petByNumber(petNo))) missingNames();
       return {
         id: id !== '' ? id : 'zeile-' + i,
         record: id,
-        name: name || 'Ohne Namen',
+        name: name || (petNo !== '' ? 'Tier ' + petNo : 'Ohne Namen'),
         kunde: customerNo,
-        tierart: readField(row, f.tierart),
-        rasse: readField(row, f.rasse),
-        besitzer: [readField(row, f.vorname), readField(row, f.nachname)].filter(Boolean).join(' ') || (customerNo !== '' ? 'Kunde ' + customerNo : ''),
+        tierart: readField(row, f.tierart) || (pet ? pet.art : '') || (fresh ? fresh.art : ''),
+        rasse: readField(row, f.rasse) || (pet ? pet.rasse : '') || (fresh ? fresh.rasse : ''),
+        besitzer: [readField(row, f.vorname), readField(row, f.nachname)].filter(Boolean).join(' ')
+          || (customer ? customer.anzeige : '') || (fresh ? fresh.besitzer : '') || (customerNo !== '' ? 'Kunde ' + customerNo : ''),
         behandlung: readField(row, f.behandlung),
         spalte: place.spalte,
         zimmer: place.zimmer,
-        letztesZimmer: roomName(roomValue),
+        letztesZimmer: roomName(roomField),
         uhrzeit: time,
         minute: minuteOf(time),
-        seit: changedOn === '' || dayKey(changedOn) === todayKey() ? minuteOf(readField(row, f.geaendertUm)) : null,
-        foto: photoOf(customerNo, name),
+        seit: sinceDay === '' || dayKey(sinceDay) === todayKey() ? minuteOf(readField(row, f.seit)) : null,
+        foto: pet ? petPhoto(pet) : null,
         // F\u00FCr den Betrag in der Abrechnung kennt die Maske noch kein Feld; nur die Beispieldaten haben einen.
         betrag: row.BEISPIELBETRAG || '',
       };
@@ -1807,7 +1863,7 @@ body {
       loadedRows = rows;
       const today = todayKey();
       appointments = rows
-        .filter(function (row) { return !CONFIG.nurHeute || dayKey(readField(row, CONFIG.felder.datum)) === today; })
+        .filter(function (row) { return !CONFIG.nurHeute || dayKey(readField(row, CONFIG.termine.felder.datum)) === today; })
         .map(appointmentOf)
         .map(withPending)
         .filter(function (a) { return a.spalte !== 'fertig'; })
@@ -2025,8 +2081,8 @@ body {
       const text = String(value).slice(0, Number(m[2]));
       if (beispiel) return sampleWrite(record, code, text);
       if (!hasSoftEngine()) return false;
-      const kind = CONFIG.feldarten[code] || 'L';
-      putQueue.push({ NR: CONFIG.feldSchreiben.nr, PARAMS: [m[1], m[2], kind, String(record).trim(), CONFIG.idb, text] });
+      const kind = CONFIG.termine.feldarten[code] || 'L';
+      putQueue.push({ NR: CONFIG.feldSchreiben.nr, PARAMS: [m[1], m[2], kind, String(record).trim(), CONFIG.termine.idb, text] });
       pumpPuts();
       return true;
     }
@@ -2043,17 +2099,18 @@ body {
       setTimeout(function () { putBusy = false; pumpPuts(); }, CONFIG.feldSchreiben.abstand);
     }
 
-    // "Ge\u00E4ndert am/um" setzt die Maske beim Anlegen und Verschieben selbst: daraus rechnet die Tafel
-    // die Minuten in der Spalte. Ob SoftEngine diese Felder beim Schreiben auch setzt, ist nicht belegt.
-    function stampChange(record) {
-      writeField(record, CONFIG.felder.geaendertAm, todayText());
-      writeField(record, CONFIG.felder.geaendertUm, timeOfMinute(nowMinute()));
+    // Kommt ein Termin ins Wartezimmer, schreibt die Maske die Uhrzeit (und beim Terminplaner das Datum)
+    // selbst: ab da z\u00E4hlt die Wartezeit. Ob SoftEngine "Ge\u00E4ndert am/um" beim Schreiben setzt, ist nicht belegt.
+    function stampArrival(record) {
+      const f = CONFIG.termine.felder;
+      if (f.seitDatum) writeField(record, f.seitDatum, todayText());
+      if (f.seit) writeField(record, f.seit, timeOfMinute(nowMinute()));
     }
 
     // Einen neuen Termin anlegen: die Satznummer, sonst null.
     async function createRecord() {
       if (beispiel) return sampleCreate();
-      const answer = await ask(CONFIG.satzAnlegen.nr, [CONFIG.idb], { vorne: true });
+      const answer = await ask(CONFIG.satzAnlegen.nr, [CONFIG.termine.idb], { vorne: true });
       const record = String(answer || '').trim();
       if (record === '' || record.length > 10 || /fehler|error|nicht|ung\u00FCltig/i.test(record)) return null;
       return record;
@@ -2122,31 +2179,34 @@ body {
     const sample = { rows: [] };
 
     function sampleRows() {
-      const f = CONFIG.felder;
+      const f = CONFIG.termine.felder;
       const now = nowMinute();
       const customers = new Map(BEISPIEL.kunden.map(function (k) { return [k[0], k]; }));
       const pets = new Map(BEISPIEL.tiere.map(function (t) { return [t[0], t]; }));
+      // Felder, die die Tabelle nicht hat, bleiben weg; Namen kommen dann aus den Listen.
+      const put = function (row, code, value) { if (code) row[code] = value; };
       return BEISPIEL.termine.map(function (t, i) {
         const pet = pets.get(t[0]);
         const customer = customers.get(pet[1]);
         const time = Math.max(0, Math.min(23 * 60 + 55, Math.round((now + t[1]) / 5) * 5));
-        const row = {};
-        row[f.satz] = String(i + 1);
-        row[f.kunde] = customer[0];
-        row[f.vorname] = customer[1];
-        row[f.nachname] = customer[2];
-        row[f.tiername] = pet[2];
-        row[f.tierart] = pet[3];
-        row[f.rasse] = pet[4];
-        row[f.geburtsdatum] = pet[5];
-        row[f.uhrzeit] = timeOfMinute(time);
-        row[f.datum] = todayText();
-        row[f.behandlung] = t[4];
-        row[f.status] = CONFIG.status[t[2]];
-        row[f.zimmer] = t[5];
-        row[f.geaendertAm] = todayText();
-        row[f.geaendertUm] = timeOfMinute(Math.max(0, now - t[3]));
-        row.BEISPIELBETRAG = t[6] || '';
+        const room = CONFIG.zimmer.find(function (z) { return z.name === t[5]; });
+        const row = { BEISPIELBETRAG: t[6] || '' };
+        put(row, f.satz, String(i + 1));
+        put(row, f.kunde, customer[0]);
+        put(row, f.tier, pet[0]);
+        put(row, f.vorname, customer[1]);
+        put(row, f.nachname, customer[2]);
+        put(row, f.tiername, pet[2]);
+        put(row, f.tierart, pet[3]);
+        put(row, f.rasse, pet[4]);
+        put(row, f.geburtsdatum, pet[5]);
+        put(row, f.uhrzeit, timeOfMinute(time));
+        put(row, f.datum, todayText());
+        put(row, f.behandlung, t[4]);
+        put(row, f.status, CONFIG.termine.status[t[2]]);
+        put(row, f.zimmer, room ? roomValue(room) : '');
+        put(row, f.seitDatum, todayText());
+        put(row, f.seit, timeOfMinute(Math.max(0, now - t[3])));
         return row;
       });
     }
@@ -2157,10 +2217,10 @@ body {
         const f = CONFIG.kunden.felder;
         return BEISPIEL.kunden.map(function (k) {
           const row = {};
-          row[f.nummer] = k[0];
-          row[f.vorname] = k[1];
-          row[f.nachname] = k[2];
-          row[f.ort] = k[3];
+          row[first(f.nummer)] = k[0];
+          row[first(f.vorname)] = k[1];
+          row[first(f.nachname)] = k[2];
+          row[first(f.ort)] = k[3];
           return row;
         });
       }
@@ -2181,7 +2241,7 @@ body {
     }
 
     function sampleWrite(record, code, value) {
-      const f = CONFIG.felder;
+      const f = CONFIG.termine.felder;
       const row = sample.rows.find(function (r) { return same(r[f.satz], record); });
       if (!row) return false;
       row[code] = value;
@@ -2189,7 +2249,7 @@ body {
     }
 
     function sampleCreate() {
-      const f = CONFIG.felder;
+      const f = CONFIG.termine.felder;
       const record = String(sample.rows.reduce(function (max, r) { return Math.max(max, Number(r[f.satz]) || 0); }, 0) + 1);
       const row = {};
       row[f.satz] = record;
@@ -2198,11 +2258,13 @@ body {
     }
 
     // ---------------------------------------------------------------------
-    //  Kunden und Tiere: f\u00FCr die Fotos und f\u00FCr "Neuer Termin"
+    //  Kunden und Tiere: Namen zu den Nummern, Fotos und "Termin anlegen"
     // ---------------------------------------------------------------------
     const lookup = {
       customers: null,             // null: noch nicht geladen
       pets: null,
+      customerByNo: new Map(),     // Kundennummer -> Kunde
+      petByNo: new Map(),          // Tiernummer -> Tier
       petByKey: new Map(),         // Kundennummer|Tiername -> Tier
       loading: null,
       loadedAt: 0,
@@ -2210,6 +2272,18 @@ body {
 
     function petKey(customerNo, name) {
       return plainNumber(customerNo) + '|' + plain(name);
+    }
+
+    function customerByNumber(number) {
+      return lookup.customerByNo.get(plainNumber(number)) || null;
+    }
+
+    function petByNumber(number) {
+      return lookup.petByNo.get(plainNumber(number)) || null;
+    }
+
+    function petByKey(customerNo, name) {
+      return name ? lookup.petByKey.get(petKey(customerNo, name)) || null : null;
     }
 
     function customerOf(row) {
@@ -2234,7 +2308,7 @@ body {
       };
     }
 
-    // Kunden und Tiere einmal laden, nacheinander; danach zeigt die Tafel die Fotos.
+    // Kunden und Tiere laden, nacheinander; danach zeigt die Tafel Namen und Fotos.
     function loadLookup() {
       if (lookup.loading) return lookup.loading;
       lookup.loading = (async function () {
@@ -2242,9 +2316,13 @@ body {
         const t = CONFIG.tiere;
         const customers = await askList(k.abfrage, 'Kunden', codesOf(k.felder));
         const pets = await askList(t.abfrage, 'Tiere', codesOf(t.felder));
-        if (customers) lookup.customers = customers.map(customerOf).filter(function (c) { return c.anzeige !== ''; });
+        if (customers) {
+          lookup.customers = customers.map(customerOf).filter(function (c) { return c.anzeige !== ''; });
+          lookup.customerByNo = new Map(lookup.customers.map(function (c) { return [plainNumber(c.nummer), c]; }));
+        }
         if (pets) {
           lookup.pets = pets.map(petOf).filter(function (p) { return p.name !== ''; });
+          lookup.petByNo = new Map(lookup.pets.map(function (p) { return [plainNumber(p.nummer), p]; }));
           lookup.petByKey = new Map(lookup.pets.map(function (p) { return [petKey(p.kunde, p.name), p]; }));
         }
         lookup.loadedAt = Date.now();
@@ -2254,12 +2332,22 @@ body {
       return lookup.loading;
     }
 
+    // Ein Termin nennt eine Nummer, die in keiner Liste steht: die Listen neu holen,
+    // h\u00F6chstens einmal in der Minute.
+    let namesMissingTimer = null;
+
+    function missingNames() {
+      if (lookup.loadedAt === 0 || lookup.loading || namesMissingTimer) return;
+      namesMissingTimer = setTimeout(function () {
+        namesMissingTimer = null;
+        loadLookup();
+      }, Math.max(0, lookup.loadedAt + 60000 - Date.now()));
+    }
+
     // Das Foto kommt vom Tier: aus den Beispielfotos oder \u00FCber seine Medien-Nummer von SoftEngine.
     const petPhotos = new Map();
 
-    function photoOf(customerNo, name) {
-      const pet = lookup.petByKey.get(petKey(customerNo, name));
-      if (!pet) return null;
+    function petPhoto(pet) {
       if (beispiel) return (BEISPIEL_FOTOS && BEISPIEL_FOTOS[pet.beispielfoto]) || null;
       const number = plainNumber(pet.medien);
       if (!/^\d+$/.test(number)) return null;
@@ -2373,7 +2461,7 @@ body {
     function roomsOf(list) {
       const rooms = CONFIG.zimmer.slice();
       list.forEach(function (a) {
-        if (a.zimmer && !rooms.some(function (z) { return z.name === a.zimmer; })) rooms.push({ name: a.zimmer, wert: a.zimmer, zusatz: '' });
+        if (a.zimmer && !rooms.some(function (z) { return z.name === a.zimmer; })) rooms.push({ name: a.zimmer, zusatz: '' });
       });
       return rooms;
     }
@@ -2471,20 +2559,23 @@ body {
         showError(a.name + ': Satznummer fehlt, nicht gespeichert');
         return;
       }
-      if (!writeField(a.record, CONFIG.felder.status, CONFIG.status[target.spalte])) {
+      const t = CONFIG.termine;
+      if (!writeField(a.record, t.felder.status, t.status[target.spalte])) {
         showError('Keine Verbindung zu SoftEngine, nicht gespeichert');
         return;
       }
-      // Das Zimmer bleibt im Feld stehen, f\u00FCr "Zimmer 2" in der Abrechnung.
+      // Das Zimmer bleibt im Feld stehen, f\u00FCr "Aus Zimmer 2" in der Abrechnung.
       if (target.spalte === 'behandlung') {
         const room = roomOf(target.zimmer);
-        writeField(a.record, CONFIG.felder.zimmer, room ? room.wert : target.zimmer);
+        writeField(a.record, t.felder.zimmer, room ? roomValue(room) : target.zimmer);
       }
-      stampChange(a.record);
+      if (target.spalte === 'wartezimmer') {
+        stampArrival(a.record);
+        a.seit = nowMinute();
+      }
       a.spalte = target.spalte;
       a.zimmer = target.spalte === 'behandlung' ? target.zimmer : null;
       a.letztesZimmer = a.zimmer || a.letztesZimmer;
-      a.seit = nowMinute();
       pending.set(a.id, { spalte: a.spalte, zimmer: a.zimmer, letztesZimmer: a.letztesZimmer, seit: a.seit, until: Date.now() + PENDING_MS });
       render();
       const said = {
@@ -2498,7 +2589,7 @@ body {
     }
 
     function checkout(a) {
-      if (a.record === '' || !writeField(a.record, CONFIG.felder.status, CONFIG.status.fertig)) {
+      if (a.record === '' || !writeField(a.record, CONFIG.termine.felder.status, CONFIG.termine.status.fertig)) {
         showError('Keine Verbindung zu SoftEngine, nicht gespeichert');
         return;
       }
@@ -2739,7 +2830,7 @@ body {
     // Vorschau der Karte: das Foto des gew\u00E4hlten Tiers, sonst zwei Initialen.
     function showPreview() {
       const name = petInput.value.trim() || 'Tier';
-      const photo = form.pet ? photoOf(form.pet.kunde, form.pet.name) : null;
+      const photo = form.pet ? petPhoto(form.pet) : null;
       document.getElementById('vorschauBild').innerHTML = photoHtml({ name: name, foto: photo });
       document.getElementById('vorschauName').textContent = name;
       const kind = document.getElementById('vorschauArt');
@@ -2748,10 +2839,6 @@ body {
       document.getElementById('vorschauBesitzer').textContent = 'Besitzer: ' + (ownerInput.value.trim() || 'Besitzer');
     }
 
-    function customerByNumber(number) {
-      if (!lookup.customers) return null;
-      return lookup.customers.find(function (c) { return plainNumber(c.nummer) === plainNumber(number); }) || null;
-    }
 
     // Vorschl\u00E4ge unter einem Feld: Pfeiltasten w\u00E4hlen, Enter \u00FCbernimmt, Escape schlie\u00DFt die Liste.
     function suggestions(input, list, hitsOf, choose) {
@@ -2895,7 +2982,10 @@ body {
       const customer = form.customer;
       const names = customer ? { vorname: customer.vorname, nachname: customer.nachname } : splitName(ownerText);
       const spalte = document.querySelector('input[name="wohin"]:checked').value;
-      const f = CONFIG.felder;
+      const t = CONFIG.termine;
+      const f = t.felder;
+      // Kennt die Tabelle nur Nummern, steht ein Tier ohne Nummer (und ein Besitzer ohne Kundennummer) in der Notiz.
+      const note = f.tier && !pet.nummer ? newPetNote(pet.name, pet.art, pet.rasse, customer ? '' : ownerText) : '';
 
       setCreating(true);
       const record = await createRecord();
@@ -2905,16 +2995,20 @@ body {
         [f.kunde, customer ? customer.nummer : ''],
         [f.vorname, names.vorname],
         [f.nachname, names.nachname],
+        [f.tier, pet.nummer || ''],
         [f.tiername, pet.name],
         [f.tierart, pet.art],
         [f.rasse, pet.rasse],
         [f.geburtsdatum, pet.geburtsdatum],
+        [f.notiz, note],
         [f.datum, todayText()],
         [f.uhrzeit, document.getElementById('uhrzeit').value || nextQuarterHour()],
         [f.behandlung, reason],
-        [f.status, CONFIG.status[spalte]],
-      ].forEach(function (pair) { if (pair[1] !== '') writeField(record, pair[0], pair[1]); });
-      stampChange(record);
+        [f.status, t.status[spalte]],
+      ].concat(Object.entries(t.neu)).forEach(function (pair) {
+        if (pair[0] && pair[1] !== '') writeField(record, pair[0], pair[1]);
+      });
+      if (spalte === 'wartezimmer') stampArrival(record);
       formWindow.close();
       showToast(pet.name + ' angelegt');
       requestFreshData();
