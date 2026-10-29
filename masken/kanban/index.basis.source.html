@@ -8,89 +8,109 @@
   <script src="<!--SOFTENGINE-VAR!EditorPfad-->/JS/JS/basis.html.interface.js"></script>
   <style>
 /* Gemeinsamer Stil der Masken der Kleintierpraxis.
-   Eine Maske benutzt nur diese Variablen und Bausteine und schreibt keine eigene
-   Farbe, Schrift oder Gr\F6 \DF e; masken/bauen.mjs pr\FC ft das beim Bauen. */
+   Vorbild ist der erste Entwurf (kleintierpraxis_empfangs_kanban.html): dieselben
+   Ma\DF e, Farben und Bausteine, hier ohne Tailwind als eigenes CSS. Eine Maske
+   benutzt nur diese Variablen und Bausteine und schreibt keine eigene Farbe,
+   Schrift oder Gr\F6 \DF e; masken/bauen.mjs pr\FC ft das beim Bauen. */
 
 :root {
-  /* Farben aus dem ersten Entwurf: Graut\F6 ne und eine einzige Buntfarbe */
-  --grund: #f8fafc;
-  --grund-tief: #f1f5f9;
-  --flaeche: #ffffff;
-  --flaeche-leise: #f1f5f9;
-  --flaeche-hover: #e2e8f0;
+  /* Graut\F6 ne */
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --weiss: #ffffff;
 
-  --linie: #e2e8f0;
-  --linie-stark: #cbd5e1;
-
-  --tinte: #0f172a;
-  --tinte-2: #64748b;
-  --tinte-3: #94a3b8;
-
-  /* Akzent: nur Hauptaktion und Fokus */
+  /* Akzent: Hauptaktion, Fokus, Behandlung */
   --akzent: #0f766e;
   --akzent-dunkel: #115e59;
-  --akzent-ring: rgb(15 118 110 / 0.18);
-  --auf-akzent: #ffffff;
+  --teal-50: #f0fdfa;
+  --teal-200: #99f6e4;
+  --teal-400: #2dd4bf;
 
-  /* Schrift: Inter, wenn eingebaut, sonst die Schrift von Windows */
-  --schrift: Inter, 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
-  --text-klein: 0.75rem;
-  --text-neben: 0.8125rem;
-  --text: 0.875rem;
-  --text-titel: 0.9375rem;
-  --text-gross: 1.0625rem;
+  /* Statusfarben: Wartezimmer amber, Abrechnung emerald */
+  --amber-50: #fffbeb;
+  --amber-200: #fde68a;
+  --amber-500: #f59e0b;
+  --amber-800: #92400e;
+  --emerald-50: #ecfdf5;
+  --emerald-200: #a7f3d0;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --emerald-800: #065f46;
+
+  /* Weitere Avatarfarben */
+  --sky-50: #f0f9ff;
+  --sky-200: #bae6fd;
+  --sky-700: #0369a1;
+  --indigo-50: #eef2ff;
+  --indigo-200: #c7d2fe;
+  --indigo-700: #4338ca;
+
+  /* Schrift: Inter, wenn vorhanden, sonst die Schrift des Systems */
+  --schrift: Inter, 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --schrift-titel: 'Plus Jakarta Sans', Inter, 'Segoe UI', system-ui, sans-serif;
+  --schrift-zahl: 'JetBrains Mono', Consolas, 'Cascadia Mono', monospace;
+  --text-10: 10px;
+  --text-105: 10.5px;
+  --text-11: 11px;
+  --text-12: 0.75rem;
+  --text-14: 0.875rem;
+  --text-15: 15px;
+  --zeile-12: 1rem;
+  --zeile-14: 1.25rem;
+  --zeile-eng: 1.375;
+  --mittel: 500;
   --halbfett: 600;
   --fett: 700;
-  --laufweite-eng: -0.011em;
-  --zeile: 1.45;
-  --zeile-eng: 1.25;
 
-  /* Abst\E4 nde */
-  --abstand-1: 0.25rem;
-  --abstand-2: 0.5rem;
-  --abstand-3: 0.75rem;
-  --abstand-4: 0.875rem;
-  --abstand-5: 1rem;
-  --abstand-6: 1.5rem;
+  /* Rundungen und Schatten */
+  --radius-klein: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --rund: 9999px;
+  --schatten-anheben: 0 6px 16px -4px rgb(15 23 42 / 0.06), 0 2px 4px -1px rgb(15 23 42 / 0.03);
+  --schatten-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --ring-ablage: 0 0 0 2px rgb(15 118 110 / 0.15);
+  --abdunkeln: rgb(15 23 42 / 0.3);
 
   /* Ma\DF e */
-  --bedienhoehe: 2.25rem;
-  --bedienhoehe-klein: 1.875rem;
-  --marke: 1.375rem;
   --foto: 2.75rem;
-  --lade: 26rem;
-  --radius-klein: 6px;
-  --radius: 8px;
-  --radius-gross: 12px;
-  --radius-spalte: 14px;
-  --rand: 1px;
-  --fokus: 2px;
-
-  /* Schatten: sehr leicht auf Karten, weich unter Schwebendem */
-  --schatten-karte: 0 1px 2px rgb(16 24 40 / 0.05);
-  --schatten-schwebend: 0 12px 32px rgb(16 24 40 / 0.12), 0 2px 6px rgb(16 24 40 / 0.06);
-  --fokus-ring: 0 0 0 3px var(--akzent-ring);
-  --abdunkeln: rgb(16 24 40 / 0.32);
-  --dauer: 120ms;
+  --punkt: 0.5rem;
+  --punkt-klein: 0.375rem;
+  --symbol: 0.875rem;
+  --symbol-gross: 1rem;
+  --karte-hoehe: 9.5rem;
+  --lade: 335px;
+  --tafel-breite: 1020px;
 }
 
-html {
-  font-size: 16px;
-}
-
+/* Grundlage wie Tailwinds Preflight */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  font-family: var(--schrift);
+}
+
 body {
   margin: 0;
-  background: var(--grund);
-  color: var(--tinte);
-  font-family: var(--schrift);
-  font-size: var(--text);
-  line-height: var(--zeile);
+  background: var(--slate-50);
+  color: var(--slate-900);
+  line-height: inherit;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -100,405 +120,763 @@ h3,
 p {
   margin: 0;
   font-size: inherit;
-}
-
-h1,
-h2,
-h3 {
-  font-weight: var(--halbfett);
-  letter-spacing: var(--laufweite-eng);
+  font-weight: inherit;
 }
 
 button,
 input,
-select,
-textarea {
-  font: inherit;
+select {
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
   color: inherit;
 }
 
-:focus-visible {
-  outline: var(--fokus) solid var(--akzent);
-  outline-offset: var(--fokus);
+button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+img,
+svg {
+  display: block;
+}
+
+fieldset,
+legend,
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+fieldset {
+  border: 0;
+}
+
+ul {
+  list-style: none;
 }
 
 [hidden] {
   display: none !important;
 }
 
-/* Zahlen: gleich breite Ziffern, damit Uhrzeiten untereinander stehen */
-.zahl {
-  font-variant-numeric: tabular-nums;
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
 
-.neben {
-  color: var(--tinte-2);
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.leise {
-  color: var(--tinte-3);
+::-webkit-scrollbar-thumb {
+  border-radius: var(--rund);
+  background: var(--slate-300);
 }
 
-/* Bedeutung ohne Farbe: Auff\E4 lliges wird dunkler und kr\E4 ftiger, Dringendes kehrt sich um */
-.warnen,
-.dringend {
-  color: var(--tinte);
+::-webkit-scrollbar-thumb:hover {
+  background: var(--slate-400);
 }
 
-.warnen {
-  font-weight: var(--halbfett);
-}
-
-.dringend {
-  font-weight: var(--fett);
-}
-
-/* Eine Marke: h\F6 chstens eine je Karte, f\FC r Uhrzeit, Minuten oder Betrag */
-.marke {
-  display: inline-flex;
-  align-items: center;
-  height: var(--marke);
-  padding: 0 var(--abstand-2);
-  border-radius: var(--radius-klein);
-  background: var(--flaeche-leise);
-  color: var(--tinte-2);
-  font-size: var(--text-klein);
-  font-weight: var(--halbfett);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.marke.warnen {
-  background: var(--flaeche-hover);
-}
-
-.marke.dringend {
-  background: var(--tinte);
-  color: var(--flaeche);
-}
-
-/* Symbole nur dort, wo man etwas bedient: Strichzeichnung in Textfarbe */
 .symbol {
   flex: none;
-  width: 16px;
-  height: 16px;
+  width: var(--symbol);
+  height: var(--symbol);
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 1.5;
+  stroke-width: 2;
 }
 
-/* Kopf einer Maske */
+/* Kopf: Praxis, Z\E4 hler, Suche, Hauptknopf */
 .kopf {
+  position: relative;
+  z-index: 20;
+  flex: none;
+  padding: 0.625rem 1.25rem;
+  border-bottom: 1px solid var(--slate-200);
+  background: var(--weiss);
+}
+
+.kopf-zeile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.praxis-zeile {
   display: flex;
   align-items: center;
-  gap: var(--abstand-6);
-  padding: var(--abstand-3) var(--abstand-6);
-  border-bottom: var(--rand) solid var(--linie);
-  background: var(--flaeche);
+  gap: 0.5rem;
 }
 
-.kopf-titel {
-  font-size: var(--text-titel);
+.praxis-name {
+  color: var(--slate-900);
+  font-family: var(--schrift-titel);
+  font-size: var(--text-15);
   font-weight: var(--fett);
+  letter-spacing: -0.025em;
+}
+
+.praxis-ort {
+  padding: 0.125rem 0.5rem;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  background: var(--slate-100);
+  color: var(--slate-600);
+  font-size: var(--text-11);
+  font-weight: var(--mittel);
+}
+
+.praxis-stand {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--slate-500);
+  font-size: var(--text-11);
+}
+
+.praxis-stand .punkt {
+  width: var(--punkt-klein);
+  height: var(--punkt-klein);
+}
+
+.kennzahlen {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem;
+  border: 1px solid rgb(226 232 240 / 0.9);
+  border-radius: var(--radius-lg);
+  background: var(--slate-50);
+}
+
+@media (min-width: 1280px) {
+  .kennzahlen {
+    display: flex;
+  }
+}
+
+.kennzahl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid rgb(226 232 240 / 0.7);
+  border-radius: var(--radius-md);
+  background: var(--weiss);
+  font-size: var(--text-12);
+  line-height: var(--zeile-12);
+}
+
+.kennzahl-name {
+  color: var(--slate-500);
+}
+
+.kennzahl-wert {
+  color: var(--slate-900);
+  font-weight: var(--fett);
+}
+
+.kennzahl-wert.akzent {
+  color: var(--akzent);
 }
 
 .kopf-rechts {
   display: flex;
   align-items: center;
-  gap: var(--abstand-3);
-  margin-left: auto;
+  gap: 0.625rem;
 }
 
-/* Kennzahlen im Kopf: Name leise, Zahl kr\E4 ftig */
-.kennzahlen {
-  display: flex;
-  align-items: baseline;
-  gap: var(--abstand-6);
-  font-size: var(--text-neben);
-}
-
-.kennzahl {
-  display: flex;
-  align-items: baseline;
-  gap: var(--abstand-2);
-  color: var(--tinte-3);
-  white-space: nowrap;
-}
-
-.kennzahl-wert {
-  color: var(--tinte);
-  font-weight: var(--halbfett);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Kn\F6 pfe */
-.knopf {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--bedienhoehe);
-  padding: 0 var(--abstand-5);
-  border: var(--rand) solid var(--linie-stark);
-  border-radius: var(--radius);
-  background: var(--flaeche);
-  font-size: var(--text-neben);
-  font-weight: var(--halbfett);
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    background-color var(--dauer),
-    border-color var(--dauer),
-    box-shadow var(--dauer);
-}
-
-.knopf:hover {
-  background: var(--flaeche-leise);
-}
-
-.knopf:focus-visible {
-  outline: none;
-  box-shadow: var(--fokus-ring);
-}
-
-.knopf:disabled {
-  color: var(--tinte-3);
-  cursor: default;
-}
-
-.knopf-haupt {
-  border-color: var(--akzent);
-  background: var(--akzent);
-  color: var(--auf-akzent);
-}
-
-.knopf-haupt:hover {
-  border-color: var(--akzent-dunkel);
-  background: var(--akzent-dunkel);
-}
-
-.knopf-haupt:disabled {
-  border-color: var(--tinte-3);
-  background: var(--tinte-3);
-  color: var(--auf-akzent);
-}
-
-/* Weich: leise Aktion auf einer Karte */
-.knopf-weich {
-  border-color: transparent;
-  background: var(--flaeche-leise);
-  color: var(--tinte);
-}
-
-.knopf-weich:hover {
-  background: var(--flaeche-hover);
-}
-
-.knopf-leise {
-  border-color: transparent;
-  background: transparent;
-  color: var(--tinte-2);
-}
-
-/* Nur ein Symbol, zum Beispiel das Schlie\DF en-Kreuz */
-.knopf-symbol {
-  width: var(--bedienhoehe);
-  padding: 0;
-}
-
-.knopf-klein {
-  height: var(--bedienhoehe-klein);
-  padding: 0 var(--abstand-3);
-  font-size: var(--text-klein);
-}
-
-.knopf-breit {
-  width: 100%;
-}
-
-/* Eingaben */
-.feld {
-  display: grid;
-  gap: var(--abstand-2);
-  min-width: 0;
-}
-
-.feld-name {
-  padding: 0;
-  color: var(--tinte-2);
-  font-size: var(--text-klein);
-  font-weight: var(--halbfett);
-}
-
-.eingabe {
-  width: 100%;
-  height: var(--bedienhoehe);
-  padding: 0 var(--abstand-3);
-  border: var(--rand) solid var(--linie);
-  border-radius: var(--radius);
-  background: var(--flaeche);
-  transition:
-    border-color var(--dauer),
-    box-shadow var(--dauer);
-}
-
-.eingabe:hover {
-  border-color: var(--linie-stark);
-}
-
-.eingabe:focus {
-  border-color: var(--akzent);
-  outline: none;
-  box-shadow: var(--fokus-ring);
-}
-
-.eingabe::placeholder {
-  color: var(--tinte-3);
-}
-
-/* Suchfeld mit Lupe */
 .suchfeld {
   position: relative;
-  display: block;
+  width: 15rem;
 }
 
 .suchfeld .symbol {
   position: absolute;
   top: 50%;
-  left: var(--abstand-3);
-  color: var(--tinte-2);
+  left: 0.75rem;
+  color: var(--slate-400);
   transform: translateY(-50%);
   pointer-events: none;
 }
 
-.suchfeld .eingabe {
-  padding-left: calc(var(--abstand-3) * 2 + 16px);
+.suchfeld input {
+  width: 100%;
+  padding: 0.375rem 0.75rem 0.375rem 2rem;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  background: var(--slate-50);
+  color: var(--slate-800);
+  font-size: var(--text-12);
+  line-height: var(--zeile-12);
+  transition:
+    background-color 150ms,
+    border-color 150ms;
 }
 
-.gruppe {
-  display: grid;
-  gap: var(--abstand-2);
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
+.suchfeld input::placeholder {
+  color: var(--slate-400);
 }
 
-.gruppe > legend {
-  margin-bottom: var(--abstand-2);
+.suchfeld input:focus {
+  border-color: var(--akzent);
+  outline: none;
+  background: var(--weiss);
 }
 
-.reihe {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--abstand-3);
-  align-items: end;
-}
-
-/* Eine Wahl: K\E4 stchen oder Punkt mit Text */
-.wahl {
+.knopf-haupt {
   display: flex;
   align-items: center;
-  gap: var(--abstand-3);
-  min-height: var(--bedienhoehe);
-  padding: 0 var(--abstand-3);
-  border: var(--rand) solid var(--linie);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition:
-    border-color var(--dauer),
-    background-color var(--dauer);
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--radius-lg);
+  background: var(--akzent);
+  color: var(--weiss);
+  font-size: var(--text-12);
+  font-weight: var(--halbfett);
+  line-height: var(--zeile-12);
+  transition: background-color 150ms;
 }
 
-.wahl:hover {
-  border-color: var(--linie-stark);
+.knopf-haupt:hover {
+  background: var(--akzent-dunkel);
 }
 
-.wahl:has(:checked) {
-  border-color: var(--tinte);
+.knopf-haupt:disabled {
+  background: var(--slate-400);
+  cursor: default;
 }
 
-.wahl input {
-  width: 1rem;
-  height: 1rem;
-  margin: 0;
-  accent-color: var(--tinte);
+/* Punkte vor Spalten, Z\E4 hlern und Zimmern */
+.punkt {
+  display: inline-block;
+  flex: none;
+  width: var(--punkt);
+  height: var(--punkt);
+  border-radius: var(--rund);
 }
 
-/* Vorschl\E4 ge unter einem Eingabefeld */
-.vorschlaege {
-  max-height: 16rem;
-  margin: 0;
-  padding: var(--abstand-1);
+.punkt.termin,
+.punkt.aus {
+  background: var(--slate-400);
+}
+
+.punkt.wartezimmer,
+.punkt.wartet {
+  background: var(--amber-500);
+}
+
+.punkt.behandlung {
+  background: var(--akzent);
+}
+
+.punkt.abrechnung,
+.punkt.da {
+  background: var(--emerald-500);
+}
+
+.punkt.frei {
+  background: var(--slate-300);
+}
+
+/* Tafel und Spalten */
+.tafel-bereich {
+  flex: 1;
+  min-height: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.tafel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.875rem;
+  min-width: var(--tafel-breite);
+  height: 100%;
+}
+
+.spalte {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgb(226 232 240 / 0.9);
+  border-radius: var(--radius-xl);
+  background: rgb(241 245 249 / 0.75);
+}
+
+.spalte-kopf {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid rgb(226 232 240 / 0.8);
+  background: var(--weiss);
+}
+
+.spalte-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.spalte-titel {
+  color: var(--slate-800);
+  font-family: var(--schrift-titel);
+  font-size: var(--text-12);
+  font-weight: var(--fett);
+  line-height: var(--zeile-12);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.zaehler {
+  padding: 0.125rem 0.5rem;
+  border: 1px solid;
+  border-radius: var(--rund);
+  font-size: var(--text-11);
+  font-weight: var(--halbfett);
+}
+
+.zaehler.termin {
+  border-color: var(--slate-200);
+  background: var(--slate-100);
+  color: var(--slate-700);
+}
+
+.zaehler.wartezimmer {
+  border-color: var(--amber-200);
+  background: var(--amber-50);
+  color: var(--amber-800);
+}
+
+.zaehler.behandlung {
+  border-color: var(--teal-200);
+  background: var(--teal-50);
+  color: var(--akzent);
+}
+
+.zaehler.abrechnung {
+  border-color: var(--emerald-200);
+  background: var(--emerald-50);
+  color: var(--emerald-800);
+}
+
+.spalte-inhalt {
+  flex: 1;
+  padding: 0.625rem;
   overflow-y: auto;
-  border: var(--rand) solid var(--linie);
-  border-radius: var(--radius);
-  background: var(--flaeche);
-  box-shadow: var(--schatten-karte);
-  list-style: none;
+  transition: background-color 150ms;
 }
 
-.vorschlag {
+.spalte-inhalt > * + * {
+  margin-top: 0.625rem;
+}
+
+.spalte-inhalt.ablage {
+  background: var(--teal-50);
+}
+
+.leer {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 6rem;
+  border: 1px dashed var(--slate-300);
+  border-radius: var(--radius-xl);
+  color: var(--slate-400);
+  font-size: var(--text-12);
+  line-height: var(--zeile-12);
+}
+
+/* Zimmer in der Spalte Behandlung */
+.zimmer {
+  padding: 0.625rem;
+  border: 1px solid rgb(226 232 240 / 0.95);
+  border-radius: var(--radius-xl);
+  background: rgb(255 255 255 / 0.8);
+  transition: all 150ms;
+}
+
+.zimmer.ablage {
+  border-color: var(--akzent);
+  background: var(--teal-50);
+  box-shadow: var(--ring-ablage);
+}
+
+.zimmer-kopf {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--abstand-5);
-  padding: var(--abstand-2) var(--abstand-3);
-  border-radius: var(--radius-klein);
-  cursor: pointer;
+  margin-bottom: 0.5rem;
+  padding: 0 0.125rem;
 }
 
-.vorschlag:hover,
-.vorschlag[aria-selected='true'] {
-  background: var(--flaeche-leise);
+.zimmer-name {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
 }
 
-/* Men\FC  an einer Karte */
-.menue {
-  position: fixed;
-  z-index: 20;
-  min-width: 15rem;
-  max-width: 22rem;
-  padding: var(--abstand-1);
-  border: var(--rand) solid var(--linie);
-  border-radius: var(--radius-gross);
-  background: var(--flaeche);
-  box-shadow: var(--schatten-schwebend);
+.zimmer-titel {
+  color: var(--slate-900);
+  font-family: var(--schrift-titel);
+  font-size: var(--text-12);
+  font-weight: var(--fett);
+  line-height: var(--zeile-12);
+  white-space: nowrap;
 }
 
-.menue-titel {
-  padding: var(--abstand-2) var(--abstand-3) var(--abstand-1);
-  color: var(--tinte-3);
-  font-size: var(--text-klein);
+.zimmer-zusatz {
+  overflow: hidden;
+  color: var(--slate-500);
+  font-size: var(--text-11);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stand {
+  flex: none;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid;
+  border-radius: var(--rund);
+  font-size: var(--text-10);
   font-weight: var(--halbfett);
 }
 
-.menue-eintrag {
+.stand.belegt {
+  border-color: var(--teal-200);
+  background: var(--teal-50);
+  color: var(--akzent);
+}
+
+.stand.frei {
+  border-color: var(--slate-200);
+  background: var(--slate-100);
+  color: var(--slate-500);
+}
+
+.zimmer-karten > * + * {
+  margin-top: 0.5rem;
+}
+
+.zimmer-leer {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--abstand-6);
-  width: 100%;
-  padding: var(--abstand-2) var(--abstand-3);
-  border: 0;
-  border-radius: var(--radius);
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  height: 4rem;
+  border: 1px dashed rgb(203 213 225 / 0.9);
+  border-radius: var(--radius-lg);
+  background: rgb(248 250 252 / 0.7);
+  color: var(--slate-400);
+  font-size: var(--text-11);
 }
 
-/* Der \FC bliche n\E4 chste Schritt */
-.menue-eintrag.standard {
-  font-weight: var(--halbfett);
+/* Karte: Foto, Name, Besitzer, Badge; Grund; Fu\DF  mit Aktion */
+.karte {
+  display: flex;
+  flex-direction: column;
+  min-height: var(--karte-hoehe);
+  padding: 0.75rem;
+  border: 1px solid rgb(226 232 240 / 0.95);
+  border-radius: var(--radius-xl);
+  background: var(--weiss);
+  cursor: grab;
+  transition:
+    transform 0.14s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.14s ease,
+    border-color 0.14s ease;
 }
 
-.menue-eintrag:hover,
-.menue-eintrag:focus-visible {
+.karte:active {
+  cursor: grabbing;
+}
+
+.karte:hover {
+  box-shadow: var(--schatten-anheben);
+  transform: translateY(-1px);
+}
+
+.karte:focus-visible {
+  border-color: var(--akzent);
   outline: none;
-  background: var(--flaeche-leise);
+  box-shadow: var(--ring-ablage);
 }
 
-/* Lade: kommt von rechts \FC ber die Seite, der Rest wird abgedunkelt */
+.karte.gezogen {
+  opacity: 0.4;
+  transform: scale(0.98);
+}
+
+.karte-oben {
+  padding-bottom: 0.625rem;
+}
+
+.karte-kopf {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.625rem;
+}
+
+.karte-tier {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+}
+
+.karte-text {
+  min-width: 0;
+}
+
+.karte-zeile {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.karte-name,
+.karte-rasse,
+.karte-besitzer {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.karte-name {
+  color: var(--slate-900);
+  font-family: var(--schrift-titel);
+  font-size: var(--text-14);
+  font-weight: var(--fett);
+  line-height: var(--zeile-14);
+}
+
+.karte-rasse {
+  color: var(--slate-400);
+  font-size: var(--text-11);
+}
+
+.karte-besitzer {
+  min-height: var(--zeile-12);
+  color: var(--slate-600);
+  font-size: var(--text-12);
+  font-weight: var(--mittel);
+  line-height: var(--zeile-12);
+}
+
+.karte-grund {
+  margin-top: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  border: 1px solid rgb(226 232 240 / 0.7);
+  border-radius: var(--radius-lg);
+  background: var(--slate-50);
+  color: var(--slate-700);
+  font-size: var(--text-12);
+  line-height: var(--zeile-eng);
+}
+
+.karte-fuss {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--slate-100);
+}
+
+.fuss-text {
+  overflow: hidden;
+  color: var(--slate-400);
+  font-size: var(--text-11);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fuss-text.zimmer-im {
+  color: var(--slate-500);
+  font-weight: var(--mittel);
+}
+
+/* Foto oder Avatar mit zwei Initialen */
+.bild,
+.avatar {
+  position: relative;
+  flex: none;
+  width: var(--foto);
+  height: var(--foto);
+  border: 1px solid;
+  border-radius: var(--radius-xl);
+}
+
+.bild {
+  overflow: hidden;
+  border-color: var(--slate-200);
+  background: var(--slate-100);
+}
+
+.bild img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--schrift-titel);
+  font-size: var(--text-12);
+  font-weight: var(--fett);
+  line-height: 1;
+  letter-spacing: -0.025em;
+  user-select: none;
+}
+
+.avatar.farbe-0 {
+  border-color: var(--teal-200);
+  background: var(--teal-50);
+  color: var(--akzent);
+}
+
+.avatar.farbe-1 {
+  border-color: var(--sky-200);
+  background: var(--sky-50);
+  color: var(--sky-700);
+}
+
+.avatar.farbe-2 {
+  border-color: var(--indigo-200);
+  background: var(--indigo-50);
+  color: var(--indigo-700);
+}
+
+.avatar.farbe-3 {
+  border-color: var(--amber-200);
+  background: var(--amber-50);
+  color: var(--amber-800);
+}
+
+.avatar.farbe-4 {
+  border-color: var(--emerald-200);
+  background: var(--emerald-50);
+  color: var(--emerald-700);
+}
+
+/* Badge oben rechts: h\F6 chstens eins je Karte */
+.badge {
+  flex: none;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid;
+  border-radius: var(--radius-md);
+  font-size: var(--text-11);
+  font-weight: var(--halbfett);
+  white-space: nowrap;
+}
+
+.badge.zeit {
+  border-color: var(--slate-200);
+  background: var(--slate-100);
+  color: var(--slate-700);
+  font-family: var(--schrift-zahl);
+  font-weight: var(--mittel);
+}
+
+.badge.wartezeit {
+  border-color: var(--amber-200);
+  background: var(--amber-50);
+  color: var(--amber-800);
+}
+
+.badge.im-zimmer {
+  border-color: var(--teal-200);
+  background: var(--teal-50);
+  color: var(--akzent);
+  font-size: var(--text-105);
+}
+
+.badge.betrag {
+  border-color: var(--emerald-200);
+  background: var(--emerald-50);
+  color: var(--emerald-800);
+  font-family: var(--schrift-zahl);
+}
+
+/* Kn\F6 pfe im Fu\DF  einer Karte */
+.knopf-karte {
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-11);
+  font-weight: var(--halbfett);
+  white-space: nowrap;
+  transition: background-color 150ms;
+}
+
+.knopf-karte.akzent {
+  background: var(--akzent);
+  color: var(--weiss);
+}
+
+.knopf-karte.akzent:hover {
+  background: var(--akzent-dunkel);
+}
+
+.knopf-karte.grau {
+  border: 1px solid var(--slate-200);
+  background: var(--slate-100);
+  color: var(--slate-800);
+}
+
+.knopf-karte.grau:hover {
+  background: var(--slate-200);
+}
+
+.knopf-karte.kasse {
+  background: var(--emerald-600);
+  color: var(--weiss);
+}
+
+.knopf-karte.kasse:hover {
+  background: var(--emerald-700);
+}
+
+.zimmerwahl {
+  flex: none;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  background: var(--slate-100);
+  color: var(--slate-800);
+  font-size: var(--text-11);
+  font-weight: var(--halbfett);
+  cursor: pointer;
+}
+
+.zimmerwahl:hover {
+  background: var(--slate-200);
+}
+
+.zimmerwahl:focus {
+  outline: none;
+}
+
+/* Lade von rechts \FC ber der Seite */
 .lade {
   position: fixed;
   inset: 0 0 0 auto;
@@ -509,11 +887,14 @@ textarea {
   margin: 0;
   padding: 0;
   border: 0;
-  background: var(--flaeche);
-  color: var(--tinte);
+  border-left: 1px solid var(--slate-200);
+  background: var(--weiss);
+  color: var(--slate-900);
 }
 
 .lade[open] {
+  display: flex;
+  flex-direction: column;
   animation: lade-rein 180ms ease-out;
 }
 
@@ -537,88 +918,322 @@ textarea {
   }
 }
 
-.lade-form {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
 .lade-kopf {
   display: flex;
+  flex: none;
   align-items: center;
   justify-content: space-between;
-  gap: var(--abstand-3);
-  padding: var(--abstand-4) var(--abstand-4) var(--abstand-4) var(--abstand-6);
-  border-bottom: var(--rand) solid var(--linie);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--slate-200);
+  background: rgb(248 250 252 / 0.6);
 }
 
 .lade-titel {
-  font-size: var(--text-gross);
+  color: var(--slate-900);
+  font-family: var(--schrift-titel);
+  font-size: var(--text-14);
+  font-weight: var(--fett);
+  line-height: var(--zeile-14);
 }
 
-.lade-inhalt {
-  display: grid;
+.lade-zu {
+  padding: 0.25rem;
+  border-radius: var(--radius-lg);
+  color: var(--slate-400);
+  transition:
+    color 150ms,
+    background-color 150ms;
+}
+
+.lade-zu:hover {
+  background: var(--slate-100);
+  color: var(--slate-700);
+}
+
+.lade-zu .symbol {
+  width: var(--symbol-gross);
+  height: var(--symbol-gross);
+}
+
+.lade-form {
   flex: 1;
-  align-content: start;
-  gap: var(--abstand-6);
-  min-height: 0;
-  padding: var(--abstand-6);
+  padding: 1rem;
   overflow-y: auto;
+  font-size: var(--text-12);
+  line-height: var(--zeile-12);
 }
 
-.lade-fuss {
-  padding: var(--abstand-5) var(--abstand-6);
-  border-top: var(--rand) solid var(--linie);
+.lade-form > * + * {
+  margin-top: 0.875rem;
+}
+
+.vorschau {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid rgb(226 232 240 / 0.9);
+  border-radius: var(--radius-xl);
+  background: var(--slate-50);
+}
+
+.vorschau-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.vorschau-art {
+  flex: none;
+  padding: 0.125rem 0.375rem;
+  border: 1px solid;
+  border-radius: var(--radius-klein);
+  font-size: var(--text-10);
+  font-weight: var(--mittel);
+}
+
+.vorschau-art.avatar-art {
+  border-color: var(--teal-200);
+  background: var(--teal-50);
+  color: var(--akzent);
+}
+
+.vorschau-art.foto-art {
+  border-color: var(--slate-200);
+  background: var(--slate-200);
+  color: var(--slate-700);
+}
+
+.vorschau-besitzer {
+  overflow: hidden;
+  color: var(--slate-500);
+  font-size: var(--text-11);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reihe {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+.feld {
+  position: relative;
+  min-width: 0;
+}
+
+.feld-name {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--slate-700);
+  font-weight: var(--halbfett);
+}
+
+.feld-name.weit {
+  margin-bottom: 0.375rem;
+}
+
+.eingabe {
+  width: 100%;
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  background: var(--weiss);
+  color: var(--slate-900);
+}
+
+.eingabe:focus {
+  border-color: var(--akzent);
+  outline: none;
+}
+
+.eingabe.zahl {
+  font-family: var(--schrift-zahl);
+}
+
+.wahlen {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.wahl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+
+.wahl:has(:checked) {
+  border-color: var(--akzent);
+  background: rgb(240 253 250 / 0.5);
+}
+
+.wahl input {
+  margin: 0;
+  accent-color: var(--akzent);
+}
+
+.wahl-titel,
+.wahl-zusatz {
+  display: block;
+}
+
+.wahl-titel {
+  color: var(--slate-800);
+  font-size: var(--text-11);
+  font-weight: var(--halbfett);
+}
+
+.wahl-zusatz {
+  color: var(--slate-500);
+  font-size: var(--text-10);
+}
+
+.lade-absenden {
+  padding-top: 0.25rem;
+}
+
+.knopf-eintragen {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  gap: 0.5rem;
+}
+
+.knopf-eintragen .symbol {
+  width: var(--symbol-gross);
+  height: var(--symbol-gross);
 }
 
 .lade-fehler {
-  margin-bottom: var(--abstand-3);
-  font-size: var(--text-neben);
+  color: var(--amber-800);
+  font-size: var(--text-11);
+  font-weight: var(--halbfett);
 }
 
-/* Fehlermeldung unten in der Mitte */
+/* Vorschl\E4 ge unter einem Eingabefeld */
+.vorschlaege {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  z-index: 10;
+  max-height: 14rem;
+  margin-top: 0.25rem;
+  padding: 0.25rem;
+  overflow-y: auto;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  background: var(--weiss);
+  box-shadow: var(--schatten-md);
+}
+
+.vorschlag {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.vorschlag:hover,
+.vorschlag[aria-selected='true'] {
+  background: var(--slate-100);
+}
+
+.vorschlag-zusatz {
+  color: var(--slate-400);
+  font-size: var(--text-11);
+  white-space: nowrap;
+}
+
+/* Men\FC  einer Karte (Tastatur und rechte Maustaste) */
+.menue {
+  position: fixed;
+  z-index: 40;
+  min-width: 13.75rem;
+  padding: 0.25rem;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-xl);
+  background: var(--weiss);
+  box-shadow: var(--schatten-md);
+}
+
+.menue-titel {
+  padding: 0.375rem 0.625rem 0.125rem;
+  color: var(--slate-400);
+  font-size: var(--text-11);
+  font-weight: var(--halbfett);
+}
+
+.menue-eintrag {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.375rem 0.625rem;
+  border-radius: var(--radius-lg);
+  color: var(--slate-800);
+  font-size: var(--text-12);
+  text-align: left;
+}
+
+.menue-eintrag.standard {
+  font-weight: var(--halbfett);
+}
+
+.menue-eintrag:hover,
+.menue-eintrag:focus-visible {
+  outline: none;
+  background: var(--slate-100);
+}
+
+.menue-zusatz {
+  color: var(--slate-400);
+  font-size: var(--text-11);
+  font-weight: normal;
+}
+
+/* Meldungen unten links */
 .meldungen {
   position: fixed;
-  bottom: var(--abstand-6);
-  left: 50%;
-  z-index: 30;
-  display: grid;
-  justify-items: center;
-  gap: var(--abstand-2);
-  transform: translateX(-50%);
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   pointer-events: none;
 }
 
 .meldung {
-  padding: var(--abstand-2) var(--abstand-5);
-  border-radius: var(--radius);
-  background: var(--tinte);
-  color: var(--flaeche);
-  font-size: var(--text-neben);
-  box-shadow: var(--schatten-schwebend);
-  transition: opacity 300ms;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--radius-xl);
+  background: var(--slate-900);
+  color: var(--weiss);
+  font-size: var(--text-12);
+  font-weight: var(--mittel);
+  line-height: var(--zeile-12);
+  box-shadow: var(--schatten-md);
+  transition: opacity 200ms;
+}
+
+.meldung .punkt {
+  background: var(--teal-400);
 }
 
 .meldung.weg {
   opacity: 0;
 }
 
-/* Foto eines Tiers; ohne Foto der erste Buchstabe des Namens */
-.foto {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: var(--foto);
-  height: var(--foto);
-  border-radius: var(--radius-gross);
-  background: var(--flaeche-leise);
-  color: var(--tinte-2);
-  font-size: var(--text-neben);
-  font-weight: var(--halbfett);
-  object-fit: cover;
-}
-
-/* Empfang: Anordnung der Tafel. Alle Werte kommen aus dem gemeinsamen Stil. */
+/* Empfang: Seite aus Kopf und Tafel. Alle Werte kommen aus dem gemeinsamen Stil. */
 html,
 body {
   height: 100%;
@@ -628,332 +1243,139 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.unterzeile {
-  display: flex;
-  gap: var(--abstand-3);
-  color: var(--tinte-3);
-  font-size: var(--text-klein);
-}
-
-.suche {
-  width: 15rem;
-}
-
-.suche .eingabe {
-  background: var(--grund);
-}
-
-.suche .eingabe:focus {
-  background: var(--flaeche);
-}
-
-.uhr {
-  min-width: 3rem;
-  color: var(--tinte-2);
-  font-weight: var(--halbfett);
-  text-align: right;
-}
-
-.tafel {
-  display: grid;
-  flex: 1;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--abstand-5);
-  min-height: 0;
-  padding: var(--abstand-5);
   user-select: none;
-}
-
-/* Eine Spalte: Kopf mit Titel und Z\E4 hler, darunter die Karten */
-.spalte {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  border-radius: var(--radius-spalte);
-  background: var(--grund-tief);
-}
-
-.spalte-kopf {
-  display: flex;
-  align-items: baseline;
-  gap: var(--abstand-2);
-  padding: var(--abstand-4) var(--abstand-4) var(--abstand-3);
-}
-
-.spalte-titel {
-  font-size: var(--text);
-}
-
-.spalte-zahl {
-  color: var(--tinte-3);
-  font-size: var(--text-neben);
-  font-weight: var(--halbfett);
-}
-
-.spalte-inhalt {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: var(--abstand-3);
-  min-height: 0;
-  padding: 0 var(--abstand-3) var(--abstand-3);
-  overflow-y: auto;
-  border-radius: var(--radius-spalte);
-  transition: background-color var(--dauer);
-}
-
-.ziel {
-  background: var(--flaeche-hover);
-  outline: var(--fokus) solid var(--linie-stark);
-  outline-offset: calc(var(--fokus) * -1);
-}
-
-/* Eine Karte */
-.karte {
-  flex: none;
-  padding: var(--abstand-4);
-  border: var(--rand) solid var(--linie);
-  border-radius: var(--radius-gross);
-  background: var(--flaeche);
-  box-shadow: var(--schatten-karte);
-  cursor: grab;
-  transition: border-color var(--dauer);
-}
-
-.karte:hover,
-.karte.offen {
-  border-color: var(--linie-stark);
-}
-
-.karte:focus-visible {
-  outline: none;
-  border-color: var(--akzent);
-  box-shadow: var(--fokus-ring);
-}
-
-.karte.gezogen {
-  opacity: 0.4;
-}
-
-.karte-kopf {
-  display: grid;
-  grid-template-columns: var(--foto) minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--abstand-3);
-}
-
-.karte-name,
-.karte-besitzer {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.karte-name {
-  font-weight: var(--halbfett);
-  letter-spacing: var(--laufweite-eng);
-}
-
-.karte-art {
-  margin-left: var(--abstand-2);
-  color: var(--tinte-3);
-  font-size: var(--text-neben);
-  font-weight: normal;
-  letter-spacing: normal;
-}
-
-.karte-besitzer {
-  color: var(--tinte-2);
-  font-size: var(--text-neben);
-}
-
-.karte-kopf .marke {
-  align-self: start;
-}
-
-.karte-grund {
-  display: -webkit-box;
-  margin-top: var(--abstand-3);
-  overflow: hidden;
-  color: var(--tinte-2);
-  font-size: var(--text-neben);
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.karte-fuss {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--abstand-3);
-  margin-top: var(--abstand-3);
-  padding-top: var(--abstand-3);
-  border-top: var(--rand) solid var(--linie);
-  color: var(--tinte-3);
-  font-size: var(--text-klein);
-}
-
-/* Die Zimmer der Spalte Behandlung: Ablage mit Belegt oder Frei */
-.zimmer {
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  gap: var(--abstand-2);
-  padding: var(--abstand-3);
-  border: var(--rand) solid var(--linie);
-  border-radius: var(--radius-gross);
-  background: var(--flaeche-leise);
-  transition: background-color var(--dauer);
-}
-
-.zimmer-kopf {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--abstand-3);
-  padding: 0 var(--abstand-1);
-  font-size: var(--text-neben);
-}
-
-.zimmer-zusatz {
-  margin-left: var(--abstand-2);
-  color: var(--tinte-3);
-  font-weight: normal;
-  letter-spacing: normal;
-}
-
-.zimmer-stand {
-  color: var(--tinte-3);
-  font-size: var(--text-klein);
-}
-
-.zimmer-leer {
-  min-height: 3.5rem;
-  border-radius: var(--radius);
-  background: var(--flaeche);
-}
-
-/* Termin anlegen */
-.tier-liste {
-  display: grid;
-  gap: var(--abstand-2);
-}
-
-.neues-tier {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--abstand-3);
-}
-
-.neues-tier > :first-child {
-  grid-column: 1 / -1;
-}
-
-@media (max-width: 1499px) {
-  .kennzahlen {
-    display: none;
-  }
 }
   </style>
 </head>
 <body>
   <header class="kopf">
-    <div>
-      <h1 class="kopf-titel" id="praxis"></h1>
-      <p class="unterzeile"><span>Empfang</span><span id="datum"></span><span id="verbindung"></span></p>
-    </div>
-    <div class="kennzahlen">
-      <p class="kennzahl">Nicht zugewiesen <span class="kennzahl-wert" id="kennzahl-termin"></span></p>
-      <p class="kennzahl">Wartezimmer <span class="kennzahl-wert" id="kennzahl-wartezimmer"></span></p>
-      <p class="kennzahl">Zimmer belegt <span class="kennzahl-wert" id="kennzahl-zimmer"></span></p>
-      <p class="kennzahl">Abrechnung <span class="kennzahl-wert" id="kennzahl-abrechnung"></span></p>
-    </div>
-    <div class="kopf-rechts">
-      <label class="suchfeld suche">
-        <svg class="symbol" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
-        <input class="eingabe" id="suche" type="search" placeholder="Tier oder Besitzer suchen" aria-label="Suchen" autocomplete="off">
-      </label>
-      <button class="knopf knopf-haupt" id="terminAnlegen" type="button" aria-haspopup="dialog">Termin anlegen</button>
-      <span class="uhr zahl" id="uhr"></span>
+    <div class="kopf-zeile">
+      <div>
+        <div class="praxis-zeile">
+          <h1 class="praxis-name" id="praxis"></h1>
+          <span class="praxis-ort">Empfang</span>
+        </div>
+        <p class="praxis-stand"><span class="punkt" id="standPunkt"></span><span id="stand"></span></p>
+      </div>
+
+      <div class="kennzahlen">
+        <p class="kennzahl"><span class="punkt termin"></span><span class="kennzahl-name">Nicht zugewiesen:</span><span class="kennzahl-wert" id="kennzahl-termin"></span></p>
+        <p class="kennzahl"><span class="punkt wartezimmer"></span><span class="kennzahl-name">Wartezimmer:</span><span class="kennzahl-wert" id="kennzahl-wartezimmer"></span></p>
+        <p class="kennzahl"><span class="punkt behandlung"></span><span class="kennzahl-name">Zimmer belegt:</span><span class="kennzahl-wert" id="kennzahl-zimmer"></span></p>
+        <p class="kennzahl"><span class="punkt abrechnung"></span><span class="kennzahl-name">Abrechnung:</span><span class="kennzahl-wert akzent" id="kennzahl-abrechnung"></span></p>
+      </div>
+
+      <div class="kopf-rechts">
+        <label class="suchfeld">
+          <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input id="suche" type="text" placeholder="Tiername oder Besitzer suchen..." aria-label="Suchen" autocomplete="off">
+        </label>
+        <button class="knopf-haupt" id="terminAnlegen" type="button" aria-haspopup="dialog">
+          <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16m8-8H4"/></svg>
+          <span>Termin anlegen</span>
+        </button>
+      </div>
     </div>
   </header>
 
-  <main class="tafel" id="tafel">
-    <section class="spalte" aria-labelledby="titel-termin">
-      <header class="spalte-kopf">
-        <h2 class="spalte-titel" id="titel-termin">Nicht zugewiesen</h2>
-        <span class="spalte-zahl" id="zahl-termin"></span>
-      </header>
-      <div class="spalte-inhalt" id="inhalt-termin" data-ziel="termin"></div>
-    </section>
-    <section class="spalte" aria-labelledby="titel-wartezimmer">
-      <header class="spalte-kopf">
-        <h2 class="spalte-titel" id="titel-wartezimmer">Wartezimmer</h2>
-        <span class="spalte-zahl" id="zahl-wartezimmer"></span>
-      </header>
-      <div class="spalte-inhalt" id="inhalt-wartezimmer" data-ziel="wartezimmer"></div>
-    </section>
-    <section class="spalte" aria-labelledby="titel-behandlung">
-      <header class="spalte-kopf">
-        <h2 class="spalte-titel" id="titel-behandlung">Behandlung</h2>
-        <span class="spalte-zahl" id="zahl-behandlung"></span>
-      </header>
-      <div class="spalte-inhalt" id="inhalt-behandlung" data-ziel="behandlung"></div>
-    </section>
-    <section class="spalte" aria-labelledby="titel-abrechnung">
-      <header class="spalte-kopf">
-        <h2 class="spalte-titel" id="titel-abrechnung">Abrechnung</h2>
-        <span class="spalte-zahl" id="zahl-abrechnung"></span>
-      </header>
-      <div class="spalte-inhalt" id="inhalt-abrechnung" data-ziel="abrechnung"></div>
-    </section>
+  <main class="tafel-bereich">
+    <div class="tafel" id="tafel">
+      <section class="spalte" aria-labelledby="titel-termin">
+        <header class="spalte-kopf">
+          <div class="spalte-name"><span class="punkt termin"></span><h2 class="spalte-titel" id="titel-termin">Nicht zugewiesen</h2></div>
+          <span class="zaehler termin" id="zahl-termin"></span>
+        </header>
+        <div class="spalte-inhalt" id="inhalt-termin" data-ziel="termin"></div>
+      </section>
+      <section class="spalte" aria-labelledby="titel-wartezimmer">
+        <header class="spalte-kopf">
+          <div class="spalte-name"><span class="punkt wartezimmer"></span><h2 class="spalte-titel" id="titel-wartezimmer">Wartezimmer</h2></div>
+          <span class="zaehler wartezimmer" id="zahl-wartezimmer"></span>
+        </header>
+        <div class="spalte-inhalt" id="inhalt-wartezimmer" data-ziel="wartezimmer"></div>
+      </section>
+      <section class="spalte" aria-labelledby="titel-behandlung">
+        <header class="spalte-kopf">
+          <div class="spalte-name"><span class="punkt behandlung"></span><h2 class="spalte-titel" id="titel-behandlung">Behandlung</h2></div>
+          <span class="zaehler behandlung" id="zahl-behandlung"></span>
+        </header>
+        <div class="spalte-inhalt" id="inhalt-behandlung" data-ziel="behandlung"></div>
+      </section>
+      <section class="spalte" aria-labelledby="titel-abrechnung">
+        <header class="spalte-kopf">
+          <div class="spalte-name"><span class="punkt abrechnung"></span><h2 class="spalte-titel" id="titel-abrechnung">Abrechnung</h2></div>
+          <span class="zaehler abrechnung" id="zahl-abrechnung"></span>
+        </header>
+        <div class="spalte-inhalt" id="inhalt-abrechnung" data-ziel="abrechnung"></div>
+      </section>
+    </div>
   </main>
 
   <dialog class="lade" id="lade" aria-labelledby="ladeTitel">
+    <header class="lade-kopf">
+      <h3 class="lade-titel" id="ladeTitel">Termin anlegen</h3>
+      <button class="lade-zu" id="schliessen" type="button" aria-label="Schlie&#xDF;en">
+        <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </header>
     <form class="lade-form" id="formular" novalidate>
-      <header class="lade-kopf">
-        <h2 class="lade-titel" id="ladeTitel">Termin anlegen</h2>
-        <button class="knopf knopf-leise knopf-symbol" id="schliessen" type="button" aria-label="Schlie&#xDF;en">
-          <svg class="symbol" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
-        </button>
-      </header>
-      <div class="lade-inhalt">
+      <div class="vorschau">
+        <div id="vorschauBild"></div>
+        <div class="vorschau-text">
+          <div class="karte-zeile">
+            <span class="karte-name" id="vorschauName"></span>
+            <span class="vorschau-art" id="vorschauArt"></span>
+          </div>
+          <p class="vorschau-besitzer" id="vorschauBesitzer"></p>
+        </div>
+      </div>
+
+      <div class="reihe">
         <div class="feld">
-          <label class="feld-name" for="besitzer">Besitzer</label>
-          <input class="eingabe" id="besitzer" maxlength="60" autocomplete="off" role="combobox" autofocus
+          <label class="feld-name" for="tierName">Tiername *</label>
+          <input class="eingabe" id="tierName" maxlength="30" placeholder="z.B. Luna" autocomplete="off" role="combobox"
+                 aria-autocomplete="list" aria-expanded="false" aria-controls="tierListe">
+          <ul class="vorschlaege" id="tierListe" role="listbox" hidden></ul>
+        </div>
+        <div class="feld">
+          <label class="feld-name" for="tierArt">Tierart / Rasse</label>
+          <input class="eingabe" id="tierArt" maxlength="63" placeholder="z.B. EKH / Dackel" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="reihe">
+        <div class="feld">
+          <label class="feld-name" for="besitzer">Besitzer *</label>
+          <input class="eingabe" id="besitzer" maxlength="60" placeholder="z.B. Hr. Meyer" autocomplete="off" role="combobox"
                  aria-autocomplete="list" aria-expanded="false" aria-controls="besitzerListe">
           <ul class="vorschlaege" id="besitzerListe" role="listbox" hidden></ul>
         </div>
-        <fieldset class="gruppe">
-          <legend class="feld-name">Tier</legend>
-          <div class="tier-liste" id="tierListe"></div>
-          <div class="neues-tier" id="neuesTier">
-            <label class="feld"><span class="feld-name">Name</span><input class="eingabe" id="tierName" maxlength="30" autocomplete="off"></label>
-            <label class="feld"><span class="feld-name">Tierart</span><input class="eingabe" id="tierArt" maxlength="30" list="tierarten" autocomplete="off"></label>
-            <label class="feld"><span class="feld-name">Rasse</span><input class="eingabe" id="tierRasse" maxlength="30" list="rassen" autocomplete="off"></label>
-          </div>
-          <datalist id="tierarten"></datalist>
-          <datalist id="rassen"></datalist>
-        </fieldset>
-        <label class="feld"><span class="feld-name">Grund</span><input class="eingabe" id="behandlung" maxlength="150" autocomplete="off"></label>
-        <div class="reihe">
-          <label class="feld"><span class="feld-name">Uhrzeit</span><input class="eingabe zahl" id="uhrzeit" type="time"></label>
-          <label class="wahl"><input type="checkbox" id="notfall">Notfall</label>
+        <div class="feld">
+          <label class="feld-name" for="uhrzeit">Termin-Uhrzeit</label>
+          <input class="eingabe zahl" id="uhrzeit" type="time">
         </div>
-        <fieldset class="gruppe">
-          <legend class="feld-name">Wohin</legend>
-          <div class="reihe">
-            <label class="wahl"><input type="radio" name="wohin" value="termin" checked>Nicht zugewiesen</label>
-            <label class="wahl"><input type="radio" name="wohin" value="wartezimmer">Wartezimmer</label>
-          </div>
-        </fieldset>
       </div>
-      <footer class="lade-fuss">
-        <p class="lade-fehler dringend" id="formFehler" role="alert" hidden></p>
-        <button class="knopf knopf-haupt knopf-breit" id="anlegen" type="submit">Eintragen</button>
-      </footer>
+
+      <div class="feld">
+        <label class="feld-name" for="behandlung">Grund des Termins *</label>
+        <input class="eingabe" id="behandlung" maxlength="150" placeholder="z.B. Krallen schneiden, Nachkontrolle..." autocomplete="off">
+      </div>
+
+      <fieldset>
+        <legend class="feld-name weit">Wo soll der Termin erscheinen?</legend>
+        <div class="wahlen">
+          <label class="wahl"><input type="radio" name="wohin" value="termin" checked><span><span class="wahl-titel">Nicht zugewiesen</span><span class="wahl-zusatz">Noch nicht da</span></span></label>
+          <label class="wahl"><input type="radio" name="wohin" value="wartezimmer"><span><span class="wahl-titel">Wartezimmer</span><span class="wahl-zusatz">Ist schon da</span></span></label>
+        </div>
+      </fieldset>
+
+      <p class="lade-fehler" id="formFehler" role="alert" hidden></p>
+      <div class="lade-absenden">
+        <button class="knopf-haupt knopf-eintragen" id="anlegen" type="submit">
+          <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16m8-8H4"/></svg>
+          <span>Termin ins Board eintragen</span>
+        </button>
+      </div>
     </form>
   </dialog>
 
@@ -991,8 +1413,6 @@ body {
         vorname: '283_30',       // Vorname Kunde
         nachname: '313_30',      // Nachname Kunde
         status: '343_30',        // Zimmer/Status: steuert die Spalte, siehe status
-        prioritaet: '373_12',
-        belegnummer: '385_12',
         geaendertAm: '418_10',
         geaendertUm: '428_5',    // daraus die Minuten in der Spalte (Wartezeit)
         zimmer: '444_30',        // welches Zimmer, siehe zimmer
@@ -1008,25 +1428,16 @@ body {
         wartezimmer: 'Wartezimmer',
         behandlung: 'Behandlung',
         abrechnung: 'Abrechnung',
-        fertig: 'Fertig',          // nach "Kassiert": der Termin verschwindet von der Tafel
+        fertig: 'Fertig',          // nach "Kassieren": der Termin verschwindet von der Tafel
       },
-
-      // Was im Feld Priorit\u00E4t einen Notfall kennzeichnet.
-      notfall: 'Notfall',
 
       // Die Zimmer der Spalte Behandlung: name zeigt die Maske, wert steht im Feld zimmer.
       zimmer: [
-        { name: 'Zimmer 1', wert: 'Zimmer 1', zusatz: 'Dr. Weber' },
-        { name: 'Zimmer 2', wert: 'Zimmer 2', zusatz: 'Dr. Lindner' },
-        { name: 'Zimmer 3', wert: 'Zimmer 3', zusatz: 'R\u00F6ntgen, Labor' },
-        { name: 'Zimmer 4', wert: 'Zimmer 4', zusatz: 'OP' },
+        { name: 'Zimmer 1', wert: 'Zimmer 1', zusatz: 'Dr. Weber (Sprechstunde)' },
+        { name: 'Zimmer 2', wert: 'Zimmer 2', zusatz: 'Dr. Lindner (Sprechstunde)' },
+        { name: 'Zimmer 3', wert: 'Zimmer 3', zusatz: 'R\u00F6ntgen / Ultraschall / Labor' },
+        { name: 'Zimmer 4', wert: 'Zimmer 4', zusatz: 'OP / Zahnstation' },
       ],
-
-      // Ab wie vielen Minuten im Wartezimmer die Wartezeit auff\u00E4llt.
-      wartezeit: { warnen: 15, dringend: 30 },
-
-      // Ab wie vielen Minuten nach der Uhrzeit ein Termin auff\u00E4llt, der noch nicht da ist.
-      verspaetet: 10,
 
       // Feld eines Termins schreiben: PUT_RELATION 174 [POS, LEN, Feldart, Satznummer, IDB, Wert],
       // einer nach dem anderen im Abstand von 100 ms.
@@ -1106,20 +1517,20 @@ body {
         ['20011', '10110', 'Mia', 'Katze', 'Siam', '19.10.2019', ''],
         ['20012', '10124', 'Simba', 'Katze', 'Bengal', '11.12.2020', ''],
       ],
-      // Tier, Minuten von jetzt bis zur Uhrzeit, Spalte, Minuten in der Spalte, Behandlung, Notfall, Zimmer, Betrag
+      // Tier, Minuten von jetzt bis zur Uhrzeit, Spalte, Minuten in der Spalte, Behandlung, Zimmer, Betrag
       termine: [
-        ['20003', -40, 'behandlung', 22, 'Lahmt vorne links', false, 'Zimmer 1'],
-        ['20011', -25, 'behandlung', 9, 'Zahnkontrolle', false, 'Zimmer 3'],
-        ['20004', -35, 'abrechnung', 4, 'Impfung', false, 'Zimmer 2', '68,50 \u20AC'],
-        ['20009', -55, 'abrechnung', 7, 'Schilddr\u00FCse, Kontrolle', false, 'Zimmer 1', '54,20 \u20AC'],
-        ['20001', -20, 'wartezimmer', 34, 'Ohrenentz\u00FCndung, Nachkontrolle', false, ''],
-        ['20012', -10, 'wartezimmer', 18, 'Frisst seit zwei Tagen nicht', false, ''],
-        ['20006', 0, 'wartezimmer', 6, 'Schnittwunde an der Pfote', true, ''],
-        ['20005', -15, 'termin', 0, 'Gewichtskontrolle', false, ''],
-        ['20007', 5, 'termin', 0, 'Impfung', false, ''],
-        ['20008', 15, 'termin', 0, 'Blutabnahme', false, ''],
-        ['20002', 30, 'termin', 0, 'Krallen schneiden', false, ''],
-        ['20010', 45, 'termin', 0, 'Erstuntersuchung', false, ''],
+        ['20003', -40, 'behandlung', 22, 'Lahmt vorne links', 'Zimmer 1'],
+        ['20011', -25, 'behandlung', 9, 'Zahnkontrolle', 'Zimmer 3'],
+        ['20004', -35, 'abrechnung', 4, 'Impfung', 'Zimmer 2', '68,50 \u20AC'],
+        ['20009', -55, 'abrechnung', 7, 'Schilddr\u00FCse, Kontrolle', 'Zimmer 1', '54,20 \u20AC'],
+        ['20001', -20, 'wartezimmer', 34, 'Ohrenentz\u00FCndung, Nachkontrolle', ''],
+        ['20012', -10, 'wartezimmer', 18, 'Frisst seit zwei Tagen nicht', ''],
+        ['20006', 0, 'wartezimmer', 6, 'Schnittwunde an der Pfote', ''],
+        ['20005', -15, 'termin', 0, 'Gewichtskontrolle', ''],
+        ['20007', 5, 'termin', 0, 'Impfung', ''],
+        ['20008', 15, 'termin', 0, 'Blutabnahme', ''],
+        ['20002', 30, 'termin', 0, 'Krallen schneiden', ''],
+        ['20010', 45, 'termin', 0, 'Erstuntersuchung', ''],
       ],
     };
 
@@ -1218,19 +1629,6 @@ body {
 
     function nextQuarterHour() {
       return timeOfMinute((Math.ceil((nowMinute() + 1) / 15) * 15) % (24 * 60));
-    }
-
-    // Alter aus dem Geburtsdatum: "8 Monate", "1 Jahr", "7 Jahre".
-    function ageText(birth) {
-      const key = dayKey(birth);
-      if (key === '') return '';
-      const [y, m, d] = key.split('-').map(Number);
-      const now = new Date();
-      const months = (now.getFullYear() - y) * 12 + now.getMonth() + 1 - m - (now.getDate() < d ? 1 : 0);
-      if (months < 0) return '';
-      if (months < 12) return months === 1 ? '1 Monat' : months + ' Monate';
-      const years = Math.floor(months / 12);
-      return years === 1 ? '1 Jahr' : years + ' Jahre';
     }
 
     // ---------------------------------------------------------------------
@@ -1371,10 +1769,8 @@ body {
         kunde: customerNo,
         tierart: readField(row, f.tierart),
         rasse: readField(row, f.rasse),
-        alter: ageText(readField(row, f.geburtsdatum)),
         besitzer: [readField(row, f.vorname), readField(row, f.nachname)].filter(Boolean).join(' ') || (customerNo !== '' ? 'Kunde ' + customerNo : ''),
         behandlung: readField(row, f.behandlung),
-        notfall: CONFIG.notfall !== '' && same(readField(row, f.prioritaet), CONFIG.notfall),
         spalte: place.spalte,
         zimmer: place.zimmer,
         letztesZimmer: roomName(roomValue),
@@ -1735,11 +2131,10 @@ body {
         row[f.datum] = todayText();
         row[f.behandlung] = t[4];
         row[f.status] = CONFIG.status[t[2]];
-        row[f.prioritaet] = t[5] ? CONFIG.notfall : '';
-        row[f.zimmer] = t[6];
+        row[f.zimmer] = t[5];
         row[f.geaendertAm] = todayText();
         row[f.geaendertUm] = timeOfMinute(Math.max(0, now - t[3]));
-        row.BEISPIELBETRAG = t[7] || '';
+        row.BEISPIELBETRAG = t[6] || '';
         return row;
       });
     }
@@ -1845,7 +2240,6 @@ body {
         }
         lookup.loadedAt = Date.now();
         lookup.loading = null;
-        fillSpeciesLists();
         if (loadedRows !== null) takeRows(loadedRows);
       })();
       return lookup.loading;
@@ -1893,64 +2287,76 @@ body {
       return a.seit === null ? null : Math.max(0, nowMinute() - a.seit);
     }
 
-    function waitTone(minutes) {
-      if (minutes === null) return '';
-      return minutes >= CONFIG.wartezeit.dringend ? 'dringend' : minutes >= CONFIG.wartezeit.warnen ? 'warnen' : '';
-    }
-
-    function isLate(a) {
-      return a.minute !== null && nowMinute() - a.minute > CONFIG.verspaetet;
-    }
-
     function matchesSearch(a) {
       if (searchText === '') return true;
       const text = plain([a.name, a.besitzer, a.behandlung, a.tierart, a.rasse].join(' '));
       return searchText.split(/\s+/).map(plain).every(function (word) { return text.includes(word); });
     }
 
-    // Die Marke oben rechts: Uhrzeit, Wartezeit, Minuten im Zimmer oder Betrag.
-    function valueOf(a) {
-      if (a.spalte === 'termin') return { text: a.uhrzeit, ton: isLate(a) ? 'warnen' : '' };
-      if (a.spalte === 'abrechnung' && a.betrag) return { text: a.betrag, ton: '' };
-      const minutes = minutesSince(a);
-      if (minutes === null) return { text: a.uhrzeit, ton: '' };
-      return { text: minutes + ' min', ton: a.spalte === 'wartezimmer' ? waitTone(minutes) : '' };
+    function hashOf(text) {
+      let h = 0;
+      for (let i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) | 0;
+      return h;
     }
 
-    // Die eine Aktion im Fu\u00DF der Karte, je Spalte.
-    const AKTIONEN = { termin: 'Ins Wartezimmer', wartezimmer: 'Aufrufen', behandlung: 'Zur Abrechnung', abrechnung: 'Kassieren' };
-
-    // Ohne Foto zwei Initialen: aus zwei W\u00F6rtern je der erste Buchstabe, sonst die ersten zwei.
+    // Ohne Foto zwei Initialen: die ersten zwei Buchstaben des Namens.
     function initials(name) {
-      const words = String(name || '').trim().split(/\s+/).filter(Boolean);
-      const text = words.length > 1 ? words[0].charAt(0) + words[1].charAt(0) : (words[0] || '').slice(0, 2);
-      return text.toUpperCase();
+      const clean = (String(name || '').trim() || 'TI').toUpperCase();
+      return clean.length >= 2 ? clean.slice(0, 2) : clean + 'X';
     }
 
     function photoHtml(a) {
-      if (a.foto) return '<img class="foto" src="' + esc(a.foto) + '" alt="">';
-      return '<span class="foto" aria-hidden="true">' + esc(initials(a.name)) + '</span>';
+      if (a.foto) return '<div class="bild"><img src="' + esc(a.foto) + '" alt=""></div>';
+      return '<div class="avatar farbe-' + (Math.abs(hashOf(a.name)) % 5) + '" aria-hidden="true">' + esc(initials(a.name)) + '</div>';
+    }
+
+    // Das Badge oben rechts: Uhrzeit, Wartezeit, "Im Zimmer" oder Betrag.
+    function badgeHtml(a) {
+      if (a.spalte === 'termin') return a.uhrzeit ? '<span class="badge zeit">' + esc(a.uhrzeit) + ' Uhr</span>' : '';
+      if (a.spalte === 'wartezimmer') {
+        const minutes = minutesSince(a);
+        return minutes === null ? '' : '<span class="badge wartezeit">' + minutes + ' Min.</span>';
+      }
+      if (a.spalte === 'behandlung') return '<span class="badge im-zimmer">Im Zimmer</span>';
+      return a.betrag ? '<span class="badge betrag">' + esc(a.betrag) + '</span>' : '';
+    }
+
+    // Der Fu\u00DF der Karte: links ein Hinweis aus den Daten, rechts die eine Aktion.
+    function footHtml(a) {
+      if (a.spalte === 'termin') {
+        return '<span class="fuss-text"></span>'
+          + '<button class="knopf-karte akzent" type="button" tabindex="-1" data-aktion>Ins Wartezimmer</button>';
+      }
+      if (a.spalte === 'wartezimmer') {
+        return '<span class="fuss-text"></span>'
+          + '<select class="zimmerwahl" tabindex="-1" aria-label="Zimmer" data-zimmerwahl><option value="">Zimmer...</option>'
+          + CONFIG.zimmer.map(function (room) { return '<option value="' + esc(room.name) + '">' + esc(room.name) + '</option>'; }).join('')
+          + '</select>';
+      }
+      if (a.spalte === 'behandlung') {
+        return '<span class="fuss-text zimmer-im">' + esc(a.zimmer || '') + '</span>'
+          + '<button class="knopf-karte grau" type="button" tabindex="-1" data-aktion>Zur Abrechnung</button>';
+      }
+      return '<span class="fuss-text">' + (a.letztesZimmer ? 'Aus ' + esc(a.letztesZimmer) : '') + '</span>'
+        + '<button class="knopf-karte kasse" type="button" tabindex="-1" data-aktion>Kassieren</button>';
     }
 
     function cardHtml(a) {
-      const value = valueOf(a);
       const kind = a.rasse || a.tierart;
-      const origin = a.spalte === 'abrechnung' && a.letztesZimmer ? 'Aus ' + a.letztesZimmer : '';
-      const reason = (a.notfall ? '<span class="dringend">Notfall</span> ' : '') + esc(a.behandlung);
       return '<article class="karte" tabindex="0" draggable="true" aria-haspopup="menu" data-id="' + esc(a.id) + '">'
+        + '<div class="karte-oben">'
         + '<div class="karte-kopf">'
-        + photoHtml(a)
-        + '<div>'
-        + '<p class="karte-name">' + esc(a.name) + (kind ? '<span class="karte-art">' + esc(kind) + '</span>' : '') + '</p>'
-        + (a.besitzer ? '<p class="karte-besitzer">' + esc(a.besitzer) + '</p>' : '')
+        + '<div class="karte-tier">' + photoHtml(a)
+        + '<div class="karte-text">'
+        + '<div class="karte-zeile"><h3 class="karte-name">' + esc(a.name) + '</h3>'
+        + (kind ? '<span class="karte-rasse">\u2022 ' + esc(kind) + '</span>' : '') + '</div>'
+        + '<p class="karte-besitzer">' + esc(a.besitzer) + '</p>'
+        + '</div></div>'
+        + badgeHtml(a)
         + '</div>'
-        + (value.text ? '<span class="marke ' + value.ton + '">' + esc(value.text) + '</span>' : '')
+        + (a.behandlung ? '<p class="karte-grund">' + esc(a.behandlung) + '</p>' : '')
         + '</div>'
-        + (reason ? '<p class="karte-grund">' + reason + '</p>' : '')
-        + '<div class="karte-fuss">'
-        + '<span>' + esc(origin) + '</span>'
-        + '<button class="knopf knopf-klein knopf-weich" type="button" tabindex="-1" data-aktion>' + AKTIONEN[a.spalte] + '</button>'
-        + '</div>'
+        + '<div class="karte-fuss">' + footHtml(a) + '</div>'
         + '</article>';
     }
 
@@ -1967,18 +2373,22 @@ body {
       return roomsOf(all).map(function (room) {
         const busy = all.some(function (a) { return a.zimmer === room.name; });
         const cards = shown.filter(function (a) { return a.zimmer === room.name; }).map(cardHtml).join('');
-        return '<section class="zimmer" data-ziel="behandlung" data-zimmer="' + esc(room.name) + '">'
-          + '<header class="zimmer-kopf"><h3>' + esc(room.name)
-          + (room.zusatz ? '<span class="zimmer-zusatz">' + esc(room.zusatz) + '</span>' : '') + '</h3>'
-          + '<span class="zimmer-stand">' + (busy ? 'Belegt' : 'Frei') + '</span></header>'
-          + (cards || '<div class="zimmer-leer"></div>')
-          + '</section>';
+        return '<div class="zimmer" data-ziel="behandlung" data-zimmer="' + esc(room.name) + '">'
+          + '<div class="zimmer-kopf"><div class="zimmer-name">'
+          + '<span class="punkt ' + (busy ? 'behandlung' : 'frei') + '"></span>'
+          + '<span class="zimmer-titel">' + esc(room.name) + '</span>'
+          + (room.zusatz ? '<span class="zimmer-zusatz">\u2022 ' + esc(room.zusatz) + '</span>' : '')
+          + '</div><span class="stand ' + (busy ? 'belegt' : 'frei') + '">' + (busy ? 'Belegt' : 'Frei') + '</span></div>'
+          + '<div class="zimmer-karten">' + (cards || '<div class="zimmer-leer">Frei</div>') + '</div>'
+          + '</div>';
       }).join('');
     }
 
     function freeRooms(all) {
       return roomsOf(all).filter(function (room) { return !all.some(function (a) { return a.zimmer === room.name; }); });
     }
+
+    const LEER = { termin: 'Keine offenen Termine', wartezimmer: 'Wartezimmer ist leer', abrechnung: 'Keine offene Abrechnung' };
 
     function render() {
       if (dragId !== null || menu.forId !== null) {
@@ -1987,19 +2397,21 @@ body {
       }
       renderLater = false;
       const focused = document.activeElement && document.activeElement.classList.contains('karte') ? document.activeElement.dataset.id : null;
-      const count = {};
+      const inColumn = function (spalte) { return appointments.filter(function (a) { return a.spalte === spalte; }); };
       SPALTEN.forEach(function (spalte) {
-        const all = appointments.filter(function (a) { return a.spalte === spalte; });
+        const all = inColumn(spalte);
         const shown = all.filter(matchesSearch);
-        count[spalte] = all;
-        document.getElementById('inhalt-' + spalte).innerHTML = spalte === 'behandlung' ? treatmentHtml(all, shown) : shown.map(cardHtml).join('');
-        document.getElementById('zahl-' + spalte).textContent = String(all.length);
+        const content = document.getElementById('inhalt-' + spalte);
+        if (spalte === 'behandlung') content.innerHTML = treatmentHtml(all, shown);
+        else content.innerHTML = shown.length > 0 ? shown.map(cardHtml).join('') : '<div class="leer">' + LEER[spalte] + '</div>';
+        document.getElementById('zahl-' + spalte).textContent = String(shown.length);
       });
-      const rooms = roomsOf(count.behandlung);
-      document.getElementById('kennzahl-termin').textContent = String(count.termin.length);
-      document.getElementById('kennzahl-wartezimmer').textContent = String(count.wartezimmer.length);
-      document.getElementById('kennzahl-zimmer').textContent = (rooms.length - freeRooms(count.behandlung).length) + ' / ' + rooms.length;
-      document.getElementById('kennzahl-abrechnung').textContent = String(count.abrechnung.length);
+      const treated = inColumn('behandlung');
+      const rooms = roomsOf(treated);
+      document.getElementById('kennzahl-termin').textContent = String(inColumn('termin').length);
+      document.getElementById('kennzahl-wartezimmer').textContent = String(inColumn('wartezimmer').length);
+      document.getElementById('kennzahl-zimmer').textContent = (rooms.length - freeRooms(treated).length) + ' / ' + rooms.length;
+      document.getElementById('kennzahl-abrechnung').textContent = String(inColumn('abrechnung').length);
       if (focused !== null) {
         const card = cardOf(focused);
         if (card) card.focus();
@@ -2014,22 +2426,21 @@ body {
       return appointments.find(function (a) { return a.id === id; }) || null;
     }
 
+    // Unter dem Praxisnamen: das Datum, oder ob noch Daten von SoftEngine fehlen.
     function showConnection() {
-      const el = document.getElementById('verbindung');
+      const dot = document.getElementById('standPunkt');
+      const text = document.getElementById('stand');
+      const date = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
       if (beispiel) {
-        el.className = '';
-        el.textContent = 'Beispieldaten';
+        dot.className = 'punkt aus';
+        text.textContent = 'Beispieldaten, ' + date;
       } else if (loadedRows === null) {
-        el.className = 'warnen';
-        el.textContent = 'Warte auf SoftEngine';
+        dot.className = 'punkt wartet';
+        text.textContent = 'Warte auf SoftEngine';
       } else {
-        el.textContent = '';
+        dot.className = 'punkt da';
+        text.textContent = date;
       }
-    }
-
-    function showClock() {
-      document.getElementById('uhr').textContent = timeOfMinute(nowMinute());
-      document.getElementById('datum').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
     }
 
     // ---------------------------------------------------------------------
@@ -2066,6 +2477,13 @@ body {
       a.seit = nowMinute();
       pending.set(a.id, { spalte: a.spalte, zimmer: a.zimmer, letztesZimmer: a.letztesZimmer, seit: a.seit, until: Date.now() + PENDING_MS });
       render();
+      const said = {
+        termin: a.name + ' zur\u00FCck auf \u201ENicht zugewiesen\u201C gesetzt',
+        wartezimmer: a.name + ' ist jetzt im Wartezimmer',
+        behandlung: a.name + ' wurde in ' + a.zimmer + ' eingewiesen',
+        abrechnung: a.name + ' ist bereit zur Abrechnung',
+      };
+      showToast(said[a.spalte]);
       requestFreshData();
     }
 
@@ -2078,6 +2496,7 @@ body {
       pending.set(a.id, { spalte: 'fertig', zimmer: null, letztesZimmer: a.letztesZimmer, seit: nowMinute(), until: Date.now() + PENDING_MS });
       appointments = appointments.filter(function (item) { return item.id !== a.id; });
       render();
+      showToast('Abrechnung f\u00FCr ' + a.name + (a.besitzer ? ' (' + a.besitzer + ')' : '') + ' erledigt');
       requestFreshData();
     }
 
@@ -2096,7 +2515,6 @@ body {
           zimmer: room.name,
           text: room.name,
           zusatz: inside.length > 0 ? inside.join(', ') : 'Frei',
-          ton: inside.length > 0 ? 'leise' : 'neben',
           next: a.spalte === 'wartezimmer' && free.length > 0 && free[0].name === room.name,
         });
       });
@@ -2118,10 +2536,9 @@ body {
       menuEl.innerHTML = '<p class="menue-titel">' + esc(a.name) + '</p>' + menu.targets.map(function (t, i) {
         return '<button class="menue-eintrag' + (t.next ? ' standard' : '') + '" type="button" role="menuitem" data-i="' + i + '">'
           + '<span>' + esc(t.text) + '</span>'
-          + (t.zusatz ? '<span class="' + t.ton + '">' + esc(t.zusatz) + '</span>' : '')
+          + (t.zusatz ? '<span class="menue-zusatz">' + esc(t.zusatz) + '</span>' : '')
           + '</button>';
       }).join('');
-      row.classList.add('offen');
       menuEl.hidden = false;
       const box = row.getBoundingClientRect();
       const width = menuEl.offsetWidth;
@@ -2142,10 +2559,7 @@ body {
       menuEl.hidden = true;
       menuEl.innerHTML = '';
       const row = cardOf(id);
-      if (row) {
-        row.classList.remove('offen');
-        if (refocus) row.focus();
-      }
+      if (row && refocus) row.focus();
       if (renderLater) render();
     }
 
@@ -2182,22 +2596,18 @@ body {
     window.addEventListener('resize', function () { closeMenu(false); });
     tafel.addEventListener('scroll', function () { closeMenu(false); }, true);
 
-    // Die Aktion im Fu\u00DF f\u00FChrt den n\u00E4chsten Schritt aus; ein Klick sonst auf die Karte \u00F6ffnet das Men\u00FC.
+    // Die Aktion im Fu\u00DF f\u00FChrt den n\u00E4chsten Schritt aus; im Wartezimmer w\u00E4hlt man das Zimmer.
     const NAECHSTE = { termin: 'wartezimmer', behandlung: 'abrechnung', abrechnung: 'fertig' };
 
     tafel.addEventListener('click', function (e) {
-      const card = e.target.closest('.karte');
-      if (!card) return;
       const button = e.target.closest('[data-aktion]');
-      const a = appointmentById(card.dataset.id);
-      if (!button || !a) {
-        openMenu(card, { x: e.clientX, y: e.clientY });
-      } else if (a.spalte === 'wartezimmer') {
-        const box = button.getBoundingClientRect();
-        openMenu(card, { x: box.left, y: box.bottom + 4 }, true);
-      } else {
-        moveTo(a.id, { spalte: NAECHSTE[a.spalte] });
-      }
+      const a = button ? appointmentById(button.closest('.karte').dataset.id) : null;
+      if (a) moveTo(a.id, { spalte: NAECHSTE[a.spalte] });
+    });
+
+    tafel.addEventListener('change', function (e) {
+      const choice = e.target.closest('[data-zimmerwahl]');
+      if (choice && choice.value !== '') moveTo(choice.closest('.karte').dataset.id, { spalte: 'behandlung', zimmer: choice.value });
     });
 
     tafel.addEventListener('contextmenu', function (e) {
@@ -2239,7 +2649,7 @@ body {
     }
 
     function clearZones() {
-      tafel.querySelectorAll('.ziel').forEach(function (el) { el.classList.remove('ziel'); });
+      tafel.querySelectorAll('.ablage').forEach(function (el) { el.classList.remove('ablage'); });
     }
 
     tafel.addEventListener('dragstart', function (e) {
@@ -2264,15 +2674,15 @@ body {
       if (dragId === null || !zone) return;
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      if (!zone.classList.contains('ziel')) {
+      if (!zone.classList.contains('ablage')) {
         clearZones();
-        zone.classList.add('ziel');
+        zone.classList.add('ablage');
       }
     });
 
     tafel.addEventListener('dragleave', function (e) {
       const zone = dropZone(e.target);
-      if (zone && !zone.contains(e.relatedTarget)) zone.classList.remove('ziel');
+      if (zone && !zone.contains(e.relatedTarget)) zone.classList.remove('ablage');
     });
 
     tafel.addEventListener('drop', function (e) {
@@ -2289,17 +2699,18 @@ body {
     //  Termin anlegen: die Lade von rechts \u00FCber der Tafel
     // ---------------------------------------------------------------------
     const drawer = document.getElementById('lade');
+    const petInput = document.getElementById('tierName');
+    const kindInput = document.getElementById('tierArt');
     const ownerInput = document.getElementById('besitzer');
-    const ownerList = document.getElementById('besitzerListe');
-    const form = { customer: null, hits: [], active: -1, creating: false };
+    const form = { customer: null, pet: null, creating: false };
 
     function resetForm() {
       document.getElementById('formular').reset();
       document.getElementById('formFehler').hidden = true;
       form.customer = null;
+      form.pet = null;
       document.getElementById('uhrzeit').value = nextQuarterHour();
-      showHits([]);
-      showPets();
+      showPreview();
     }
 
     // Escape schlie\u00DFt die Lade von selbst, ein Klick neben sie auch.
@@ -2307,7 +2718,7 @@ body {
       closeMenu(false);
       resetForm();
       drawer.showModal();
-      ownerInput.focus();
+      petInput.focus();
       if (lookup.customers === null) loadLookup();
     }
 
@@ -2315,78 +2726,128 @@ body {
       if (e.target === drawer) drawer.close();
     });
 
+    // Vorschau der Karte: das Foto des gew\u00E4hlten Tiers, sonst zwei Initialen.
+    function showPreview() {
+      const name = petInput.value.trim() || 'Tier';
+      const photo = form.pet ? photoOf(form.pet.kunde, form.pet.name) : null;
+      document.getElementById('vorschauBild').innerHTML = photoHtml({ name: name, foto: photo });
+      document.getElementById('vorschauName').textContent = name;
+      const kind = document.getElementById('vorschauArt');
+      kind.textContent = photo ? 'Tierfoto' : 'Avatar';
+      kind.className = 'vorschau-art ' + (photo ? 'foto-art' : 'avatar-art');
+      document.getElementById('vorschauBesitzer').textContent = 'Besitzer: ' + (ownerInput.value.trim() || 'Besitzer');
+    }
+
+    function customerByNumber(number) {
+      if (!lookup.customers) return null;
+      return lookup.customers.find(function (c) { return plainNumber(c.nummer) === plainNumber(number); }) || null;
+    }
+
+    // Vorschl\u00E4ge unter einem Feld: Pfeiltasten w\u00E4hlen, Enter \u00FCbernimmt, Escape schlie\u00DFt die Liste.
+    function suggestions(input, list, hitsOf, choose) {
+      const box = { hits: [], active: -1 };
+      const mark = function () {
+        list.querySelectorAll('.vorschlag').forEach(function (li, i) { li.setAttribute('aria-selected', String(i === box.active)); });
+        if (box.active >= 0) input.setAttribute('aria-activedescendant', list.id + '-' + box.active);
+        else input.removeAttribute('aria-activedescendant');
+      };
+      const show = function (hits) {
+        box.hits = hits;
+        box.active = hits.length > 0 ? 0 : -1;
+        list.innerHTML = hits.map(function (hit, i) {
+          return '<li class="vorschlag" role="option" id="' + list.id + '-' + i + '" data-i="' + i + '">'
+            + '<span>' + esc(hit.text) + '</span><span class="vorschlag-zusatz">' + esc(hit.zusatz) + '</span></li>';
+        }).join('');
+        list.hidden = hits.length === 0;
+        input.setAttribute('aria-expanded', String(hits.length > 0));
+        mark();
+      };
+      const take = function (i) {
+        const hit = box.hits[i];
+        show([]);
+        if (hit) choose(hit.value);
+      };
+      input.addEventListener('input', function () { show(hitsOf(input.value)); });
+      input.addEventListener('blur', function () { show([]); });
+      input.addEventListener('keydown', function (e) {
+        if (list.hidden) return;
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          box.active = (box.active + (e.key === 'ArrowDown' ? 1 : box.hits.length - 1)) % box.hits.length;
+          mark();
+        } else if (e.key === 'Enter' && box.active >= 0) {
+          e.preventDefault();
+          take(box.active);
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          show([]);
+        }
+      });
+      list.addEventListener('mousedown', function (e) {
+        const li = e.target.closest('.vorschlag');
+        if (!li) return;
+        e.preventDefault();
+        take(Number(li.dataset.i));
+      });
+    }
+
     function customerHits(text) {
       const words = text.trim().split(/\s+/).map(plain).filter(Boolean);
       if (!lookup.customers || words.length === 0) return [];
       return lookup.customers
         .filter(function (c) { return words.every(function (w) { return c.suche.includes(w); }); })
         .sort(function (a, b) { return a.nachname.localeCompare(b.nachname, 'de') || a.vorname.localeCompare(b.vorname, 'de'); })
-        .slice(0, 8);
+        .slice(0, 8)
+        .map(function (c) { return { text: c.anzeige, zusatz: [c.nummer, c.ort].filter(Boolean).join(', '), value: c }; });
     }
 
-    function showHits(hits) {
-      form.hits = hits;
-      form.active = hits.length > 0 ? 0 : -1;
-      ownerList.innerHTML = hits.map(function (c, i) {
-        return '<li class="vorschlag" role="option" id="vorschlag-' + i + '" data-i="' + i + '" aria-selected="' + (i === form.active) + '">'
-          + '<span>' + esc(c.anzeige) + '</span><span class="leise">' + esc([c.nummer, c.ort].filter(Boolean).join(', ')) + '</span></li>';
-      }).join('');
-      ownerList.hidden = hits.length === 0;
-      ownerInput.setAttribute('aria-expanded', String(hits.length > 0));
-      markActive();
+    // Tiere zum Getippten; ist ein Besitzer gew\u00E4hlt, nur seine.
+    function petHits(text) {
+      const word = plain(text);
+      if (!lookup.pets || word === '') return [];
+      return lookup.pets
+        .filter(function (p) { return (!form.customer || plainNumber(p.kunde) === plainNumber(form.customer.nummer)) && plain(p.name).includes(word); })
+        .sort(function (a, b) { return a.name.localeCompare(b.name, 'de'); })
+        .slice(0, 8)
+        .map(function (p) {
+          const owner = customerByNumber(p.kunde);
+          return { text: p.name, zusatz: [p.rasse || p.art, owner ? owner.anzeige : ''].filter(Boolean).join(', '), value: p };
+        });
     }
 
-    function markActive() {
-      ownerList.querySelectorAll('.vorschlag').forEach(function (li, i) { li.setAttribute('aria-selected', String(i === form.active)); });
-      if (form.active >= 0) ownerInput.setAttribute('aria-activedescendant', 'vorschlag-' + form.active);
-      else ownerInput.removeAttribute('aria-activedescendant');
-    }
+    suggestions(petInput, document.getElementById('tierListe'), petHits, function (p) {
+      form.pet = p;
+      petInput.value = p.name;
+      kindInput.value = [p.art, p.rasse].filter(Boolean).join(' / ');
+      const owner = customerByNumber(p.kunde);
+      if (owner) {
+        form.customer = owner;
+        ownerInput.value = owner.anzeige;
+      }
+      showPreview();
+    });
 
-    function chooseCustomer(c) {
+    suggestions(ownerInput, document.getElementById('besitzerListe'), customerHits, function (c) {
       form.customer = c;
       ownerInput.value = c.anzeige;
-      showHits([]);
-      showPets();
-    }
+      if (form.pet && plainNumber(form.pet.kunde) !== plainNumber(c.nummer)) form.pet = null;
+      showPreview();
+    });
 
-    function petsOf(customer) {
-      if (!customer || !lookup.pets) return [];
-      return lookup.pets
-        .filter(function (p) { return plainNumber(p.kunde) === plainNumber(customer.nummer); })
-        .sort(function (a, b) { return a.name.localeCompare(b.name, 'de'); });
-    }
+    petInput.addEventListener('input', function () {
+      form.pet = null;
+      showPreview();
+    });
 
-    // Die Tiere des gew\u00E4hlten Kunden zum Ankreuzen; ein neues Tier ohne Kunden oder auf Wunsch.
-    function showPets() {
-      const pets = petsOf(form.customer);
-      const list = document.getElementById('tierListe');
-      list.innerHTML = pets.map(function (p, i) {
-        const kind = [p.rasse || p.art, ageText(p.geburtsdatum)].filter(Boolean).join(', ');
-        return '<label class="wahl"><input type="checkbox" name="tier" value="' + i + '"' + (pets.length === 1 ? ' checked' : '') + '>'
-          + '<span>' + esc(p.name) + (kind ? ' <span class="leise">' + esc(kind) + '</span>' : '') + '</span></label>';
-      }).join('') + (pets.length > 0 ? '<label class="wahl"><input type="checkbox" id="neuesTierWahl">Neues Tier</label>' : '');
-      list.hidden = pets.length === 0;
-      form.pets = pets;
-      showNewPet();
-    }
+    ownerInput.addEventListener('input', function () {
+      form.customer = null;
+      showPreview();
+    });
 
-    function wantsNewPet() {
-      const choice = document.getElementById('neuesTierWahl');
-      return choice ? choice.checked : true;
-    }
-
-    function showNewPet() {
-      document.getElementById('neuesTier').hidden = !wantsNewPet();
-    }
-
-    function fillSpeciesLists() {
-      const pets = lookup.pets || [];
-      const options = function (values) {
-        return Array.from(new Set(values.filter(Boolean))).sort(function (a, b) { return a.localeCompare(b, 'de'); })
-          .map(function (v) { return '<option value="' + esc(v) + '">'; }).join('');
-      };
-      document.getElementById('tierarten').innerHTML = options(pets.map(function (p) { return p.art; }));
-      document.getElementById('rassen').innerHTML = options(pets.map(function (p) { return p.rasse; }));
+    // "Hund / Dackel" wird zu Tierart und Rasse; ein Wert allein ist die Tierart.
+    function splitKind(text) {
+      const parts = text.split('/').map(function (s) { return s.trim(); });
+      return { art: parts[0] || '', rasse: parts.slice(1).join(' / ') };
     }
 
     // Ein Name ohne Kunden: "Nachname, Vorname" oder "Vorname Nachname".
@@ -2400,105 +2861,51 @@ body {
       return { vorname: words.slice(0, -1).join(' '), nachname: words[words.length - 1] || '' };
     }
 
-    ownerInput.addEventListener('input', function () {
-      form.customer = null;
-      showHits(customerHits(ownerInput.value));
-      showPets();
-    });
-
-    ownerInput.addEventListener('keydown', function (e) {
-      if (ownerList.hidden) return;
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        form.active = (form.active + (e.key === 'ArrowDown' ? 1 : form.hits.length - 1)) % form.hits.length;
-        markActive();
-      } else if (e.key === 'Enter' && form.active >= 0) {
-        e.preventDefault();
-        chooseCustomer(form.hits[form.active]);
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        showHits([]);
-      }
-    });
-
-    ownerList.addEventListener('mousedown', function (e) {
-      const li = e.target.closest('.vorschlag');
-      if (!li) return;
-      e.preventDefault();
-      chooseCustomer(form.hits[Number(li.dataset.i)]);
-    });
-
-    document.getElementById('tierListe').addEventListener('change', function (e) {
-      if (e.target.id === 'neuesTierWahl') {
-        showNewPet();
-        if (e.target.checked) document.getElementById('tierName').focus();
-      }
-    });
+    function fieldMissing(input, text) {
+      showError(text);
+      input.focus();
+    }
 
     document.getElementById('schliessen').addEventListener('click', function () { drawer.close(); });
 
     document.getElementById('formular').addEventListener('submit', async function (e) {
       e.preventDefault();
       if (form.creating) return;
+      const reasonInput = document.getElementById('behandlung');
+      const name = petInput.value.trim();
       const ownerText = ownerInput.value.trim();
-      const chosen = Array.from(document.querySelectorAll('input[name="tier"]:checked')).map(function (box) { return form.pets[Number(box.value)]; });
-      const fresh = wantsNewPet()
-        ? { name: document.getElementById('tierName').value.trim(), art: document.getElementById('tierArt').value.trim(), rasse: document.getElementById('tierRasse').value.trim(), geburtsdatum: '' }
-        : null;
-      if (ownerText === '') {
-        showError('Besitzer fehlt');
-        ownerInput.focus();
-        return;
-      }
-      if (fresh && fresh.name === '') {
-        showError('Name des Tiers fehlt');
-        document.getElementById('tierName').focus();
-        return;
-      }
-      const pets = chosen.concat(fresh ? [fresh] : []);
-      if (pets.length === 0) {
-        showError('Kein Tier gew\u00E4hlt');
-        return;
-      }
-      if (!beispiel && !hasSoftEngine()) {
-        showError('Keine Verbindung zu SoftEngine, Termin nicht angelegt');
-        return;
-      }
+      const reason = reasonInput.value.trim();
+      if (name === '') return fieldMissing(petInput, 'Tiername fehlt');
+      if (ownerText === '') return fieldMissing(ownerInput, 'Besitzer fehlt');
+      if (reason === '') return fieldMissing(reasonInput, 'Grund fehlt');
+      if (!beispiel && !hasSoftEngine()) return showError('Keine Verbindung zu SoftEngine, Termin nicht angelegt');
+
+      const kind = splitKind(kindInput.value);
+      const pet = form.pet && same(form.pet.name, name) ? form.pet : { name: name, art: kind.art, rasse: kind.rasse, geburtsdatum: '' };
       const customer = form.customer;
       const names = customer ? { vorname: customer.vorname, nachname: customer.nachname } : splitName(ownerText);
       const spalte = document.querySelector('input[name="wohin"]:checked').value;
-      const time = document.getElementById('uhrzeit').value || nextQuarterHour();
-      const reason = document.getElementById('behandlung').value.trim();
-      const urgent = document.getElementById('notfall').checked;
       const f = CONFIG.felder;
 
       setCreating(true);
-      let made = 0;
-      for (const pet of pets) {
-        const record = await createRecord();
-        if (record === null) {
-          showError('Termin nicht angelegt: keine Satznummer von SoftEngine');
-          break;
-        }
-        [
-          [f.kunde, customer ? customer.nummer : ''],
-          [f.vorname, names.vorname],
-          [f.nachname, names.nachname],
-          [f.tiername, pet.name],
-          [f.tierart, pet.art],
-          [f.rasse, pet.rasse],
-          [f.geburtsdatum, pet.geburtsdatum],
-          [f.datum, todayText()],
-          [f.uhrzeit, time],
-          [f.behandlung, reason],
-          [f.status, CONFIG.status[spalte]],
-          [f.prioritaet, urgent ? CONFIG.notfall : ''],
-        ].forEach(function (pair) { if (pair[1] !== '') writeField(record, pair[0], pair[1]); });
-        made++;
-      }
+      const record = await createRecord();
       setCreating(false);
-      if (made === 0) return;
+      if (record === null) return showError('Termin nicht angelegt: keine Satznummer von SoftEngine');
+      [
+        [f.kunde, customer ? customer.nummer : ''],
+        [f.vorname, names.vorname],
+        [f.nachname, names.nachname],
+        [f.tiername, pet.name],
+        [f.tierart, pet.art],
+        [f.rasse, pet.rasse],
+        [f.geburtsdatum, pet.geburtsdatum],
+        [f.datum, todayText()],
+        [f.uhrzeit, document.getElementById('uhrzeit').value || nextQuarterHour()],
+        [f.behandlung, reason],
+        [f.status, CONFIG.status[spalte]],
+      ].forEach(function (pair) { if (pair[1] !== '') writeField(record, pair[0], pair[1]); });
       drawer.close();
+      showToast(pet.name + ' angelegt');
       requestFreshData();
     });
 
@@ -2506,29 +2913,33 @@ body {
       form.creating = on;
       const button = document.getElementById('anlegen');
       button.disabled = on;
-      button.textContent = on ? 'Wird eingetragen' : 'Eintragen';
+      button.querySelector('span').textContent = on ? 'Wird eingetragen' : 'Termin ins Board eintragen';
     }
 
     // ---------------------------------------------------------------------
-    //  Fehler melden und Start
+    //  Meldungen und Start
     // ---------------------------------------------------------------------
-    // Gemeldet wird nur, was schiefging: in der offenen Lade \u00FCber "Eintragen",
-    // sonst eine Zeile unten, nach f\u00FCnf Sekunden weg.
-    function showError(text) {
-      if (drawer.open) {
-        const line = document.getElementById('formFehler');
-        line.textContent = text;
-        line.hidden = false;
-        return;
-      }
+    // Eine Meldung unten links, nach gut zwei Sekunden weg.
+    function showToast(text) {
       const el = document.createElement('div');
       el.className = 'meldung';
-      el.textContent = text;
+      el.innerHTML = '<span class="punkt"></span><span>' + esc(text) + '</span>';
       document.getElementById('meldungen').appendChild(el);
       setTimeout(function () {
         el.classList.add('weg');
-        setTimeout(function () { el.remove(); }, 300);
-      }, 5000);
+        setTimeout(function () { el.remove(); }, 200);
+      }, 2400);
+    }
+
+    // Ein Fehler steht in der offenen Lade \u00FCber dem Knopf, sonst als Meldung unten.
+    function showError(text) {
+      if (!drawer.open) {
+        showToast(text);
+        return;
+      }
+      const line = document.getElementById('formFehler');
+      line.textContent = text;
+      line.hidden = false;
     }
 
     document.getElementById('suche').addEventListener('input', function (e) {
@@ -2541,7 +2952,6 @@ body {
     window.addEventListener('load', function () {
       beispiel = !hasSoftEngine() && typeof window.basisHTML_REGISTER !== 'function' && !(window.SEDATA && window.SEDATA.Daten);
       document.getElementById('praxis').textContent = CONFIG.praxis;
-      showClock();
       showConnection();
       if (beispiel) {
         sample.rows = sampleRows();
@@ -2550,12 +2960,11 @@ body {
       } else {
         connect();
       }
-      // Uhr und Minuten laufen weiter.
+      // Die Wartezeiten laufen weiter.
       let shownMinute = nowMinute();
       setInterval(function () {
         if (nowMinute() === shownMinute) return;
         shownMinute = nowMinute();
-        showClock();
         if (loadedRows !== null) takeRows(loadedRows);
       }, 5000);
     });

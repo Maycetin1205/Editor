@@ -9,7 +9,7 @@
   <style>
 /*STIL*/
 
-/* Empfang: Anordnung der Tafel. Alle Werte kommen aus dem gemeinsamen Stil. */
+/* Empfang: Seite aus Kopf und Tafel. Alle Werte kommen aus dem gemeinsamen Stil. */
 html,
 body {
   height: 100%;
@@ -19,332 +19,139 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.unterzeile {
-  display: flex;
-  gap: var(--abstand-3);
-  color: var(--tinte-3);
-  font-size: var(--text-klein);
-}
-
-.suche {
-  width: 15rem;
-}
-
-.suche .eingabe {
-  background: var(--grund);
-}
-
-.suche .eingabe:focus {
-  background: var(--flaeche);
-}
-
-.uhr {
-  min-width: 3rem;
-  color: var(--tinte-2);
-  font-weight: var(--halbfett);
-  text-align: right;
-}
-
-.tafel {
-  display: grid;
-  flex: 1;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--abstand-5);
-  min-height: 0;
-  padding: var(--abstand-5);
   user-select: none;
-}
-
-/* Eine Spalte: Kopf mit Titel und Zähler, darunter die Karten */
-.spalte {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  border-radius: var(--radius-spalte);
-  background: var(--grund-tief);
-}
-
-.spalte-kopf {
-  display: flex;
-  align-items: baseline;
-  gap: var(--abstand-2);
-  padding: var(--abstand-4) var(--abstand-4) var(--abstand-3);
-}
-
-.spalte-titel {
-  font-size: var(--text);
-}
-
-.spalte-zahl {
-  color: var(--tinte-3);
-  font-size: var(--text-neben);
-  font-weight: var(--halbfett);
-}
-
-.spalte-inhalt {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: var(--abstand-3);
-  min-height: 0;
-  padding: 0 var(--abstand-3) var(--abstand-3);
-  overflow-y: auto;
-  border-radius: var(--radius-spalte);
-  transition: background-color var(--dauer);
-}
-
-.ziel {
-  background: var(--flaeche-hover);
-  outline: var(--fokus) solid var(--linie-stark);
-  outline-offset: calc(var(--fokus) * -1);
-}
-
-/* Eine Karte */
-.karte {
-  flex: none;
-  padding: var(--abstand-4);
-  border: var(--rand) solid var(--linie);
-  border-radius: var(--radius-gross);
-  background: var(--flaeche);
-  box-shadow: var(--schatten-karte);
-  cursor: grab;
-  transition: border-color var(--dauer);
-}
-
-.karte:hover,
-.karte.offen {
-  border-color: var(--linie-stark);
-}
-
-.karte:focus-visible {
-  outline: none;
-  border-color: var(--akzent);
-  box-shadow: var(--fokus-ring);
-}
-
-.karte.gezogen {
-  opacity: 0.4;
-}
-
-.karte-kopf {
-  display: grid;
-  grid-template-columns: var(--foto) minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--abstand-3);
-}
-
-.karte-name,
-.karte-besitzer {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.karte-name {
-  font-weight: var(--halbfett);
-  letter-spacing: var(--laufweite-eng);
-}
-
-.karte-art {
-  margin-left: var(--abstand-2);
-  color: var(--tinte-3);
-  font-size: var(--text-neben);
-  font-weight: normal;
-  letter-spacing: normal;
-}
-
-.karte-besitzer {
-  color: var(--tinte-2);
-  font-size: var(--text-neben);
-}
-
-.karte-kopf .marke {
-  align-self: start;
-}
-
-.karte-grund {
-  display: -webkit-box;
-  margin-top: var(--abstand-3);
-  overflow: hidden;
-  color: var(--tinte-2);
-  font-size: var(--text-neben);
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.karte-fuss {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--abstand-3);
-  margin-top: var(--abstand-3);
-  padding-top: var(--abstand-3);
-  border-top: var(--rand) solid var(--linie);
-  color: var(--tinte-3);
-  font-size: var(--text-klein);
-}
-
-/* Die Zimmer der Spalte Behandlung: Ablage mit Belegt oder Frei */
-.zimmer {
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  gap: var(--abstand-2);
-  padding: var(--abstand-3);
-  border: var(--rand) solid var(--linie);
-  border-radius: var(--radius-gross);
-  background: var(--flaeche-leise);
-  transition: background-color var(--dauer);
-}
-
-.zimmer-kopf {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--abstand-3);
-  padding: 0 var(--abstand-1);
-  font-size: var(--text-neben);
-}
-
-.zimmer-zusatz {
-  margin-left: var(--abstand-2);
-  color: var(--tinte-3);
-  font-weight: normal;
-  letter-spacing: normal;
-}
-
-.zimmer-stand {
-  color: var(--tinte-3);
-  font-size: var(--text-klein);
-}
-
-.zimmer-leer {
-  min-height: 3.5rem;
-  border-radius: var(--radius);
-  background: var(--flaeche);
-}
-
-/* Termin anlegen */
-.tier-liste {
-  display: grid;
-  gap: var(--abstand-2);
-}
-
-.neues-tier {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--abstand-3);
-}
-
-.neues-tier > :first-child {
-  grid-column: 1 / -1;
-}
-
-@media (max-width: 1499px) {
-  .kennzahlen {
-    display: none;
-  }
 }
   </style>
 </head>
 <body>
   <header class="kopf">
-    <div>
-      <h1 class="kopf-titel" id="praxis"></h1>
-      <p class="unterzeile"><span>Empfang</span><span id="datum"></span><span id="verbindung"></span></p>
-    </div>
-    <div class="kennzahlen">
-      <p class="kennzahl">Nicht zugewiesen <span class="kennzahl-wert" id="kennzahl-termin"></span></p>
-      <p class="kennzahl">Wartezimmer <span class="kennzahl-wert" id="kennzahl-wartezimmer"></span></p>
-      <p class="kennzahl">Zimmer belegt <span class="kennzahl-wert" id="kennzahl-zimmer"></span></p>
-      <p class="kennzahl">Abrechnung <span class="kennzahl-wert" id="kennzahl-abrechnung"></span></p>
-    </div>
-    <div class="kopf-rechts">
-      <label class="suchfeld suche">
-        <svg class="symbol" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
-        <input class="eingabe" id="suche" type="search" placeholder="Tier oder Besitzer suchen" aria-label="Suchen" autocomplete="off">
-      </label>
-      <button class="knopf knopf-haupt" id="terminAnlegen" type="button" aria-haspopup="dialog">Termin anlegen</button>
-      <span class="uhr zahl" id="uhr"></span>
+    <div class="kopf-zeile">
+      <div>
+        <div class="praxis-zeile">
+          <h1 class="praxis-name" id="praxis"></h1>
+          <span class="praxis-ort">Empfang</span>
+        </div>
+        <p class="praxis-stand"><span class="punkt" id="standPunkt"></span><span id="stand"></span></p>
+      </div>
+
+      <div class="kennzahlen">
+        <p class="kennzahl"><span class="punkt termin"></span><span class="kennzahl-name">Nicht zugewiesen:</span><span class="kennzahl-wert" id="kennzahl-termin"></span></p>
+        <p class="kennzahl"><span class="punkt wartezimmer"></span><span class="kennzahl-name">Wartezimmer:</span><span class="kennzahl-wert" id="kennzahl-wartezimmer"></span></p>
+        <p class="kennzahl"><span class="punkt behandlung"></span><span class="kennzahl-name">Zimmer belegt:</span><span class="kennzahl-wert" id="kennzahl-zimmer"></span></p>
+        <p class="kennzahl"><span class="punkt abrechnung"></span><span class="kennzahl-name">Abrechnung:</span><span class="kennzahl-wert akzent" id="kennzahl-abrechnung"></span></p>
+      </div>
+
+      <div class="kopf-rechts">
+        <label class="suchfeld">
+          <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input id="suche" type="text" placeholder="Tiername oder Besitzer suchen..." aria-label="Suchen" autocomplete="off">
+        </label>
+        <button class="knopf-haupt" id="terminAnlegen" type="button" aria-haspopup="dialog">
+          <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16m8-8H4"/></svg>
+          <span>Termin anlegen</span>
+        </button>
+      </div>
     </div>
   </header>
 
-  <main class="tafel" id="tafel">
-    <section class="spalte" aria-labelledby="titel-termin">
-      <header class="spalte-kopf">
-        <h2 class="spalte-titel" id="titel-termin">Nicht zugewiesen</h2>
-        <span class="spalte-zahl" id="zahl-termin"></span>
-      </header>
-      <div class="spalte-inhalt" id="inhalt-termin" data-ziel="termin"></div>
-    </section>
-    <section class="spalte" aria-labelledby="titel-wartezimmer">
-      <header class="spalte-kopf">
-        <h2 class="spalte-titel" id="titel-wartezimmer">Wartezimmer</h2>
-        <span class="spalte-zahl" id="zahl-wartezimmer"></span>
-      </header>
-      <div class="spalte-inhalt" id="inhalt-wartezimmer" data-ziel="wartezimmer"></div>
-    </section>
-    <section class="spalte" aria-labelledby="titel-behandlung">
-      <header class="spalte-kopf">
-        <h2 class="spalte-titel" id="titel-behandlung">Behandlung</h2>
-        <span class="spalte-zahl" id="zahl-behandlung"></span>
-      </header>
-      <div class="spalte-inhalt" id="inhalt-behandlung" data-ziel="behandlung"></div>
-    </section>
-    <section class="spalte" aria-labelledby="titel-abrechnung">
-      <header class="spalte-kopf">
-        <h2 class="spalte-titel" id="titel-abrechnung">Abrechnung</h2>
-        <span class="spalte-zahl" id="zahl-abrechnung"></span>
-      </header>
-      <div class="spalte-inhalt" id="inhalt-abrechnung" data-ziel="abrechnung"></div>
-    </section>
+  <main class="tafel-bereich">
+    <div class="tafel" id="tafel">
+      <section class="spalte" aria-labelledby="titel-termin">
+        <header class="spalte-kopf">
+          <div class="spalte-name"><span class="punkt termin"></span><h2 class="spalte-titel" id="titel-termin">Nicht zugewiesen</h2></div>
+          <span class="zaehler termin" id="zahl-termin"></span>
+        </header>
+        <div class="spalte-inhalt" id="inhalt-termin" data-ziel="termin"></div>
+      </section>
+      <section class="spalte" aria-labelledby="titel-wartezimmer">
+        <header class="spalte-kopf">
+          <div class="spalte-name"><span class="punkt wartezimmer"></span><h2 class="spalte-titel" id="titel-wartezimmer">Wartezimmer</h2></div>
+          <span class="zaehler wartezimmer" id="zahl-wartezimmer"></span>
+        </header>
+        <div class="spalte-inhalt" id="inhalt-wartezimmer" data-ziel="wartezimmer"></div>
+      </section>
+      <section class="spalte" aria-labelledby="titel-behandlung">
+        <header class="spalte-kopf">
+          <div class="spalte-name"><span class="punkt behandlung"></span><h2 class="spalte-titel" id="titel-behandlung">Behandlung</h2></div>
+          <span class="zaehler behandlung" id="zahl-behandlung"></span>
+        </header>
+        <div class="spalte-inhalt" id="inhalt-behandlung" data-ziel="behandlung"></div>
+      </section>
+      <section class="spalte" aria-labelledby="titel-abrechnung">
+        <header class="spalte-kopf">
+          <div class="spalte-name"><span class="punkt abrechnung"></span><h2 class="spalte-titel" id="titel-abrechnung">Abrechnung</h2></div>
+          <span class="zaehler abrechnung" id="zahl-abrechnung"></span>
+        </header>
+        <div class="spalte-inhalt" id="inhalt-abrechnung" data-ziel="abrechnung"></div>
+      </section>
+    </div>
   </main>
 
   <dialog class="lade" id="lade" aria-labelledby="ladeTitel">
+    <header class="lade-kopf">
+      <h3 class="lade-titel" id="ladeTitel">Termin anlegen</h3>
+      <button class="lade-zu" id="schliessen" type="button" aria-label="Schließen">
+        <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </header>
     <form class="lade-form" id="formular" novalidate>
-      <header class="lade-kopf">
-        <h2 class="lade-titel" id="ladeTitel">Termin anlegen</h2>
-        <button class="knopf knopf-leise knopf-symbol" id="schliessen" type="button" aria-label="Schließen">
-          <svg class="symbol" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
-        </button>
-      </header>
-      <div class="lade-inhalt">
+      <div class="vorschau">
+        <div id="vorschauBild"></div>
+        <div class="vorschau-text">
+          <div class="karte-zeile">
+            <span class="karte-name" id="vorschauName"></span>
+            <span class="vorschau-art" id="vorschauArt"></span>
+          </div>
+          <p class="vorschau-besitzer" id="vorschauBesitzer"></p>
+        </div>
+      </div>
+
+      <div class="reihe">
         <div class="feld">
-          <label class="feld-name" for="besitzer">Besitzer</label>
-          <input class="eingabe" id="besitzer" maxlength="60" autocomplete="off" role="combobox" autofocus
+          <label class="feld-name" for="tierName">Tiername *</label>
+          <input class="eingabe" id="tierName" maxlength="30" placeholder="z.B. Luna" autocomplete="off" role="combobox"
+                 aria-autocomplete="list" aria-expanded="false" aria-controls="tierListe">
+          <ul class="vorschlaege" id="tierListe" role="listbox" hidden></ul>
+        </div>
+        <div class="feld">
+          <label class="feld-name" for="tierArt">Tierart / Rasse</label>
+          <input class="eingabe" id="tierArt" maxlength="63" placeholder="z.B. EKH / Dackel" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="reihe">
+        <div class="feld">
+          <label class="feld-name" for="besitzer">Besitzer *</label>
+          <input class="eingabe" id="besitzer" maxlength="60" placeholder="z.B. Hr. Meyer" autocomplete="off" role="combobox"
                  aria-autocomplete="list" aria-expanded="false" aria-controls="besitzerListe">
           <ul class="vorschlaege" id="besitzerListe" role="listbox" hidden></ul>
         </div>
-        <fieldset class="gruppe">
-          <legend class="feld-name">Tier</legend>
-          <div class="tier-liste" id="tierListe"></div>
-          <div class="neues-tier" id="neuesTier">
-            <label class="feld"><span class="feld-name">Name</span><input class="eingabe" id="tierName" maxlength="30" autocomplete="off"></label>
-            <label class="feld"><span class="feld-name">Tierart</span><input class="eingabe" id="tierArt" maxlength="30" list="tierarten" autocomplete="off"></label>
-            <label class="feld"><span class="feld-name">Rasse</span><input class="eingabe" id="tierRasse" maxlength="30" list="rassen" autocomplete="off"></label>
-          </div>
-          <datalist id="tierarten"></datalist>
-          <datalist id="rassen"></datalist>
-        </fieldset>
-        <label class="feld"><span class="feld-name">Grund</span><input class="eingabe" id="behandlung" maxlength="150" autocomplete="off"></label>
-        <div class="reihe">
-          <label class="feld"><span class="feld-name">Uhrzeit</span><input class="eingabe zahl" id="uhrzeit" type="time"></label>
-          <label class="wahl"><input type="checkbox" id="notfall">Notfall</label>
+        <div class="feld">
+          <label class="feld-name" for="uhrzeit">Termin-Uhrzeit</label>
+          <input class="eingabe zahl" id="uhrzeit" type="time">
         </div>
-        <fieldset class="gruppe">
-          <legend class="feld-name">Wohin</legend>
-          <div class="reihe">
-            <label class="wahl"><input type="radio" name="wohin" value="termin" checked>Nicht zugewiesen</label>
-            <label class="wahl"><input type="radio" name="wohin" value="wartezimmer">Wartezimmer</label>
-          </div>
-        </fieldset>
       </div>
-      <footer class="lade-fuss">
-        <p class="lade-fehler dringend" id="formFehler" role="alert" hidden></p>
-        <button class="knopf knopf-haupt knopf-breit" id="anlegen" type="submit">Eintragen</button>
-      </footer>
+
+      <div class="feld">
+        <label class="feld-name" for="behandlung">Grund des Termins *</label>
+        <input class="eingabe" id="behandlung" maxlength="150" placeholder="z.B. Krallen schneiden, Nachkontrolle..." autocomplete="off">
+      </div>
+
+      <fieldset>
+        <legend class="feld-name weit">Wo soll der Termin erscheinen?</legend>
+        <div class="wahlen">
+          <label class="wahl"><input type="radio" name="wohin" value="termin" checked><span><span class="wahl-titel">Nicht zugewiesen</span><span class="wahl-zusatz">Noch nicht da</span></span></label>
+          <label class="wahl"><input type="radio" name="wohin" value="wartezimmer"><span><span class="wahl-titel">Wartezimmer</span><span class="wahl-zusatz">Ist schon da</span></span></label>
+        </div>
+      </fieldset>
+
+      <p class="lade-fehler" id="formFehler" role="alert" hidden></p>
+      <div class="lade-absenden">
+        <button class="knopf-haupt knopf-eintragen" id="anlegen" type="submit">
+          <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16m8-8H4"/></svg>
+          <span>Termin ins Board eintragen</span>
+        </button>
+      </div>
     </form>
   </dialog>
 
@@ -382,8 +189,6 @@ body {
         vorname: '283_30',       // Vorname Kunde
         nachname: '313_30',      // Nachname Kunde
         status: '343_30',        // Zimmer/Status: steuert die Spalte, siehe status
-        prioritaet: '373_12',
-        belegnummer: '385_12',
         geaendertAm: '418_10',
         geaendertUm: '428_5',    // daraus die Minuten in der Spalte (Wartezeit)
         zimmer: '444_30',        // welches Zimmer, siehe zimmer
@@ -399,25 +204,16 @@ body {
         wartezimmer: 'Wartezimmer',
         behandlung: 'Behandlung',
         abrechnung: 'Abrechnung',
-        fertig: 'Fertig',          // nach "Kassiert": der Termin verschwindet von der Tafel
+        fertig: 'Fertig',          // nach "Kassieren": der Termin verschwindet von der Tafel
       },
-
-      // Was im Feld Priorität einen Notfall kennzeichnet.
-      notfall: 'Notfall',
 
       // Die Zimmer der Spalte Behandlung: name zeigt die Maske, wert steht im Feld zimmer.
       zimmer: [
-        { name: 'Zimmer 1', wert: 'Zimmer 1', zusatz: 'Dr. Weber' },
-        { name: 'Zimmer 2', wert: 'Zimmer 2', zusatz: 'Dr. Lindner' },
-        { name: 'Zimmer 3', wert: 'Zimmer 3', zusatz: 'Röntgen, Labor' },
-        { name: 'Zimmer 4', wert: 'Zimmer 4', zusatz: 'OP' },
+        { name: 'Zimmer 1', wert: 'Zimmer 1', zusatz: 'Dr. Weber (Sprechstunde)' },
+        { name: 'Zimmer 2', wert: 'Zimmer 2', zusatz: 'Dr. Lindner (Sprechstunde)' },
+        { name: 'Zimmer 3', wert: 'Zimmer 3', zusatz: 'Röntgen / Ultraschall / Labor' },
+        { name: 'Zimmer 4', wert: 'Zimmer 4', zusatz: 'OP / Zahnstation' },
       ],
-
-      // Ab wie vielen Minuten im Wartezimmer die Wartezeit auffällt.
-      wartezeit: { warnen: 15, dringend: 30 },
-
-      // Ab wie vielen Minuten nach der Uhrzeit ein Termin auffällt, der noch nicht da ist.
-      verspaetet: 10,
 
       // Feld eines Termins schreiben: PUT_RELATION 174 [POS, LEN, Feldart, Satznummer, IDB, Wert],
       // einer nach dem anderen im Abstand von 100 ms.
@@ -497,20 +293,20 @@ body {
         ['20011', '10110', 'Mia', 'Katze', 'Siam', '19.10.2019', ''],
         ['20012', '10124', 'Simba', 'Katze', 'Bengal', '11.12.2020', ''],
       ],
-      // Tier, Minuten von jetzt bis zur Uhrzeit, Spalte, Minuten in der Spalte, Behandlung, Notfall, Zimmer, Betrag
+      // Tier, Minuten von jetzt bis zur Uhrzeit, Spalte, Minuten in der Spalte, Behandlung, Zimmer, Betrag
       termine: [
-        ['20003', -40, 'behandlung', 22, 'Lahmt vorne links', false, 'Zimmer 1'],
-        ['20011', -25, 'behandlung', 9, 'Zahnkontrolle', false, 'Zimmer 3'],
-        ['20004', -35, 'abrechnung', 4, 'Impfung', false, 'Zimmer 2', '68,50 €'],
-        ['20009', -55, 'abrechnung', 7, 'Schilddrüse, Kontrolle', false, 'Zimmer 1', '54,20 €'],
-        ['20001', -20, 'wartezimmer', 34, 'Ohrenentzündung, Nachkontrolle', false, ''],
-        ['20012', -10, 'wartezimmer', 18, 'Frisst seit zwei Tagen nicht', false, ''],
-        ['20006', 0, 'wartezimmer', 6, 'Schnittwunde an der Pfote', true, ''],
-        ['20005', -15, 'termin', 0, 'Gewichtskontrolle', false, ''],
-        ['20007', 5, 'termin', 0, 'Impfung', false, ''],
-        ['20008', 15, 'termin', 0, 'Blutabnahme', false, ''],
-        ['20002', 30, 'termin', 0, 'Krallen schneiden', false, ''],
-        ['20010', 45, 'termin', 0, 'Erstuntersuchung', false, ''],
+        ['20003', -40, 'behandlung', 22, 'Lahmt vorne links', 'Zimmer 1'],
+        ['20011', -25, 'behandlung', 9, 'Zahnkontrolle', 'Zimmer 3'],
+        ['20004', -35, 'abrechnung', 4, 'Impfung', 'Zimmer 2', '68,50 €'],
+        ['20009', -55, 'abrechnung', 7, 'Schilddrüse, Kontrolle', 'Zimmer 1', '54,20 €'],
+        ['20001', -20, 'wartezimmer', 34, 'Ohrenentzündung, Nachkontrolle', ''],
+        ['20012', -10, 'wartezimmer', 18, 'Frisst seit zwei Tagen nicht', ''],
+        ['20006', 0, 'wartezimmer', 6, 'Schnittwunde an der Pfote', ''],
+        ['20005', -15, 'termin', 0, 'Gewichtskontrolle', ''],
+        ['20007', 5, 'termin', 0, 'Impfung', ''],
+        ['20008', 15, 'termin', 0, 'Blutabnahme', ''],
+        ['20002', 30, 'termin', 0, 'Krallen schneiden', ''],
+        ['20010', 45, 'termin', 0, 'Erstuntersuchung', ''],
       ],
     };
 
@@ -604,19 +400,6 @@ body {
 
     function nextQuarterHour() {
       return timeOfMinute((Math.ceil((nowMinute() + 1) / 15) * 15) % (24 * 60));
-    }
-
-    // Alter aus dem Geburtsdatum: "8 Monate", "1 Jahr", "7 Jahre".
-    function ageText(birth) {
-      const key = dayKey(birth);
-      if (key === '') return '';
-      const [y, m, d] = key.split('-').map(Number);
-      const now = new Date();
-      const months = (now.getFullYear() - y) * 12 + now.getMonth() + 1 - m - (now.getDate() < d ? 1 : 0);
-      if (months < 0) return '';
-      if (months < 12) return months === 1 ? '1 Monat' : months + ' Monate';
-      const years = Math.floor(months / 12);
-      return years === 1 ? '1 Jahr' : years + ' Jahre';
     }
 
     // ---------------------------------------------------------------------
@@ -757,10 +540,8 @@ body {
         kunde: customerNo,
         tierart: readField(row, f.tierart),
         rasse: readField(row, f.rasse),
-        alter: ageText(readField(row, f.geburtsdatum)),
         besitzer: [readField(row, f.vorname), readField(row, f.nachname)].filter(Boolean).join(' ') || (customerNo !== '' ? 'Kunde ' + customerNo : ''),
         behandlung: readField(row, f.behandlung),
-        notfall: CONFIG.notfall !== '' && same(readField(row, f.prioritaet), CONFIG.notfall),
         spalte: place.spalte,
         zimmer: place.zimmer,
         letztesZimmer: roomName(roomValue),
@@ -1121,11 +902,10 @@ body {
         row[f.datum] = todayText();
         row[f.behandlung] = t[4];
         row[f.status] = CONFIG.status[t[2]];
-        row[f.prioritaet] = t[5] ? CONFIG.notfall : '';
-        row[f.zimmer] = t[6];
+        row[f.zimmer] = t[5];
         row[f.geaendertAm] = todayText();
         row[f.geaendertUm] = timeOfMinute(Math.max(0, now - t[3]));
-        row.BEISPIELBETRAG = t[7] || '';
+        row.BEISPIELBETRAG = t[6] || '';
         return row;
       });
     }
@@ -1231,7 +1011,6 @@ body {
         }
         lookup.loadedAt = Date.now();
         lookup.loading = null;
-        fillSpeciesLists();
         if (loadedRows !== null) takeRows(loadedRows);
       })();
       return lookup.loading;
@@ -1279,64 +1058,76 @@ body {
       return a.seit === null ? null : Math.max(0, nowMinute() - a.seit);
     }
 
-    function waitTone(minutes) {
-      if (minutes === null) return '';
-      return minutes >= CONFIG.wartezeit.dringend ? 'dringend' : minutes >= CONFIG.wartezeit.warnen ? 'warnen' : '';
-    }
-
-    function isLate(a) {
-      return a.minute !== null && nowMinute() - a.minute > CONFIG.verspaetet;
-    }
-
     function matchesSearch(a) {
       if (searchText === '') return true;
       const text = plain([a.name, a.besitzer, a.behandlung, a.tierart, a.rasse].join(' '));
       return searchText.split(/\s+/).map(plain).every(function (word) { return text.includes(word); });
     }
 
-    // Die Marke oben rechts: Uhrzeit, Wartezeit, Minuten im Zimmer oder Betrag.
-    function valueOf(a) {
-      if (a.spalte === 'termin') return { text: a.uhrzeit, ton: isLate(a) ? 'warnen' : '' };
-      if (a.spalte === 'abrechnung' && a.betrag) return { text: a.betrag, ton: '' };
-      const minutes = minutesSince(a);
-      if (minutes === null) return { text: a.uhrzeit, ton: '' };
-      return { text: minutes + ' min', ton: a.spalte === 'wartezimmer' ? waitTone(minutes) : '' };
+    function hashOf(text) {
+      let h = 0;
+      for (let i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) | 0;
+      return h;
     }
 
-    // Die eine Aktion im Fuß der Karte, je Spalte.
-    const AKTIONEN = { termin: 'Ins Wartezimmer', wartezimmer: 'Aufrufen', behandlung: 'Zur Abrechnung', abrechnung: 'Kassieren' };
-
-    // Ohne Foto zwei Initialen: aus zwei Wörtern je der erste Buchstabe, sonst die ersten zwei.
+    // Ohne Foto zwei Initialen: die ersten zwei Buchstaben des Namens.
     function initials(name) {
-      const words = String(name || '').trim().split(/\s+/).filter(Boolean);
-      const text = words.length > 1 ? words[0].charAt(0) + words[1].charAt(0) : (words[0] || '').slice(0, 2);
-      return text.toUpperCase();
+      const clean = (String(name || '').trim() || 'TI').toUpperCase();
+      return clean.length >= 2 ? clean.slice(0, 2) : clean + 'X';
     }
 
     function photoHtml(a) {
-      if (a.foto) return '<img class="foto" src="' + esc(a.foto) + '" alt="">';
-      return '<span class="foto" aria-hidden="true">' + esc(initials(a.name)) + '</span>';
+      if (a.foto) return '<div class="bild"><img src="' + esc(a.foto) + '" alt=""></div>';
+      return '<div class="avatar farbe-' + (Math.abs(hashOf(a.name)) % 5) + '" aria-hidden="true">' + esc(initials(a.name)) + '</div>';
+    }
+
+    // Das Badge oben rechts: Uhrzeit, Wartezeit, "Im Zimmer" oder Betrag.
+    function badgeHtml(a) {
+      if (a.spalte === 'termin') return a.uhrzeit ? '<span class="badge zeit">' + esc(a.uhrzeit) + ' Uhr</span>' : '';
+      if (a.spalte === 'wartezimmer') {
+        const minutes = minutesSince(a);
+        return minutes === null ? '' : '<span class="badge wartezeit">' + minutes + ' Min.</span>';
+      }
+      if (a.spalte === 'behandlung') return '<span class="badge im-zimmer">Im Zimmer</span>';
+      return a.betrag ? '<span class="badge betrag">' + esc(a.betrag) + '</span>' : '';
+    }
+
+    // Der Fuß der Karte: links ein Hinweis aus den Daten, rechts die eine Aktion.
+    function footHtml(a) {
+      if (a.spalte === 'termin') {
+        return '<span class="fuss-text"></span>'
+          + '<button class="knopf-karte akzent" type="button" tabindex="-1" data-aktion>Ins Wartezimmer</button>';
+      }
+      if (a.spalte === 'wartezimmer') {
+        return '<span class="fuss-text"></span>'
+          + '<select class="zimmerwahl" tabindex="-1" aria-label="Zimmer" data-zimmerwahl><option value="">Zimmer...</option>'
+          + CONFIG.zimmer.map(function (room) { return '<option value="' + esc(room.name) + '">' + esc(room.name) + '</option>'; }).join('')
+          + '</select>';
+      }
+      if (a.spalte === 'behandlung') {
+        return '<span class="fuss-text zimmer-im">' + esc(a.zimmer || '') + '</span>'
+          + '<button class="knopf-karte grau" type="button" tabindex="-1" data-aktion>Zur Abrechnung</button>';
+      }
+      return '<span class="fuss-text">' + (a.letztesZimmer ? 'Aus ' + esc(a.letztesZimmer) : '') + '</span>'
+        + '<button class="knopf-karte kasse" type="button" tabindex="-1" data-aktion>Kassieren</button>';
     }
 
     function cardHtml(a) {
-      const value = valueOf(a);
       const kind = a.rasse || a.tierart;
-      const origin = a.spalte === 'abrechnung' && a.letztesZimmer ? 'Aus ' + a.letztesZimmer : '';
-      const reason = (a.notfall ? '<span class="dringend">Notfall</span> ' : '') + esc(a.behandlung);
       return '<article class="karte" tabindex="0" draggable="true" aria-haspopup="menu" data-id="' + esc(a.id) + '">'
+        + '<div class="karte-oben">'
         + '<div class="karte-kopf">'
-        + photoHtml(a)
-        + '<div>'
-        + '<p class="karte-name">' + esc(a.name) + (kind ? '<span class="karte-art">' + esc(kind) + '</span>' : '') + '</p>'
-        + (a.besitzer ? '<p class="karte-besitzer">' + esc(a.besitzer) + '</p>' : '')
+        + '<div class="karte-tier">' + photoHtml(a)
+        + '<div class="karte-text">'
+        + '<div class="karte-zeile"><h3 class="karte-name">' + esc(a.name) + '</h3>'
+        + (kind ? '<span class="karte-rasse">• ' + esc(kind) + '</span>' : '') + '</div>'
+        + '<p class="karte-besitzer">' + esc(a.besitzer) + '</p>'
+        + '</div></div>'
+        + badgeHtml(a)
         + '</div>'
-        + (value.text ? '<span class="marke ' + value.ton + '">' + esc(value.text) + '</span>' : '')
+        + (a.behandlung ? '<p class="karte-grund">' + esc(a.behandlung) + '</p>' : '')
         + '</div>'
-        + (reason ? '<p class="karte-grund">' + reason + '</p>' : '')
-        + '<div class="karte-fuss">'
-        + '<span>' + esc(origin) + '</span>'
-        + '<button class="knopf knopf-klein knopf-weich" type="button" tabindex="-1" data-aktion>' + AKTIONEN[a.spalte] + '</button>'
-        + '</div>'
+        + '<div class="karte-fuss">' + footHtml(a) + '</div>'
         + '</article>';
     }
 
@@ -1353,18 +1144,22 @@ body {
       return roomsOf(all).map(function (room) {
         const busy = all.some(function (a) { return a.zimmer === room.name; });
         const cards = shown.filter(function (a) { return a.zimmer === room.name; }).map(cardHtml).join('');
-        return '<section class="zimmer" data-ziel="behandlung" data-zimmer="' + esc(room.name) + '">'
-          + '<header class="zimmer-kopf"><h3>' + esc(room.name)
-          + (room.zusatz ? '<span class="zimmer-zusatz">' + esc(room.zusatz) + '</span>' : '') + '</h3>'
-          + '<span class="zimmer-stand">' + (busy ? 'Belegt' : 'Frei') + '</span></header>'
-          + (cards || '<div class="zimmer-leer"></div>')
-          + '</section>';
+        return '<div class="zimmer" data-ziel="behandlung" data-zimmer="' + esc(room.name) + '">'
+          + '<div class="zimmer-kopf"><div class="zimmer-name">'
+          + '<span class="punkt ' + (busy ? 'behandlung' : 'frei') + '"></span>'
+          + '<span class="zimmer-titel">' + esc(room.name) + '</span>'
+          + (room.zusatz ? '<span class="zimmer-zusatz">• ' + esc(room.zusatz) + '</span>' : '')
+          + '</div><span class="stand ' + (busy ? 'belegt' : 'frei') + '">' + (busy ? 'Belegt' : 'Frei') + '</span></div>'
+          + '<div class="zimmer-karten">' + (cards || '<div class="zimmer-leer">Frei</div>') + '</div>'
+          + '</div>';
       }).join('');
     }
 
     function freeRooms(all) {
       return roomsOf(all).filter(function (room) { return !all.some(function (a) { return a.zimmer === room.name; }); });
     }
+
+    const LEER = { termin: 'Keine offenen Termine', wartezimmer: 'Wartezimmer ist leer', abrechnung: 'Keine offene Abrechnung' };
 
     function render() {
       if (dragId !== null || menu.forId !== null) {
@@ -1373,19 +1168,21 @@ body {
       }
       renderLater = false;
       const focused = document.activeElement && document.activeElement.classList.contains('karte') ? document.activeElement.dataset.id : null;
-      const count = {};
+      const inColumn = function (spalte) { return appointments.filter(function (a) { return a.spalte === spalte; }); };
       SPALTEN.forEach(function (spalte) {
-        const all = appointments.filter(function (a) { return a.spalte === spalte; });
+        const all = inColumn(spalte);
         const shown = all.filter(matchesSearch);
-        count[spalte] = all;
-        document.getElementById('inhalt-' + spalte).innerHTML = spalte === 'behandlung' ? treatmentHtml(all, shown) : shown.map(cardHtml).join('');
-        document.getElementById('zahl-' + spalte).textContent = String(all.length);
+        const content = document.getElementById('inhalt-' + spalte);
+        if (spalte === 'behandlung') content.innerHTML = treatmentHtml(all, shown);
+        else content.innerHTML = shown.length > 0 ? shown.map(cardHtml).join('') : '<div class="leer">' + LEER[spalte] + '</div>';
+        document.getElementById('zahl-' + spalte).textContent = String(shown.length);
       });
-      const rooms = roomsOf(count.behandlung);
-      document.getElementById('kennzahl-termin').textContent = String(count.termin.length);
-      document.getElementById('kennzahl-wartezimmer').textContent = String(count.wartezimmer.length);
-      document.getElementById('kennzahl-zimmer').textContent = (rooms.length - freeRooms(count.behandlung).length) + ' / ' + rooms.length;
-      document.getElementById('kennzahl-abrechnung').textContent = String(count.abrechnung.length);
+      const treated = inColumn('behandlung');
+      const rooms = roomsOf(treated);
+      document.getElementById('kennzahl-termin').textContent = String(inColumn('termin').length);
+      document.getElementById('kennzahl-wartezimmer').textContent = String(inColumn('wartezimmer').length);
+      document.getElementById('kennzahl-zimmer').textContent = (rooms.length - freeRooms(treated).length) + ' / ' + rooms.length;
+      document.getElementById('kennzahl-abrechnung').textContent = String(inColumn('abrechnung').length);
       if (focused !== null) {
         const card = cardOf(focused);
         if (card) card.focus();
@@ -1400,22 +1197,21 @@ body {
       return appointments.find(function (a) { return a.id === id; }) || null;
     }
 
+    // Unter dem Praxisnamen: das Datum, oder ob noch Daten von SoftEngine fehlen.
     function showConnection() {
-      const el = document.getElementById('verbindung');
+      const dot = document.getElementById('standPunkt');
+      const text = document.getElementById('stand');
+      const date = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
       if (beispiel) {
-        el.className = '';
-        el.textContent = 'Beispieldaten';
+        dot.className = 'punkt aus';
+        text.textContent = 'Beispieldaten, ' + date;
       } else if (loadedRows === null) {
-        el.className = 'warnen';
-        el.textContent = 'Warte auf SoftEngine';
+        dot.className = 'punkt wartet';
+        text.textContent = 'Warte auf SoftEngine';
       } else {
-        el.textContent = '';
+        dot.className = 'punkt da';
+        text.textContent = date;
       }
-    }
-
-    function showClock() {
-      document.getElementById('uhr').textContent = timeOfMinute(nowMinute());
-      document.getElementById('datum').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
     }
 
     // ---------------------------------------------------------------------
@@ -1452,6 +1248,13 @@ body {
       a.seit = nowMinute();
       pending.set(a.id, { spalte: a.spalte, zimmer: a.zimmer, letztesZimmer: a.letztesZimmer, seit: a.seit, until: Date.now() + PENDING_MS });
       render();
+      const said = {
+        termin: a.name + ' zurück auf „Nicht zugewiesen“ gesetzt',
+        wartezimmer: a.name + ' ist jetzt im Wartezimmer',
+        behandlung: a.name + ' wurde in ' + a.zimmer + ' eingewiesen',
+        abrechnung: a.name + ' ist bereit zur Abrechnung',
+      };
+      showToast(said[a.spalte]);
       requestFreshData();
     }
 
@@ -1464,6 +1267,7 @@ body {
       pending.set(a.id, { spalte: 'fertig', zimmer: null, letztesZimmer: a.letztesZimmer, seit: nowMinute(), until: Date.now() + PENDING_MS });
       appointments = appointments.filter(function (item) { return item.id !== a.id; });
       render();
+      showToast('Abrechnung für ' + a.name + (a.besitzer ? ' (' + a.besitzer + ')' : '') + ' erledigt');
       requestFreshData();
     }
 
@@ -1482,7 +1286,6 @@ body {
           zimmer: room.name,
           text: room.name,
           zusatz: inside.length > 0 ? inside.join(', ') : 'Frei',
-          ton: inside.length > 0 ? 'leise' : 'neben',
           next: a.spalte === 'wartezimmer' && free.length > 0 && free[0].name === room.name,
         });
       });
@@ -1504,10 +1307,9 @@ body {
       menuEl.innerHTML = '<p class="menue-titel">' + esc(a.name) + '</p>' + menu.targets.map(function (t, i) {
         return '<button class="menue-eintrag' + (t.next ? ' standard' : '') + '" type="button" role="menuitem" data-i="' + i + '">'
           + '<span>' + esc(t.text) + '</span>'
-          + (t.zusatz ? '<span class="' + t.ton + '">' + esc(t.zusatz) + '</span>' : '')
+          + (t.zusatz ? '<span class="menue-zusatz">' + esc(t.zusatz) + '</span>' : '')
           + '</button>';
       }).join('');
-      row.classList.add('offen');
       menuEl.hidden = false;
       const box = row.getBoundingClientRect();
       const width = menuEl.offsetWidth;
@@ -1528,10 +1330,7 @@ body {
       menuEl.hidden = true;
       menuEl.innerHTML = '';
       const row = cardOf(id);
-      if (row) {
-        row.classList.remove('offen');
-        if (refocus) row.focus();
-      }
+      if (row && refocus) row.focus();
       if (renderLater) render();
     }
 
@@ -1568,22 +1367,18 @@ body {
     window.addEventListener('resize', function () { closeMenu(false); });
     tafel.addEventListener('scroll', function () { closeMenu(false); }, true);
 
-    // Die Aktion im Fuß führt den nächsten Schritt aus; ein Klick sonst auf die Karte öffnet das Menü.
+    // Die Aktion im Fuß führt den nächsten Schritt aus; im Wartezimmer wählt man das Zimmer.
     const NAECHSTE = { termin: 'wartezimmer', behandlung: 'abrechnung', abrechnung: 'fertig' };
 
     tafel.addEventListener('click', function (e) {
-      const card = e.target.closest('.karte');
-      if (!card) return;
       const button = e.target.closest('[data-aktion]');
-      const a = appointmentById(card.dataset.id);
-      if (!button || !a) {
-        openMenu(card, { x: e.clientX, y: e.clientY });
-      } else if (a.spalte === 'wartezimmer') {
-        const box = button.getBoundingClientRect();
-        openMenu(card, { x: box.left, y: box.bottom + 4 }, true);
-      } else {
-        moveTo(a.id, { spalte: NAECHSTE[a.spalte] });
-      }
+      const a = button ? appointmentById(button.closest('.karte').dataset.id) : null;
+      if (a) moveTo(a.id, { spalte: NAECHSTE[a.spalte] });
+    });
+
+    tafel.addEventListener('change', function (e) {
+      const choice = e.target.closest('[data-zimmerwahl]');
+      if (choice && choice.value !== '') moveTo(choice.closest('.karte').dataset.id, { spalte: 'behandlung', zimmer: choice.value });
     });
 
     tafel.addEventListener('contextmenu', function (e) {
@@ -1625,7 +1420,7 @@ body {
     }
 
     function clearZones() {
-      tafel.querySelectorAll('.ziel').forEach(function (el) { el.classList.remove('ziel'); });
+      tafel.querySelectorAll('.ablage').forEach(function (el) { el.classList.remove('ablage'); });
     }
 
     tafel.addEventListener('dragstart', function (e) {
@@ -1650,15 +1445,15 @@ body {
       if (dragId === null || !zone) return;
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      if (!zone.classList.contains('ziel')) {
+      if (!zone.classList.contains('ablage')) {
         clearZones();
-        zone.classList.add('ziel');
+        zone.classList.add('ablage');
       }
     });
 
     tafel.addEventListener('dragleave', function (e) {
       const zone = dropZone(e.target);
-      if (zone && !zone.contains(e.relatedTarget)) zone.classList.remove('ziel');
+      if (zone && !zone.contains(e.relatedTarget)) zone.classList.remove('ablage');
     });
 
     tafel.addEventListener('drop', function (e) {
@@ -1675,17 +1470,18 @@ body {
     //  Termin anlegen: die Lade von rechts über der Tafel
     // ---------------------------------------------------------------------
     const drawer = document.getElementById('lade');
+    const petInput = document.getElementById('tierName');
+    const kindInput = document.getElementById('tierArt');
     const ownerInput = document.getElementById('besitzer');
-    const ownerList = document.getElementById('besitzerListe');
-    const form = { customer: null, hits: [], active: -1, creating: false };
+    const form = { customer: null, pet: null, creating: false };
 
     function resetForm() {
       document.getElementById('formular').reset();
       document.getElementById('formFehler').hidden = true;
       form.customer = null;
+      form.pet = null;
       document.getElementById('uhrzeit').value = nextQuarterHour();
-      showHits([]);
-      showPets();
+      showPreview();
     }
 
     // Escape schließt die Lade von selbst, ein Klick neben sie auch.
@@ -1693,7 +1489,7 @@ body {
       closeMenu(false);
       resetForm();
       drawer.showModal();
-      ownerInput.focus();
+      petInput.focus();
       if (lookup.customers === null) loadLookup();
     }
 
@@ -1701,78 +1497,128 @@ body {
       if (e.target === drawer) drawer.close();
     });
 
+    // Vorschau der Karte: das Foto des gewählten Tiers, sonst zwei Initialen.
+    function showPreview() {
+      const name = petInput.value.trim() || 'Tier';
+      const photo = form.pet ? photoOf(form.pet.kunde, form.pet.name) : null;
+      document.getElementById('vorschauBild').innerHTML = photoHtml({ name: name, foto: photo });
+      document.getElementById('vorschauName').textContent = name;
+      const kind = document.getElementById('vorschauArt');
+      kind.textContent = photo ? 'Tierfoto' : 'Avatar';
+      kind.className = 'vorschau-art ' + (photo ? 'foto-art' : 'avatar-art');
+      document.getElementById('vorschauBesitzer').textContent = 'Besitzer: ' + (ownerInput.value.trim() || 'Besitzer');
+    }
+
+    function customerByNumber(number) {
+      if (!lookup.customers) return null;
+      return lookup.customers.find(function (c) { return plainNumber(c.nummer) === plainNumber(number); }) || null;
+    }
+
+    // Vorschläge unter einem Feld: Pfeiltasten wählen, Enter übernimmt, Escape schließt die Liste.
+    function suggestions(input, list, hitsOf, choose) {
+      const box = { hits: [], active: -1 };
+      const mark = function () {
+        list.querySelectorAll('.vorschlag').forEach(function (li, i) { li.setAttribute('aria-selected', String(i === box.active)); });
+        if (box.active >= 0) input.setAttribute('aria-activedescendant', list.id + '-' + box.active);
+        else input.removeAttribute('aria-activedescendant');
+      };
+      const show = function (hits) {
+        box.hits = hits;
+        box.active = hits.length > 0 ? 0 : -1;
+        list.innerHTML = hits.map(function (hit, i) {
+          return '<li class="vorschlag" role="option" id="' + list.id + '-' + i + '" data-i="' + i + '">'
+            + '<span>' + esc(hit.text) + '</span><span class="vorschlag-zusatz">' + esc(hit.zusatz) + '</span></li>';
+        }).join('');
+        list.hidden = hits.length === 0;
+        input.setAttribute('aria-expanded', String(hits.length > 0));
+        mark();
+      };
+      const take = function (i) {
+        const hit = box.hits[i];
+        show([]);
+        if (hit) choose(hit.value);
+      };
+      input.addEventListener('input', function () { show(hitsOf(input.value)); });
+      input.addEventListener('blur', function () { show([]); });
+      input.addEventListener('keydown', function (e) {
+        if (list.hidden) return;
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          box.active = (box.active + (e.key === 'ArrowDown' ? 1 : box.hits.length - 1)) % box.hits.length;
+          mark();
+        } else if (e.key === 'Enter' && box.active >= 0) {
+          e.preventDefault();
+          take(box.active);
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          show([]);
+        }
+      });
+      list.addEventListener('mousedown', function (e) {
+        const li = e.target.closest('.vorschlag');
+        if (!li) return;
+        e.preventDefault();
+        take(Number(li.dataset.i));
+      });
+    }
+
     function customerHits(text) {
       const words = text.trim().split(/\s+/).map(plain).filter(Boolean);
       if (!lookup.customers || words.length === 0) return [];
       return lookup.customers
         .filter(function (c) { return words.every(function (w) { return c.suche.includes(w); }); })
         .sort(function (a, b) { return a.nachname.localeCompare(b.nachname, 'de') || a.vorname.localeCompare(b.vorname, 'de'); })
-        .slice(0, 8);
+        .slice(0, 8)
+        .map(function (c) { return { text: c.anzeige, zusatz: [c.nummer, c.ort].filter(Boolean).join(', '), value: c }; });
     }
 
-    function showHits(hits) {
-      form.hits = hits;
-      form.active = hits.length > 0 ? 0 : -1;
-      ownerList.innerHTML = hits.map(function (c, i) {
-        return '<li class="vorschlag" role="option" id="vorschlag-' + i + '" data-i="' + i + '" aria-selected="' + (i === form.active) + '">'
-          + '<span>' + esc(c.anzeige) + '</span><span class="leise">' + esc([c.nummer, c.ort].filter(Boolean).join(', ')) + '</span></li>';
-      }).join('');
-      ownerList.hidden = hits.length === 0;
-      ownerInput.setAttribute('aria-expanded', String(hits.length > 0));
-      markActive();
+    // Tiere zum Getippten; ist ein Besitzer gewählt, nur seine.
+    function petHits(text) {
+      const word = plain(text);
+      if (!lookup.pets || word === '') return [];
+      return lookup.pets
+        .filter(function (p) { return (!form.customer || plainNumber(p.kunde) === plainNumber(form.customer.nummer)) && plain(p.name).includes(word); })
+        .sort(function (a, b) { return a.name.localeCompare(b.name, 'de'); })
+        .slice(0, 8)
+        .map(function (p) {
+          const owner = customerByNumber(p.kunde);
+          return { text: p.name, zusatz: [p.rasse || p.art, owner ? owner.anzeige : ''].filter(Boolean).join(', '), value: p };
+        });
     }
 
-    function markActive() {
-      ownerList.querySelectorAll('.vorschlag').forEach(function (li, i) { li.setAttribute('aria-selected', String(i === form.active)); });
-      if (form.active >= 0) ownerInput.setAttribute('aria-activedescendant', 'vorschlag-' + form.active);
-      else ownerInput.removeAttribute('aria-activedescendant');
-    }
+    suggestions(petInput, document.getElementById('tierListe'), petHits, function (p) {
+      form.pet = p;
+      petInput.value = p.name;
+      kindInput.value = [p.art, p.rasse].filter(Boolean).join(' / ');
+      const owner = customerByNumber(p.kunde);
+      if (owner) {
+        form.customer = owner;
+        ownerInput.value = owner.anzeige;
+      }
+      showPreview();
+    });
 
-    function chooseCustomer(c) {
+    suggestions(ownerInput, document.getElementById('besitzerListe'), customerHits, function (c) {
       form.customer = c;
       ownerInput.value = c.anzeige;
-      showHits([]);
-      showPets();
-    }
+      if (form.pet && plainNumber(form.pet.kunde) !== plainNumber(c.nummer)) form.pet = null;
+      showPreview();
+    });
 
-    function petsOf(customer) {
-      if (!customer || !lookup.pets) return [];
-      return lookup.pets
-        .filter(function (p) { return plainNumber(p.kunde) === plainNumber(customer.nummer); })
-        .sort(function (a, b) { return a.name.localeCompare(b.name, 'de'); });
-    }
+    petInput.addEventListener('input', function () {
+      form.pet = null;
+      showPreview();
+    });
 
-    // Die Tiere des gewählten Kunden zum Ankreuzen; ein neues Tier ohne Kunden oder auf Wunsch.
-    function showPets() {
-      const pets = petsOf(form.customer);
-      const list = document.getElementById('tierListe');
-      list.innerHTML = pets.map(function (p, i) {
-        const kind = [p.rasse || p.art, ageText(p.geburtsdatum)].filter(Boolean).join(', ');
-        return '<label class="wahl"><input type="checkbox" name="tier" value="' + i + '"' + (pets.length === 1 ? ' checked' : '') + '>'
-          + '<span>' + esc(p.name) + (kind ? ' <span class="leise">' + esc(kind) + '</span>' : '') + '</span></label>';
-      }).join('') + (pets.length > 0 ? '<label class="wahl"><input type="checkbox" id="neuesTierWahl">Neues Tier</label>' : '');
-      list.hidden = pets.length === 0;
-      form.pets = pets;
-      showNewPet();
-    }
+    ownerInput.addEventListener('input', function () {
+      form.customer = null;
+      showPreview();
+    });
 
-    function wantsNewPet() {
-      const choice = document.getElementById('neuesTierWahl');
-      return choice ? choice.checked : true;
-    }
-
-    function showNewPet() {
-      document.getElementById('neuesTier').hidden = !wantsNewPet();
-    }
-
-    function fillSpeciesLists() {
-      const pets = lookup.pets || [];
-      const options = function (values) {
-        return Array.from(new Set(values.filter(Boolean))).sort(function (a, b) { return a.localeCompare(b, 'de'); })
-          .map(function (v) { return '<option value="' + esc(v) + '">'; }).join('');
-      };
-      document.getElementById('tierarten').innerHTML = options(pets.map(function (p) { return p.art; }));
-      document.getElementById('rassen').innerHTML = options(pets.map(function (p) { return p.rasse; }));
+    // "Hund / Dackel" wird zu Tierart und Rasse; ein Wert allein ist die Tierart.
+    function splitKind(text) {
+      const parts = text.split('/').map(function (s) { return s.trim(); });
+      return { art: parts[0] || '', rasse: parts.slice(1).join(' / ') };
     }
 
     // Ein Name ohne Kunden: "Nachname, Vorname" oder "Vorname Nachname".
@@ -1786,105 +1632,51 @@ body {
       return { vorname: words.slice(0, -1).join(' '), nachname: words[words.length - 1] || '' };
     }
 
-    ownerInput.addEventListener('input', function () {
-      form.customer = null;
-      showHits(customerHits(ownerInput.value));
-      showPets();
-    });
-
-    ownerInput.addEventListener('keydown', function (e) {
-      if (ownerList.hidden) return;
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        form.active = (form.active + (e.key === 'ArrowDown' ? 1 : form.hits.length - 1)) % form.hits.length;
-        markActive();
-      } else if (e.key === 'Enter' && form.active >= 0) {
-        e.preventDefault();
-        chooseCustomer(form.hits[form.active]);
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        showHits([]);
-      }
-    });
-
-    ownerList.addEventListener('mousedown', function (e) {
-      const li = e.target.closest('.vorschlag');
-      if (!li) return;
-      e.preventDefault();
-      chooseCustomer(form.hits[Number(li.dataset.i)]);
-    });
-
-    document.getElementById('tierListe').addEventListener('change', function (e) {
-      if (e.target.id === 'neuesTierWahl') {
-        showNewPet();
-        if (e.target.checked) document.getElementById('tierName').focus();
-      }
-    });
+    function fieldMissing(input, text) {
+      showError(text);
+      input.focus();
+    }
 
     document.getElementById('schliessen').addEventListener('click', function () { drawer.close(); });
 
     document.getElementById('formular').addEventListener('submit', async function (e) {
       e.preventDefault();
       if (form.creating) return;
+      const reasonInput = document.getElementById('behandlung');
+      const name = petInput.value.trim();
       const ownerText = ownerInput.value.trim();
-      const chosen = Array.from(document.querySelectorAll('input[name="tier"]:checked')).map(function (box) { return form.pets[Number(box.value)]; });
-      const fresh = wantsNewPet()
-        ? { name: document.getElementById('tierName').value.trim(), art: document.getElementById('tierArt').value.trim(), rasse: document.getElementById('tierRasse').value.trim(), geburtsdatum: '' }
-        : null;
-      if (ownerText === '') {
-        showError('Besitzer fehlt');
-        ownerInput.focus();
-        return;
-      }
-      if (fresh && fresh.name === '') {
-        showError('Name des Tiers fehlt');
-        document.getElementById('tierName').focus();
-        return;
-      }
-      const pets = chosen.concat(fresh ? [fresh] : []);
-      if (pets.length === 0) {
-        showError('Kein Tier gewählt');
-        return;
-      }
-      if (!beispiel && !hasSoftEngine()) {
-        showError('Keine Verbindung zu SoftEngine, Termin nicht angelegt');
-        return;
-      }
+      const reason = reasonInput.value.trim();
+      if (name === '') return fieldMissing(petInput, 'Tiername fehlt');
+      if (ownerText === '') return fieldMissing(ownerInput, 'Besitzer fehlt');
+      if (reason === '') return fieldMissing(reasonInput, 'Grund fehlt');
+      if (!beispiel && !hasSoftEngine()) return showError('Keine Verbindung zu SoftEngine, Termin nicht angelegt');
+
+      const kind = splitKind(kindInput.value);
+      const pet = form.pet && same(form.pet.name, name) ? form.pet : { name: name, art: kind.art, rasse: kind.rasse, geburtsdatum: '' };
       const customer = form.customer;
       const names = customer ? { vorname: customer.vorname, nachname: customer.nachname } : splitName(ownerText);
       const spalte = document.querySelector('input[name="wohin"]:checked').value;
-      const time = document.getElementById('uhrzeit').value || nextQuarterHour();
-      const reason = document.getElementById('behandlung').value.trim();
-      const urgent = document.getElementById('notfall').checked;
       const f = CONFIG.felder;
 
       setCreating(true);
-      let made = 0;
-      for (const pet of pets) {
-        const record = await createRecord();
-        if (record === null) {
-          showError('Termin nicht angelegt: keine Satznummer von SoftEngine');
-          break;
-        }
-        [
-          [f.kunde, customer ? customer.nummer : ''],
-          [f.vorname, names.vorname],
-          [f.nachname, names.nachname],
-          [f.tiername, pet.name],
-          [f.tierart, pet.art],
-          [f.rasse, pet.rasse],
-          [f.geburtsdatum, pet.geburtsdatum],
-          [f.datum, todayText()],
-          [f.uhrzeit, time],
-          [f.behandlung, reason],
-          [f.status, CONFIG.status[spalte]],
-          [f.prioritaet, urgent ? CONFIG.notfall : ''],
-        ].forEach(function (pair) { if (pair[1] !== '') writeField(record, pair[0], pair[1]); });
-        made++;
-      }
+      const record = await createRecord();
       setCreating(false);
-      if (made === 0) return;
+      if (record === null) return showError('Termin nicht angelegt: keine Satznummer von SoftEngine');
+      [
+        [f.kunde, customer ? customer.nummer : ''],
+        [f.vorname, names.vorname],
+        [f.nachname, names.nachname],
+        [f.tiername, pet.name],
+        [f.tierart, pet.art],
+        [f.rasse, pet.rasse],
+        [f.geburtsdatum, pet.geburtsdatum],
+        [f.datum, todayText()],
+        [f.uhrzeit, document.getElementById('uhrzeit').value || nextQuarterHour()],
+        [f.behandlung, reason],
+        [f.status, CONFIG.status[spalte]],
+      ].forEach(function (pair) { if (pair[1] !== '') writeField(record, pair[0], pair[1]); });
       drawer.close();
+      showToast(pet.name + ' angelegt');
       requestFreshData();
     });
 
@@ -1892,29 +1684,33 @@ body {
       form.creating = on;
       const button = document.getElementById('anlegen');
       button.disabled = on;
-      button.textContent = on ? 'Wird eingetragen' : 'Eintragen';
+      button.querySelector('span').textContent = on ? 'Wird eingetragen' : 'Termin ins Board eintragen';
     }
 
     // ---------------------------------------------------------------------
-    //  Fehler melden und Start
+    //  Meldungen und Start
     // ---------------------------------------------------------------------
-    // Gemeldet wird nur, was schiefging: in der offenen Lade über "Eintragen",
-    // sonst eine Zeile unten, nach fünf Sekunden weg.
-    function showError(text) {
-      if (drawer.open) {
-        const line = document.getElementById('formFehler');
-        line.textContent = text;
-        line.hidden = false;
-        return;
-      }
+    // Eine Meldung unten links, nach gut zwei Sekunden weg.
+    function showToast(text) {
       const el = document.createElement('div');
       el.className = 'meldung';
-      el.textContent = text;
+      el.innerHTML = '<span class="punkt"></span><span>' + esc(text) + '</span>';
       document.getElementById('meldungen').appendChild(el);
       setTimeout(function () {
         el.classList.add('weg');
-        setTimeout(function () { el.remove(); }, 300);
-      }, 5000);
+        setTimeout(function () { el.remove(); }, 200);
+      }, 2400);
+    }
+
+    // Ein Fehler steht in der offenen Lade über dem Knopf, sonst als Meldung unten.
+    function showError(text) {
+      if (!drawer.open) {
+        showToast(text);
+        return;
+      }
+      const line = document.getElementById('formFehler');
+      line.textContent = text;
+      line.hidden = false;
     }
 
     document.getElementById('suche').addEventListener('input', function (e) {
@@ -1927,7 +1723,6 @@ body {
     window.addEventListener('load', function () {
       beispiel = !hasSoftEngine() && typeof window.basisHTML_REGISTER !== 'function' && !(window.SEDATA && window.SEDATA.Daten);
       document.getElementById('praxis').textContent = CONFIG.praxis;
-      showClock();
       showConnection();
       if (beispiel) {
         sample.rows = sampleRows();
@@ -1936,12 +1731,11 @@ body {
       } else {
         connect();
       }
-      // Uhr und Minuten laufen weiter.
+      // Die Wartezeiten laufen weiter.
       let shownMinute = nowMinute();
       setInterval(function () {
         if (nowMinute() === shownMinute) return;
         shownMinute = nowMinute();
-        showClock();
         if (loadedRows !== null) takeRows(loadedRows);
       }, 5000);
     });
