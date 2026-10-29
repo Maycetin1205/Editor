@@ -1,0 +1,1032 @@
+/* Gestaltung der Masken nach der Vorlage "Kanban Board" von Philip Litassy (Dribbble 17511387),
+   über stil.css gelegt (masken/bauen.mjs setzt sie dahinter ein). Jedes Maß ist aus dem Bild
+   gemessen (1x-Pixel; 1rem = 16px) und wächst ab 1440 Pixel Fensterbreite bis 1,25-fach bei 1920.
+   Schrift Inter; solange sie nicht eingebettet ist, vertritt sie Segoe UI. Die Maske selbst bleibt
+   unverändert; ohne diese Datei sieht jede Maske wieder aus wie mit stil.css allein. */
+
+/* Segoe UI für Inter: 6 % größer, damit x-Höhe und Breite ungefähr passen, und mit den Ober- und
+   Unterlängen von Inter (0,969 / 0,242 em), damit Text auf derselben Grundlinie sitzt wie im Bild. */
+@font-face {
+  font-family: 'Inter Ersatz';
+  src: local('Segoe UI');
+  font-weight: 400;
+  size-adjust: 106%;
+  ascent-override: 91.4%;
+  descent-override: 22.8%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Inter Ersatz';
+  src: local('Segoe UI Semibold');
+  font-weight: 500 600;
+  size-adjust: 106%;
+  ascent-override: 91.4%;
+  descent-override: 22.8%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Inter Ersatz';
+  src: local('Segoe UI Bold');
+  font-weight: 700;
+  size-adjust: 106%;
+  ascent-override: 91.4%;
+  descent-override: 22.8%;
+  line-gap-override: 0%;
+}
+
+/* Die Maske schreibt "• " vor Rasse und Zimmerzusatz. Der Punkt bekommt eine Schrift ohne Größe. */
+@font-face {
+  font-family: 'Ohne Trennpunkt';
+  src: local('Segoe UI'), local('Arial');
+  unicode-range: U+2022;
+  size-adjust: 0%;
+}
+
+/* 1 Werte */
+:root {
+  /* Farben aus dem Bild */
+  --seite: #ecf3f5;
+  --flaeche: #ffffff;
+  --spaltenflaeche: #f7f8fa;
+  --zeile-gewaehlt: #f2f6f9;
+  --tinte: #000000;
+  --grau: #8a9393;
+  --platzhalter: #b5b9bc;
+  --symbol: #bfc6c6;
+  --akzent: #4675f9;
+  --knopf: #ebeef0;
+  --pille: #e5eaeb;
+  --pille-text: #8d969a;
+  --rand-karte: #e5e7e9;
+  --rand-feld: #eaeaea;
+  --trennlinie: #e7eae9;
+  --fehler: #ca4554;
+
+  /* Zustände, die das Bild nicht zeigt: aus den Bildfarben abgeleitet */
+  --akzent-tief: #3a66e8;
+  --akzent-ring: rgb(70 117 249 / 0.22);
+  --knopf-tief: #e1e5e8;
+  --rand-zeigen: #d5dadd;
+
+  /* Initialen: Fläche und Schrift */
+  --av-rosa: #f0b8d0;
+  --av-rosa-text: #bf4a76;
+  --av-tuerkis: #9ad6d2;
+  --av-tuerkis-text: #397e77;
+  --av-blau: #92c4ff;
+  --av-blau-text: #2356b4;
+  --av-gelb: #eae0bb;
+  --av-gelb-text: #91863f;
+  --av-grau: #dadedf;
+  --av-grau-text: #828689;
+
+  /* Schrift */
+  --schrift: Inter, 'Inter Ersatz', 'Segoe UI', system-ui, sans-serif;
+  --schrift-titel: var(--schrift);
+  --schrift-zahl: var(--schrift);
+
+  /* Maße */
+  --rand: 1.25rem; /* 20: Fenster- und Karteninnenrand */
+  --rund: 0.25rem; /* 4 */
+  --spalte-breite: 18.75rem; /* 300: Karte 280 und 2 x 10 */
+  --karte-abstand: 0.75rem; /* 12 */
+  --zeile-grau: 1.5625rem; /* 25: graue Zeilen der Karte */
+  --knopf-hoehe: 1.875rem; /* 30 */
+  --feld-hoehe: 2.125rem; /* 34 */
+  --kopf-hoehe: 3.5rem; /* 56 */
+  --listenzeile: 2rem; /* 32 */
+  --foto: 2rem; /* 32 */
+  --fenster: 35rem; /* 560: Fenster "Termin anlegen" */
+
+  --schatten-karte: 0 1px 6px rgb(0 0 0 / 0.04);
+  --schatten-fenster: 0 12px 24px rgb(0 0 0 / 0.06);
+  --kurve: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Symbole der Statuszeile, 12 x 12: "i" im Kreis und Warte-Kranz */
+  --symbol-info: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill-rule='evenodd' d='M6 0a6 6 0 1 1 0 12A6 6 0 0 1 6 0zm0 2.5a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8zM5.25 5.5v3.4a.75.75 0 0 0 1.5 0V5.5a.75.75 0 0 0-1.5 0z'/%3E%3C/svg%3E");
+  --symbol-warten: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='black' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M8.6 6h2.7M7.84 7.84l1.91 1.91M6 8.6v2.7M4.16 7.84l-1.91 1.91M3.4 6H.7M4.16 4.16 2.25 2.25M6 3.4V.7M7.84 4.16l1.91-1.91'/%3E%3C/svg%3E");
+
+  /* Die Namen aus stil.css zeigen auf die neuen Werte */
+  --slate-50: var(--spaltenflaeche);
+  --slate-100: var(--zeile-gewaehlt);
+  --slate-200: var(--rand-karte);
+  --slate-300: var(--rand-zeigen);
+  --slate-400: var(--platzhalter);
+  --slate-500: var(--grau);
+  --slate-600: var(--grau);
+  --slate-700: #5d5e5f;
+  --slate-800: #2f3333;
+  --slate-900: var(--tinte);
+  --weiss: var(--flaeche);
+  --akzent-dunkel: var(--akzent-tief);
+  --teal-50: var(--zeile-gewaehlt);
+  --teal-200: var(--rand-karte);
+  --teal-400: var(--akzent);
+  --amber-50: var(--zeile-gewaehlt);
+  --amber-200: var(--rand-karte);
+  --amber-500: var(--grau);
+  --amber-800: var(--fehler);
+  --emerald-50: var(--zeile-gewaehlt);
+  --emerald-200: var(--rand-karte);
+  --emerald-500: var(--akzent);
+  --emerald-600: var(--akzent);
+  --emerald-700: var(--akzent-tief);
+  --emerald-800: var(--akzent-tief);
+  --sky-50: var(--av-blau);
+  --sky-200: var(--av-blau);
+  --sky-700: var(--av-blau-text);
+  --indigo-50: var(--av-grau);
+  --indigo-200: var(--av-grau);
+  --indigo-700: var(--av-grau-text);
+  --text-10: 0.75rem;
+  --text-105: 0.75rem;
+  --text-11: 0.8125rem;
+  --text-12: 0.8125rem;
+  --text-14: 0.875rem;
+  --text-15: 1rem;
+  --radius-klein: var(--rund);
+  --radius-md: var(--rund);
+  --radius-lg: var(--rund);
+  --radius-xl: var(--rund);
+  --schatten-anheben: var(--schatten-karte);
+  --schatten-md: var(--schatten-fenster);
+  --ring-ablage: 0 0 0 2px var(--akzent-ring);
+  --abdunkeln: rgb(236 243 245 / 0.75);
+  --karte-hoehe: 0;
+  --tafel-breite: 0;
+}
+
+/* 2 Gerüst: blassblauer Grund, darauf das weiße Fenster mit Kopfzeile und Tafel */
+html {
+  overflow: hidden;
+  background: var(--seite);
+  font-size: clamp(16px, calc(16px + (100vw - 1440px) / 120), 20px);
+}
+
+html body {
+  height: calc(100% - 2 * var(--rand));
+  margin: var(--rand);
+  overflow: hidden;
+  border-radius: var(--rund);
+  background: var(--flaeche);
+  color: var(--tinte);
+  font-family: var(--schrift);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  box-shadow: var(--schatten-fenster);
+}
+
+.kopf {
+  display: flex;
+  align-items: center;
+  min-height: var(--kopf-hoehe);
+  padding: 0 var(--rand);
+  border-bottom: 1px solid var(--trennlinie);
+  background: none;
+}
+
+.kopf-zeile {
+  flex: 1;
+  gap: 1.125rem;
+}
+
+.kopf-zeile > :first-child,
+.praxis-zeile {
+  display: flex;
+  align-items: baseline;
+  gap: 1.125rem;
+  min-width: 0;
+}
+
+.kopf-rechts {
+  gap: 1.125rem;
+}
+
+.tafel-bereich {
+  padding: 0.625rem 0.625rem 0;
+}
+
+.tafel {
+  grid-template-columns: repeat(4, var(--spalte-breite));
+  gap: 0;
+  min-width: 0;
+}
+
+.spalte {
+  border: 0;
+  border-radius: var(--rund);
+  background: none;
+}
+
+.spalte-kopf {
+  justify-content: flex-start;
+  gap: 0.625rem;
+  height: 3.1875rem; /* 51: 15 + Pille 22 + 14 */
+  padding: 0.9375rem var(--rand) 0.875rem;
+  border-bottom: 0;
+  background: none;
+}
+
+/* Der Rollbalken (6 px) liegt im rechten Innenrand, so bleibt die Karte immer 280 breit. */
+.spalte-inhalt {
+  padding: 0 calc(0.625rem - 6px) 0.625rem 0.625rem;
+  scrollbar-gutter: stable;
+}
+
+.spalte-inhalt > * + *,
+.zimmer-karten > * + * {
+  margin-top: var(--karte-abstand);
+}
+
+/* 3 Schrift: Inter, schwarz und grau, keine Großbuchstaben */
+.praxis-name {
+  color: var(--tinte);
+  font-family: var(--schrift);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5rem;
+  letter-spacing: normal;
+}
+
+.praxis-ort {
+  color: var(--tinte);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.praxis-stand {
+  margin: 0;
+  color: var(--grau);
+  font-size: 0.875rem;
+}
+
+.spalte-titel {
+  color: var(--tinte);
+  font-family: var(--schrift);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.375rem;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.spalte-kopf .zaehler {
+  color: var(--pille-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.karte-name,
+.zimmer-titel,
+.menue-titel,
+.fenster-titel,
+.wahl-titel {
+  color: var(--tinte);
+  font-family: var(--schrift);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  letter-spacing: normal;
+}
+
+.karte-rasse,
+.karte-besitzer,
+.zimmer-zusatz,
+.vorschau-besitzer,
+.wahl-zusatz,
+.menue-zusatz,
+.vorschlag-zusatz {
+  color: var(--grau);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1rem;
+}
+
+.karte-rasse,
+.zimmer-zusatz {
+  font-family: 'Ohne Trennpunkt', var(--schrift);
+}
+
+.karte-grund,
+.fuss-text,
+.karte-kopf .badge {
+  color: var(--grau);
+  font-family: var(--schrift);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: var(--zeile-grau);
+}
+
+.karte-kopf .badge {
+  font-variant-numeric: tabular-nums;
+}
+
+.avatar {
+  font-family: var(--schrift);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: normal;
+}
+
+.knopf-karte,
+.zimmerwahl {
+  color: var(--tinte);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.knopf-haupt {
+  color: var(--flaeche);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.suchfeld input,
+.eingabe,
+.menue-eintrag,
+.vorschlag,
+.meldung,
+.fenster-form {
+  color: var(--tinte);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.25rem;
+}
+
+.suchfeld input::placeholder,
+.eingabe::placeholder {
+  color: var(--platzhalter);
+}
+
+.feld-name {
+  color: var(--tinte);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.menue-eintrag.standard {
+  font-weight: 600;
+}
+
+.fenster-fehler {
+  color: var(--fehler);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* 4 Bausteine */
+
+/* Kopfzeile: Name wie das Logo, "Empfang" wie die Brotkrumen, Datum grau; keine Zählerleiste, keine Punkte */
+.praxis-ort {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.kennzahlen,
+.punkt,
+.knopf-haupt .symbol,
+.leer,
+.zimmer-leer,
+.vorschau-art {
+  display: none;
+}
+
+.suchfeld {
+  width: 18.75rem; /* 300 */
+}
+
+.suchfeld input {
+  height: var(--feld-hoehe);
+  padding: 0 0.625rem 0 2rem;
+  border: 1px solid var(--rand-feld);
+  border-radius: var(--rund);
+  background: var(--flaeche);
+}
+
+.suchfeld .symbol {
+  left: 0.625rem;
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--symbol);
+}
+
+/* Hauptknopf wie "Add": blau, weiße Schrift */
+.knopf-haupt {
+  height: var(--feld-hoehe);
+  padding: 0 0.875rem;
+  border-radius: var(--rund);
+  background: var(--akzent);
+  box-shadow: none;
+}
+
+.knopf-haupt:hover {
+  background: var(--akzent-tief);
+}
+
+.knopf-haupt:active {
+  transform: scale(0.98);
+}
+
+.knopf-haupt:disabled {
+  background: var(--platzhalter);
+  transform: none;
+}
+
+/* Spaltenkopf: Titel und Zahl in grauer Pille */
+.spalte-kopf .zaehler {
+  min-width: 1.6875rem; /* 27 */
+  height: 1.375rem; /* 22 */
+  padding: 0 0.5625rem;
+  border: 0;
+  border-radius: 0.6875rem;
+  background: var(--pille);
+  text-align: center;
+}
+
+/* Die helle Spaltenfläche zeigt im Bild die gewählte Spalte, hier das Ablegen beim Ziehen. */
+.spalte:has(.ablage) {
+  background: var(--spaltenflaeche);
+}
+
+.spalte-inhalt.ablage {
+  background: none;
+}
+
+/* Karte */
+.karte {
+  min-height: 0;
+  padding: var(--rand) var(--rand) 0.9375rem;
+  border: 1px solid var(--rand-karte);
+  border-radius: var(--rund);
+  background: var(--flaeche);
+  box-shadow: var(--schatten-karte);
+}
+
+.karte:hover {
+  border-color: var(--rand-zeigen);
+  box-shadow: var(--schatten-karte);
+  transform: none;
+}
+
+.karte.gezogen {
+  box-shadow: none;
+  opacity: 0.5;
+  transform: none;
+}
+
+/* Reihenfolge wie im Bild: Avatar mit Name, graue Zeilen, Statuszeile, Knopf */
+.karte-oben,
+.karte .karte-kopf,
+.karte .karte-zeile {
+  display: contents;
+}
+
+/* Die Zeile ist so hoch wie der Avatar; Name und graue Zeile (zusammen 36) stehen mittig darüber. */
+.karte-tier {
+  order: 1;
+  gap: 0.75rem;
+  height: var(--foto);
+  margin-bottom: 0.625rem;
+}
+
+.karte-grund {
+  order: 2;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.karte-kopf .badge {
+  order: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.5625rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.karte-fuss {
+  order: 4;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* Name in der ersten Zeile, darunter grau Rasse und Besitzer als eine Zeile, die sich hinten kürzt */
+.karte .karte-text {
+  flex: 1;
+  overflow: hidden;
+  color: var(--grau);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.karte .karte-name {
+  display: block;
+  line-height: 1.125rem;
+}
+
+.karte .karte-rasse,
+.karte .karte-besitzer {
+  display: inline;
+  min-height: 0;
+}
+
+/* Das Leerzeichen hinter dem unsichtbaren Punkt rückt die Rasse ein; zurückziehen. */
+.karte .karte-rasse {
+  margin-left: -0.28em;
+}
+
+.karte-zeile:has(.karte-rasse) + .karte-besitzer::before {
+  content: ', ';
+}
+
+/* Statuszeile: Uhrzeit und Betrag mit "i", Wartezeit mit Warte-Kranz; "Im Zimmer" sagt der Platz */
+.karte-kopf .badge::before {
+  content: '';
+  flex: none;
+  width: 0.75rem;
+  height: 0.75rem;
+  background: currentColor;
+  -webkit-mask: var(--symbol-info) center / contain no-repeat;
+  mask: var(--symbol-info) center / contain no-repeat;
+}
+
+.karte-kopf .badge.wartezeit::before {
+  -webkit-mask-image: var(--symbol-warten);
+  mask-image: var(--symbol-warten);
+}
+
+.karte-kopf .badge.im-zimmer,
+.fuss-text:empty,
+.fuss-text.zimmer-im {
+  display: none;
+}
+
+.bild,
+.avatar {
+  width: var(--foto);
+  height: var(--foto);
+  border: 0;
+  border-radius: 50%;
+}
+
+.avatar.farbe-0 {
+  background: var(--av-rosa);
+  color: var(--av-rosa-text);
+}
+
+.avatar.farbe-1 {
+  background: var(--av-tuerkis);
+  color: var(--av-tuerkis-text);
+}
+
+.avatar.farbe-2 {
+  background: var(--av-blau);
+  color: var(--av-blau-text);
+}
+
+.avatar.farbe-3 {
+  background: var(--av-gelb);
+  color: var(--av-gelb-text);
+}
+
+.avatar.farbe-4 {
+  background: var(--av-grau);
+  color: var(--av-grau-text);
+}
+
+/* Kartenknopf wie "Offer intro": grau, volle Breite; die Zimmerwahl sieht genauso aus */
+.knopf-karte.akzent,
+.knopf-karte.grau,
+.knopf-karte.kasse,
+.zimmerwahl {
+  width: 100%;
+  height: var(--knopf-hoehe);
+  margin-top: 1.3125rem; /* 21 */
+  padding: 0 0.625rem;
+  border: 0;
+  border-radius: var(--rund);
+  background: var(--knopf);
+  color: var(--tinte);
+  line-height: var(--knopf-hoehe);
+  text-align: center;
+  box-shadow: none;
+}
+
+.zimmerwahl {
+  -webkit-appearance: none;
+  appearance: none;
+  text-align-last: center;
+}
+
+.knopf-karte.akzent:hover,
+.knopf-karte.grau:hover,
+.knopf-karte.kasse:hover,
+.zimmerwahl:hover {
+  background: var(--knopf-tief);
+}
+
+.knopf-karte.akzent:active,
+.knopf-karte.grau:active,
+.knopf-karte.kasse:active,
+.zimmerwahl:active {
+  transform: scale(0.98);
+}
+
+/* Zimmer: kompakte Zeilen wie die Listen der Seitenleiste, darunter die Karte */
+.zimmer {
+  padding: 0;
+  border: 0;
+  border-radius: var(--rund);
+  background: none;
+}
+
+.spalte-inhalt > .zimmer + .zimmer {
+  margin-top: 0.125rem;
+}
+
+.spalte-inhalt > .zimmer:has(.karte) + .zimmer {
+  margin-top: var(--karte-abstand);
+}
+
+.zimmer.ablage {
+  border-color: transparent;
+  background: var(--zeile-gewaehlt);
+  box-shadow: none;
+}
+
+.zimmer-kopf {
+  gap: 0.625rem;
+  height: var(--listenzeile);
+  margin: 0;
+  padding: 0 0.625rem;
+}
+
+.zimmer-name {
+  align-items: baseline;
+  gap: 0.375rem;
+}
+
+.zimmer-kopf .stand {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+}
+
+.zimmer-kopf .stand.frei {
+  color: var(--grau);
+  font-weight: 400;
+}
+
+.zimmer-kopf .stand.belegt {
+  color: var(--tinte);
+  font-weight: 600;
+}
+
+.zimmer-karten > .karte:first-child {
+  margin-top: 0.125rem;
+}
+
+/* Menü, Vorschläge, Meldungen: weiß wie eine Karte, Zeilen wie die Seitenleiste */
+.menue,
+.vorschlaege,
+.meldung {
+  border: 1px solid var(--rand-karte);
+  border-radius: var(--rund);
+  background: var(--flaeche);
+  box-shadow: var(--schatten-fenster), var(--schatten-karte);
+}
+
+.menue,
+.vorschlaege {
+  padding: 0.25rem;
+}
+
+.menue {
+  min-width: 15rem;
+}
+
+.menue-titel {
+  padding: 0.5rem 0.625rem 0.25rem;
+}
+
+.menue-eintrag,
+.vorschlag {
+  align-items: center;
+  gap: 1rem;
+  min-height: var(--listenzeile);
+  padding: 0.375rem 0.625rem;
+  border-radius: var(--rund);
+}
+
+.menue-eintrag:hover,
+.menue-eintrag:focus-visible,
+.vorschlag:hover,
+.vorschlag[aria-selected='true'] {
+  outline: none;
+  background: var(--zeile-gewaehlt);
+}
+
+/* Vorschläge dürfen breiter sein als das Feld, damit Rasse und Besitzer ganz zu lesen sind. */
+.vorschlaege {
+  right: auto;
+  width: max-content;
+  min-width: 100%;
+  max-width: min(28rem, calc(100vw - 4rem));
+  margin-top: 0.25rem;
+}
+
+.vorschlag-zusatz {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meldungen {
+  bottom: 2rem;
+  left: 2rem;
+  gap: 0.5rem;
+}
+
+.meldung {
+  padding: 0.625rem 0.875rem;
+}
+
+/* Fenster "Termin anlegen": eine große Karte in der Mitte */
+.fenster {
+  border: 1px solid var(--rand-karte);
+  border-radius: var(--rund);
+  background: var(--flaeche);
+  color: var(--tinte);
+  box-shadow: var(--schatten-fenster), var(--schatten-karte);
+}
+
+.fenster::backdrop {
+  background: var(--abdunkeln);
+}
+
+.fenster-kopf {
+  padding: var(--rand) var(--rand) 0;
+  border-bottom: 0;
+  background: none;
+}
+
+.fenster-zu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border-radius: var(--rund);
+  color: var(--grau);
+}
+
+.fenster-zu:hover {
+  background: var(--zeile-gewaehlt);
+  color: var(--tinte);
+}
+
+.fenster-zu .symbol {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.fenster-form {
+  padding: 1rem var(--rand) var(--rand);
+}
+
+.fenster-form > * + * {
+  margin-top: 1rem;
+}
+
+.vorschau {
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--rand-karte);
+  border-radius: var(--rund);
+  background: var(--flaeche);
+  box-shadow: var(--schatten-karte);
+}
+
+.reihe,
+.wahlen {
+  gap: 0.75rem;
+}
+
+.feld-name {
+  margin-bottom: 0.375rem;
+}
+
+.feld-name.weit {
+  margin-bottom: 0.5rem;
+}
+
+.eingabe {
+  height: var(--feld-hoehe);
+  padding: 0 0.625rem;
+  border: 1px solid var(--rand-feld);
+  border-radius: var(--rund);
+  background: var(--flaeche);
+}
+
+.wahl {
+  gap: 0.625rem;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--rand-feld);
+  border-radius: var(--rund);
+  background: var(--flaeche);
+}
+
+.wahl:has(:checked) {
+  border-color: var(--akzent);
+  background: var(--zeile-gewaehlt);
+}
+
+.fenster-absenden {
+  padding-top: 0.25rem;
+}
+
+.knopf-eintragen {
+  width: 100%;
+  padding: 0 0.875rem;
+}
+
+/* Fokus für die Tastatur: blauer Rand mit hellem Ring */
+.karte:focus-visible,
+.suchfeld input:focus,
+.eingabe:focus {
+  border-color: var(--akzent);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--akzent-ring);
+}
+
+.knopf-haupt:focus-visible,
+.knopf-karte:focus-visible,
+.zimmerwahl:focus-visible,
+.fenster-zu:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--akzent-ring);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: var(--rand-zeigen);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--platzhalter);
+}
+
+/* Im Bild sind keine Rollbalken zu sehen: in den Spalten erst beim Zeigen */
+.spalte-inhalt::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+.spalte-inhalt:hover::-webkit-scrollbar-thumb {
+  background: var(--rand-zeigen);
+}
+
+/* 5 Schmale Bildschirme: die Tafel scrollt waagrecht wie im Bild; am Telefon ohne Rand ums Fenster */
+@media (max-width: 1299px) {
+  .tafel-bereich {
+    scroll-snap-type: x proximity;
+  }
+
+  .spalte {
+    scroll-snap-align: start;
+  }
+}
+
+@media (max-width: 640px) {
+  html body {
+    height: 100%;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .kopf {
+    padding: 0.625rem var(--rand);
+  }
+
+  .kopf-zeile > :first-child {
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+  .kopf-rechts {
+    flex-wrap: wrap;
+    gap: 0.625rem;
+    width: 100%;
+  }
+
+  .suchfeld,
+  .kopf-rechts .knopf-haupt {
+    flex: 1 1 100%;
+    width: auto;
+  }
+
+  .reihe,
+  .wahlen {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (pointer: coarse) {
+  .knopf-haupt,
+  .knopf-karte,
+  .zimmerwahl,
+  .suchfeld input,
+  .eingabe,
+  .menue-eintrag,
+  .vorschlag {
+    min-height: 44px;
+  }
+}
+
+/* 6 Bewegung: nur Farben beim Zeigen, Druck beim Klicken, Fenster blendet auf */
+.karte,
+.knopf-haupt,
+.knopf-karte,
+.zimmerwahl,
+.suchfeld input,
+.eingabe,
+.wahl,
+.menue-eintrag,
+.vorschlag,
+.fenster-zu,
+.spalte,
+.spalte-inhalt,
+.zimmer {
+  transition:
+    background-color 0.2s var(--kurve),
+    border-color 0.2s var(--kurve),
+    box-shadow 0.2s var(--kurve),
+    color 0.2s var(--kurve),
+    transform 0.2s var(--kurve),
+    opacity 0.2s var(--kurve);
+}
+
+/* Die Meldung blendet in 200 ms aus, so lange wartet die Maske vor dem Entfernen. */
+.meldung {
+  transition: opacity 0.2s var(--kurve);
+}
+
+.fenster[open] {
+  animation: fenster-auf 0.3s var(--kurve);
+}
+
+.fenster[open]::backdrop {
+  animation: abdunkeln-auf 0.3s var(--kurve);
+}
+
+@keyframes fenster-auf {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+@keyframes abdunkeln-auf {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  .fenster::backdrop {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,6 +1,6 @@
-// Baut jede Maske unter masken/: aus <name>/<name>.html und stil/stil.css wird
+// Baut jede Maske unter masken/: aus <name>/<name>.html und dem gemeinsamen Stil wird
 // <name>/index.basis.source.html, die Datei, die SoftEngine öffnet.
-//   - der gemeinsame Stil kommt an die Stelle /*STIL*/ im einzigen <style> der Maske
+//   - der Stil (stil/stil.css, darüber stil/gold.css) kommt an die Stelle /*STIL*/ im einzigen <style> der Maske
 //   - /*DATEI:name.json*/ null wird zum Inhalt dieser Datei aus dem Ordner der Maske
 //   - nur ASCII und Zeilenende LF, wie die Masken des Editors (src/export/validator.ts)
 // Aufruf: node masken/bauen.mjs
@@ -78,7 +78,8 @@ function bauen(name, stil) {
   console.log(`${name}: index.basis.source.html, ${Math.round(html.length / 1024)} KB`)
 }
 
-const stil = lesen(join(ordner, 'stil', 'stil.css'))
+// gold.css überschreibt stil.css; ohne den Eintrag baut jede Maske im Stil von stil.css allein.
+const stil = ['stil.css', 'gold.css'].map((datei) => lesen(join(ordner, 'stil', datei))).join('\n\n')
 for (const eintrag of readdirSync(ordner, { withFileTypes: true })) {
   if (eintrag.isDirectory() && existsSync(join(ordner, eintrag.name, `${eintrag.name}.html`))) bauen(eintrag.name, stil)
 }
