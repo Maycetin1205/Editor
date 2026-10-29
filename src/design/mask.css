@@ -1,6 +1,6 @@
-/* The tokens of the mask, the one system every block draws from (26.10.2026,
-   entwuerfe/entwurf-bereich.html): white cards with a hairline and 8 px corners
-   on a light grey ground with a slight blue cast, the type of Windows, one
+/* The tokens of the mask, the one system every block draws from: white cards
+   with a hairline and 8 px corners on a light grey ground with a slight blue
+   cast, the type of Windows, one
    blue accent, four meaning colors used only as a dot, an edge, a chip or the
    soft ground of a row. Light only. A block names a token; it never writes a
    color, a radius, a font size or a shadow of its own (eslint checks that). */

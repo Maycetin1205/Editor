@@ -1,80 +1,51 @@
 # Aufbau-Editor
 
-Ein Editor im Browser, mit dem Masken für SoftEngine gebaut werden. Eine Maske wird als eine HTML-Datei plus ein `SEvariablen`-Blatt exportiert und ersetzt in SoftEngine die eingebaute Oberfläche einer Karteikarte.
+Ein Editor im Browser, der Masken für SoftEngine baut. Eine Maske wird als HTML-Datei plus SEvariablen-Blatt exportiert und ersetzt in SoftEngine die eingebaute Oberfläche einer Karteikarte.
 
-- Für Anwender: [docs/BAUSTEINE.md](docs/BAUSTEINE.md) (Bestand der Bausteine und Einstellungen); ein Handbuch folgt, wenn Bausteine und Einstellungen entschieden sind
-- Für den Anschluss an SoftEngine: [docs/SOFTENGINE-SCHNITTSTELLE.md](docs/SOFTENGINE-SCHNITTSTELLE.md)
-- Für Entwickler: dieser Text, [docs/ARCHITEKTUR.md](docs/ARCHITEKTUR.md), [BAUPLAN.md](BAUPLAN.md) (was noch offen ist) und [docs/RELEASE.md](docs/RELEASE.md)
-
-## Voraussetzungen
-
-- Node.js 22 oder 24, npm
-- Zum Arbeiten mit Masken-Ordnern im Browser: Chrome oder Edge (File System Access API). In anderen Browsern wird die Maske heruntergeladen statt in einen Ordner geschrieben.
-
-## Starten
+## Starten, prüfen, bauen
 
 ```sh
 npm ci
-npm run dev
+npm run dev      # Editor auf http://localhost:5300; der Port ist fest, Masken im Browser-Speicher hängen daran
+npm run check    # Typen, eslint, Prettier, Importkreise, toter Code (knip), Tests
+npm run build    # statische Seite in dist/, kein Server-Teil
 ```
 
-Der Editor läuft dann auf `http://localhost:5300`. Der Port ist fest: Masken und Bibliothek, die der Browser hält, hängen an dieser Adresse.
+Node.js 22 oder 24. Ordner und Dateien braucht Chrome oder Edge, andere Browser laden die Maske herunter. Vor dev, build und test entsteht `src/export/generated/runtime.json` (nicht im Repository): die Bausteine, die eine exportierte Maske mitnimmt. Dieselbe Prüfung läuft auf GitHub bei jedem Push.
 
-`npm run dev` baut vorher die Laufzeit der Maske (`src/export/generated/runtime.json`, nicht im Repository). Ohne sie scheitert der Export.
+## Wie es gebaut ist
 
-## Prüfen
-
-```sh
-npm run check
-```
-
-Läuft Typprüfung, eslint, Prettier, Kreis-Prüfung der Importe, knip (toter Code) und die Tests. Dasselbe läuft auf GitHub bei jedem Push (`.github/workflows/check.yml`), dort zusätzlich der Produktionsbau.
-
-Nur die Tests:
-
-```sh
-npm test
-```
-
-Die Tests liegen in `test/` und prüfen die Nähte, an denen ein Fehler teuer wird: das Markup des Exports (Abbild in `test/__snapshots__`), das Escaping feindlicher Eingaben, die Maskendatei mit Leftover und Abweisung fremder Stufen, die Aktionsketten und das Lesen der SoftEngine-Daten. Ändert sich das Export-Markup absichtlich, wird das Abbild mit `npx vitest run -u` erneuert und der Unterschied im Commit erklärt.
-
-Die Rauchprobe im Browser (`npm run smoke`, gegen einen laufenden `npm run dev`, braucht Playwright) prüft jeden Baustein so, wie ein Nutzer ihn braucht, bis in die exportierte Maske. Ein neuer Baustein ist erst fertig, wenn er sie besteht; was sie dafür braucht, steht in `docs/ARCHITEKTUR.md`.
-
-## Bauen
-
-```sh
-npm run build
-```
-
-Ergebnis in `dist/`: eine statische Seite, die von jedem Webserver ausgeliefert werden kann. Es gibt keinen Server-Teil. Der Editor speichert im Browser (localStorage) und, in Chrome/Edge, in Ordnern, die der Nutzer freigibt.
-
-Vorschau des Baus: `npm run preview`.
-
-## Aufbau des Codes
+Zwei Programme mit einem gemeinsamen Kern: der Editor, der die Maske baut, und die Maske selbst, die beim Kunden in SoftEngine läuft.
 
 | Ordner | Inhalt |
 |---|---|
-| `src/core` | Modell: Bausteinbaum, Eigenschaften, Datenquellen, Aktionsketten. Kein DOM, kein React, kein Lit. |
-| `src/blocks` | Die Bausteine als Lit-Elemente. Laufen im Editor und in der exportierten Maske. |
-| `src/runtime` | Was in der Maske läuft: Aktionen, Auswahl, Datenbezug. Kennt SoftEngine nur über `MaskHost`. |
-| `src/softengine` | Der Anschluss an SoftEngine. Einziger Ort, der die Host-Funktionen kennt. |
-| `src/export` | Schreibt HTML und SEvariablen aus dem Modell. |
-| `src/editor` | Der Editor in React. `editor/state` hält Zustand, Verlauf, Dateien. |
-| `src/design` | Die Gestaltungswerte (Tokens) für Editor und Maske. |
-| `tools` | `buildRuntime.mjs` bündelt die Bausteine für den Export, `cycles.mjs` findet Importkreise. |
-| `test` | Tests (vitest, happy-dom). |
+| `src/core` | Regelwerk: Bausteinbaum, Eigenschaften, Fähigkeiten, Datenquellen, Relationen, Schritte. Kein DOM, kein React, kein Lit |
+| `src/blocks` | Die 13 Bausteine als Lit-Elemente, alle auf `BlockElement`. Laufen im Editor und in der exportierten Maske |
+| `src/runtime` | Was in der Maske läuft: Daten holen, Auswahl, Ereignisse, Schritte. Kennt SoftEngine nur als `MaskHost` |
+| `src/softengine` | Der Anschluss an SoftEngine: der einzige Ort, der SEDATA, GET/PUT_RELATION und die Warteschlange kennt |
+| `src/export` | Schreibt aus dem Baum `index.basis.source.html` und `index.basis.SEvariablen.json`, nur mit den benutzten Bausteinen |
+| `src/editor` | Der Editor in React: Leinwand, Inspektor, Datenfenster, Schritt-, Rechen-, Verteil- und Nachschlagefenster. `editor/state` hält Zustand, Verlauf und Dateien |
+| `src/design` | Farben, Schrift und Abstände für Editor und Maske |
+| `tools` | `buildRuntime.mjs` bündelt die Bausteine für den Export, `cycles.mjs` findet Importkreise |
+| `test` | vitest mit happy-dom |
 
-Die Importregeln zwischen den Schichten stehen in `eslint.config.js` und werden geprüft.
+Im Editor antwortet der Maske eine Attrappe, die nichts liefert. Eine exportierte Maske setzt beim Start SoftEngine als Host ein (`runtime/softEngineStart.ts`).
 
-## Masken und Dateien
+## Dateien
 
-- Eine Maske ist eine JSON-Datei (`kind: "aufbau-editor-maske"`, `schemaVersion`). Der Editor liest die Stufe 40 und hebt die Stufe 39 beim Öffnen (`src/editor/state/maskSchema.ts`); eine ältere Maske lehnt er mit „zu alte Fassung“ ab, eine neuere mit dem Hinweis, den Editor zu erneuern. Was der Editor in einer Maske nicht lesen kann, bleibt in der Datei erhalten (`leftover`).
-- Die Bibliothek mit Datenquellen und Relationen ist eine eigene JSON-Datei (`kind: "aufbau-editor-bibliothek"`).
-- Der Export schreibt `index.basis.source.html` und `index.basis.SEvariablen.json`, bei gesetztem Rahmen mit dem Rahmen im Namen.
+Eine Maske ist eine JSON-Datei (`kind: "aufbau-editor-maske"`) mit einer Stufe (`schemaVersion`, jetzt 41). Masken ab Stufe 39 hebt der Editor beim Öffnen (`editor/state/maskSchema.ts`), ältere lehnt er ab. Was er in einer Datei nicht lesen kann, bleibt als Rest erhalten und steht nach dem Speichern wieder darin. Datenquellen und Relationen liegen in einer eigenen Bibliotheksdatei (`kind: "aufbau-editor-bibliothek"`).
 
-## Bekannte Grenzen
+## Wörter im Code
 
-- Der SoftEngine-Anschluss ist gegen keine laufende Installation geprüft. Die offenen Punkte stehen in `docs/SOFTENGINE-SCHNITTSTELLE.md`.
-- Masken unter Stufe 39 öffnen nicht. Die Hebungen dafür sind gestrichen (26.10.2026), weil keine solche Maske mehr im Umlauf ist.
-- Ordner und Dateien gehen nur in Chrome und Edge. Firefox und Safari laden herunter.
-- Der Editor ist auf eine Maske je Browser-Profil ausgelegt. Zwei Tabs mit verschiedenen Masken überschreiben sich im Browser-Speicher gegenseitig.
+| Wort | Bedeutet |
+|---|---|
+| block, property, capability | Baustein. Eine Einstellung, im Inspektor sichtbar, im HTML ein Attribut. Was ein Baustein kann: source, list, events, followsSelection, recordChoice, bindable, compute, capture, change, lookupWindow, holdsSent, actionValue |
+| tree, stage, leftover | Der Baum aller Bausteine. Die Stufe der Datei. Der Rest, den dieser Editor nicht kennt |
+| source, preset, order, delivery, write, sheet | Datenquelle. Ihre Vorlage (Belegkopf, Positionen, ...). Was die Maske beim Öffnen bestellt. Wie Zeilen ankommen (push, message, relationRows, relationValue). Wie gespeichert wird. Das SEvariablen-Blatt |
+| relation | GET_, PUT_ oder PUTADD_RELATION mit Platzhaltern wie Belegart, Jahr, Position |
+| step, chain, condition | Ein Schritt eines Ablaufs: RELATION, POPUP_OPEN, POPUP_CLOSE, CONFIRM, START_TOOL. Die Kette hinter einem Ereignis. Die Bedingung eines Schritts (onlyIf) |
+| spot, origin, reach | Eine Stelle in einem Baustein, in die ein Feld kommt. Die Herkunft eines Werts: Feld, gewählte, erfasste, geänderte oder verteilte Zeile, Summe, Schrittergebnis. Was ein Baustein von seinem Platz aus sieht |
+| giver, carrier | Ein Baustein, dessen gewählte Zeile andere übernehmen. Der Baustein, auf den sich ein Schritt bezieht |
+| capture, ledger, split, pick | Die Erfassung. Ihr Buch über erfasste und gebuchte Zeilen. Die Verteilung einer Zeile auf Chargen. Eine verteilte Zeile |
+| woven, look, notice | Text mit Feldern in Lücken. Farbton: neutral, info, success, warning, danger. Der Ring am Baustein: loading, writing, saved, sent |
+| host, job, hostQueue | Wer der Maske antwortet. Ein Aufruf an SoftEngine. Die Reihe, in der die Aufrufe laufen |
