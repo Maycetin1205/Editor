@@ -22,16 +22,14 @@
   --tinte-2: #55524b;
   --tinte-3: #85817a;
 
-  /* Akzent: Hauptknopf, Fokus, Auswahl, Ablegen */
+  /* Akzent: nur die Hauptaktion einer Maske */
   --akzent: #2b5a8c;
   --akzent-dunkel: #214a75;
-  --akzent-flaeche: #e2e9f2;
   --auf-akzent: #ffffff;
 
-  /* Bedeutung */
+  /* Bedeutung: nur als Textfarbe, nie als Fl\E4 che */
   --warnen: #8a5300;
   --dringend: #a3292b;
-  --frei: #2e6a44;
 
   /* Schrift: Text in Segoe UI, Zahlen in Bahnschrift (beide bei Windows dabei) */
   --schrift: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
@@ -43,6 +41,7 @@
   --zahl-gross: 1.5rem;
   --zahl-anzeige: 2.25rem;
   --halbfett: 600;
+  --laufweite-eng: -0.01em;
   --zeile: 1.4;
   --zeile-eng: 1.2;
 
@@ -56,14 +55,14 @@
 
   /* Ma\DF e */
   --bedienhoehe: 2.5rem;
-  --foto: 3.5rem;
-  --radius: 4px;
-  --radius-gross: 8px;
+  --bedienhoehe-klein: 2rem;
+  --foto: 2.75rem;
+  --seitenleiste: 22rem;
+  --radius: 6px;
+  --radius-gross: 10px;
   --rand: 1px;
   --fokus: 2px;
   --markierung: 3px;
-  --schatten: 0 12px 32px rgb(28 27 25 / 0.16), 0 2px 6px rgb(28 27 25 / 0.08);
-  --abdunkeln: rgb(28 27 25 / 0.3);
   --dauer: 120ms;
 }
 
@@ -100,6 +99,7 @@ h1,
 h2,
 h3 {
   font-weight: var(--halbfett);
+  letter-spacing: var(--laufweite-eng);
 }
 
 button,
@@ -111,7 +111,7 @@ textarea {
 }
 
 :focus-visible {
-  outline: var(--fokus) solid var(--akzent);
+  outline: var(--fokus) solid var(--tinte);
   outline-offset: var(--fokus);
 }
 
@@ -141,13 +141,8 @@ textarea {
   color: var(--dringend);
 }
 
-.frei {
-  color: var(--frei);
-}
-
 .warnen,
-.dringend,
-.frei {
+.dringend {
   font-weight: var(--halbfett);
 }
 
@@ -158,6 +153,7 @@ textarea {
   gap: var(--abstand-5);
   padding: var(--abstand-3) var(--abstand-5);
   border-bottom: var(--rand) solid var(--linie-stark);
+  background: var(--flaeche);
 }
 
 .kopf-titel {
@@ -216,6 +212,45 @@ textarea {
   color: var(--auf-akzent);
 }
 
+.knopf-klein {
+  height: var(--bedienhoehe-klein);
+  padding: 0 var(--abstand-3);
+  font-size: var(--text-klein);
+}
+
+.knopf-leise {
+  border-color: transparent;
+  background: transparent;
+  color: var(--tinte-2);
+}
+
+.knopf-breit {
+  width: 100%;
+}
+
+/* Kennzahlen im Kopf: Name leise, Zahl kr\E4 ftig */
+.kennzahlen {
+  display: flex;
+  align-items: baseline;
+  gap: var(--abstand-5);
+}
+
+.kennzahl {
+  display: flex;
+  align-items: baseline;
+  gap: var(--abstand-2);
+  color: var(--tinte-3);
+  white-space: nowrap;
+}
+
+.kennzahl-wert {
+  color: var(--tinte);
+  font-family: var(--schrift-zahl);
+  font-size: var(--text-titel);
+  font-weight: var(--halbfett);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Eingaben */
 .feld {
   display: grid;
@@ -240,9 +275,9 @@ textarea {
 }
 
 .eingabe:focus {
-  outline: none;
-  border-color: var(--akzent);
-  box-shadow: inset 0 0 0 var(--rand) var(--akzent);
+  border-color: var(--tinte);
+  outline: var(--rand) solid var(--tinte);
+  outline-offset: 0;
 }
 
 .eingabe::placeholder {
@@ -284,7 +319,7 @@ textarea {
   width: 1.125rem;
   height: 1.125rem;
   margin: 0;
-  accent-color: var(--akzent);
+  accent-color: var(--tinte);
 }
 
 /* Vorschl\E4 ge unter einem Eingabefeld */
@@ -310,7 +345,7 @@ textarea {
 
 .vorschlag:hover,
 .vorschlag[aria-selected='true'] {
-  background: var(--akzent-flaeche);
+  background: var(--grund-tief);
 }
 
 /* Men\FC  an einer Zeile */
@@ -320,10 +355,9 @@ textarea {
   min-width: 16rem;
   max-width: 24rem;
   padding: var(--abstand-1);
-  border: var(--rand) solid var(--linie);
+  border: var(--rand) solid var(--linie-stark);
   border-radius: var(--radius-gross);
   background: var(--flaeche);
-  box-shadow: var(--schatten);
 }
 
 .menue-titel {
@@ -348,44 +382,52 @@ textarea {
   cursor: pointer;
 }
 
+/* Der \FC bliche n\E4 chste Schritt */
+.menue-eintrag.standard {
+  font-weight: var(--halbfett);
+}
+
 .menue-eintrag:hover,
 .menue-eintrag:focus-visible {
   outline: none;
-  background: var(--akzent-flaeche);
+  background: var(--grund-tief);
 }
 
-/* Dialog */
-.dialog {
-  width: min(36rem, calc(100vw - 2 * var(--abstand-5)));
-  max-height: calc(100vh - 2 * var(--abstand-5));
-  padding: 0;
-  border: var(--rand) solid var(--linie);
-  border-radius: var(--radius-gross);
+/* Seitenleiste rechts mit einem Formular */
+.seitenleiste {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: var(--seitenleiste);
+  min-height: 0;
+  border-left: var(--rand) solid var(--linie-stark);
   background: var(--flaeche);
-  color: var(--tinte);
-  box-shadow: var(--schatten);
 }
 
-.dialog::backdrop {
-  background: var(--abdunkeln);
-}
-
-.dialog-kopf {
-  padding: var(--abstand-4) var(--abstand-5);
+.seitenleiste-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--abstand-3);
+  padding: var(--abstand-3) var(--abstand-3) var(--abstand-3) var(--abstand-5);
   border-bottom: var(--rand) solid var(--linie);
+}
+
+.seitenleiste-titel {
   font-size: var(--text-titel);
 }
 
-.dialog-inhalt {
+.seitenleiste-inhalt {
   display: grid;
+  flex: 1;
+  align-content: start;
   gap: var(--abstand-5);
+  min-height: 0;
   padding: var(--abstand-5);
+  overflow-y: auto;
 }
 
-.dialog-fuss {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--abstand-3);
+.seitenleiste-fuss {
   padding: var(--abstand-4) var(--abstand-5);
   border-top: var(--rand) solid var(--linie);
 }
@@ -408,7 +450,6 @@ textarea {
   border-radius: var(--radius);
   background: var(--tinte);
   color: var(--flaeche);
-  box-shadow: var(--schatten);
   transition: opacity 300ms;
 }
 
@@ -428,8 +469,8 @@ textarea {
   height: var(--foto);
   border-radius: var(--radius);
   background: var(--grund-tief);
-  color: var(--tinte-3);
-  font-size: var(--text-gross);
+  color: var(--tinte-2);
+  font-size: var(--text-titel);
   font-weight: var(--halbfett);
   object-fit: cover;
 }
@@ -446,139 +487,167 @@ body {
   overflow: hidden;
 }
 
+.unterzeile {
+  display: flex;
+  gap: var(--abstand-4);
+}
+
 .suche {
-  width: 16rem;
+  width: 15rem;
 }
 
 .uhr {
-  font-size: var(--zahl-anzeige);
-  line-height: var(--zeile-eng);
+  color: var(--tinte-2);
+  font-size: var(--zahl-gross);
+}
+
+.arbeitsflaeche {
+  display: flex;
+  flex: 1;
+  min-height: 0;
 }
 
 .tafel {
   display: grid;
   flex: 1;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  min-height: 0;
+  gap: var(--abstand-4);
+  min-width: 0;
+  padding: var(--abstand-4);
   user-select: none;
 }
 
+/* Eine Spalte: Kopf mit Name und Zahl, darunter die Karten */
 .spalte {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border-right: var(--rand) solid var(--linie);
-}
-
-.spalte:last-child {
-  border-right: 0;
+  border: var(--rand) solid var(--linie);
+  border-radius: var(--radius-gross);
+  background: var(--grund-tief);
 }
 
 .spalte-kopf {
   display: flex;
-  align-items: flex-end;
+  align-items: baseline;
   justify-content: space-between;
   gap: var(--abstand-3);
-  padding: var(--abstand-4) var(--abstand-5) var(--abstand-3);
-  border-bottom: var(--rand) solid var(--linie-stark);
+  padding: var(--abstand-3) var(--abstand-4);
 }
 
 .spalte-titel {
   font-size: var(--text-titel);
 }
 
-.spalte-uebersicht {
-  min-height: calc(var(--text-klein) * var(--zeile));
-  color: var(--tinte-2);
-  font-size: var(--text-klein);
-}
-
 .spalte-zahl {
   color: var(--tinte-2);
-  font-size: var(--zahl-anzeige);
-  line-height: 1;
+  font-size: var(--text-titel);
 }
 
 .spalte-inhalt {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  gap: var(--abstand-3);
   min-height: 0;
+  padding: 0 var(--abstand-3) var(--abstand-3);
   overflow-y: auto;
-  transition: background-color var(--dauer);
+  border-radius: var(--radius-gross);
 }
 
 .ziel {
-  background: var(--akzent-flaeche);
-}
-
-/* Ein Termin: Foto, Text, Zahl rechts */
-.termin {
-  position: relative;
-  display: grid;
-  grid-template-columns: var(--foto) minmax(0, 1fr) auto;
-  align-items: start;
-  column-gap: var(--abstand-4);
-  padding: var(--abstand-3) var(--abstand-5);
-  border-bottom: var(--rand) solid var(--linie);
-  cursor: pointer;
-}
-
-.termin:hover {
-  background: var(--flaeche);
-}
-
-.termin:focus-visible {
+  outline: var(--fokus) solid var(--tinte-3);
   outline-offset: calc(var(--fokus) * -1);
 }
 
-.termin.offen {
-  background: var(--akzent-flaeche);
+/* Eine Karte */
+.karte {
+  flex: none;
+  padding: var(--abstand-3);
+  border: var(--rand) solid var(--linie);
+  border-radius: var(--radius-gross);
+  background: var(--flaeche);
+  cursor: grab;
 }
 
-.termin.gezogen {
+.karte:hover,
+.karte.offen {
+  border-color: var(--linie-stark);
+}
+
+.karte.gezogen {
   opacity: 0.4;
 }
 
-.termin.notfall::before {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--markierung);
-  background: var(--dringend);
-  content: '';
+.karte-kopf {
+  display: grid;
+  grid-template-columns: var(--foto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--abstand-3);
 }
 
-.termin-name {
-  margin-bottom: var(--abstand-1);
-  font-size: var(--text-gross);
-  font-weight: var(--halbfett);
-  line-height: var(--zeile-eng);
-}
-
-.termin-name,
-.termin-zeile {
+.karte-name,
+.karte-besitzer {
   overflow: hidden;
-  color: var(--tinte-2);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.termin-grund {
+.karte-name {
+  font-size: var(--text-gross);
+  font-weight: var(--halbfett);
+  line-height: var(--zeile-eng);
+  letter-spacing: var(--laufweite-eng);
+}
+
+.karte-art {
+  margin-left: var(--abstand-2);
   color: var(--tinte-3);
+  font-size: var(--text);
+  font-weight: normal;
+  letter-spacing: normal;
 }
 
-.termin-wert {
-  text-align: right;
+.karte-besitzer {
+  color: var(--tinte-2);
 }
 
-.termin-zahl {
+.karte-wert {
+  align-self: start;
   font-size: var(--zahl-gross);
   line-height: var(--zeile-eng);
   white-space: nowrap;
 }
 
-/* Die Zimmer der Spalte Behandlung */
+.karte-grund {
+  display: -webkit-box;
+  margin-top: var(--abstand-2);
+  overflow: hidden;
+  color: var(--tinte-2);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.karte-fuss {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--abstand-3);
+  margin-top: var(--abstand-3);
+  padding-top: var(--abstand-3);
+  border-top: var(--rand) solid var(--linie);
+}
+
+/* Die Zimmer der Spalte Behandlung: Ablage mit Belegt oder Frei */
 .zimmer {
-  border-bottom: var(--rand) solid var(--linie-stark);
-  transition: background-color var(--dauer);
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--abstand-2);
+  min-height: 5rem;
+  padding: var(--abstand-2) var(--abstand-3) var(--abstand-3);
+  border: var(--rand) solid var(--linie-stark);
+  border-radius: var(--radius-gross);
 }
 
 .zimmer-kopf {
@@ -586,94 +655,95 @@ body {
   align-items: baseline;
   justify-content: space-between;
   gap: var(--abstand-3);
-  padding: var(--abstand-2) var(--abstand-5);
-  background: var(--grund-tief);
-}
-
-.zimmer.ziel .zimmer-kopf {
-  background: transparent;
 }
 
 .zimmer-zusatz {
   margin-left: var(--abstand-2);
-  color: var(--tinte-2);
+  color: var(--tinte-3);
   font-weight: normal;
+  letter-spacing: normal;
 }
 
-.zimmer .termin:last-child {
-  border-bottom: 0;
+/* Termin anlegen */
+.tier-liste {
+  display: grid;
+  gap: var(--abstand-1);
 }
 
-/* Neuer Termin */
 .neues-tier {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--abstand-3);
+}
+
+.neues-tier > :first-child {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 1499px) {
+  .kennzahlen {
+    display: none;
+  }
 }
   </style>
 </head>
 <body>
   <header class="kopf">
-    <h1 class="kopf-titel">Empfang</h1>
-    <p class="neben" id="datum"></p>
-    <p id="verbindung"></p>
+    <div>
+      <h1 class="kopf-titel" id="praxis"></h1>
+      <p class="leise unterzeile"><span id="datum"></span><span id="verbindung"></span></p>
+    </div>
+    <div class="kennzahlen">
+      <p class="kennzahl">Nicht zugewiesen <span class="kennzahl-wert" id="kennzahl-termin"></span></p>
+      <p class="kennzahl">Wartezimmer <span class="kennzahl-wert" id="kennzahl-wartezimmer"></span></p>
+      <p class="kennzahl">Zimmer belegt <span class="kennzahl-wert" id="kennzahl-zimmer"></span></p>
+      <p class="kennzahl">Abrechnung <span class="kennzahl-wert" id="kennzahl-abrechnung"></span></p>
+    </div>
     <div class="kopf-rechts">
       <input class="eingabe suche" id="suche" type="search" placeholder="Suchen" aria-label="Suchen" autocomplete="off">
-      <button class="knopf knopf-haupt" id="neuerTermin" type="button">Neuer Termin</button>
+      <button class="knopf knopf-haupt" id="terminAnlegen" type="button" aria-controls="seitenleiste" aria-expanded="false">Termin anlegen</button>
       <span class="uhr zahl" id="uhr"></span>
     </div>
   </header>
 
-  <main class="tafel" id="tafel">
-    <section class="spalte" aria-labelledby="titel-termin">
-      <header class="spalte-kopf">
-        <div>
-          <h2 class="spalte-titel" id="titel-termin">Termine</h2>
-          <p class="spalte-uebersicht" id="uebersicht-termin"></p>
-        </div>
-        <span class="spalte-zahl zahl" id="zahl-termin"></span>
-      </header>
-      <div class="spalte-inhalt" id="inhalt-termin" data-ziel="termin"></div>
-    </section>
-    <section class="spalte" aria-labelledby="titel-wartezimmer">
-      <header class="spalte-kopf">
-        <div>
+  <div class="arbeitsflaeche">
+    <main class="tafel" id="tafel">
+      <section class="spalte" aria-labelledby="titel-termin">
+        <header class="spalte-kopf">
+          <h2 class="spalte-titel" id="titel-termin">Nicht zugewiesen</h2>
+          <span class="spalte-zahl zahl" id="zahl-termin"></span>
+        </header>
+        <div class="spalte-inhalt" id="inhalt-termin" data-ziel="termin"></div>
+      </section>
+      <section class="spalte" aria-labelledby="titel-wartezimmer">
+        <header class="spalte-kopf">
           <h2 class="spalte-titel" id="titel-wartezimmer">Wartezimmer</h2>
-          <p class="spalte-uebersicht" id="uebersicht-wartezimmer"></p>
-        </div>
-        <span class="spalte-zahl zahl" id="zahl-wartezimmer"></span>
-      </header>
-      <div class="spalte-inhalt" id="inhalt-wartezimmer" data-ziel="wartezimmer"></div>
-    </section>
-    <section class="spalte" aria-labelledby="titel-behandlung">
-      <header class="spalte-kopf">
-        <div>
+          <span class="spalte-zahl zahl" id="zahl-wartezimmer"></span>
+        </header>
+        <div class="spalte-inhalt" id="inhalt-wartezimmer" data-ziel="wartezimmer"></div>
+      </section>
+      <section class="spalte" aria-labelledby="titel-behandlung">
+        <header class="spalte-kopf">
           <h2 class="spalte-titel" id="titel-behandlung">Behandlung</h2>
-          <p class="spalte-uebersicht" id="uebersicht-behandlung"></p>
-        </div>
-        <span class="spalte-zahl zahl" id="zahl-behandlung"></span>
-      </header>
-      <div class="spalte-inhalt" id="inhalt-behandlung" data-ziel="behandlung"></div>
-    </section>
-    <section class="spalte" aria-labelledby="titel-abrechnung">
-      <header class="spalte-kopf">
-        <div>
+          <span class="spalte-zahl zahl" id="zahl-behandlung"></span>
+        </header>
+        <div class="spalte-inhalt" id="inhalt-behandlung" data-ziel="behandlung"></div>
+      </section>
+      <section class="spalte" aria-labelledby="titel-abrechnung">
+        <header class="spalte-kopf">
           <h2 class="spalte-titel" id="titel-abrechnung">Abrechnung</h2>
-          <p class="spalte-uebersicht" id="uebersicht-abrechnung"></p>
-        </div>
-        <span class="spalte-zahl zahl" id="zahl-abrechnung"></span>
+          <span class="spalte-zahl zahl" id="zahl-abrechnung"></span>
+        </header>
+        <div class="spalte-inhalt" id="inhalt-abrechnung" data-ziel="abrechnung"></div>
+      </section>
+    </main>
+
+    <aside class="seitenleiste" id="seitenleiste" aria-labelledby="seitenleisteTitel" hidden>
+      <header class="seitenleiste-kopf">
+        <h2 class="seitenleiste-titel" id="seitenleisteTitel">Termin anlegen</h2>
+        <button class="knopf knopf-leise" id="schliessen" type="button">Schlie&#xDF;en</button>
       </header>
-      <div class="spalte-inhalt" id="inhalt-abrechnung" data-ziel="abrechnung"></div>
-    </section>
-  </main>
-
-  <div class="menue" id="menue" role="menu" hidden></div>
-  <div class="meldungen" id="meldungen" aria-live="polite"></div>
-
-  <dialog class="dialog" id="dialog" aria-labelledby="dialogTitel">
-    <form id="formular" novalidate>
-      <h2 class="dialog-kopf" id="dialogTitel">Neuer Termin</h2>
-      <div class="dialog-inhalt">
+      <form class="seitenleiste-inhalt" id="formular" novalidate>
         <div class="feld">
           <label class="feld-name" for="besitzer">Besitzer</label>
           <input class="eingabe" id="besitzer" maxlength="60" autocomplete="off" role="combobox"
@@ -682,7 +752,7 @@ body {
         </div>
         <fieldset class="gruppe">
           <legend class="feld-name">Tier</legend>
-          <div class="gruppe" id="tierListe"></div>
+          <div class="tier-liste" id="tierListe"></div>
           <div class="neues-tier" id="neuesTier">
             <label class="feld"><span class="feld-name">Name</span><input class="eingabe" id="tierName" maxlength="30" autocomplete="off"></label>
             <label class="feld"><span class="feld-name">Tierart</span><input class="eingabe" id="tierArt" maxlength="30" list="tierarten" autocomplete="off"></label>
@@ -691,25 +761,23 @@ body {
           <datalist id="tierarten"></datalist>
           <datalist id="rassen"></datalist>
         </fieldset>
-        <label class="feld"><span class="feld-name">Behandlung</span><input class="eingabe" id="behandlung" maxlength="150" autocomplete="off"></label>
+        <label class="feld"><span class="feld-name">Grund</span><input class="eingabe" id="behandlung" maxlength="150" autocomplete="off"></label>
         <div class="reihe">
           <label class="feld"><span class="feld-name">Uhrzeit</span><input class="eingabe zahl" id="uhrzeit" type="time"></label>
           <label class="wahl"><input type="checkbox" id="notfall">Notfall</label>
         </div>
         <fieldset class="gruppe">
           <legend class="feld-name">Wohin</legend>
-          <div class="reihe">
-            <label class="wahl"><input type="radio" name="wohin" value="wartezimmer" checked>Wartezimmer</label>
-            <label class="wahl"><input type="radio" name="wohin" value="termin">Termine</label>
-          </div>
+          <label class="wahl"><input type="radio" name="wohin" value="termin" checked>Nicht zugewiesen</label>
+          <label class="wahl"><input type="radio" name="wohin" value="wartezimmer">Wartezimmer</label>
         </fieldset>
-      </div>
-      <div class="dialog-fuss">
-        <button class="knopf" id="abbrechen" type="button">Abbrechen</button>
-        <button class="knopf knopf-haupt" id="anlegen" type="submit">Anlegen</button>
-      </div>
-    </form>
-  </dialog>
+        <button class="knopf knopf-haupt knopf-breit" id="anlegen" type="submit">Eintragen</button>
+      </form>
+    </aside>
+  </div>
+
+  <div class="menue" id="menue" role="menu" hidden></div>
+  <div class="meldungen" id="meldungen" aria-live="polite"></div>
 
   <script>
     // =====================================================================
@@ -718,6 +786,9 @@ body {
     //  Passt beim Test etwas nicht, wird nur hier eine Zeile ge\u00E4ndert.
     // =====================================================================
     const CONFIG = {
+      // Name der Praxis oben links.
+      praxis: 'Kleintierpraxis am Stadtpark',
+
       // Name der Liste in index.basis.SEvariablen.json (ALIAS beim SEFILELOOP).
       quelle: 'Termine',
 
@@ -854,11 +925,12 @@ body {
         ['20011', '10110', 'Mia', 'Katze', 'Siam', '19.10.2019', ''],
         ['20012', '10124', 'Simba', 'Katze', 'Bengal', '11.12.2020', ''],
       ],
-      // Tier, Minuten von jetzt bis zur Uhrzeit, Spalte, Minuten in der Spalte, Behandlung, Notfall, Zimmer
+      // Tier, Minuten von jetzt bis zur Uhrzeit, Spalte, Minuten in der Spalte, Behandlung, Notfall, Zimmer, Betrag
       termine: [
         ['20003', -40, 'behandlung', 22, 'Lahmt vorne links', false, 'Zimmer 1'],
         ['20011', -25, 'behandlung', 9, 'Zahnkontrolle', false, 'Zimmer 3'],
-        ['20004', -35, 'abrechnung', 4, 'Impfung', false, 'Zimmer 2'],
+        ['20004', -35, 'abrechnung', 4, 'Impfung', false, 'Zimmer 2', '68,50 \u20AC'],
+        ['20009', -55, 'abrechnung', 7, 'Schilddr\u00FCse, Kontrolle', false, 'Zimmer 1', '54,20 \u20AC'],
         ['20001', -20, 'wartezimmer', 34, 'Ohrenentz\u00FCndung, Nachkontrolle', false, ''],
         ['20012', -10, 'wartezimmer', 18, 'Frisst seit zwei Tagen nicht', false, ''],
         ['20006', 0, 'wartezimmer', 6, 'Schnittwunde an der Pfote', true, ''],
@@ -867,7 +939,6 @@ body {
         ['20008', 15, 'termin', 0, 'Blutabnahme', false, ''],
         ['20002', 30, 'termin', 0, 'Krallen schneiden', false, ''],
         ['20010', 45, 'termin', 0, 'Erstuntersuchung', false, ''],
-        ['20009', 60, 'termin', 0, 'Schilddr\u00FCse, Kontrolle', false, ''],
       ],
     };
 
@@ -1130,6 +1201,8 @@ body {
         minute: minuteOf(time),
         seit: changedOn === '' || dayKey(changedOn) === todayKey() ? minuteOf(readField(row, f.geaendertUm)) : null,
         foto: photoOf(customerNo, name),
+        // F\u00FCr den Betrag in der Abrechnung kennt die Maske noch kein Feld; nur die Beispieldaten haben einen.
+        betrag: row.BEISPIELBETRAG || '',
       };
     }
 
@@ -1485,6 +1558,7 @@ body {
         row[f.zimmer] = t[6];
         row[f.geaendertAm] = todayText();
         row[f.geaendertUm] = timeOfMinute(Math.max(0, now - t[3]));
+        row.BEISPIELBETRAG = t[7] || '';
         return row;
       });
     }
@@ -1653,40 +1727,43 @@ body {
       return searchText.split(/\s+/).map(plain).every(function (word) { return text.includes(word); });
     }
 
-    // Die Zahl rechts: Uhrzeit bei Terminen, sonst die Minuten in der Spalte.
+    // Die Angabe oben rechts: Uhrzeit, Wartezeit, Minuten im Zimmer oder Betrag.
     function valueOf(a) {
-      if (a.spalte === 'termin') return { gross: a.uhrzeit, klein: '', ton: isLate(a) ? 'warnen' : '' };
+      if (a.spalte === 'termin') return { text: a.uhrzeit, ton: isLate(a) ? 'warnen' : '' };
+      if (a.spalte === 'abrechnung' && a.betrag) return { text: a.betrag, ton: '' };
       const minutes = minutesSince(a);
-      if (minutes === null) return { gross: a.uhrzeit, klein: '', ton: '' };
-      return {
-        gross: minutes + ' min',
-        klein: a.spalte === 'abrechnung' ? a.letztesZimmer : '',
-        ton: a.spalte === 'wartezimmer' ? waitTone(minutes) : '',
-      };
+      if (minutes === null) return { text: a.uhrzeit, ton: 'leise' };
+      return { text: minutes + ' min', ton: a.spalte === 'wartezimmer' ? waitTone(minutes) : 'leise' };
     }
+
+    // Die eine Aktion im Fu\u00DF der Karte, je Spalte.
+    const AKTIONEN = { termin: 'Ins Wartezimmer', wartezimmer: 'Aufrufen', behandlung: 'Zur Abrechnung', abrechnung: 'Kassieren' };
 
     function photoHtml(a) {
       if (a.foto) return '<img class="foto" src="' + esc(a.foto) + '" alt="">';
       return '<span class="foto" aria-hidden="true">' + esc(a.name.charAt(0).toUpperCase()) + '</span>';
     }
 
-    function appointmentHtml(a) {
+    function cardHtml(a) {
       const value = valueOf(a);
-      const kind = [a.rasse || a.tierart, a.alter].filter(Boolean).join(', ');
+      const kind = a.rasse || a.tierart;
+      const origin = a.spalte === 'abrechnung' && a.letztesZimmer ? 'Aus ' + a.letztesZimmer : '';
       const reason = (a.notfall ? '<span class="dringend">Notfall</span> ' : '') + esc(a.behandlung);
-      return '<div class="termin' + (a.notfall ? ' notfall' : '') + '" tabindex="0" draggable="true" role="button" aria-haspopup="menu" data-id="' + esc(a.id) + '">'
+      return '<article class="karte" tabindex="0" draggable="true" aria-haspopup="menu" data-id="' + esc(a.id) + '">'
+        + '<div class="karte-kopf">'
         + photoHtml(a)
         + '<div>'
-        + '<p class="termin-name">' + esc(a.name) + '</p>'
-        + (kind ? '<p class="termin-zeile">' + esc(kind) + '</p>' : '')
-        + (a.besitzer ? '<p class="termin-zeile">' + esc(a.besitzer) + '</p>' : '')
-        + (reason ? '<p class="termin-zeile termin-grund">' + reason + '</p>' : '')
+        + '<p class="karte-name">' + esc(a.name) + (kind ? '<span class="karte-art">' + esc(kind) + '</span>' : '') + '</p>'
+        + (a.besitzer ? '<p class="karte-besitzer">' + esc(a.besitzer) + '</p>' : '')
         + '</div>'
-        + '<div class="termin-wert">'
-        + '<p class="termin-zahl zahl ' + value.ton + '">' + esc(value.gross) + '</p>'
-        + (value.klein ? '<p class="leise">' + esc(value.klein) + '</p>' : '')
+        + '<p class="karte-wert zahl ' + value.ton + '">' + esc(value.text) + '</p>'
         + '</div>'
-        + '</div>';
+        + (reason ? '<p class="karte-grund">' + reason + '</p>' : '')
+        + '<div class="karte-fuss">'
+        + '<span class="leise">' + esc(origin) + '</span>'
+        + '<button class="knopf knopf-klein" type="button" tabindex="-1" data-aktion>' + AKTIONEN[a.spalte] + '</button>'
+        + '</div>'
+        + '</article>';
     }
 
     // Die eingestellten Zimmer, dazu jedes unbekannte, in dem gerade jemand ist.
@@ -1704,8 +1781,8 @@ body {
         return '<section class="zimmer" data-ziel="behandlung" data-zimmer="' + esc(room.name) + '">'
           + '<header class="zimmer-kopf"><h3>' + esc(room.name)
           + (room.zusatz ? '<span class="zimmer-zusatz">' + esc(room.zusatz) + '</span>' : '') + '</h3>'
-          + (busy ? '' : '<span class="frei">frei</span>') + '</header>'
-          + shown.filter(function (a) { return a.zimmer === room.name; }).map(appointmentHtml).join('')
+          + '<span class="leise">' + (busy ? 'Belegt' : 'Frei') + '</span></header>'
+          + shown.filter(function (a) { return a.zimmer === room.name; }).map(cardHtml).join('')
           + '</section>';
       }).join('');
     }
@@ -1714,50 +1791,44 @@ body {
       return roomsOf(all).filter(function (room) { return !all.some(function (a) { return a.zimmer === room.name; }); });
     }
 
-    function overviewHtml(spalte, all) {
-      if (spalte === 'termin') {
-        const late = all.filter(isLate).length;
-        return late > 0 ? '<span class="warnen">' + late + ' versp\u00E4tet</span>' : '';
-      }
-      if (spalte === 'wartezimmer') {
-        const longest = all.reduce(function (max, a) { const m = minutesSince(a); return m !== null && m > max ? m : max; }, -1);
-        return longest < 0 ? '' : 'l\u00E4ngste <span class="' + (waitTone(longest) || 'neben') + '">' + longest + ' min</span>';
-      }
-      if (spalte === 'behandlung') {
-        const free = freeRooms(all).length;
-        return free === 0 ? 'alle Zimmer belegt' : '<span class="frei">' + free + ' Zimmer frei</span>';
-      }
-      return '';
-    }
-
     function render() {
       if (dragId !== null || menu.forId !== null) {
         renderLater = true;
         return;
       }
       renderLater = false;
-      const focused = document.activeElement && document.activeElement.classList.contains('termin') ? document.activeElement.dataset.id : null;
+      const focused = document.activeElement && document.activeElement.classList.contains('karte') ? document.activeElement.dataset.id : null;
+      const count = {};
       SPALTEN.forEach(function (spalte) {
         const all = appointments.filter(function (a) { return a.spalte === spalte; });
         const shown = all.filter(matchesSearch);
-        document.getElementById('inhalt-' + spalte).innerHTML = spalte === 'behandlung' ? treatmentHtml(all, shown) : shown.map(appointmentHtml).join('');
+        count[spalte] = all;
+        document.getElementById('inhalt-' + spalte).innerHTML = spalte === 'behandlung' ? treatmentHtml(all, shown) : shown.map(cardHtml).join('');
         document.getElementById('zahl-' + spalte).textContent = String(all.length);
-        document.getElementById('uebersicht-' + spalte).innerHTML = overviewHtml(spalte, all);
       });
+      const rooms = roomsOf(count.behandlung);
+      document.getElementById('kennzahl-termin').textContent = String(count.termin.length);
+      document.getElementById('kennzahl-wartezimmer').textContent = String(count.wartezimmer.length);
+      document.getElementById('kennzahl-zimmer').textContent = (rooms.length - freeRooms(count.behandlung).length) + ' / ' + rooms.length;
+      document.getElementById('kennzahl-abrechnung').textContent = String(count.abrechnung.length);
       if (focused !== null) {
-        const row = rowOf(focused);
-        if (row) row.focus();
+        const card = cardOf(focused);
+        if (card) card.focus();
       }
     }
 
-    function rowOf(id) {
-      return tafel.querySelector('.termin[data-id="' + CSS.escape(id) + '"]');
+    function cardOf(id) {
+      return tafel.querySelector('.karte[data-id="' + CSS.escape(id) + '"]');
+    }
+
+    function appointmentById(id) {
+      return appointments.find(function (a) { return a.id === id; }) || null;
     }
 
     function showConnection() {
       const el = document.getElementById('verbindung');
       if (beispiel) {
-        el.className = 'leise';
+        el.className = '';
         el.textContent = 'Beispieldaten';
       } else if (loadedRows === null) {
         el.className = 'warnen';
@@ -1769,11 +1840,11 @@ body {
 
     function showClock() {
       document.getElementById('uhr').textContent = timeOfMinute(nowMinute());
-      document.getElementById('datum').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      document.getElementById('datum').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
     }
 
     // ---------------------------------------------------------------------
-    //  Verschieben: \u00FCber das Men\u00FC einer Zeile oder durch Ziehen
+    //  Verschieben: Aktion der Karte, Men\u00FC oder Ziehen
     // ---------------------------------------------------------------------
     function moveTo(id, target) {
       const a = appointments.find(function (item) { return item.id === id; });
@@ -1788,11 +1859,11 @@ body {
       }
       if (a.spalte === target.spalte && (target.spalte !== 'behandlung' || a.zimmer === target.zimmer)) return;
       if (a.record === '') {
-        toast(a.name + ': Satznummer fehlt, nicht gespeichert', true);
+        showError(a.name + ': Satznummer fehlt, nicht gespeichert');
         return;
       }
       if (!writeField(a.record, CONFIG.felder.status, CONFIG.status[target.spalte])) {
-        toast('Keine Verbindung zu SoftEngine, nicht gespeichert', true);
+        showError('Keine Verbindung zu SoftEngine, nicht gespeichert');
         return;
       }
       // Das Zimmer bleibt im Feld stehen, f\u00FCr "Zimmer 2" in der Abrechnung.
@@ -1805,21 +1876,18 @@ body {
       a.letztesZimmer = a.zimmer || a.letztesZimmer;
       a.seit = nowMinute();
       pending.set(a.id, { spalte: a.spalte, zimmer: a.zimmer, letztesZimmer: a.letztesZimmer, seit: a.seit, until: Date.now() + PENDING_MS });
-      const where = { termin: 'zur\u00FCck zu den Terminen', wartezimmer: 'im Wartezimmer', behandlung: 'in ' + a.zimmer, abrechnung: 'zur Abrechnung' };
-      toast(a.name + ' ' + where[a.spalte]);
       render();
       requestFreshData();
     }
 
     function checkout(a) {
       if (a.record === '' || !writeField(a.record, CONFIG.felder.status, CONFIG.status.fertig)) {
-        toast('Keine Verbindung zu SoftEngine, nicht gespeichert', true);
+        showError('Keine Verbindung zu SoftEngine, nicht gespeichert');
         return;
       }
       if (CONFIG.kassenWerkzeug !== '') send('START_TOOL', { NR: CONFIG.kassenWerkzeug });
       pending.set(a.id, { spalte: 'fertig', zimmer: null, letztesZimmer: a.letztesZimmer, seit: nowMinute(), until: Date.now() + PENDING_MS });
       appointments = appointments.filter(function (item) { return item.id !== a.id; });
-      toast(a.name + ' kassiert');
       render();
       requestFreshData();
     }
@@ -1829,7 +1897,7 @@ body {
       const all = appointments.filter(function (item) { return item.spalte === 'behandlung'; });
       const free = freeRooms(all);
       const targets = [];
-      if (a.spalte !== 'termin') targets.push({ spalte: 'termin', text: 'Termine' });
+      if (a.spalte !== 'termin') targets.push({ spalte: 'termin', text: 'Nicht zugewiesen' });
       if (a.spalte !== 'wartezimmer') targets.push({ spalte: 'wartezimmer', text: 'Wartezimmer', next: a.spalte === 'termin' });
       roomsOf(all).forEach(function (room) {
         if (a.spalte === 'behandlung' && a.zimmer === room.name) return;
@@ -1838,27 +1906,28 @@ body {
           spalte: 'behandlung',
           zimmer: room.name,
           text: room.name,
-          zusatz: inside.length > 0 ? inside.join(', ') : 'frei',
-          ton: inside.length > 0 ? 'leise' : 'frei',
+          zusatz: inside.length > 0 ? inside.join(', ') : 'Frei',
+          ton: inside.length > 0 ? 'leise' : 'neben',
           next: a.spalte === 'wartezimmer' && free.length > 0 && free[0].name === room.name,
         });
       });
       if (a.spalte !== 'abrechnung') targets.push({ spalte: 'abrechnung', text: 'Abrechnung', next: a.spalte === 'behandlung' });
-      if (a.spalte === 'abrechnung') targets.push({ spalte: 'fertig', text: 'Kassiert', next: true });
+      if (a.spalte === 'abrechnung') targets.push({ spalte: 'fertig', text: 'Kassieren', next: true });
       return targets;
     }
 
     const menuEl = document.getElementById('menue');
     const menu = { forId: null, targets: [] };
 
-    function openMenu(row, point) {
-      const a = appointments.find(function (item) { return item.id === row.dataset.id; });
+    // Das Men\u00FC einer Karte: alle Ziele, oder beim Aufrufen nur die Zimmer.
+    function openMenu(row, point, onlyRooms) {
+      const a = appointmentById(row.dataset.id);
       if (!a) return;
       closeMenu(false);
       menu.forId = a.id;
-      menu.targets = targetsOf(a);
+      menu.targets = targetsOf(a).filter(function (t) { return !onlyRooms || t.spalte === 'behandlung'; });
       menuEl.innerHTML = '<p class="menue-titel">' + esc(a.name) + '</p>' + menu.targets.map(function (t, i) {
-        return '<button class="menue-eintrag" type="button" role="menuitem" data-i="' + i + '">'
+        return '<button class="menue-eintrag' + (t.next ? ' standard' : '') + '" type="button" role="menuitem" data-i="' + i + '">'
           + '<span>' + esc(t.text) + '</span>'
           + (t.zusatz ? '<span class="' + t.ton + '">' + esc(t.zusatz) + '</span>' : '')
           + '</button>';
@@ -1883,7 +1952,7 @@ body {
       menu.forId = null;
       menuEl.hidden = true;
       menuEl.innerHTML = '';
-      const row = rowOf(id);
+      const row = cardOf(id);
       if (row) {
         row.classList.remove('offen');
         if (refocus) row.focus();
@@ -1924,13 +1993,26 @@ body {
     window.addEventListener('resize', function () { closeMenu(false); });
     tafel.addEventListener('scroll', function () { closeMenu(false); }, true);
 
+    // Die Aktion im Fu\u00DF f\u00FChrt den n\u00E4chsten Schritt aus; ein Klick sonst auf die Karte \u00F6ffnet das Men\u00FC.
+    const NAECHSTE = { termin: 'wartezimmer', behandlung: 'abrechnung', abrechnung: 'fertig' };
+
     tafel.addEventListener('click', function (e) {
-      const row = e.target.closest('.termin');
-      if (row) openMenu(row, { x: e.clientX, y: e.clientY });
+      const card = e.target.closest('.karte');
+      if (!card) return;
+      const button = e.target.closest('[data-aktion]');
+      const a = appointmentById(card.dataset.id);
+      if (!button || !a) {
+        openMenu(card, { x: e.clientX, y: e.clientY });
+      } else if (a.spalte === 'wartezimmer') {
+        const box = button.getBoundingClientRect();
+        openMenu(card, { x: box.left, y: box.bottom + 4 }, true);
+      } else {
+        moveTo(a.id, { spalte: NAECHSTE[a.spalte] });
+      }
     });
 
     tafel.addEventListener('contextmenu', function (e) {
-      const row = e.target.closest('.termin');
+      const row = e.target.closest('.karte');
       if (!row) return;
       e.preventDefault();
       openMenu(row, { x: e.clientX, y: e.clientY });
@@ -1938,7 +2020,7 @@ body {
 
     // Tastatur: Enter \u00F6ffnet das Men\u00FC, die Pfeiltasten gehen von Zeile zu Zeile und von Spalte zu Spalte.
     tafel.addEventListener('keydown', function (e) {
-      const row = e.target.closest('.termin');
+      const row = e.target.closest('.karte');
       if (!row || e.target !== row) return;
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'ContextMenu') {
         e.preventDefault();
@@ -1947,7 +2029,7 @@ body {
       }
       if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
       e.preventDefault();
-      const lanes = SPALTEN.map(function (spalte) { return Array.from(document.getElementById('inhalt-' + spalte).querySelectorAll('.termin')); });
+      const lanes = SPALTEN.map(function (spalte) { return Array.from(document.getElementById('inhalt-' + spalte).querySelectorAll('.karte')); });
       const lane = lanes.findIndex(function (rows) { return rows.includes(row); });
       const index = lanes[lane].indexOf(row);
       let next = null;
@@ -1972,7 +2054,7 @@ body {
     }
 
     tafel.addEventListener('dragstart', function (e) {
-      const row = e.target.closest('.termin');
+      const row = e.target.closest('.karte');
       if (!row) return;
       closeMenu(false);
       dragId = row.dataset.id;
@@ -2015,23 +2097,41 @@ body {
     });
 
     // ---------------------------------------------------------------------
-    //  Neuer Termin
+    //  Termin anlegen: die Seitenleiste rechts
     // ---------------------------------------------------------------------
-    const dialog = document.getElementById('dialog');
+    const sidebar = document.getElementById('seitenleiste');
+    const sidebarButton = document.getElementById('terminAnlegen');
     const ownerInput = document.getElementById('besitzer');
     const ownerList = document.getElementById('besitzerListe');
     const form = { customer: null, hits: [], active: -1, creating: false };
+    const SEITENLEISTE_MERKEN = 'empfang-seitenleiste';
 
-    function openDialog() {
-      closeMenu(false);
+    function resetForm() {
       document.getElementById('formular').reset();
       form.customer = null;
       document.getElementById('uhrzeit').value = nextQuarterHour();
       showHits([]);
       showPets();
-      dialog.showModal();
-      ownerInput.focus();
+    }
+
+    // \u00D6ffnen und Schlie\u00DFen von Hand merkt sich dieser Rechner; ohne Merkwert ist sie bei breitem Bildschirm offen.
+    function showSidebar(open, byHand) {
+      sidebar.hidden = !open;
+      sidebarButton.setAttribute('aria-expanded', String(open));
+      if (byHand) {
+        try { localStorage.setItem(SEITENLEISTE_MERKEN, open ? '1' : '0'); } catch (e) { /* ohne Speicher */ }
+      }
+      if (!open) return;
       if (lookup.customers === null) loadLookup();
+      if (byHand) ownerInput.focus();
+    }
+
+    function sidebarWanted() {
+      try {
+        const saved = localStorage.getItem(SEITENLEISTE_MERKEN);
+        if (saved !== null) return saved === '1';
+      } catch (e) { /* ohne Speicher */ }
+      return window.innerWidth >= 1600;
     }
 
     function customerHits(text) {
@@ -2154,7 +2254,10 @@ body {
       }
     });
 
-    document.getElementById('abbrechen').addEventListener('click', function () { dialog.close(); });
+    document.getElementById('schliessen').addEventListener('click', function () {
+      showSidebar(false, true);
+      sidebarButton.focus();
+    });
 
     document.getElementById('formular').addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -2165,22 +2268,22 @@ body {
         ? { name: document.getElementById('tierName').value.trim(), art: document.getElementById('tierArt').value.trim(), rasse: document.getElementById('tierRasse').value.trim(), geburtsdatum: '' }
         : null;
       if (ownerText === '') {
-        toast('Besitzer fehlt', true);
+        showError('Besitzer fehlt');
         ownerInput.focus();
         return;
       }
       if (fresh && fresh.name === '') {
-        toast('Name des Tiers fehlt', true);
+        showError('Name des Tiers fehlt');
         document.getElementById('tierName').focus();
         return;
       }
       const pets = chosen.concat(fresh ? [fresh] : []);
       if (pets.length === 0) {
-        toast('Kein Tier gew\u00E4hlt', true);
+        showError('Kein Tier gew\u00E4hlt');
         return;
       }
       if (!beispiel && !hasSoftEngine()) {
-        toast('Keine Verbindung zu SoftEngine, Termin nicht angelegt', true);
+        showError('Keine Verbindung zu SoftEngine, Termin nicht angelegt');
         return;
       }
       const customer = form.customer;
@@ -2196,7 +2299,7 @@ body {
       for (const pet of pets) {
         const record = await createRecord();
         if (record === null) {
-          toast('Termin nicht angelegt: keine Satznummer von SoftEngine', true);
+          showError('Termin nicht angelegt: keine Satznummer von SoftEngine');
           break;
         }
         [
@@ -2217,8 +2320,8 @@ body {
       }
       setCreating(false);
       if (made === 0) return;
-      dialog.close();
-      toast(made === 1 ? 'Termin f\u00FCr ' + pets[0].name + ' angelegt' : made + ' Termine angelegt');
+      resetForm();
+      ownerInput.focus();
       requestFreshData();
     });
 
@@ -2226,21 +2329,22 @@ body {
       form.creating = on;
       const button = document.getElementById('anlegen');
       button.disabled = on;
-      button.textContent = on ? 'Wird angelegt' : 'Anlegen';
+      button.textContent = on ? 'Wird eingetragen' : 'Eintragen';
     }
 
     // ---------------------------------------------------------------------
-    //  Meldungen und Start
+    //  Fehler melden und Start
     // ---------------------------------------------------------------------
-    function toast(text, error) {
+    // Gemeldet wird nur, was schiefging: eine Zeile, nach f\u00FCnf Sekunden weg.
+    function showError(text) {
       const el = document.createElement('div');
-      el.className = 'meldung' + (error ? ' fehler' : '');
+      el.className = 'meldung fehler';
       el.textContent = text;
       document.getElementById('meldungen').appendChild(el);
       setTimeout(function () {
         el.classList.add('weg');
         setTimeout(function () { el.remove(); }, 300);
-      }, error ? 5000 : 2500);
+      }, 5000);
     }
 
     document.getElementById('suche').addEventListener('input', function (e) {
@@ -2248,12 +2352,15 @@ body {
       render();
     });
 
-    document.getElementById('neuerTermin').addEventListener('click', openDialog);
+    sidebarButton.addEventListener('click', function () { showSidebar(sidebar.hidden, true); });
 
     window.addEventListener('load', function () {
       beispiel = !hasSoftEngine() && typeof window.basisHTML_REGISTER !== 'function' && !(window.SEDATA && window.SEDATA.Daten);
+      document.getElementById('praxis').textContent = CONFIG.praxis;
       showClock();
       showConnection();
+      resetForm();
+      showSidebar(sidebarWanted(), false);
       if (beispiel) {
         sample.rows = sampleRows();
         window.SEDATA = { Daten: { SEFileLoop: [{ ALIAS: CONFIG.quelle, Zeilen: sample.rows }] } };
