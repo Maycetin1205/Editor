@@ -1,4 +1,5 @@
 import { MASK_ROOT_CLASS } from '../core/block/frameFit'
+import { unreadChains } from '../core/data/steps/chainsRead'
 
 const BRIDGE_PATH = '<!--SOFTENGINE-VAR!EditorPfad-->/JS/JS/basis.html.interface.js'
 export const BRIDGE_SCRIPT = `<script src="${BRIDGE_PATH}"></script>`
@@ -9,6 +10,17 @@ interface CheckResult {
   detail: string
 
   warning?: boolean
+}
+
+// An attribute value as the browser hands it over; undoes htmlAttr.
+function attrText(raw: string): string {
+  return raw
+    .replace(/&#x([0-9A-F]+);/gi, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(Number(dec)))
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
 }
 
 export function validateMaskHtml(html: string): CheckResult[] {
@@ -45,6 +57,11 @@ export function validateMaskHtml(html: string): CheckResult[] {
 
   const foreign = scripts.filter((src) => src !== BRIDGE_PATH)
   check('kein fremdes Skript', foreign.length === 0, foreign.join(', '))
+
+  const silent = [...html.matchAll(/\sdata-ff-actions=(?:'([^']*)'|"([^"]*)")/g)].flatMap((hit) =>
+    unreadChains(attrText(hit[1] ?? hit[2] ?? '')),
+  )
+  check('Ablaeufe lesbar', silent.length === 0, silent.join(', '))
 
   check('DOCTYPE vorhanden', html.includes('<!DOCTYPE html>'))
   check('Wurzel-Fluss vorhanden', html.includes(`class="${MASK_ROOT_CLASS}"`))

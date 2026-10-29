@@ -4,38 +4,51 @@ import { isUnread } from '../../unread'
 import { conditionRead } from './stepAdapter'
 import { isStepKind, stepAdapter, type RuntimeStep, type Step } from './steps'
 
+function parsedChains(raw: string | null): Record<string, unknown> | null {
+  if (!raw) return null
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    return isUnread<Record<string, unknown>>(parsed) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+// A chain with one step it cannot read is no chain at all.
+function chainRead(chain: readonly unknown[]): RuntimeStep[] | null {
+  const steps: RuntimeStep[] = []
+  for (const entry of chain) {
+    const step =
+      isUnread<RuntimeStep>(entry) &&
+      typeof entry.kind === 'string' &&
+      isStepKind(entry.kind) &&
+      typeof entry.resultName === 'string'
+        ? stepAdapter(entry.kind).readExported(entry, entry.resultName)
+        : null
+    if (!step) return null
+    steps.push({ ...step, ...(isUnread<RuntimeStep>(entry) ? conditionRead(entry.onlyIf) : {}) })
+  }
+  return steps
+}
+
 // The action chains as the exported mask carries them in data-ff-actions.
 export function chainsRead(raw: string | null): Record<string, RuntimeStep[]> {
-  if (!raw) return {}
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(raw)
-  } catch {
-    return {}
-  }
-  if (!isUnread<Record<string, RuntimeStep[]>>(parsed)) return {}
   const out: Record<string, RuntimeStep[]> = {}
-  for (const [key, chain] of Object.entries(parsed)) {
+  for (const [key, chain] of Object.entries(parsedChains(raw) ?? {})) {
     if (!Array.isArray(chain) || chain.length === 0) continue
-    const steps: RuntimeStep[] = []
-    let broken = false
-    for (const entry of chain) {
-      const step =
-        isUnread<RuntimeStep>(entry) &&
-        typeof entry.kind === 'string' &&
-        isStepKind(entry.kind) &&
-        typeof entry.resultName === 'string'
-          ? stepAdapter(entry.kind).readExported(entry, entry.resultName)
-          : null
-      if (!step) {
-        broken = true
-        break
-      }
-      steps.push({ ...step, ...(isUnread<RuntimeStep>(entry) ? conditionRead(entry.onlyIf) : {}) })
-    }
-    if (!broken && steps.length > 0) out[key] = steps
+    const steps = chainRead(chain)
+    if (steps) out[key] = steps
   }
   return out
+}
+
+// The events whose chain the runtime would drop: the mask stays silent there.
+export function unreadChains(raw: string): string[] {
+  const parsed = parsedChains(raw)
+  if (!parsed) return ['*']
+  return Object.entries(parsed)
+    .filter(([, chain]) => !Array.isArray(chain) || (chain.length > 0 && chainRead(chain) === null))
+    .map(([key]) => key)
 }
 
 interface RowsReference {

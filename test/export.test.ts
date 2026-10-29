@@ -122,3 +122,19 @@ describe('exportMask', () => {
     expect(html).not.toContain('<nope')
   })
 })
+
+describe('validator on action chains', () => {
+  const button = (step: object) =>
+    `<ff-button data-ff-actions='${JSON.stringify({ onClick: [step] }).replace(/'/g, '&#39;')}'></ff-button>`
+  const unread = (html: string) => validateMaskHtml(html).find((r) => r.name === 'Ablaeufe lesbar')
+
+  it('names an event whose chain the runtime would drop', () => {
+    const html = button({ kind: 'RELATION', resultName: '', relationId: 'r', parameter: [] })
+    expect(unread(html)).toMatchObject({ ok: false, detail: 'onClick' })
+  })
+
+  it('passes a chain it can read', () => {
+    const html = button({ kind: 'RELATION', resultName: '', relationId: 'r', parameter: [], extraParameter: [] })
+    expect(unread(html)).toMatchObject({ ok: true })
+  })
+})
