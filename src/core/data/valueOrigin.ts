@@ -13,7 +13,7 @@ export type ValueOrigin =
   | { kind: 'sum'; blockId: string; value: string }
   | { kind: 'captured'; blockId: string; value: string }
   | { kind: 'changed'; blockId: string; value: string }
-  | { kind: 'split'; blockId: string; value: string; pick?: number }
+  | { kind: 'split'; blockId: string; value: string }
   | { kind: 'step'; stepId: string; field?: string }
   | { kind: 'previous' }
   | { kind: 'variable'; value: string }
@@ -37,12 +37,7 @@ export function parameterOrigin(p: Parameter): ValueOrigin | null {
     case 'changeCell':
       return { kind: 'changed', blockId: p.blockId ?? '', value: p.value }
     case 'splitCell':
-      return {
-        kind: 'split',
-        blockId: p.blockId ?? '',
-        value: p.value,
-        ...(p.pick === undefined ? {} : { pick: p.pick }),
-      }
+      return { kind: 'split', blockId: p.blockId ?? '', value: p.value }
     case 'stepResult':
       return { kind: 'step', stepId: p.value, ...(p.resultField ? { field: p.resultField } : {}) }
     case 'previousResult':
@@ -71,12 +66,7 @@ export function originParameter(o: ValueOrigin): Parameter | null {
     case 'changed':
       return { source: 'changeCell', blockId: o.blockId, value: o.value }
     case 'split':
-      return {
-        source: 'splitCell',
-        blockId: o.blockId,
-        value: o.value,
-        ...(o.pick === undefined ? {} : { pick: o.pick }),
-      }
+      return { source: 'splitCell', blockId: o.blockId, value: o.value }
     case 'step':
       return { source: 'stepResult', value: o.stepId, ...(o.field ? { resultField: o.field } : {}) }
     case 'previous':

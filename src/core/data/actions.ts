@@ -50,10 +50,6 @@ export interface Parameter {
   blockId?: string
 
   resultField?: string
-
-  // splitCell only: which distributed row (0 = first) the place reads. Without
-  // it the step runs once for every distributed row.
-  pick?: number
 }
 
 export const RECORD_PLACEHOLDER = ['PINDEX', 'DROP_PINDEX'] as const
@@ -83,8 +79,6 @@ export interface RuntimeValues {
   rowsCell?: (blockId: string, columnsIndex: number) => string
 
   pick?: PickValues
-
-  picks?: readonly PickValues[]
 }
 
 export function checkParameterBinding(raw: unknown): Parameter | null {
@@ -98,8 +92,6 @@ export function checkParameterBinding(raw: unknown): Parameter | null {
   if (raw.sourceId !== undefined && typeof raw.sourceId !== 'string') return null
   if (raw.blockId !== undefined && typeof raw.blockId !== 'string') return null
   if (raw.resultField !== undefined && typeof raw.resultField !== 'string') return null
-  const pick =
-    raw.source === 'splitCell' && Number.isInteger(raw.pick) && Number(raw.pick) >= 0 ? Number(raw.pick) : null
   return {
     source: raw.source as ParameterSource,
     value: raw.value,
@@ -107,6 +99,5 @@ export function checkParameterBinding(raw: unknown): Parameter | null {
     ...(typeof raw.blockId === 'string' ? { blockId: raw.blockId } : {}),
 
     ...(raw.source === 'stepResult' && typeof raw.resultField === 'string' ? { resultField: raw.resultField } : {}),
-    ...(pick === null ? {} : { pick }),
   }
 }

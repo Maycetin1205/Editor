@@ -162,8 +162,6 @@ export interface CaptureCarrier {
   capturedRows: readonly (readonly string[])[]
   capturedKey: readonly string[]
   capturedPicks: readonly (readonly CapturedPick[])[]
-  // The source the picks are distributed from; '' without a split.
-  pickSource: string
 
   capturedColumn: (key: string) => readonly string[]
 }

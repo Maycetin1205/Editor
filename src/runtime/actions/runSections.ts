@@ -33,7 +33,6 @@ function rowsOfList(carrier: RowsCarrier, kind: PendingKind): ListRun | undefine
           key: capture.capturedKey[slot] ?? String(slot),
           values,
           picks: capture.capturedPicks[slot] ?? [],
-          pickedFrom: capture.pickSource,
         })),
         open: (key) => capture.capturedKey.includes(key),
       }
@@ -101,7 +100,6 @@ async function runRows(
         transcript,
         row.key,
         row.picks,
-        row.pickedFrom,
       )
     } catch (error) {
       list.report.rowFailed(section.kind, row.key)

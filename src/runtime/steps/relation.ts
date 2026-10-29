@@ -1,11 +1,10 @@
 import { readDeclared } from '../../core/block/registry'
 import { SOURCE_PROPERTY } from '../../core/block/sharedProperties'
 import { BLOCK_ID_ATTR, COLUMN_PARAM_SOURCES, RECORD_PLACEHOLDER, type Parameter } from '../../core/data/actions'
-import { NO_CONFIRMATION, TOO_MANY_PICKS, type PutConfirm } from '../../core/data/jobs'
+import { NO_CONFIRMATION, type PutConfirm } from '../../core/data/jobs'
 import { POSITION_DELETE_NR, positionsConfirm, type PositionsWrite } from '../../core/data/positions'
 import type { RuntimeRelation } from '../../core/data/relations'
 import type { RuntimeRelationStep } from '../../core/data/steps/relation'
-import { spreadParams } from '../../core/data/steps/spread'
 import type { StepRun, StepRunner } from './stepRunner'
 
 function sourceOfBlock(el: Element | undefined): string {
@@ -61,11 +60,7 @@ export const relationRunner: StepRunner<RuntimeRelationStep> = {
     )
     if (missingAnswer) return { failed: true, reason: NO_CONFIRMATION }
 
-    const picks = run.parameterValues.picks ?? []
-    if (step.spread && picks.length > step.spread.rows) return { failed: true, reason: TOO_MANY_PICKS }
-
-    const resolved = bindings.map((binding) => run.host.resolveParameter(binding, run.parameterValues))
-    const params = step.spread ? spreadParams(resolved, template.parameter, step.spread, picks) : resolved
+    const params = bindings.map((binding) => run.host.resolveParameter(binding, run.parameterValues))
     const sendOnly = template.verb !== 'GET_RELATION' && run.lastForRow
     const confirm = sendOnly ? undefined : putConfirm(template, params, bindings, run)
     const answer = await run.host.runRelation(template, params, {
