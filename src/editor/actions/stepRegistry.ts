@@ -2,7 +2,7 @@ import type { StepKind } from '../../core/data/steps/steps'
 import { confirmSummary, confirmTab } from './confirmStep'
 import type { StepSummary, StepTab, StepTabDef } from './stepTypes'
 import { popupCloseSummary, popupOpenSummary, popupTab } from './popupStep'
-import { getTab, putAddTab, putTab, relationSummary } from './relationStep'
+import { getTab, putTab, relationSummary } from './relationStep'
 import { startToolSummary, toolTab } from './startToolStep'
 
 export type { StepContext, StepTab } from './stepTypes'
@@ -18,7 +18,6 @@ const STEP_SUMMARIES: { [K in StepKind]: StepSummary<K> } = {
 const TABS: { [T in StepTab]: StepTabDef } = {
   GET: getTab,
   PUT: putTab,
-  PUTADD: putAddTab,
   TOOL: toolTab,
   POPUP: popupTab,
   ASK: confirmTab,

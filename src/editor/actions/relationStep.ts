@@ -1,15 +1,23 @@
 import type { ComponentType } from 'react'
 import type { RelationTemplate, RelationVerb } from '../../core/data/relations'
 import type { RelationStep } from '../../core/data/steps/relation'
-import { GetRelationBody, PutAddRelationBody, PutRelationBody } from './RelationBody'
+import { GetRelationBody, PutRelationBody } from './RelationBody'
 import type { StepBodyProps, StepContext, StepSummary, StepTab, StepTabDef } from './stepTypes'
 
-// Short form of the verb; it is also the key of the verb's tab.
-const VERB_SHORT = {
+const VERB_SHORT: Record<RelationVerb, string> = {
   GET_RELATION: 'GET',
   PUT_RELATION: 'PUT',
   PUTADD_RELATION: 'PUTADD',
-} as const satisfies Record<RelationVerb, StepTab>
+}
+
+// The verbs a mask can send, each with its tab. SoftEngine drops a
+// PUTADD_RELATION from a mask without a word; only its formulas may add.
+const VERB_TAB = {
+  GET_RELATION: 'GET',
+  PUT_RELATION: 'PUT',
+} as const satisfies Partial<Record<RelationVerb, StepTab>>
+
+type MaskVerb = keyof typeof VERB_TAB
 
 const emptyRelation = (id: string): RelationStep => ({
   id,
@@ -29,13 +37,12 @@ export const relationSummary: StepSummary<'RELATION'> = {
     return { words: t?.name ?? 'Relation', short: t ? `${VERB_SHORT[t.verb]} ${t.nr}` : '', known: t !== undefined }
   },
   tab(step, context) {
-    const t = templateOf(step, context)
-    return t ? VERB_SHORT[t.verb] : 'PUT'
+    return templateOf(step, context)?.verb === 'GET_RELATION' ? 'GET' : 'PUT'
   },
 }
 
-function relationTab(verb: RelationVerb, Body: ComponentType<StepBodyProps>): StepTabDef {
-  const key = VERB_SHORT[verb]
+function relationTab(verb: MaskVerb, Body: ComponentType<StepBodyProps>): StepTabDef {
+  const key = VERB_TAB[verb]
   return {
     key,
     name: `${key} Relation`,
@@ -50,4 +57,3 @@ function relationTab(verb: RelationVerb, Body: ComponentType<StepBodyProps>): St
 
 export const getTab = relationTab('GET_RELATION', GetRelationBody)
 export const putTab = relationTab('PUT_RELATION', PutRelationBody)
-export const putAddTab = relationTab('PUTADD_RELATION', PutAddRelationBody)

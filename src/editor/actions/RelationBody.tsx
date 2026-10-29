@@ -26,10 +26,6 @@ export function PutRelationBody(props: StepBodyProps) {
   return <RelationTab verb="PUT_RELATION" {...props} />
 }
 
-export function PutAddRelationBody(props: StepBodyProps) {
-  return <RelationTab verb="PUTADD_RELATION" {...props} />
-}
-
 function RelationTab({ verb, step, context, reach, onChange }: StepBodyProps & { verb: RelationVerb }) {
   if (step.kind !== 'RELATION') return null
   return (
