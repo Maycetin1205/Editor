@@ -79,6 +79,7 @@
   --rund: 9999px;
   --schatten-anheben: 0 6px 16px -4px rgb(15 23 42 / 0.06), 0 2px 4px -1px rgb(15 23 42 / 0.03);
   --schatten-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --schatten-fenster: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   --ring-ablage: 0 0 0 2px rgb(15 118 110 / 0.15);
   --abdunkeln: rgb(15 23 42 / 0.3);
 
@@ -89,7 +90,7 @@
   --symbol: 0.875rem;
   --symbol-gross: 1rem;
   --karte-hoehe: 9.5rem;
-  --lade: 335px;
+  --fenster: 520px;
   --tafel-breite: 1020px;
 }
 
@@ -876,39 +877,42 @@ ul {
   outline: none;
 }
 
-/* Lade von rechts \FC ber der Seite */
-.lade {
+/* Fenster in der Mitte \FC ber der Seite; die Seite darunter bleibt, wie sie ist */
+.fenster {
   position: fixed;
-  inset: 0 0 0 auto;
-  width: var(--lade);
-  max-width: 100vw;
-  height: 100%;
-  max-height: 100%;
-  margin: 0;
+  inset: 0;
+  width: var(--fenster);
+  max-width: calc(100vw - 2rem);
+  height: fit-content;
+  max-height: 90vh;
+  margin: auto;
   padding: 0;
-  border: 0;
-  border-left: 1px solid var(--slate-200);
+  overflow: hidden;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-xl);
   background: var(--weiss);
   color: var(--slate-900);
+  box-shadow: var(--schatten-fenster);
 }
 
-.lade[open] {
+.fenster[open] {
   display: flex;
   flex-direction: column;
-  animation: lade-rein 180ms ease-out;
+  animation: fenster-rein 160ms ease-out;
 }
 
-.lade::backdrop {
+.fenster::backdrop {
   background: var(--abdunkeln);
 }
 
-.lade[open]::backdrop {
-  animation: abdunkeln-rein 180ms ease-out;
+.fenster[open]::backdrop {
+  animation: abdunkeln-rein 160ms ease-out;
 }
 
-@keyframes lade-rein {
+@keyframes fenster-rein {
   from {
-    transform: translateX(100%);
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
   }
 }
 
@@ -918,7 +922,7 @@ ul {
   }
 }
 
-.lade-kopf {
+.fenster-kopf {
   display: flex;
   flex: none;
   align-items: center;
@@ -928,7 +932,7 @@ ul {
   background: rgb(248 250 252 / 0.6);
 }
 
-.lade-titel {
+.fenster-titel {
   color: var(--slate-900);
   font-family: var(--schrift-titel);
   font-size: var(--text-14);
@@ -936,7 +940,7 @@ ul {
   line-height: var(--zeile-14);
 }
 
-.lade-zu {
+.fenster-zu {
   padding: 0.25rem;
   border-radius: var(--radius-lg);
   color: var(--slate-400);
@@ -945,25 +949,26 @@ ul {
     background-color 150ms;
 }
 
-.lade-zu:hover {
+.fenster-zu:hover {
   background: var(--slate-100);
   color: var(--slate-700);
 }
 
-.lade-zu .symbol {
+.fenster-zu .symbol {
   width: var(--symbol-gross);
   height: var(--symbol-gross);
 }
 
-.lade-form {
-  flex: 1;
+.fenster-form {
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 1rem;
   overflow-y: auto;
   font-size: var(--text-12);
   line-height: var(--zeile-12);
 }
 
-.lade-form > * + * {
+.fenster-form > * + * {
   margin-top: 0.875rem;
 }
 
@@ -1093,7 +1098,7 @@ ul {
   font-size: var(--text-10);
 }
 
-.lade-absenden {
+.fenster-absenden {
   padding-top: 0.25rem;
 }
 
@@ -1108,7 +1113,7 @@ ul {
   height: var(--symbol-gross);
 }
 
-.lade-fehler {
+.fenster-fehler {
   color: var(--amber-800);
   font-size: var(--text-11);
   font-weight: var(--halbfett);
@@ -1311,14 +1316,14 @@ body {
     </div>
   </main>
 
-  <dialog class="lade" id="lade" aria-labelledby="ladeTitel">
-    <header class="lade-kopf">
-      <h3 class="lade-titel" id="ladeTitel">Termin anlegen</h3>
-      <button class="lade-zu" id="schliessen" type="button" aria-label="Schlie&#xDF;en">
+  <dialog class="fenster" id="fenster" aria-labelledby="fensterTitel">
+    <header class="fenster-kopf">
+      <h3 class="fenster-titel" id="fensterTitel">Termin anlegen</h3>
+      <button class="fenster-zu" id="schliessen" type="button" aria-label="Schlie&#xDF;en">
         <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </header>
-    <form class="lade-form" id="formular" novalidate>
+    <form class="fenster-form" id="formular" novalidate>
       <div class="vorschau">
         <div id="vorschauBild"></div>
         <div class="vorschau-text">
@@ -1369,8 +1374,8 @@ body {
         </div>
       </fieldset>
 
-      <p class="lade-fehler" id="formFehler" role="alert" hidden></p>
-      <div class="lade-absenden">
+      <p class="fenster-fehler" id="formFehler" role="alert" hidden></p>
+      <div class="fenster-absenden">
         <button class="knopf-haupt knopf-eintragen" id="anlegen" type="submit">
           <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16m8-8H4"/></svg>
           <span>Termin ins Board eintragen</span>
@@ -2696,9 +2701,9 @@ body {
     });
 
     // ---------------------------------------------------------------------
-    //  Termin anlegen: die Lade von rechts \u00FCber der Tafel
+    //  Termin anlegen: ein Fenster in der Mitte \u00FCber der Tafel
     // ---------------------------------------------------------------------
-    const drawer = document.getElementById('lade');
+    const formWindow = document.getElementById('fenster');
     const petInput = document.getElementById('tierName');
     const kindInput = document.getElementById('tierArt');
     const ownerInput = document.getElementById('besitzer');
@@ -2713,17 +2718,17 @@ body {
       showPreview();
     }
 
-    // Escape schlie\u00DFt die Lade von selbst, ein Klick neben sie auch.
-    function openDrawer() {
+    // Escape schlie\u00DFt das Fenster von selbst, ein Klick auf die Abdunklung auch.
+    function openForm() {
       closeMenu(false);
       resetForm();
-      drawer.showModal();
+      formWindow.showModal();
       petInput.focus();
       if (lookup.customers === null) loadLookup();
     }
 
-    drawer.addEventListener('click', function (e) {
-      if (e.target === drawer) drawer.close();
+    formWindow.addEventListener('click', function (e) {
+      if (e.target === formWindow) formWindow.close();
     });
 
     // Vorschau der Karte: das Foto des gew\u00E4hlten Tiers, sonst zwei Initialen.
@@ -2866,7 +2871,7 @@ body {
       input.focus();
     }
 
-    document.getElementById('schliessen').addEventListener('click', function () { drawer.close(); });
+    document.getElementById('schliessen').addEventListener('click', function () { formWindow.close(); });
 
     document.getElementById('formular').addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -2904,7 +2909,7 @@ body {
         [f.behandlung, reason],
         [f.status, CONFIG.status[spalte]],
       ].forEach(function (pair) { if (pair[1] !== '') writeField(record, pair[0], pair[1]); });
-      drawer.close();
+      formWindow.close();
       showToast(pet.name + ' angelegt');
       requestFreshData();
     });
@@ -2931,9 +2936,9 @@ body {
       }, 2400);
     }
 
-    // Ein Fehler steht in der offenen Lade \u00FCber dem Knopf, sonst als Meldung unten.
+    // Ein Fehler steht im offenen Fenster \u00FCber dem Knopf, sonst als Meldung unten.
     function showError(text) {
-      if (!drawer.open) {
+      if (!formWindow.open) {
         showToast(text);
         return;
       }
@@ -2947,7 +2952,7 @@ body {
       render();
     });
 
-    document.getElementById('terminAnlegen').addEventListener('click', openDrawer);
+    document.getElementById('terminAnlegen').addEventListener('click', openForm);
 
     window.addEventListener('load', function () {
       beispiel = !hasSoftEngine() && typeof window.basisHTML_REGISTER !== 'function' && !(window.SEDATA && window.SEDATA.Daten);

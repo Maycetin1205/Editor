@@ -87,14 +87,14 @@ body {
     </div>
   </main>
 
-  <dialog class="lade" id="lade" aria-labelledby="ladeTitel">
-    <header class="lade-kopf">
-      <h3 class="lade-titel" id="ladeTitel">Termin anlegen</h3>
-      <button class="lade-zu" id="schliessen" type="button" aria-label="Schließen">
+  <dialog class="fenster" id="fenster" aria-labelledby="fensterTitel">
+    <header class="fenster-kopf">
+      <h3 class="fenster-titel" id="fensterTitel">Termin anlegen</h3>
+      <button class="fenster-zu" id="schliessen" type="button" aria-label="Schließen">
         <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </header>
-    <form class="lade-form" id="formular" novalidate>
+    <form class="fenster-form" id="formular" novalidate>
       <div class="vorschau">
         <div id="vorschauBild"></div>
         <div class="vorschau-text">
@@ -145,8 +145,8 @@ body {
         </div>
       </fieldset>
 
-      <p class="lade-fehler" id="formFehler" role="alert" hidden></p>
-      <div class="lade-absenden">
+      <p class="fenster-fehler" id="formFehler" role="alert" hidden></p>
+      <div class="fenster-absenden">
         <button class="knopf-haupt knopf-eintragen" id="anlegen" type="submit">
           <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16m8-8H4"/></svg>
           <span>Termin ins Board eintragen</span>
@@ -1467,9 +1467,9 @@ body {
     });
 
     // ---------------------------------------------------------------------
-    //  Termin anlegen: die Lade von rechts über der Tafel
+    //  Termin anlegen: ein Fenster in der Mitte über der Tafel
     // ---------------------------------------------------------------------
-    const drawer = document.getElementById('lade');
+    const formWindow = document.getElementById('fenster');
     const petInput = document.getElementById('tierName');
     const kindInput = document.getElementById('tierArt');
     const ownerInput = document.getElementById('besitzer');
@@ -1484,17 +1484,17 @@ body {
       showPreview();
     }
 
-    // Escape schließt die Lade von selbst, ein Klick neben sie auch.
-    function openDrawer() {
+    // Escape schließt das Fenster von selbst, ein Klick auf die Abdunklung auch.
+    function openForm() {
       closeMenu(false);
       resetForm();
-      drawer.showModal();
+      formWindow.showModal();
       petInput.focus();
       if (lookup.customers === null) loadLookup();
     }
 
-    drawer.addEventListener('click', function (e) {
-      if (e.target === drawer) drawer.close();
+    formWindow.addEventListener('click', function (e) {
+      if (e.target === formWindow) formWindow.close();
     });
 
     // Vorschau der Karte: das Foto des gewählten Tiers, sonst zwei Initialen.
@@ -1637,7 +1637,7 @@ body {
       input.focus();
     }
 
-    document.getElementById('schliessen').addEventListener('click', function () { drawer.close(); });
+    document.getElementById('schliessen').addEventListener('click', function () { formWindow.close(); });
 
     document.getElementById('formular').addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -1675,7 +1675,7 @@ body {
         [f.behandlung, reason],
         [f.status, CONFIG.status[spalte]],
       ].forEach(function (pair) { if (pair[1] !== '') writeField(record, pair[0], pair[1]); });
-      drawer.close();
+      formWindow.close();
       showToast(pet.name + ' angelegt');
       requestFreshData();
     });
@@ -1702,9 +1702,9 @@ body {
       }, 2400);
     }
 
-    // Ein Fehler steht in der offenen Lade über dem Knopf, sonst als Meldung unten.
+    // Ein Fehler steht im offenen Fenster über dem Knopf, sonst als Meldung unten.
     function showError(text) {
-      if (!drawer.open) {
+      if (!formWindow.open) {
         showToast(text);
         return;
       }
@@ -1718,7 +1718,7 @@ body {
       render();
     });
 
-    document.getElementById('terminAnlegen').addEventListener('click', openDrawer);
+    document.getElementById('terminAnlegen').addEventListener('click', openForm);
 
     window.addEventListener('load', function () {
       beispiel = !hasSoftEngine() && typeof window.basisHTML_REGISTER !== 'function' && !(window.SEDATA && window.SEDATA.Daten);
