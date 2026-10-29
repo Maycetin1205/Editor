@@ -11,6 +11,7 @@ export type JobReason =
   | 'gesendet, ohne Rückmeldung'
   | `von SoftEngine abgelehnt: ${string}`
   | 'veraltet'
+  | 'mehr verteilte Zeilen als Plätze'
 
 export const ANSWER_WAIT_MS = 20_000
 
@@ -20,6 +21,8 @@ export const NO_CONFIRMATION: JobReason = 'keine Rückmeldung von SoftEngine'
 // A write SoftEngine took without a word: neither refused nor confirmed.
 export const NOT_ACKNOWLEDGED: JobReason = 'gesendet, ohne Rückmeldung'
 export const STALE: JobReason = 'veraltet'
+// More rows distributed than a step carries: it would lose the rest.
+export const TOO_MANY_PICKS: JobReason = 'mehr verteilte Zeilen als Plätze'
 
 const REFUSED = 'von SoftEngine abgelehnt: '
 

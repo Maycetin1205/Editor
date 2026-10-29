@@ -16,6 +16,7 @@ import { PickerControl } from '../controls/PickerControl'
 import type { Reach } from '../origin/reach'
 import { Places, Result } from './Places'
 import { placeEmpty } from './placeOrigins'
+import { SpreadPart } from './SpreadPart'
 import type { StepBodyProps } from './stepTypes'
 
 export function GetRelationBody(props: StepBodyProps) {
@@ -109,24 +110,28 @@ function RelationBody({
         reach={reach}
         showResult={showResult}
         onToggleResult={() => setShowResult(!showResult)}
+        onChange={onChange}
       />
     </div>
   )
 }
 
-// Right column: collapsible result preview and the relation's name.
+// Right column: collapsible result preview, the distributed rows and the
+// relation's name.
 function RelationSide({
   template,
   step,
   reach,
   showResult,
   onToggleResult,
+  onChange,
 }: {
   template: RelationTemplate
   step: RelationStep
   reach: Reach
   showResult: boolean
   onToggleResult: () => void
+  onChange: (step: RelationStep) => void
 }) {
   return (
     <div className="flex min-h-0 flex-col overflow-y-auto">
@@ -144,6 +149,7 @@ function RelationSide({
         Ergebnis
       </button>
       {showResult && <Result template={template} filled={step} reach={reach} />}
+      <SpreadPart template={template} step={step} splits={reach.splits ?? []} onChange={onChange} />
       <Strip>Bezeichnung</Strip>
       <div className="px-[12px] py-[9px]">{template.name}</div>
     </div>

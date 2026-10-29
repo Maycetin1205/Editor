@@ -1,5 +1,6 @@
 import { COLUMN_PARAM_SOURCES, checkParameterBinding, type Parameter } from '../actions'
 import type { Unread } from '../../unread'
+import { spreadRead, type PickSpread } from './spread'
 import type { RuntimeStepBase, StepAdapter, StepBase } from './stepAdapter'
 
 export interface RelationStep extends StepBase {
@@ -10,6 +11,8 @@ export interface RelationStep extends StepBase {
   parameter: Parameter[]
 
   extraParameter: Parameter[]
+
+  spread?: PickSpread
 }
 
 export interface RuntimeRelationStep extends RuntimeStepBase {
@@ -17,6 +20,7 @@ export interface RuntimeRelationStep extends RuntimeStepBase {
   relationId: string
   parameter: Parameter[]
   extraParameter: Parameter[]
+  spread?: PickSpread
 }
 
 function bindingsRead(raw: unknown): Parameter[] | null {
@@ -32,12 +36,12 @@ function bindingsRead(raw: unknown): Parameter[] | null {
 
 function relationFields(
   raw: Unread<RuntimeRelationStep>,
-): { relationId: string; parameter: Parameter[]; extraParameter: Parameter[] } | null {
+): { relationId: string; parameter: Parameter[]; extraParameter: Parameter[]; spread?: PickSpread } | null {
   if (typeof raw.relationId !== 'string') return null
   const parameter = bindingsRead(raw.parameter)
   const extraParameter = bindingsRead(raw.extraParameter)
   if (!parameter || !extraParameter) return null
-  return { relationId: raw.relationId, parameter, extraParameter }
+  return { relationId: raw.relationId, parameter, extraParameter, ...spreadRead(raw.spread) }
 }
 
 function withBindings(step: RelationStep, map: (binding: Parameter) => Parameter): RelationStep {
@@ -74,15 +78,20 @@ export const relation: StepAdapter<RelationStep, RuntimeRelationStep> = {
       relationId: step.relationId,
       parameter: step.parameter.map(binding),
       extraParameter: step.extraParameter.map(binding),
+      ...(step.spread && step.spread.start > 0 ? { spread: { ...step.spread } } : {}),
     }
   },
   bindings: (step) => [...step.parameter, ...step.extraParameter],
   withBindings,
   withBlockIds(step, newId) {
-    return withBindings(step, (b) => {
+    const moved = withBindings(step, (b) => {
       const target = b.blockId === undefined || b.blockId === '' ? undefined : newId(b.blockId)
       return target === undefined ? b : { ...b, blockId: target }
     })
+    const spreadTo = moved.spread && newId(moved.spread.blockId)
+    return spreadTo === undefined || moved.spread === undefined
+      ? moved
+      : { ...moved, spread: { ...moved.spread, blockId: spreadTo } }
   },
   relationId: (step) => step.relationId,
 }
