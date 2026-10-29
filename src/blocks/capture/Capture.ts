@@ -140,6 +140,10 @@ export class Capture extends BlockElement implements CaptureCarrier, ChangeCarri
     return this._ledger.captured.pendingMarks().map((v) => v.picks)
   }
 
+  get pickSource(): string {
+    return this.splits[0]?.sourceId ?? ''
+  }
+
   capturedColumn(key: string): readonly string[] {
     const slot = this.listColumns().findIndex((column) => column.key === key)
     return slot < 0 ? [] : this._ledger.captured.values.map((values) => values[slot] ?? '')
