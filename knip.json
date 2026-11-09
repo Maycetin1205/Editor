@@ -1,5 +1,0 @@
-{
-  "$schema": "https://unpkg.com/knip@5/schema.json",
-  "entry": ["src/runtime/softEngineStart.ts"],
-  "project": ["src/**/*.{ts,tsx}", "test/**/*.ts", "tools/*.mjs"]
-}

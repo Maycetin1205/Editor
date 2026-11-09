@@ -5,14 +5,10 @@ import react from '@vitejs/plugin-react'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 
+// The editor. Fixed port: masks and the library saved in the browser hang on
+// the origin http://localhost:5300; another port would not find them.
 export default defineConfig({
-  // Fixed port: the masks and data sources saved in the browser hang on the
-  // origin http://localhost:5300. Another port would not find them.
   server: { port: 5300, strictPort: true },
   plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(here, 'src'),
-    },
-  },
+  resolve: { alias: { '@': path.resolve(here, 'src') } },
 })

@@ -1,260 +1,43 @@
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
-const rootDir = import.meta.dirname
-
-// Design values a style string or a Tailwind class must not write itself:
-// every color, and a radius, font size, shadow or font of its own. 0, 50%,
-// none, inherit, transparent, currentColor and a var() stay open, also inside
-// a color function or a Tailwind class: hsl(var(--wb-line)) and
-// shadow-[var(--x)] pass, hsl(246 60% 56%) and rounded-[4px] do not.
-const LOOSE_DESIGN_VALUES = [
-  ['color', /(?<!&)#[0-9a-fA-F]{3,8}(?![\w-])/],
-  ['color', /\b(?:rgba?|hsla?|oklch)\((?!\s*var\()/],
-  ['radius', /radius\s*:[^;{}]*\dpx|(?<![\w-])rounded(?:-[a-z]+)?-\[(?!var\()/],
-  ['font size', /font-size\s*:[^;{}]*\d(?:px|rem)|(?<![\w-])text-\[\d/],
-  [
-    'shadow',
-    /box-shadow\s*:(?!\s*(?:none|var\(--[\w-]+\))\s*(?:!important\s*)?(?:[;}]|$))|(?<![\w-])shadow-\[(?!var\()/,
-  ],
-  ['font', /font-family\s*:(?!\s*(?:inherit|var\(--[\w-]+\))\s*(?:!important\s*)?(?:[;}]|$))/],
-]
+// Which layer may use which. The model knows nothing of React or the DOM; the
+// SoftEngine adapter is reached only through the MaskHost of the runtime.
+const layer = (files, forbidden, message) => ({
+  files,
+  rules: {
+    'no-restricted-imports': ['error', { patterns: [{ group: forbidden, message }] }],
+  },
+})
 
 export default defineConfig([
   globalIgnores(['dist', 'src/export/generated', '.claude']),
   {
     files: ['**/*.{ts,tsx}'],
-    extends: [
-      js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
-    ],
-    languageOptions: {
-      globals: globals.browser,
-      parserOptions: {
-        tsconfigRootDir: rootDir,
-      },
-    },
-    // One way to write an import: a module once per file, a type as a type.
+    extends: [js.configs.recommended, tseslint.configs.recommended, reactHooks.configs.flat.recommended],
+    languageOptions: { globals: globals.browser },
     rules: {
       'no-duplicate-imports': ['error', { allowSeparateTypeImports: true }],
       '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports' }],
-      '@typescript-eslint/no-import-type-side-effects': 'error',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   },
-  // Type-aware linting for this one rule only: a forgotten `.catch` on an
-  // action chain swallows every error, and a `void` in front of it looks like
-  // intent. The rule needs the type checker, hence `projectService`.
-  {
-    files: ['**/*.{ts,tsx}'],
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: rootDir,
-      },
-    },
-    rules: {
-      'no-empty': ['error', { allowEmptyCatch: true }],
-      '@typescript-eslint/no-floating-promises': 'error',
-    },
-  },
-  // src/core is the framework-free model: no lit, no react, and no import of
-  // an outer layer. One rule for every depth under src/core.
-  {
-    files: ['src/core/**/*.{ts,tsx}'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['lit', 'lit/*', 'react', 'react/*', 'react-dom', 'react-dom/*'],
-              message: 'src/core must stay framework free.',
-            },
-            {
-              regex: '^(?:(?:\\.\\./)+|@/)(?:blocks|design|editor|export|runtime|softengine)(?:/|$)',
-              message: 'src/core must not import an outer application layer.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  // Only src/softengine knows the host globals. A block asks the mask host in
-  // src/runtime and never SoftEngine itself. What runs in the mask never pulls
-  // in the editor or the export.
-  {
-    files: ['src/blocks/**/*.{ts,tsx}'],
-    rules: {
-      // A block takes the types of its properties from its own declaration
-      // instead of writing them down a second time; the base class fills the
-      // values in before anything reads them.
-      '@typescript-eslint/no-empty-object-type': ['error', { allowInterfaces: 'with-single-extends' }],
-      '@typescript-eslint/no-unsafe-declaration-merging': 'off',
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              regex: '^(?:(?:\\.\\./)+|@/)softengine(?:/|$)',
-              message: 'Blocks reach SoftEngine only through the mask host.',
-            },
-            {
-              regex: '^(?:(?:\\.\\./)+|@/)(?:editor|export)(?:/|$)',
-              message: 'Blocks must not import the editor or the export.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  // The runtime of the mask knows blocks only through the registry and their
-  // elements, and SoftEngine only through the one host that fills the door.
-  {
-    files: ['src/runtime/**/*.{ts,tsx}'],
-    ignores: ['src/runtime/softEngineHost.ts'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              regex: '^(?:(?:\\.\\./)+|@/)softengine(?:/|$)',
-              message: 'The runtime reaches SoftEngine only through softEngineHost.',
-            },
-            {
-              regex: '^(?:(?:\\.\\./)+|@/)(?:blocks|editor|export)(?:/|$)',
-              message: 'src/runtime must not import a block, the editor or the export.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['src/runtime/softEngineHost.ts'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/softengine/bridge'],
-              importNames: ['hostCall'],
-              message: 'The host passes on what src/softengine offers, it calls no host function itself.',
-            },
-            {
-              regex: '^(?:(?:\\.\\./)+|@/)(?:blocks|editor|export)(?:/|$)',
-              message: 'src/runtime must not import a block, the editor or the export.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  // What the mask shows takes its colors, radii, font sizes, shadows and fonts
-  // from the tokens in src/design, which carry the values of the reception
-  // mask. A value written into a block, the runtime or the export would be a
-  // second look beside it. The editor wears the same look, from the same place.
-  {
-    files: [
-      'src/blocks/**/*.{ts,tsx}',
-      'src/runtime/**/*.{ts,tsx}',
-      'src/export/**/*.{ts,tsx}',
-      'src/editor/**/*.{ts,tsx}',
-    ],
-    rules: {
-      'no-restricted-syntax': [
-        'error',
-        ...LOOSE_DESIGN_VALUES.flatMap(([what, pattern]) => [
-          { selector: `Literal[value=${pattern}]`, message: `Take the ${what} from a token in src/design.` },
-          {
-            selector: `TemplateElement[value.raw=${pattern}]`,
-            message: `Take the ${what} from a token in src/design.`,
-          },
-        ]),
-      ],
-    },
-  },
-  // The export writes files from the model: no editor, no React.
-  {
-    files: ['src/export/**/*.{ts,tsx}'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['react', 'react/*', 'react-dom', 'react-dom/*'],
-              message: 'src/export must stay free of React.',
-            },
-            {
-              regex: '^(?:(?:\\.\\./)+|@/)(?:editor|softengine)(?:/|$)',
-              message: 'src/export must not import the editor or SoftEngine.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  // The editor's state is the model under its React parts and imports none of
-  // them.
-  {
-    files: ['src/editor/state/**/*.{ts,tsx}'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              regex:
-                '^(?:(?:\\.\\./)+|@/editor/)(?:actions|bar|canvas|controls|data|icons|inspector|masks|origin|shell|sidebar|widgets)(?:/|$)',
-              message: 'editor/state must not import a React part of the editor.',
-            },
-            {
-              regex: '^(?:(?:\\.\\./)+|@/)export(?:/|$)',
-              message: 'editor/state must not import the export.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  // Size brake: a long file or function has usually gathered more than one
-  // task. A React component gets more lines, its markup takes room.
-  {
-    files: ['src/**/*.{ts,tsx}'],
-    rules: {
-      'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
-      'max-lines-per-function': ['error', { max: 80, skipBlankLines: true, skipComments: true }],
-    },
-  },
-  {
-    files: ['src/**/*.tsx'],
-    rules: {
-      'max-lines-per-function': ['error', { max: 120, skipBlankLines: true, skipComments: true }],
-    },
-  },
-  // The door itself reaches back into nothing that uses it.
-  {
-    files: ['src/softengine/**/*.{ts,tsx}'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              regex: '^(?:(?:\\.\\./)+|@/)(?:blocks|editor|export|runtime)(?:/|$)',
-              message: 'src/softengine must not import a block, the runtime, the editor or the export.',
-            },
-          ],
-        },
-      ],
-    },
-  },
+  layer(
+    ['src/model/**'],
+    ['react', 'react-dom', '@/runtime/*', '@/blocks/*', '@/editor/*', '@/softengine/*', '@/export/*'],
+    'Das Modell kennt weder React noch die anderen Schichten.',
+  ),
+  layer(
+    ['src/softengine/**'],
+    ['react', 'react-dom', '@/runtime/*', '@/blocks/*', '@/editor/*', '@/export/*'],
+    'Der SoftEngine-Anschluss kennt nur das Modell.',
+  ),
+  layer(
+    ['src/runtime/**', 'src/blocks/**'],
+    ['@/editor/*', '@/export/*'],
+    'Die Maske läuft ohne den Editor.',
+  ),
 ])

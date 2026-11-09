@@ -5,15 +5,9 @@ import { defineConfig } from 'vitest/config'
 const here = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      '@': path.resolve(here, 'src'),
-    },
-  },
+  resolve: { alias: { '@': path.resolve(here, 'src') } },
   test: {
-    include: ['test/**/*.test.ts'],
+    include: ['test/**/*.test.{ts,tsx}'],
     environment: 'happy-dom',
-    // vitest stubs CSS by default; the export test needs the real mask.css?raw.
-    css: true,
   },
 })

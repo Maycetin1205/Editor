@@ -1,8 +1,19 @@
-import { asTrimmedString, isObject } from './data'
-
 // A field of a row as SoftEngine delivers it: under its code, under a
-// prefixed or suffixed key, as {WERT}, or cut from the raw record at
-// position and length (code "12_8" = 8 characters from position 12).
+// prefixed or suffixed key ("IDB_78_30"), as {WERT}, or cut from the raw
+// record at position and length (code "12_8" = 8 characters from position 12).
+
+type JsonObject = Record<string, unknown>
+
+const isObject = (value: unknown): value is JsonObject => typeof value === 'object' && value !== null
+
+function cellText(value: unknown): string {
+  if (value == null) return ''
+  if (isObject(value)) {
+    const content = value.WERT
+    return content == null || typeof content === 'object' ? '' : String(content).trim()
+  }
+  return String(value).trim()
+}
 
 const ENTITY = /&(#x[0-9a-f]+|#[0-9]+|[a-z]+);/gi
 const NAMED: Readonly<Record<string, string>> = {
@@ -11,7 +22,7 @@ const NAMED: Readonly<Record<string, string>> = {
   gt: '>',
   quot: '"',
   apos: "'",
-  nbsp: ' ',
+  nbsp: ' ',
   auml: 'ä',
   ouml: 'ö',
   uuml: 'ü',
@@ -31,60 +42,61 @@ function decodeEntities(s: string): string {
   })
 }
 
-export function fieldRead(row: unknown, code: string): string {
-  return decodeEntities(fieldReadRaw(row, code))
-}
+const RAW_KEYS = ['SATZNEU', 'SATZ', 'satzneu', 'satz', 'RAW', 'raw'] as const
 
 function fieldReadRaw(row: unknown, code: string): string {
   if (!isObject(row) || code === '') return ''
   const key = code.trim()
-  const direct = asTrimmedString(row[key])
+  const direct = cellText(row[key])
   if (direct !== '') return direct
-  for (const rk of Object.keys(row)) {
-    if (rk === key || rk.startsWith(`${key}_`) || rk.endsWith(`_${key}`)) {
-      const v = asTrimmedString(row[rk])
-      if (v !== '') return v
+  for (const rowKey of Object.keys(row)) {
+    if (rowKey === key || rowKey.startsWith(`${key}_`) || rowKey.endsWith(`_${key}`)) {
+      const value = cellText(row[rowKey])
+      if (value !== '') return value
     }
   }
-  const m = /^(\d+)_(\d+)$/.exec(key)
-  if (!m) return ''
-
-  const rawSource = row.SATZNEU ?? row.SATZ ?? row.satzneu ?? row.satz ?? row.RAW ?? row.raw
-  const raw = rawSource == null ? '' : String(rawSource)
+  const place = /^(\d+)_(\d+)$/.exec(key)
+  if (!place) return ''
+  const rawKey = RAW_KEYS.find((k) => row[k] != null)
+  const raw = rawKey === undefined ? '' : String(row[rawKey])
   if (raw === '') return ''
-  const pos = Number(m[1])
-  const len = Number(m[2])
-  if (len <= 0) return ''
-  return raw.substring(pos, pos + len).trim()
+  const pos = Number(place[1])
+  const len = Number(place[2])
+  return len <= 0 ? '' : raw.substring(pos, pos + len).trim()
 }
 
+export function fieldRead(row: unknown, code: string): string {
+  return decodeEntities(fieldReadRaw(row, code))
+}
+
+// Writes a value into a row the mask holds, at every place fieldRead would
+// find it. True when something was written.
 export function fieldWrite(row: unknown, code: string, value: string): boolean {
   if (!isObject(row) || code === '') return false
   const key = code.trim()
   let written = false
-
-  for (const rk of Object.keys(row)) {
-    if (rk === key || rk.startsWith(`${key}_`) || rk.endsWith(`_${key}`)) {
-      row[rk] = value
+  for (const rowKey of Object.keys(row)) {
+    if (rowKey === key || rowKey.startsWith(`${key}_`) || rowKey.endsWith(`_${key}`)) {
+      row[rowKey] = value
       written = true
     }
   }
-
-  const m = /^(\d+)_(\d+)$/.exec(key)
-  if (m) {
-    const rawKeys = ['SATZNEU', 'SATZ', 'satzneu', 'satz', 'RAW', 'raw'] as const
-    const rawKey = rawKeys.find((k) => typeof row[k] === 'string')
-    if (rawKey) {
+  const place = /^(\d+)_(\d+)$/.exec(key)
+  if (place) {
+    const rawKey = RAW_KEYS.find((k) => typeof row[k] === 'string')
+    const pos = Number(place[1])
+    const len = Number(place[2])
+    if (rawKey && len > 0) {
       const raw = row[rawKey] as string
-      const pos = Number(m[1])
-      const len = Number(m[2])
-      if (len > 0) {
-        const field = value.length > len ? value.slice(0, len) : value.padEnd(len, ' ')
-        const padded = raw.length < pos ? raw.padEnd(pos, ' ') : raw
-        row[rawKey] = padded.slice(0, pos) + field + padded.slice(pos + len)
-        written = true
-      }
+      const field = value.length > len ? value.slice(0, len) : value.padEnd(len, ' ')
+      const padded = raw.length < pos ? raw.padEnd(pos, ' ') : raw
+      row[rawKey] = padded.slice(0, pos) + field + padded.slice(pos + len)
+      written = true
     }
+  }
+  if (!written) {
+    row[key] = value
+    written = true
   }
   return written
 }
