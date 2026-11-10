@@ -12,7 +12,8 @@
 #define LCD_I2C 1                      // 1 = Display mit I2C-Adapter (4 Pins), 0 = Display mit 16 Pins
 const uint8_t LCD_ADDR = 0x27;         // bleibt das Display leer: 0x3F probieren
 const char* AP_PASSWORD = "legoradio"; // WLAN-Passwort im Einstellmodus (mind. 8 Zeichen)
-const char* VERSION = "1.1";           // steht auf der Einstellseite
+const bool LEDS_INVERTED = true;         // true = Streifen direkt am Pin (leuchtet bei LOW), false = mit Transistor
+const char* VERSION = "1.2";           // steht auf der Einstellseite
 // Alles andere stellst du auf der Einstellseite im WLAN ein.
 
 const int PIN_PREV = 25, PIN_NEXT = 26, PIN_SIREN = 27;
@@ -123,8 +124,8 @@ void refreshDisplay() {
 
 // ---------- Ton und Licht ----------
 void leds(bool red, bool blue) {
-  digitalWrite(PIN_RED, red ? HIGH : LOW);
-  digitalWrite(PIN_BLUE, blue ? HIGH : LOW);
+  digitalWrite(PIN_RED, (red != LEDS_INVERTED) ? HIGH : LOW);
+  digitalWrite(PIN_BLUE, (blue != LEDS_INVERTED) ? HIGH : LOW);
 }
 
 void markDirty() { dirty = true; dirtySince = millis(); }

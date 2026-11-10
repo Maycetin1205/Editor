@@ -30,11 +30,14 @@ Plus = Batteriefach rot, GND = Batteriefach schwarz.
 | Taster Weiter | | ESP32 `GPIO26` und GND | |
 | Taster Sirene | | ESP32 `GPIO27` und GND | |
 | LED rot | `+` | Plus | |
-| LED rot | `−` | Kollektor NPN, Emitter an GND | Basis über 330 Ω an `GPIO32` |
+| LED rot | `−` | ESP32 `GPIO32` | 220 Ω |
 | LED blau | `+` | Plus | |
-| LED blau | `−` | Kollektor NPN, Emitter an GND | Basis über 330 Ω an `GPIO33` |
+| LED blau | `−` | ESP32 `GPIO33` | 220 Ω |
 | Musiklicht | `GPIO34` | ESP32 `3V3` | 100 kΩ |
 | Musiklicht | `GPIO34` | ESP32 `GND` | 100 kΩ |
+
+Die LED-Streifen hängen ohne Transistor direkt am Pin und leuchten bei LOW (`LEDS_INVERTED = true` im Code).
+Mit Transistor: `LEDS_INVERTED = false`.
 
 ## SD-Karte
 

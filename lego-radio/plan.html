@@ -158,15 +158,15 @@ ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px;max-wi
         <thead><tr><th>ESP32-Pin</th><th>Aufgabe</th><th>Verbunden mit</th><th>Ader</th></tr></thead>
         <tbody>
           <tr><td><code>5V</code> (VIN)</td><td>Stromversorgung</td><td>5-V-Verteiler, dazu <code>+</code> beider LED-Streifen</td><td class="n">5, 7</td></tr>
-          <tr><td><code>GND</code></td><td>Masse</td><td>GND-Verteiler, Taster, Emitter der Transistoren</td><td class="n">8, 10</td></tr>
+          <tr><td><code>GND</code></td><td>Masse</td><td>GND-Verteiler, Taster</td><td class="n">8, 10</td></tr>
           <tr><td><code>GPIO4</code></td><td>Läuft gerade ein Lied?</td><td>DFPlayer <code>BUSY</code> (Pin 16)</td><td class="n">13</td></tr>
           <tr><td><code>GPIO16</code></td><td>Daten vom DFPlayer</td><td>DFPlayer <code>TX</code> (Pin 3)</td><td class="n">12</td></tr>
           <tr><td><code>GPIO17</code></td><td>Befehle an den DFPlayer</td><td>1 kΩ, dann DFPlayer <code>RX</code> (Pin 2)</td><td class="n">11</td></tr>
           <tr><td><code>GPIO25</code></td><td>Taster Zurück (lang: leiser)</td><td>Taster, anderes Bein an GND</td><td class="n">16</td></tr>
           <tr><td><code>GPIO26</code></td><td>Taster Weiter (lang: lauter)</td><td>Taster, anderes Bein an GND</td><td class="n">17</td></tr>
           <tr><td><code>GPIO27</code></td><td>Taster Sirene (beim Einschalten halten: Einstellmodus)</td><td>Taster, anderes Bein an GND</td><td class="n">18</td></tr>
-          <tr><td><code>GPIO32</code></td><td>Rote LEDs</td><td>1 kΩ, dann Basis Transistor Rot</td><td class="n">19</td></tr>
-          <tr><td><code>GPIO33</code></td><td>Blaue LEDs</td><td>1 kΩ, dann Basis Transistor Blau</td><td class="n">20</td></tr>
+          <tr><td><code>GPIO32</code></td><td>Rote LEDs</td><td>220 Ω, dann <code>−</code> vom roten Streifen</td><td class="n">19</td></tr>
+          <tr><td><code>GPIO33</code></td><td>Blaue LEDs</td><td>220 Ω, dann <code>−</code> vom blauen Streifen</td><td class="n">20</td></tr>
           <tr><td><code>GPIO34</code></td><td>Musik mithören für das Musiklicht</td><td>Kondensator von DFPlayer <code>DAC_L</code>, dazu je 100 kΩ nach <code>3V3</code> und <code>GND</code></td><td class="n">23, 24, 25</td></tr>
           <tr><td><code>3V3</code></td><td>Nur für das Musiklicht</td><td>100 kΩ, dann <code>GPIO34</code></td><td class="n">24</td></tr>
         </tbody>
@@ -177,7 +177,7 @@ ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px;max-wi
 
   <section>
     <h2>Verkabelung, Ader für Ader</h2>
-    <p class="note">Löte zwei kleine Streifen Lochraster als Verteiler: einen für 5 V, einen für GND. Die Platine im Deckel trägt oben die drei Taster und unten den ESP32, dazu die zwei Transistoren und alle Widerstände. Vom Gehäuse zum Deckel laufen 6 Adern, je 12 cm lang. Die zwei Adern am Batteriefach sind 10 cm lang, alle anderen reichen mit 6 bis 8 cm.</p>
+    <p class="note">Löte zwei kleine Streifen Lochraster als Verteiler: einen für 5 V, einen für GND. Die Platine im Deckel trägt oben die drei Taster und unten den ESP32, dazu alle Widerstände. Vom Gehäuse zum Deckel laufen 6 Adern, je 12 cm lang. Die zwei Adern am Batteriefach sind 10 cm lang, alle anderen reichen mit 6 bis 8 cm.</p>
     <div class="scroll">
       <table>
         <thead><tr><th>Nr.</th><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead>
@@ -188,10 +188,10 @@ ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px;max-wi
           <tr><td class="n">4</td><td>Elko, kurzes Bein</td><td>DFPlayer <code>GND</code> (Pin 7)</td><td></td></tr>
           <tr><td class="n">5</td><td>5-V-Verteiler</td><td>ESP32 <code>5V</code> (auch <code>VIN</code> genannt)</td><td>Deckelkabel. Nicht an <code>3V3</code></td></tr>
           <tr><td class="n">6</td><td>5-V-Verteiler</td><td>DFPlayer <code>VCC</code> (Pin 1)</td><td></td></tr>
-          <tr><td class="n">7</td><td>ESP32 <code>5V</code></td><td><code>+</code> beider LED-Streifen</td><td>Auf der Deckelplatine</td></tr>
+          <tr><td class="n">7</td><td>ESP32 <code>5V</code></td><td><code>+</code> beider LED-Streifen</td><td>Plus vom Batteriefach</td></tr>
           <tr><td class="n">8</td><td>GND-Verteiler</td><td>ESP32 <code>GND</code></td><td>Deckelkabel</td></tr>
           <tr><td class="n">9</td><td>GND-Verteiler</td><td>DFPlayer <code>GND</code> (Pin 7)</td><td></td></tr>
-          <tr><td class="n">10</td><td>ESP32 <code>GND</code></td><td>Ein Bein jedes Tasters und beide Emitter</td><td>Auf der Deckelplatine</td></tr>
+          <tr><td class="n">10</td><td>ESP32 <code>GND</code></td><td>Ein Bein jedes Tasters</td><td>Auf der Deckelplatine</td></tr>
           <tr><td class="n">11</td><td>ESP32 <code>GPIO17</code></td><td>1 kΩ, dann DFPlayer <code>RX</code> (Pin 2)</td><td>Deckelkabel. Widerstand direkt am DFPlayer</td></tr>
           <tr><td class="n">12</td><td>ESP32 <code>GPIO16</code></td><td>DFPlayer <code>TX</code> (Pin 3)</td><td>Deckelkabel</td></tr>
           <tr><td class="n">13</td><td>ESP32 <code>GPIO4</code></td><td>DFPlayer <code>BUSY</code> (Pin 16)</td><td>Deckelkabel</td></tr>
@@ -200,10 +200,8 @@ ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px;max-wi
           <tr><td class="n">16</td><td>ESP32 <code>GPIO25</code></td><td>Taster Zurück, freies Bein</td><td>Auf der Deckelplatine</td></tr>
           <tr><td class="n">17</td><td>ESP32 <code>GPIO26</code></td><td>Taster Weiter, freies Bein</td><td>Auf der Deckelplatine</td></tr>
           <tr><td class="n">18</td><td>ESP32 <code>GPIO27</code></td><td>Taster Sirene, freies Bein</td><td>Auf der Deckelplatine</td></tr>
-          <tr><td class="n">19</td><td>ESP32 <code>GPIO32</code></td><td>1 kΩ, dann Basis Transistor Rot</td><td>Auf der Deckelplatine</td></tr>
-          <tr><td class="n">20</td><td>ESP32 <code>GPIO33</code></td><td>1 kΩ, dann Basis Transistor Blau</td><td>Auf der Deckelplatine</td></tr>
-          <tr><td class="n">21</td><td>Kollektor Transistor Rot</td><td>Roter LED-Streifen <code>−</code></td><td>Auf der Deckelplatine</td></tr>
-          <tr><td class="n">22</td><td>Kollektor Transistor Blau</td><td>Blauer LED-Streifen <code>−</code></td><td>Auf der Deckelplatine</td></tr>
+          <tr><td class="n">19</td><td>ESP32 <code>GPIO32</code></td><td>220 Ω, dann <code>−</code> vom roten LED-Streifen</td><td>Auf der Deckelplatine</td></tr>
+          <tr><td class="n">20</td><td>ESP32 <code>GPIO33</code></td><td>220 Ω, dann <code>−</code> vom blauen LED-Streifen</td><td>Auf der Deckelplatine</td></tr>
           <tr><td class="n">23</td><td>DFPlayer <code>DAC_L</code> (Pin 5)</td><td>Kondensator 100 nF bis 1 µF, dann ESP32 <code>GPIO34</code></td><td>Deckelkabel. Musiklicht. Keramik oder Folie, kein Elko</td></tr>
           <tr><td class="n">24</td><td>ESP32 <code>3V3</code></td><td>100 kΩ, dann ESP32 <code>GPIO34</code></td><td>Musiklicht</td></tr>
           <tr><td class="n">25</td><td>ESP32 <code>GND</code></td><td>100 kΩ, dann ESP32 <code>GPIO34</code></td><td>Musiklicht</td></tr>
@@ -220,7 +218,7 @@ ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px;max-wi
  SPK_1  6 │              │ 11  IO_2
  GND    7 │  ┌────────┐  │ 10  GND
  SPK_2  8 └──┤ microSD ├──┘  9  IO_1</pre>
-    <p class="note">Transistor BC337: flache Seite zu dir, Beine nach unten, dann von links nach rechts Kollektor, Basis, Emitter. Beim 2N2222 im gleichen Gehäuse ist es umgekehrt. Taster mit vier Beinen: nimm zwei Beine, die sich diagonal gegenüberliegen.</p>
+    <p class="note">Die LED-Streifen hängen ohne Transistor direkt am ESP32: <code>+</code> an Plus, <code>−</code> über 220 Ω an den Pin. Sie leuchten dadurch schwächer als mit voller Spannung. Ohne den Widerstand wird der Pin überlastet. Taster mit vier Beinen: nimm zwei Beine, die sich diagonal gegenüberliegen.</p>
   </section>
 
   <section>
@@ -280,7 +278,8 @@ mp3/0002.mp3   zweites Lied, und so weiter
 #define LCD_I2C 1                      // 1 = Display mit I2C-Adapter (4 Pins), 0 = Display mit 16 Pins
 const uint8_t LCD_ADDR = 0x27;         // bleibt das Display leer: 0x3F probieren
 const char* AP_PASSWORD = "legoradio"; // WLAN-Passwort im Einstellmodus (mind. 8 Zeichen)
-const char* VERSION = "1.1";           // steht auf der Einstellseite
+const bool LEDS_INVERTED = true;         // true = Streifen direkt am Pin (leuchtet bei LOW), false = mit Transistor
+const char* VERSION = "1.2";           // steht auf der Einstellseite
 // Alles andere stellst du auf der Einstellseite im WLAN ein.
 
 const int PIN_PREV = 25, PIN_NEXT = 26, PIN_SIREN = 27;
@@ -391,8 +390,8 @@ void refreshDisplay() {
 
 // ---------- Ton und Licht ----------
 void leds(bool red, bool blue) {
-  digitalWrite(PIN_RED, red ? HIGH : LOW);
-  digitalWrite(PIN_BLUE, blue ? HIGH : LOW);
+  digitalWrite(PIN_RED, (red != LEDS_INVERTED) ? HIGH : LOW);
+  digitalWrite(PIN_BLUE, (blue != LEDS_INVERTED) ? HIGH : LOW);
 }
 
 void markDirty() { dirty = true; dirtySince = millis(); }
@@ -840,7 +839,7 @@ void loop() {
     {n:7,t:'Deckel: Plattenring',h:'Ab hier baust du den Deckel als eigenes Teil. Er wird am Ende nur aufgedrückt und nie festgeklebt. Zuerst ein Ring aus Platten, eine Noppe breit.'},
     {n:8,t:'Deckel: Schrägen und Leuchtleisten',h:'Auf den Ring links und rechts je zwei <strong>Dachsteine 2 × 4</strong>, die Schräge zeigt nach außen. Dazwischen vorne die rote und hinten die blaue Leuchtleiste. Hast du transparente Steine, nimm die. Sonst setz auf jede zweite Noppe einen Stein 1 × 1 und lass die anderen frei. Die LED-Streifen klebst du innen dahinter, LEDs nach außen.',
       e:[[27,54,50,2,''],[27,8,50,2,'']]},
-    {n:9,t:'Deckel: Platten bohren, Platine einkleben',h:'Sechs Platten oben drauf. In die mittlere lange Platte <strong>drei Löcher mit 4 mm</strong> bohren, jeweils genau durch die Mitte einer Noppe, mit einer Noppe Abstand dazwischen. Erst mit 2 mm vorbohren. Ein Stück Lochraster, 56 × 28 mm: oben die drei Taster im Abstand von 16 mm, unten der <strong>ESP32</strong>, daneben Transistoren, Widerstände und der Kondensator. Die Platine von unten an die Platten kleben, die Stößel schauen durch die Löcher. Alle übrigen Adern anlöten.',
+    {n:9,t:'Deckel: Platten bohren, Platine einkleben',h:'Sechs Platten oben drauf. In die mittlere lange Platte <strong>drei Löcher mit 4 mm</strong> bohren, jeweils genau durch die Mitte einer Noppe, mit einer Noppe Abstand dazwischen. Erst mit 2 mm vorbohren. Ein Stück Lochraster, 56 × 28 mm: oben die drei Taster im Abstand von 16 mm, unten der <strong>ESP32</strong>, daneben Widerstände und der Kondensator. Die Platine von unten an die Platten kleben, die Stößel schauen durch die Löcher. Alle übrigen Adern anlöten.',
       e:[[24,26,56,28,'']],c:[[36,36],[52,36],[68,36]]},
     {n:10,t:'Karte rein, Deckel drauf',h:'SD-Karte von rechts in den Schlitz schieben, bis sie im DFPlayer sitzt. Deckel aufdrücken, einschalten. Die Musik startet von selbst.',noplan:true}
   ];
