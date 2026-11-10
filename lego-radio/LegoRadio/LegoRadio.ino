@@ -13,7 +13,7 @@
 const uint8_t LCD_ADDR = 0x27;         // bleibt das Display leer: 0x3F probieren
 const char* AP_PASSWORD = "legoradio"; // WLAN-Passwort im Einstellmodus (mind. 8 Zeichen)
 const bool LEDS_INVERTED = true;         // true = Streifen direkt am Pin (leuchtet bei LOW), false = mit Transistor
-const char* VERSION = "1.2";           // steht auf der Einstellseite
+const char* VERSION = "1.3";           // steht auf der Einstellseite
 // Alles andere stellst du auf der Einstellseite im WLAN ein.
 
 const int PIN_PREV = 25, PIN_NEXT = 26, PIN_SIREN = 27;
@@ -166,6 +166,7 @@ void randomTrack() {
 
 void playTrack() {
   leds(false, false);
+  Serial.printf("Spiele /mp3/%04d.mp3\n", track);
   player.playMp3Folder(track);                   // spielt /mp3/0001.mp3 usw.
   mode = MUSIC;
   lastCmd = millis();
@@ -362,6 +363,10 @@ void startSetupMode() {
 
 // ---------- Start ----------
 void setup() {
+  Serial.begin(115200);                      // Diagnose im seriellen Monitor, 115200 Baud
+  Serial.println();
+  Serial.print("Lego-Radio Version ");
+  Serial.println(VERSION);
   pinMode(PIN_PREV, INPUT_PULLUP);
   pinMode(PIN_NEXT, INPUT_PULLUP);
   pinMode(PIN_SIREN, INPUT_PULLUP);
@@ -400,7 +405,11 @@ void setup() {
 #endif
 
   delay(50);
+  Serial.printf("Taster beim Start (1 = nicht gedrueckt): Zurueck=%d Weiter=%d Sirene=%d\n",
+                digitalRead(PIN_PREV), digitalRead(PIN_NEXT), digitalRead(PIN_SIREN));
+  Serial.printf("Lieder=%d Lautstaerke=%d Max=%d Wiederholen=%d\n", songCount, volume, volMax, repeatMode);
   if (digitalRead(PIN_SIREN) == LOW) {       // Sirenenknopf beim Einschalten gehalten
+    Serial.println("Sirenenknopf ist gedrueckt -> Einstellmodus, WLAN Radio-..., 192.168.4.1");
     setupMode = true;
     startSetupMode();
     return;
@@ -412,9 +421,13 @@ void setup() {
   dfSerial.begin(9600, SERIAL_8N1, 16, 17);  // RX = 16, TX = 17
   delay(1500);                               // der DFPlayer braucht kurz
   if (!player.begin(dfSerial)) {
+    Serial.println("DFPlayer antwortet NICHT. RX/TX, 1 kOhm und SD-Karte pruefen.");
     putLine(1, "SD-Karte fehlt?");
     delay(2000);
+  } else {
+    Serial.println("DFPlayer antwortet.");
   }
+  Serial.printf("BUSY-Pin: %d (0 = es laeuft gerade etwas)\n", digitalRead(PIN_BUSY));
   player.volume(volume);
   int n = player.readFileCountsInFolder(1);
   if (n > 0) sirenCount = n;
@@ -426,14 +439,17 @@ void loop() {
   if (setupMode) { server.handleClient(); delay(2); return; }
 
   int e = readButton(bNext);
+  if (e) Serial.printf("Taster Weiter: %s\n", e == 1 ? "kurz" : "gehalten");
   if (e == 1) { if (repeatMode == 3) randomTrack(); else stepTrack(1); playTrack(); }
   if (e == 2) changeVolume(+1);
 
   e = readButton(bPrev);
+  if (e) Serial.printf("Taster Zurueck: %s\n", e == 1 ? "kurz" : "gehalten");
   if (e == 1) { stepTrack(-1); playTrack(); }
   if (e == 2) changeVolume(-1);
 
   if (readButton(bSiren) == 1) {
+    Serial.println("Taster Sirene: kurz");
     if (mode == SIREN) endSiren(); else startSiren();
   }
 
