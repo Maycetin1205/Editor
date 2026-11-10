@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Lego-Radio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: eine Spalte, oben die 3D-Bühne als Hauptsache, darunter Antworten, Verdrahtung, Bauplan. */
+:root{
+  --bg:#eef2f7; --surface:#ffffff; --stage:#dfe7f1; --ink:#16233a; --muted:#56657d;
+  --line:#cbd5e3; --brick:#c8201f; --stud:#f2b90c; --on-brick:#ffffff;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1522; --surface:#172132; --stage:#1c283b; --ink:#e7edf7; --muted:#9aa9c0;
+    --line:#2c3a52; --brick:#e2403b; --stud:#f5c52e; --on-brick:#ffffff; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1522; --surface:#172132; --stage:#1c283b; --ink:#e7edf7; --muted:#9aa9c0;
+  --line:#2c3a52; --brick:#e2403b; --stud:#f5c52e; --on-brick:#ffffff; color-scheme:dark;
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:920px;margin:0 auto;padding-block:28px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:36px}
+h1,h2{font-family:var(--display);font-weight:600;text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(2rem,6vw,2.9rem)}
+h2{font-size:1.45rem}
+p{margin:0}
+.lede{color:var(--muted);max-width:62ch;margin-top:8px}
+.dims{display:inline-block;margin-top:12px;font-variant-numeric:tabular-nums;font-weight:600;
+  background:var(--stud);color:#16233a;padding:4px 12px;border-radius:999px;font-size:.9rem}
+
+.viewer{display:flex;flex-direction:column;gap:12px}
+.stage{position:relative;background:var(--stage);border-radius:18px;overflow:hidden;
+  aspect-ratio:16/10;max-height:620px;width:100%;max-width:100%;touch-action:none}
+@media (max-width:560px){.stage{aspect-ratio:1/1}}
+.stage canvas{display:block;width:100%;height:100%;cursor:grab}
+.stage canvas:active{cursor:grabbing}
+.tag{position:absolute;left:0;top:0;pointer-events:none;white-space:nowrap;
+  font-size:.74rem;font-weight:600;padding:3px 9px;border-radius:999px;
+  background:var(--surface);color:var(--ink);border:1px solid var(--line);
+  transform:translate(-50%,-150%);will-change:transform}
+.tag.below{transform:translate(-50%,60%)}
+.fallback[hidden]{display:none}
+.fallback{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button,.act{font:600 .9rem var(--body);border:0;border-radius:999px;padding:8px 16px;cursor:pointer;color:var(--ink);background:transparent}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.act{background:var(--brick);color:var(--on-brick)}
+.seg button:focus-visible,.act:focus-visible{outline:3px solid var(--stud);outline-offset:2px}
+.hint{color:var(--muted);font-size:.85rem;margin-left:auto}
+
+section{display:flex;flex-direction:column;gap:16px}
+.qa{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px 32px}
+.qa div{min-width:0}
+.qa h3{font:600 1rem var(--body);margin:0 0 4px}
+.qa p{color:var(--muted);font-size:.95rem}
+.qa strong{color:var(--ink)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.93rem;background:var(--surface);border-radius:12px;overflow:hidden}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:var(--stage);padding:1px 6px;border-radius:5px}
+ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px;max-width:68ch}
+.note{color:var(--muted);font-size:.9rem;max-width:68ch}
+.codebox{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.codebox pre{margin:0;padding:16px;overflow:auto;max-height:460px;font:400 .8rem/1.5 ui-monospace,Menlo,Consolas,monospace;color:var(--ink);tab-size:2}
+.codebox .act{position:absolute;top:10px;right:10px;padding:6px 14px;font-size:.8rem}
+.tree{font:400 .88rem/1.6 ui-monospace,Menlo,Consolas,monospace;background:var(--surface);border-radius:12px;padding:14px 18px;margin:0;overflow-x:auto}
+.sir[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.steps{display:flex;flex-direction:column;gap:28px}
+.step{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:8px 24px;align-items:start}
+@media (max-width:640px){.step{grid-template-columns:minmax(0,1fr)}}
+.step h3{font:600 1.05rem var(--body);margin:0 0 6px}
+.step h3 span{display:inline-grid;place-items:center;width:1.7em;height:1.7em;border-radius:50%;background:var(--ink);color:var(--bg);font-size:.85rem;margin-right:8px;font-variant-numeric:tabular-nums}
+.step p{color:var(--muted);font-size:.95rem}
+.step p strong{color:var(--ink)}
+.step ul{margin:8px 0 0;padding-left:1.2em;font-size:.88rem;font-variant-numeric:tabular-nums}
+.plan{background:var(--surface);border-radius:12px;padding:10px}
+.plan svg{display:block;width:100%;height:auto}
+.plan text{font:600 9px var(--body);fill:var(--ink)}
+.plan .cap{font-weight:500;fill:var(--muted)}
+.plan .el{fill:var(--stage);stroke:var(--ink);stroke-width:1;stroke-dasharray:3 2;fill-opacity:.85}
+.checks{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:8px;max-width:70ch}
+.codebox pre{max-height:520px}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Lego-Radio</h1>
+    <p class="lede">Ohne Display und so klein, wie es das Batteriefach zulässt. Bunt gemischt aus normalen Steinen, mit Blaulicht, Sirenenknopf und SD-Schlitz an der Seite.</p>
+    <span class="dims">104 × 64 × 67 mm · 13 × 8 Noppen · 5 Steine hoch</span>
+  </header>
+
+  <div class="viewer">
+    <div class="stage" id="stage"><div class="fallback" id="fallback" hidden>Das 3D-Modell konnte nicht geladen werden. Lade die Seite neu.</div></div>
+    <div class="bar">
+      <div class="seg" role="group" aria-label="Ansicht">
+        <button id="m-closed" type="button" aria-pressed="true">Geschlossen</button>
+        <button id="m-see" type="button" aria-pressed="false">Durchsicht</button>
+        <button id="m-explode" type="button" aria-pressed="false">Zerlegt</button>
+      </div>
+      <button class="act" id="sd" type="button">SD-Karte herausziehen</button>
+      <button class="act sir" id="siren" type="button" aria-pressed="false">Sirene an</button>
+      <button class="act sir" id="music" type="button" aria-pressed="false">Musik an</button>
+      <div class="seg" role="group" aria-label="Farben">
+        <button id="c-0" type="button" aria-pressed="true">Bunt</button>
+        <button id="c-1" type="button" aria-pressed="false">Reihen</button>
+        <button id="c-2" type="button" aria-pressed="false">Rot-Blau</button>
+      </div>
+      <span class="hint">Ziehen dreht, Mausrad oder zwei Finger zoomen</span>
+    </div>
+  </div>
+
+  <section>
+    <h2>Womit dieser Plan rechnet</h2>
+    <ul class="checks">
+      <li><strong>Batteriefach:</strong> 84 mm lang (10,5 Noppen) und 16 mm dick (2 Noppen), wie von dir angegeben. Es steht hochkant auf der langen Kante an der Rückwand. Die dritte Seite habe ich mit 48 mm angenommen, das sind genau 5 Steine Höhe. Ist dein Fach höher, kommt eine sechste Reihe dazu.</li>
+      <li><strong>Lautsprecher:</strong> Platz ist für 40 × 40 × 24 mm (Breite × Höhe × Tiefe), vorne links hinter dem Gitter. Das ist geschätzt, weil du sagst, er ist etwa halb so groß wie das Batteriefach.</li>
+      <li><strong>Größe:</strong> Die Breite kommt allein vom Batteriefach: 84 mm brauchen innen 11 Noppen, mit Wänden 13. Gegenüber dem Plan mit Display ist das Radio 19 mm niedriger und 8 mm breiter.</li>
+      <li><strong>Strom ohne Step-up-Wandler:</strong> Die 4,5 V vom Batteriefach gehen direkt an alles. Das läuft mit frischen Batterien. Sind sie etwa halb leer, reicht die Spannung für den ESP32 nicht mehr und das Radio startet neu oder bleibt stumm. Ein Step-up-Wandler auf 5 V behebt das, du kannst ihn später nachrüsten.</li>
+      <li><strong>Taster:</strong> Vom Boden bis zur Spitze brauchen sie etwa 9 mm, damit der Stößel durch die Platte reicht. Sind deine kürzer, steck ein 4 mm langes Stück Zahnstocher als Verlängerung ins Loch.</li>
+      <li><strong>Erst testen, dann kleben:</strong> Bau alles lose zusammen und probier es aus, bevor der Heißkleber kommt. Der Deckel wird nie auf das Gehäuse geklebt.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Batterien wechseln</h2>
+    <ol class="checks">
+      <li>Radio ausschalten. Den Deckel (Plattenring, Schrägen, Leuchtleisten und Platten mit den Tastern) nach oben abziehen und neben das Radio legen. Seine Kabel sind 12 cm lang und bleiben dran.</li>
+      <li>Das Batteriefach von der Rückwand abziehen und nach oben herausnehmen. Über ihm ist alles frei. Befestige es mit Klettband statt mit Heißkleber, sonst geht die Klappe nicht mehr auf. Seine zwei Adern sind 10 cm lang.</li>
+      <li>Klappe in der Hand öffnen, Batterien tauschen, Fach zurück, Schalter in die Lücke der Rückwand, Deckel aufdrücken.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Bauanleitung</h2>
+    <p class="note">Jeder Plan zeigt das Radio von oben, die Vorderseite ist unten. Farbige Teile kommen in diesem Schritt dazu, gestrichelte Flächen sind Elektronik. Die Nummern in Klammern sind die Lego-Teilenummern. Ein langer Stein lässt sich immer durch zwei kurze ersetzen, solange die Fugen nicht genau übereinander liegen.</p>
+    <div class="steps" id="steps"></div>
+  </section>
+
+  <section>
+    <h2>GPIO-Belegung am ESP32</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>ESP32-Pin</th><th>Aufgabe</th><th>Verbunden mit</th><th>Ader</th></tr></thead>
+        <tbody>
+          <tr><td><code>5V</code> (VIN)</td><td>Stromversorgung</td><td>5-V-Verteiler, dazu <code>+</code> beider LED-Streifen</td><td class="n">5, 7</td></tr>
+          <tr><td><code>GND</code></td><td>Masse</td><td>GND-Verteiler, Taster, Emitter der Transistoren</td><td class="n">8, 10</td></tr>
+          <tr><td><code>GPIO4</code></td><td>Läuft gerade ein Lied?</td><td>DFPlayer <code>BUSY</code> (Pin 16)</td><td class="n">13</td></tr>
+          <tr><td><code>GPIO16</code></td><td>Daten vom DFPlayer</td><td>DFPlayer <code>TX</code> (Pin 3)</td><td class="n">12</td></tr>
+          <tr><td><code>GPIO17</code></td><td>Befehle an den DFPlayer</td><td>1 kΩ, dann DFPlayer <code>RX</code> (Pin 2)</td><td class="n">11</td></tr>
+          <tr><td><code>GPIO25</code></td><td>Taster Zurück (lang: leiser)</td><td>Taster, anderes Bein an GND</td><td class="n">16</td></tr>
+          <tr><td><code>GPIO26</code></td><td>Taster Weiter (lang: lauter)</td><td>Taster, anderes Bein an GND</td><td class="n">17</td></tr>
+          <tr><td><code>GPIO27</code></td><td>Taster Sirene (beim Einschalten halten: Einstellmodus)</td><td>Taster, anderes Bein an GND</td><td class="n">18</td></tr>
+          <tr><td><code>GPIO32</code></td><td>Rote LEDs</td><td>1 kΩ, dann Basis Transistor Rot</td><td class="n">19</td></tr>
+          <tr><td><code>GPIO33</code></td><td>Blaue LEDs</td><td>1 kΩ, dann Basis Transistor Blau</td><td class="n">20</td></tr>
+          <tr><td><code>GPIO34</code></td><td>Musik mithören für das Musiklicht</td><td>Kondensator von DFPlayer <code>DAC_L</code>, dazu je 100 kΩ nach <code>3V3</code> und <code>GND</code></td><td class="n">23, 24, 25</td></tr>
+          <tr><td><code>3V3</code></td><td>Nur für das Musiklicht</td><td>100 kΩ, dann <code>GPIO34</code></td><td class="n">24</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Frei bleiben müssen <code>GPIO0</code>, <code>GPIO1</code> (TX) und <code>GPIO3</code> (RX), die brauchst du zum Aufspielen. <code>GPIO21</code> und <code>GPIO22</code> bleiben für ein Display frei, falls du später doch eines anschließt. Dann stellst du im Code <code>USE_LCD</code> auf <code>1</code>.</p>
+  </section>
+
+  <section>
+    <h2>Verkabelung, Ader für Ader</h2>
+    <p class="note">Löte zwei kleine Streifen Lochraster als Verteiler: einen für 5 V, einen für GND. Die Platine im Deckel trägt oben die drei Taster und unten den ESP32, dazu die zwei Transistoren und alle Widerstände. Vom Gehäuse zum Deckel laufen 6 Adern, je 12 cm lang. Die zwei Adern am Batteriefach sind 10 cm lang, alle anderen reichen mit 6 bis 8 cm.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Nr.</th><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead>
+        <tbody>
+          <tr><td class="n">1</td><td>Batteriefach rot</td><td>5-V-Verteiler</td><td>Der Schalter sitzt im Batteriefach</td></tr>
+          <tr><td class="n">2</td><td>Batteriefach schwarz</td><td>GND-Verteiler</td><td></td></tr>
+          <tr><td class="n">3</td><td>Elko 470 bis 1000 µF, langes Bein</td><td>DFPlayer <code>VCC</code> (Pin 1)</td><td>Puffert Stromspitzen, direkt am DFPlayer</td></tr>
+          <tr><td class="n">4</td><td>Elko, kurzes Bein</td><td>DFPlayer <code>GND</code> (Pin 7)</td><td></td></tr>
+          <tr><td class="n">5</td><td>5-V-Verteiler</td><td>ESP32 <code>5V</code> (auch <code>VIN</code> genannt)</td><td>Deckelkabel. Nicht an <code>3V3</code></td></tr>
+          <tr><td class="n">6</td><td>5-V-Verteiler</td><td>DFPlayer <code>VCC</code> (Pin 1)</td><td></td></tr>
+          <tr><td class="n">7</td><td>ESP32 <code>5V</code></td><td><code>+</code> beider LED-Streifen</td><td>Auf der Deckelplatine</td></tr>
+          <tr><td class="n">8</td><td>GND-Verteiler</td><td>ESP32 <code>GND</code></td><td>Deckelkabel</td></tr>
+          <tr><td class="n">9</td><td>GND-Verteiler</td><td>DFPlayer <code>GND</code> (Pin 7)</td><td></td></tr>
+          <tr><td class="n">10</td><td>ESP32 <code>GND</code></td><td>Ein Bein jedes Tasters und beide Emitter</td><td>Auf der Deckelplatine</td></tr>
+          <tr><td class="n">11</td><td>ESP32 <code>GPIO17</code></td><td>1 kΩ, dann DFPlayer <code>RX</code> (Pin 2)</td><td>Deckelkabel. Widerstand direkt am DFPlayer</td></tr>
+          <tr><td class="n">12</td><td>ESP32 <code>GPIO16</code></td><td>DFPlayer <code>TX</code> (Pin 3)</td><td>Deckelkabel</td></tr>
+          <tr><td class="n">13</td><td>ESP32 <code>GPIO4</code></td><td>DFPlayer <code>BUSY</code> (Pin 16)</td><td>Deckelkabel</td></tr>
+          <tr><td class="n">14</td><td>DFPlayer <code>SPK_1</code> (Pin 6)</td><td>Lautsprecher</td><td>Welche Ader wohin, ist egal</td></tr>
+          <tr><td class="n">15</td><td>DFPlayer <code>SPK_2</code> (Pin 8)</td><td>Lautsprecher</td><td>Nie an GND. Kein Widerstand mehr</td></tr>
+          <tr><td class="n">16</td><td>ESP32 <code>GPIO25</code></td><td>Taster Zurück, freies Bein</td><td>Auf der Deckelplatine</td></tr>
+          <tr><td class="n">17</td><td>ESP32 <code>GPIO26</code></td><td>Taster Weiter, freies Bein</td><td>Auf der Deckelplatine</td></tr>
+          <tr><td class="n">18</td><td>ESP32 <code>GPIO27</code></td><td>Taster Sirene, freies Bein</td><td>Auf der Deckelplatine</td></tr>
+          <tr><td class="n">19</td><td>ESP32 <code>GPIO32</code></td><td>1 kΩ, dann Basis Transistor Rot</td><td>Auf der Deckelplatine</td></tr>
+          <tr><td class="n">20</td><td>ESP32 <code>GPIO33</code></td><td>1 kΩ, dann Basis Transistor Blau</td><td>Auf der Deckelplatine</td></tr>
+          <tr><td class="n">21</td><td>Kollektor Transistor Rot</td><td>Roter LED-Streifen <code>−</code></td><td>Auf der Deckelplatine</td></tr>
+          <tr><td class="n">22</td><td>Kollektor Transistor Blau</td><td>Blauer LED-Streifen <code>−</code></td><td>Auf der Deckelplatine</td></tr>
+          <tr><td class="n">23</td><td>DFPlayer <code>DAC_L</code> (Pin 5)</td><td>Kondensator 100 nF bis 1 µF, dann ESP32 <code>GPIO34</code></td><td>Deckelkabel. Musiklicht. Keramik oder Folie, kein Elko</td></tr>
+          <tr><td class="n">24</td><td>ESP32 <code>3V3</code></td><td>100 kΩ, dann ESP32 <code>GPIO34</code></td><td>Musiklicht</td></tr>
+          <tr><td class="n">25</td><td>ESP32 <code>GND</code></td><td>100 kΩ, dann ESP32 <code>GPIO34</code></td><td>Musiklicht</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <pre class="tree">DFPlayer von oben, SD-Schacht zeigt nach unten
+
+ VCC    1 ┌──────────────┐ 16  BUSY
+ RX     2 │              │ 15  USB−
+ TX     3 │              │ 14  USB+
+ DAC_R  4 │   DFPlayer   │ 13  ADKEY_2
+ DAC_L  5 │     Mini     │ 12  ADKEY_1
+ SPK_1  6 │              │ 11  IO_2
+ GND    7 │  ┌────────┐  │ 10  GND
+ SPK_2  8 └──┤ microSD ├──┘  9  IO_1</pre>
+    <p class="note">Transistor BC337: flache Seite zu dir, Beine nach unten, dann von links nach rechts Kollektor, Basis, Emitter. Beim 2N2222 im gleichen Gehäuse ist es umgekehrt. Taster mit vier Beinen: nimm zwei Beine, die sich diagonal gegenüberliegen.</p>
+  </section>
+
+  <section>
+    <h2>Ordner auf der SD-Karte</h2>
+    <pre class="tree">mp3/0001.mp3   erstes Lied
+mp3/0002.mp3   zweites Lied, und so weiter
+01/001.mp3     Feuerwehrsirene
+01/002.mp3     zweite Sirene, wenn du magst</pre>
+    <p class="note">Leg deine Lieder in einen Ordner, der genau <code>mp3</code> heißt, und fang bei <code>0001</code> an. Hinter den vier Ziffern darf noch Text stehen. Sirenen legst du am einfachsten als normale Lieder in den Ordner <code>mp3</code> und trägst ihre Nummern auf der Einstellseite ein. Der Ordner <code>01</code> ist nur der Ersatz, falls dort nichts eingetragen ist.</p>
+  </section>
+
+  <section>
+    <h2>Einstellen und Updates per WLAN</h2>
+    <ul class="checks">
+      <li><strong>Einstellmodus:</strong> Den Sirenenknopf gedrückt halten und das Radio einschalten. Beide Leuchtleisten leuchten dauerhaft, das ist das Zeichen. Mit dem Handy ins WLAN <code>Radio-Radio</code> gehen (Passwort <code>legoradio</code>) und im Browser <code>192.168.4.1</code> öffnen.</li>
+      <li><strong>Lieder:</strong> Anzahl der Lieder, höchste Lautstärke und Lautstärke beim Einschalten. Steht dort 0, merkt sich das Radio die letzte Lautstärke.</li>
+      <li><strong>Wiederholen:</strong> alle Lieder der Reihe nach, immer dasselbe Lied, nach jedem Lied anhalten oder zufällige Reihenfolge. Dazu ein Haken, ob das Radio beim Einschalten sofort losspielt.</li>
+      <li><strong>Sirene:</strong> Du trägst die Nummern der Lieder ein, die als Sirene gelten, zum Beispiel <code>12,13</code>. Diese Lieder liegen ganz normal im Ordner <code>mp3</code>, werden beim Weiterschalten übersprungen und laufen nur über den Sirenenknopf, mit Blaulicht. Das Blinkmuster wählst du aus zwei Arten.</li>
+      <li><strong>Musiklicht:</strong> an oder aus, dazu die Empfindlichkeit.</li>
+      <li><strong>Name und Titel:</strong> nur für ein Display. Der Name steht außerdem hinter <code>Radio-</code> im WLAN-Namen.</li>
+      <li><strong>Neue Software und neue Module ohne Kabel:</strong> Kommt später ein Modul dazu, bekommt das Radio neuen Code. In der Arduino-IDE „Sketch → Kompilierte Binärdatei exportieren“ wählen und auf der Einstellseite die Datei hochladen, deren Name auf <code>.ino.bin</code> endet.</li>
+      <li><strong>Normalbetrieb:</strong> Das WLAN ist aus, das spart Batterie.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Den ESP32 ohne USB-Buchse bespielen</h2>
+    <p class="note">Das geht einmal über den ESP32-S3 als Brücke, danach nur noch per WLAN. Den S3-Weg habe ich nicht ausprobieren können. Klappt er nicht, macht ein USB-Seriell-Adapter (CP2102 oder CH340, 3,3 V, etwa 3 €) dasselbe mit derselben Verdrahtung.</p>
+    <ol class="checks">
+      <li>Den Brücken-Sketch unten auf den <strong>ESP32-S3</strong> laden. Unter „Werkzeuge“ vorher „USB CDC On Boot: Enabled“ wählen. Hat der S3 zwei USB-Buchsen, nimm ab jetzt die mit der Aufschrift „USB“.</li>
+      <li>Vier Adern stecken: S3 <code>GPIO17</code> an ESP32 <code>RX</code> (GPIO3). S3 <code>GPIO18</code> an ESP32 <code>TX</code> (GPIO1). <code>GND</code> an <code>GND</code>. S3 <code>5V</code> an ESP32 <code>5V</code>.</li>
+      <li>In der Arduino-IDE das Board „ESP32 Dev Module“ wählen, als Port den S3, und die Upload-Geschwindigkeit auf <strong>115200</strong> stellen.</li>
+      <li>Am ESP32 die Taste <code>BOOT</code> gedrückt halten, kurz <code>EN</code> drücken, <code>BOOT</code> loslassen. Jetzt „Hochladen“ klicken. Danach einmal <code>EN</code> drücken.</li>
+    </ol>
+    <div class="codebox"><button class="act copy" type="button">Kopieren</button><pre id="code2"></pre></div>
+  </section>
+
+  <section>
+    <h2>Code für das Radio</h2>
+    <div class="codebox"><button class="act copy" type="button">Kopieren</button><pre id="code"></pre></div>
+    <p class="note">Für die Arduino-IDE, Board „ESP32 Dev Module“. Eine Bibliothek installieren: „DFRobotDFPlayerMini“. Der Code hat eine Syntaxprüfung bestanden, ist aber nicht mit der echten ESP32-Umgebung kompiliert und nicht auf Hardware getestet.</p>
+  </section>
+</div>
+
+<script type="text/plain" id="src">
+// ===================== Lego-Radio =====================
+// Bibliothek: DFRobotDFPlayerMini (mit Display zusätzlich: LiquidCrystal I2C)
+#include <Arduino.h>
+#include <WiFi.h>
+#include <WebServer.h>
+#include <Update.h>
+#include <Preferences.h>
+#include <DFRobotDFPlayerMini.h>
+
+// ---------- Einstellungen ----------
+#define USE_LCD 0                      // 0 = ohne Display, 1 = Display angeschlossen
+#define LCD_I2C 1                      // 1 = Display mit I2C-Adapter (4 Pins), 0 = Display mit 16 Pins
+const uint8_t LCD_ADDR = 0x27;         // bleibt das Display leer: 0x3F probieren
+const char* AP_PASSWORD = "legoradio"; // WLAN-Passwort im Einstellmodus (mind. 8 Zeichen)
+const char* VERSION = "1.1";           // steht auf der Einstellseite
+// Alles andere stellst du auf der Einstellseite im WLAN ein.
+
+const int PIN_PREV = 25, PIN_NEXT = 26, PIN_SIREN = 27;
+const int PIN_BUSY = 4, PIN_RED = 32, PIN_BLUE = 33, PIN_AUDIO = 34;
+
+#if USE_LCD
+#if LCD_I2C
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(LCD_ADDR, 16, 2);
+#else
+#include <LiquidCrystal.h>
+LiquidCrystal lcd(13, 14, 18, 19, 21, 22);   // RS, E, D4, D5, D6, D7
+#endif
+#endif
+
+HardwareSerial dfSerial(2);
+DFRobotDFPlayerMini player;
+Preferences prefs;
+WebServer server(80);
+
+// ---------- gespeicherte Werte ----------
+String childName, titles;      // titles: ein Titel pro Zeile
+String sirenList;              // Nummern der Sirenen-Lieder im Ordner mp3, z. B. "12,13"
+int songCount, volMax, volume, track;
+int repeatMode;                // 0 = alle der Reihe nach, 1 = dasselbe Lied, 2 = anhalten, 3 = Zufall
+int startVol;                  // 0 = letzte Lautstärke merken, sonst fester Startwert
+int blinkMode;                 // 0 = Doppelblitz, 1 = ruhiger Wechsel
+int musicMin;                  // Empfindlichkeit Musiklicht, kleiner = empfindlicher
+bool autoplay, musicLightsOn;
+int sirenTracks[10], sirenN = 0;
+
+enum Mode { IDLE, MUSIC, SIREN };
+Mode mode = IDLE;
+bool setupMode = false, musicWasOn = false;
+int sirenCount = 1, sirenNo = 0;
+unsigned long lastCmd = 0, volShownUntil = 0, titleSince = 0, dirtySince = 0;
+bool dirty = false;
+String nameLcd, titleLcd, shown[2];
+
+// ---------- Display ----------
+// macht aus ä ö ü ß die Zeichen, die das Display kennt
+String lcdText(const String &s) {
+  String o;
+  for (size_t i = 0; i < s.length(); i++) {
+    uint8_t c = s[i];
+    if (c == 0xC3 && i + 1 < s.length()) {
+      uint8_t d = s[++i];
+      if (d == 0xA4 || d == 0x84) o += (char)0xE1;        // ä Ä
+      else if (d == 0xB6 || d == 0x96) o += (char)0xEF;   // ö Ö
+      else if (d == 0xBC || d == 0x9C) o += (char)0xF5;   // ü Ü
+      else if (d == 0x9F) o += (char)0xE2;                // ß
+      else o += '?';
+    } else if (c >= 0x20 && c < 0x80) o += (char)c;
+  }
+  return o;
+}
+
+String center(const String &s) {
+  String o;
+  for (int i = 0; i < (16 - (int)s.length()) / 2; i++) o += ' ';
+  return o + s;
+}
+
+void putLine(int row, String s) {
+  while (s.length() < 16) s += ' ';
+  s = s.substring(0, 16);
+  if (s == shown[row]) return;
+  shown[row] = s;
+#if USE_LCD
+  lcd.setCursor(0, row);
+  lcd.print(s);
+#endif
+}
+
+String titleOf(int n) {
+  int start = 0;
+  for (int i = 1; i < n; i++) {
+    int nl = titles.indexOf('\n', start);
+    if (nl < 0) return "";
+    start = nl + 1;
+  }
+  int end = titles.indexOf('\n', start);
+  if (end < 0) end = titles.length();
+  String t = titles.substring(start, end);
+  t.trim();
+  return t;
+}
+
+void refreshDisplay() {
+  unsigned long t = millis();
+  if (mode == SIREN) {
+    String st = sirenN > 0 ? lcdText(titleOf(sirenTracks[sirenNo - 1])) : String("");
+    putLine(0, center("SIRENE"));
+    putLine(1, center(st.length() ? st : String("Tatue Tata!")));
+    return;
+  }
+  putLine(0, center(nameLcd));
+  if (t < volShownUntil) { putLine(1, lcdText("Lautstärke ") + String(volume)); return; }
+  if (mode == IDLE) { putLine(1, lcdText(" Knopf drücken")); return; }
+  if (titleLcd.length() <= 16) { putLine(1, center(titleLcd)); return; }
+  String run = titleLcd + "   ";                 // langer Titel läuft durch
+  int n = run.length(), off = 0;
+  if (t - titleSince > 1500) off = ((t - titleSince - 1500) / 350) % n;
+  String s;
+  for (int i = 0; i < 16; i++) s += run[(off + i) % n];
+  putLine(1, s);
+}
+
+// ---------- Ton und Licht ----------
+void leds(bool red, bool blue) {
+  digitalWrite(PIN_RED, red ? HIGH : LOW);
+  digitalWrite(PIN_BLUE, blue ? HIGH : LOW);
+}
+
+void markDirty() { dirty = true; dirtySince = millis(); }
+
+// ---------- Liedauswahl ----------
+void parseSirens() {
+  sirenN = 0;
+  int start = 0;
+  while (start < (int)sirenList.length() && sirenN < 10) {
+    int c = sirenList.indexOf(',', start);
+    if (c < 0) c = sirenList.length();
+    int n = sirenList.substring(start, c).toInt();
+    if (n > 0) sirenTracks[sirenN++] = n;
+    start = c + 1;
+  }
+}
+
+bool isSiren(int n) {
+  for (int i = 0; i < sirenN; i++) if (sirenTracks[i] == n) return true;
+  return false;
+}
+
+// nächstes (dir = 1) oder vorheriges (dir = -1) Lied, Sirenen werden übersprungen
+void stepTrack(int dir) {
+  for (int i = 0; i < songCount; i++) {
+    track = (track - 1 + dir + songCount) % songCount + 1;
+    if (!isSiren(track)) return;
+  }
+}
+
+void randomTrack() {
+  for (int i = 0; i < 30; i++) {
+    int n = random(1, songCount + 1);
+    if (n != track && !isSiren(n)) { track = n; return; }
+  }
+  stepTrack(1);
+}
+
+void playTrack() {
+  leds(false, false);
+  player.playMp3Folder(track);                   // spielt /mp3/0001.mp3 usw.
+  mode = MUSIC;
+  lastCmd = millis();
+  titleLcd = lcdText(titleOf(track));
+  if (titleLcd.length() == 0) titleLcd = "Lied " + String(track);
+  titleSince = millis();
+  markDirty();
+}
+
+void startSiren() {
+  musicWasOn = (mode == MUSIC);
+  if (sirenN > 0) {                              // Sirenen-Lieder aus dem Ordner mp3
+    sirenNo = sirenNo % sirenN + 1;
+    player.playMp3Folder(sirenTracks[sirenNo - 1]);
+  } else {                                       // sonst /01/001.mp3 usw.
+    sirenNo = sirenNo % sirenCount + 1;
+    player.playFolder(1, sirenNo);
+  }
+  mode = SIREN;
+  lastCmd = millis();
+}
+
+void endSiren() {
+  leds(false, false);
+  if (musicWasOn) { playTrack(); return; }
+  player.stop();
+  mode = IDLE;
+}
+
+void changeVolume(int d) {
+  volume = constrain(volume + d, 0, volMax);
+  player.volume(volume);
+  volShownUntil = millis() + 1500;
+  markDirty();
+}
+
+void musicLights() {
+  static float avg = 0;
+  static unsigned long redUntil = 0;
+  int lo = 4095, hi = 0;
+  for (int i = 0; i < 120; i++) {
+    int v = analogRead(PIN_AUDIO);
+    if (v < lo) lo = v;
+    if (v > hi) hi = v;
+  }
+  int level = hi - lo;
+  avg = avg * 0.95 + level * 0.05;
+  unsigned long t = millis();
+  if (level > avg * 1.5 && level > musicMin) redUntil = t + 70;   // Schlag
+  leds(t < redUntil, level > avg * 1.1 && level > musicMin);
+}
+
+// ---------- Taster ----------
+struct Button { int pin; bool down; bool held; unsigned long since; unsigned long lastRepeat; };
+Button bPrev  = { PIN_PREV,  false, false, 0, 0 };
+Button bNext  = { PIN_NEXT,  false, false, 0, 0 };
+Button bSiren = { PIN_SIREN, false, false, 0, 0 };
+
+// 0 = nichts, 1 = kurz gedrückt, 2 = wird gehalten (wiederholt sich)
+int readButton(Button &b) {
+  bool now = digitalRead(b.pin) == LOW;
+  unsigned long t = millis();
+  int ev = 0;
+  if (now && !b.down) { b.down = true; b.held = false; b.since = t; }
+  else if (now && b.down) {
+    if (!b.held && t - b.since > 600) { b.held = true; b.lastRepeat = t; ev = 2; }
+    else if (b.held && t - b.lastRepeat > 250) { b.lastRepeat = t; ev = 2; }
+  } else if (!now && b.down) {
+    b.down = false;
+    if (!b.held && t - b.since > 30) ev = 1;
+  }
+  return ev;
+}
+
+// ---------- Einstellseite im WLAN ----------
+String opt(int v, int cur, const char *label) {
+  return String("<option value=") + String(v) + (v == cur ? " selected>" : ">") + label + "</option>";
+}
+
+String esc(String s) {
+  s.replace("&", "&amp;"); s.replace("<", "&lt;"); s.replace(">", "&gt;"); s.replace("\"", "&quot;");
+  return s;
+}
+
+void handleRoot() {
+  String h = F("<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
+               "<title>Lego-Radio</title><style>body{font-family:sans-serif;max-width:480px;margin:auto;padding:16px}"
+               "input,textarea,button{width:100%;font-size:16px;margin:4px 0 14px;padding:8px;box-sizing:border-box}"
+               "textarea{height:220px}input[type=checkbox]{width:auto;margin-right:8px}label{display:block;margin:4px 0 14px}"
+               "</style><h2>Lego-Radio</h2><form method=post action=/save>"
+               "Name (steht im WLAN-Namen und im Display)<input name=name maxlength=16 value=\"");
+  h += esc(childName);
+  h += F("\">Anzahl Lieder im Ordner mp3<input name=count type=number min=1 max=999 value=");
+  h += String(songCount);
+  h += F(">Höchste Lautstärke (1 bis 30)<input name=volmax type=number min=1 max=30 value=");
+  h += String(volMax);
+  h += F(">Lautstärke beim Einschalten (0 = die letzte merken)<input name=startvol type=number min=0 max=30 value=");
+  h += String(startVol);
+  h += F(">Wiederholen<select name=repeat style='width:100%;font-size:16px;margin:4px 0 14px;padding:8px'>");
+  h += opt(0, repeatMode, "Alle Lieder der Reihe nach, endlos");
+  h += opt(1, repeatMode, "Immer dasselbe Lied");
+  h += opt(2, repeatMode, "Nach jedem Lied anhalten");
+  h += opt(3, repeatMode, "Zufällige Reihenfolge");
+  h += F("</select><label><input type=checkbox name=autoplay");
+  h += autoplay ? " checked" : "";
+  h += F(">Beim Einschalten sofort losspielen</label>"
+         "Sirenen-Lieder: Nummern im Ordner mp3, mit Komma getrennt. Leer = Ordner 01<input name=sirens maxlength=60 value=\"");
+  h += esc(sirenList);
+  h += F("\">Blinken bei Sirene<select name=blink style='width:100%;font-size:16px;margin:4px 0 14px;padding:8px'>");
+  h += opt(0, blinkMode, "Doppelblitz im Wechsel");
+  h += opt(1, blinkMode, "Ruhiger Wechsel");
+  h += F("</select><label><input type=checkbox name=mlights");
+  h += musicLightsOn ? " checked" : "";
+  h += F(">Leuchtleisten blinken zur Musik</label>"
+         "Empfindlichkeit Musiklicht (kleiner = empfindlicher)<input name=mmin type=number min=10 max=2000 value=");
+  h += String(musicMin);
+  h += F(">Titel, einer pro Zeile. Zeile 1 gehört zu 0001.mp3<textarea name=titles maxlength=3500>");
+  h += esc(titles);
+  h += F("</textarea><button>Speichern</button></form>"
+         "<h3>Neue Software</h3><form method=post action=/update enctype=multipart/form-data>"
+         "<input type=file name=f accept=.bin><button>Hochladen</button></form>"
+         "<form method=post action=/restart><button>Fertig, Radio neu starten</button></form><p>Version ");
+  h += VERSION;
+  server.send(200, "text/html", h);
+}
+
+void handleSave() {
+  childName = server.arg("name");
+  songCount = constrain(server.arg("count").toInt(), 1, 999);
+  volMax = constrain(server.arg("volmax").toInt(), 1, 30);
+  titles = server.arg("titles");
+  titles.replace("\r", "");
+  startVol = constrain(server.arg("startvol").toInt(), 0, 30);
+  repeatMode = constrain(server.arg("repeat").toInt(), 0, 3);
+  blinkMode = constrain(server.arg("blink").toInt(), 0, 1);
+  musicMin = constrain(server.arg("mmin").toInt(), 10, 2000);
+  autoplay = server.hasArg("autoplay");
+  musicLightsOn = server.hasArg("mlights");
+  sirenList = server.arg("sirens");
+  parseSirens();
+  prefs.putInt("startvol", startVol);
+  prefs.putInt("repeat", repeatMode);
+  prefs.putInt("blink", blinkMode);
+  prefs.putInt("mmin", musicMin);
+  prefs.putBool("autoplay", autoplay);
+  prefs.putBool("mlights", musicLightsOn);
+  prefs.putString("sirens", sirenList);
+  if (volume > volMax) volume = volMax;
+  if (track > songCount) track = 1;
+  prefs.putString("name", childName);
+  prefs.putString("titles", titles);
+  prefs.putInt("count", songCount);
+  prefs.putInt("volmax", volMax);
+  prefs.putInt("vol", volume);
+  prefs.putInt("track", track);
+  server.sendHeader("Location", "/");
+  server.send(303, "text/plain", "");
+}
+
+void handleUpdateDone() {
+  server.send(200, "text/html", Update.hasError() ? "<meta charset=utf-8>Fehler beim Update. <a href=/>Zurück</a>"
+                                                  : "<meta charset=utf-8>Update fertig. Das Radio startet neu.");
+  delay(800);
+  if (!Update.hasError()) ESP.restart();
+}
+
+void handleUpdateData() {
+  HTTPUpload &up = server.upload();
+  if (up.status == UPLOAD_FILE_START) Update.begin(UPDATE_SIZE_UNKNOWN);
+  else if (up.status == UPLOAD_FILE_WRITE) Update.write(up.buf, up.currentSize);
+  else if (up.status == UPLOAD_FILE_END) Update.end(true);
+}
+
+void handleRestart() {
+  server.send(200, "text/html", "<meta charset=utf-8>Das Radio startet neu.");
+  delay(800);
+  ESP.restart();
+}
+
+void startSetupMode() {
+  String ssid = "Radio-";
+  for (size_t i = 0; i < childName.length() && ssid.length() < 16; i++) if (isalnum((uint8_t)childName[i])) ssid += childName[i];
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP(ssid.c_str(), AP_PASSWORD);
+  server.on("/", HTTP_GET, handleRoot);
+  server.on("/save", HTTP_POST, handleSave);
+  server.on("/update", HTTP_POST, handleUpdateDone, handleUpdateData);
+  server.on("/restart", HTTP_POST, handleRestart);
+  server.begin();
+  leds(true, true);                          // beide Leuchtleisten an = Einstellmodus
+  putLine(0, ssid);
+  putLine(1, WiFi.softAPIP().toString());
+}
+
+// ---------- Start ----------
+void setup() {
+  pinMode(PIN_PREV, INPUT_PULLUP);
+  pinMode(PIN_NEXT, INPUT_PULLUP);
+  pinMode(PIN_SIREN, INPUT_PULLUP);
+  pinMode(PIN_BUSY, INPUT);
+  pinMode(PIN_RED, OUTPUT);
+  pinMode(PIN_BLUE, OUTPUT);
+  leds(false, false);
+
+  prefs.begin("radio", false);
+  childName = prefs.getString("name", "Radio");
+  titles    = prefs.getString("titles", "");
+  songCount = prefs.getInt("count", 10);
+  volMax    = prefs.getInt("volmax", 20);
+  volume    = constrain(prefs.getInt("vol", 12), 0, volMax);
+  track     = constrain(prefs.getInt("track", 1), 1, songCount);
+  nameLcd   = lcdText(childName);
+  startVol  = prefs.getInt("startvol", 0);
+  repeatMode = prefs.getInt("repeat", 0);
+  blinkMode = prefs.getInt("blink", 0);
+  musicMin  = prefs.getInt("mmin", 60);
+  autoplay  = prefs.getBool("autoplay", true);
+  musicLightsOn = prefs.getBool("mlights", true);
+  sirenList = prefs.getString("sirens", "");
+  parseSirens();
+  if (startVol > 0) volume = min(startVol, volMax);
+  if (isSiren(track)) stepTrack(1);
+  randomSeed(micros());
+
+#if USE_LCD
+#if LCD_I2C
+  lcd.init();
+  lcd.backlight();
+#else
+  lcd.begin(16, 2);
+#endif
+#endif
+
+  delay(50);
+  if (digitalRead(PIN_SIREN) == LOW) {       // Sirenenknopf beim Einschalten gehalten
+    setupMode = true;
+    startSetupMode();
+    return;
+  }
+  WiFi.mode(WIFI_OFF);                       // im Normalbetrieb kein WLAN, spart Batterie
+
+  putLine(0, center(nameLcd));
+  putLine(1, center("startet..."));
+  dfSerial.begin(9600, SERIAL_8N1, 16, 17);  // RX = 16, TX = 17
+  delay(1500);                               // der DFPlayer braucht kurz
+  if (!player.begin(dfSerial)) {
+    putLine(1, "SD-Karte fehlt?");
+    delay(2000);
+  }
+  player.volume(volume);
+  int n = player.readFileCountsInFolder(1);
+  if (n > 0) sirenCount = n;
+  if (autoplay) playTrack();
+  dirty = false;
+}
+
+void loop() {
+  if (setupMode) { server.handleClient(); delay(2); return; }
+
+  int e = readButton(bNext);
+  if (e == 1) { if (repeatMode == 3) randomTrack(); else stepTrack(1); playTrack(); }
+  if (e == 2) changeVolume(+1);
+
+  e = readButton(bPrev);
+  if (e == 1) { stepTrack(-1); playTrack(); }
+  if (e == 2) changeVolume(-1);
+
+  if (readButton(bSiren) == 1) {
+    if (mode == SIREN) endSiren(); else startSiren();
+  }
+
+  // BUSY ist HIGH, wenn nichts mehr läuft
+  if (mode != IDLE && millis() - lastCmd > 1500 && digitalRead(PIN_BUSY) == HIGH) {
+    if (mode == SIREN) endSiren();
+    else if (repeatMode == 2) { mode = IDLE; leds(false, false); }   // nach dem Lied anhalten
+    else {
+      if (repeatMode == 0) stepTrack(1);
+      else if (repeatMode == 3) randomTrack();
+      playTrack();                               // bei 1 läuft dasselbe Lied nochmal
+    }
+  }
+
+  if (mode == SIREN) {
+    unsigned long t = millis();
+    if (blinkMode == 0) {                      // Doppelblitz im Wechsel
+      unsigned long p = t % 600;
+      bool flash = (p / 75) % 2 == 0;
+      leds(p < 300 && flash, p >= 300 && flash);
+    } else {                                   // ruhiger Wechsel
+      leds(t % 1000 < 500, t % 1000 >= 500);
+    }
+  } else if (mode == MUSIC && musicLightsOn) {
+    musicLights();
+  }
+
+  // Lautstärke und Lied merken, 3 Sekunden nach der letzten Änderung
+  if (dirty && millis() - dirtySince > 3000) {
+    prefs.putInt("vol", volume);
+    prefs.putInt("track", track);
+    dirty = false;
+  }
+
+  refreshDisplay();
+  delay(5);
+}
+</script>
+<script type="text/plain" id="src2">
+// ESP32-S3 als USB-Seriell-Brücke
+// Werkzeuge > "USB CDC On Boot": Enabled
+uint8_t buf[512];
+
+void setup() {
+  Serial.begin(115200);
+  Serial1.begin(115200, SERIAL_8N1, 18, 17);   // RX = 18, TX = 17
+}
+
+void loop() {
+  int n = Serial.available();
+  if (n > 0) {
+    n = Serial.readBytes(buf, n > 512 ? 512 : n);
+    Serial1.write(buf, n);
+  }
+  n = Serial1.available();
+  if (n > 0) {
+    n = Serial1.readBytes(buf, n > 512 ? 512 : n);
+    Serial.write(buf, n);
+  }
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+  [['code','src'],['code2','src2']].forEach(p=>{document.getElementById(p[0]).textContent=document.getElementById(p[1]).textContent.trim();});
+  document.querySelectorAll('.codebox .copy').forEach(btn=>{
+    const pre=btn.parentNode.querySelector('pre');
+    btn.addEventListener('click',()=>{
+      const done=()=>{btn.textContent='Kopiert';setTimeout(()=>btn.textContent='Kopieren',1500);};
+      const sel=()=>{const r=document.createRange();r.selectNodeContents(pre);const s=getSelection();s.removeAllRanges();s.addRange(r);};
+      try{navigator.clipboard.writeText(pre.textContent).then(done,sel);}catch(e){sel();}
+    });
+  });
+})();
+(function(){
+  const P=8,H=9.6,PL=3.2,NX=13,ROWS=5,yR=r=>PL+r*H;
+  // ---------- Teile (eine Quelle fuer 3D-Modell und Bauplaene) ----------
+  const recs=[];
+  const add=(step,kind,i,j,ni,nj,y,mat,grp)=>recs.push({step,kind,i,j,ni,nj,y,mat,grp:grp||'shell'});
+  function run(step,kind,side,a,b,y,mat,grp){let i=a;while(i<b){const rem=b-i,len=rem===5?3:Math.min(kind==='plate'?6:4,rem);
+    if(side==='back')add(step,kind,i,0,len,1,y,mat,grp);else if(side==='front')add(step,kind,i,7,len,1,y,mat,grp||'front');
+    else if(side==='left')add(step,kind,0,i,1,len,y,mat,grp);else add(step,kind,NX-1,i,1,len,y,mat,grp);i+=len;}}
+  function ring(step,r){
+    const ev=r%2===0,fa=ev?0:1,fb=ev?NX:NX-1,sa=ev?1:0,sb=ev?7:8,m='row'+r,y=yR(r);
+    if(r===2){run(step,'brick','back',0,6,y,m);run(step,'brick','back',8,NX,y,m);}else run(step,'brick','back',fa,fb,y,m);
+    run(step,'brick','left',sa,sb,y,m);
+    if(r===2){run(step,'brick','right',1,4,y,m);add(step,'plate',NX-1,4,1,3,y,m);}else run(step,'brick','right',sa,sb,y,m);
+    if(r<=2){
+      if(ev)add(step,'brick',0,7,1,1,y,m,'front');
+      add(step,'brick',2,7,1,1,y,m,'front');add(step,'brick',4,7,1,1,y,m,'front');
+      run(step,'brick','front',6,fb,y,m);
+    } else run(step,'brick','front',fa,fb,y,m);
+  }
+  add(1,'plate',0,0,6,8,0,'base');add(1,'plate',6,0,6,8,0,'base');add(1,'plate',12,0,1,8,0,'base');
+  [[0,0],[11,0],[0,6],[11,6]].forEach(f=>add(1,'round',f[0],f[1],2,2,-PL,'acc'));
+  ring(2,0);add(2,'brick',10,4,2,2,yR(0),'ped','in');
+  ring(3,1);add(3,'brick',10,4,2,2,yR(1),'ped','in');
+  ring(4,2);add(4,'plate',10,4,2,2,yR(2),'ped','in');
+  ring(5,3);ring(6,4);
+  const yL=yR(ROWS);
+  run(7,'plate','back',1,NX-1,yL,'ring','roof');run(7,'plate','front',1,NX-1,yL,'ring','roof');
+  run(7,'plate','left',0,8,yL,'ring','roof');run(7,'plate','right',0,8,yL,'ring','roof');
+  [0,4].forEach(j=>{add(8,'slopeL',0,j,2,4,yL+PL,'slope','roof');add(8,'slopeR',NX-2,j,2,4,yL+PL,'slope','roof');});
+  for(let k=0;k<4;k++){add(8,'trans',2+2*k,7,2,1,yL+PL,'transR','roof');add(8,'trans',2+2*k,0,2,1,yL+PL,'transB','roof');}
+  add(8,'trans',10,7,1,1,yL+PL,'transR','roof');add(8,'trans',10,0,1,1,yL+PL,'transB','roof');
+  const yT=yL+PL+H;
+  add(9,'plate',1,1,8,2,yT,'top','roof');add(9,'plate',9,1,3,2,yT,'top','roof');
+  add(9,'plate',1,3,3,2,yT,'top','roof');add(9,'plate',4,3,8,2,yT,'top','roof');
+  add(9,'plate',1,5,8,2,yT,'top','roof');add(9,'plate',9,5,3,2,yT,'top','roof');
+
+  // ---------- Farben ----------
+  const R='#c8201f',Y='#f2b90c',B='#1f5fbf',G='#2e9d4f',O='#e8791c',K='#2aa7b8',V='#8a4fb0';
+  const cname={[R]:'rot',[Y]:'gelb',[B]:'blau',[G]:'grün',[O]:'orange'};
+  const mix=[R,Y,B,G,O,K,V,R,Y,B,G];
+  const rowCol=[R,O,Y,G,B];
+  let preset=0;
+  function css(r){
+    const m=r.mat;
+    if(m==='base')return '#4a5058';if(m==='ped')return '#7b8794';if(m==='transR')return '#ff3b3b';if(m==='transB')return '#3b7bff';
+    if(preset===0){const h=Math.abs(Math.sin(r.i*12.9898+r.j*78.233+r.y*3.7+r.ni*5.1)*43758.5453);return mix[Math.floor((h%1)*mix.length)];}
+    if(m.startsWith('row')){const k=+m.slice(3);return preset===1?rowCol[k]:(k<3?R:B);}
+    if(m==='ring'||m==='acc')return Y;
+    return B;
+  }
+  function colName(r){const m=r.mat;if(m==='base'||m==='ped')return '';if(m==='transR')return ' rot';if(m==='transB')return ' blau';if(preset===0)return '';return ' '+cname[css(r)];}
+
+  // ---------- Bauplaene ----------
+  const steps=[
+    {n:1,t:'Boden und Füße',h:'Platten, die zusammen 13 × 8 Noppen ergeben, zum Beispiel zweimal 6 × 8 und einmal 1 × 8. Darunter an jede Ecke eine Rundplatte 2 × 2 als Fuß. Die Füße kannst du weglassen.'},
+    {n:2,t:'Reihe 1',h:'Mauer ringsum. Vorne links entsteht das <strong>Lautsprechergitter</strong>: drei Noppen bleiben frei, dazwischen steht je ein Stein 1 × 1. Innen rechts ein Stein 2 × 2 als Sockel für den DFPlayer.'},
+    {n:3,t:'Reihe 2',h:'Wieder ringsum, die Fugen sind gegenüber Reihe 1 versetzt. Im Gitter kommen die Steine 1 × 1 genau auf die aus Reihe 1. Zweiter Stein 2 × 2 auf den Sockel.'},
+    {n:4,t:'Reihe 3 mit SD-Schlitz und Schalterlücke',h:'Rechts kommt statt eines Steins nur eine <strong>Platte 1 × 3</strong> in die Wand. Der Raum darüber ist der Schlitz für die SD-Karte. Hinten bleiben <strong>2 Noppen frei</strong> für den Schalter. Halt dein Batteriefach an die Rückwand und lass die Lücke dort, wo der Schalter wirklich sitzt, auch wenn das eine andere Reihe ist. Auf den Sockel kommt eine Platte 2 × 2. Gitter wie in Reihe 1.',x:[{t:'SD',x:107,z:46},{t:'Schalter',x:48,z:13}]},
+    {n:5,t:'Reihe 4',h:'Diese Reihe läuft vorne durch und deckt Gitter, Schlitz und Lücke nach oben ab.'},
+    {n:6,t:'Reihe 5, dann die Technik einsetzen',h:'Letzte Mauerreihe. Danach: <strong>Batteriefach</strong> hochkant an die Rückwand, Schalter in die Lücke, mit Klettband halten. <strong>Lautsprecher</strong> vorne links hinter das Gitter. <strong>DFPlayer</strong> auf den Sockel: Der SD-Schacht zeigt nach rechts, die Platine ragt 6 mm in den Schlitz und liegt dort auf der Platte 1 × 3. Steck eine Karte ein und prüf, dass sie knapp über die Wand übersteht, bevor du klebst. Adern 1 bis 4, 6, 9, 14 und 15 anlöten.',
+      e:[[10,8,84,16,'Batteriefach'],[10,32,40,24,'Lautsprecher'],[82,33,20,20,'DFPlayer']]},
+    {n:7,t:'Deckel: Plattenring',h:'Ab hier baust du den Deckel als eigenes Teil. Er wird am Ende nur aufgedrückt und nie festgeklebt. Zuerst ein Ring aus Platten, eine Noppe breit.'},
+    {n:8,t:'Deckel: Schrägen und Leuchtleisten',h:'Auf den Ring links und rechts je zwei <strong>Dachsteine 2 × 4</strong>, die Schräge zeigt nach außen. Dazwischen vorne die rote und hinten die blaue Leuchtleiste. Hast du transparente Steine, nimm die. Sonst setz auf jede zweite Noppe einen Stein 1 × 1 und lass die anderen frei. Die LED-Streifen klebst du innen dahinter, LEDs nach außen.',
+      e:[[27,54,50,2,''],[27,8,50,2,'']]},
+    {n:9,t:'Deckel: Platten bohren, Platine einkleben',h:'Sechs Platten oben drauf. In die mittlere lange Platte <strong>drei Löcher mit 4 mm</strong> bohren, jeweils genau durch die Mitte einer Noppe, mit einer Noppe Abstand dazwischen. Erst mit 2 mm vorbohren. Ein Stück Lochraster, 56 × 28 mm: oben die drei Taster im Abstand von 16 mm, unten der <strong>ESP32</strong>, daneben Transistoren, Widerstände und der Kondensator. Die Platine von unten an die Platten kleben, die Stößel schauen durch die Löcher. Alle übrigen Adern anlöten.',
+      e:[[24,26,56,28,'']],c:[[36,36],[52,36],[68,36]]},
+    {n:10,t:'Karte rein, Deckel drauf',h:'SD-Karte von rechts in den Schlitz schieben, bis sie im DFPlayer sitzt. Deckel aufdrücken, einschalten. Die Musik startet von selbst.',noplan:true}
+  ];
+  const kindName={brick:'Stein',plate:'Platte',trans:'Transparentstein',round:'Rundplatte',slopeL:'Dachstein 45°',slopeR:'Dachstein 45°'};
+  const partNo={brick11:3005,brick12:3004,brick13:3622,brick14:3010,brick22:3003,plate12:3023,plate13:3623,plate14:3710,plate16:3666,plate18:3460,plate22:3022,plate23:3021,plate28:3034,plate68:3036,trans12:3065,round22:4032,slope24:3037};
+  function renderSteps(){
+    const S=20,PW=NX*S,box=document.getElementById('steps');let html='';
+    steps.forEach(st=>{
+      const mine=recs.filter(r=>r.step===st.n);
+      const cnt={};mine.forEach(r=>{const a=Math.min(r.ni,r.nj),b=Math.max(r.ni,r.nj);const nr=partNo[r.kind.slice(0,5)+a+b];const k=kindName[r.kind]+' '+a+' × '+b+colName(r)+(nr?' ('+nr+')':'');cnt[k]=(cnt[k]||0)+1;});
+      const list=Object.keys(cnt).sort().map(k=>'<li>'+cnt[k]+' × '+k+'</li>').join('');
+      let svg='';
+      if(!st.noplan){
+        svg='<div class="plan"><svg viewBox="-24 -16 '+(PW+48)+' 204" role="img" aria-label="Plan Schritt '+st.n+'">';
+        svg+='<rect x="0" y="0" width="'+PW+'" height="160" fill="none" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="2 3"/>';
+        mine.forEach(r=>{
+          const x=r.i*S,y=r.j*S,w=r.ni*S,h=r.nj*S,c=css(r);
+          if(r.kind==='round'){svg+='<circle cx="'+(x+w/2)+'" cy="'+(y+h/2)+'" r="17" fill="'+c+'" stroke="#0008"/>';return;}
+          svg+='<rect x="'+(x+.5)+'" y="'+(y+.5)+'" width="'+(w-1)+'" height="'+(h-1)+'" rx="2" fill="'+c+'" fill-opacity="'+(r.kind==='trans'?.6:1)+'" stroke="#0009"/>';
+          if(r.kind==='slopeL'||r.kind==='slopeR'){const sx=r.kind==='slopeL'?x:x+S;svg+='<rect x="'+(sx+1)+'" y="'+(y+1)+'" width="'+(S-2)+'" height="'+(h-2)+'" fill="#fff" fill-opacity=".28"/>';
+            const ox=r.kind==='slopeL'?x+S:x;for(let b=0;b<r.nj;b++)svg+='<circle cx="'+(ox+10)+'" cy="'+(y+b*S+10)+'" r="5" fill="#0002" stroke="#0005"/>';return;}
+          if(r.ni*r.nj<=16)for(let a=0;a<r.ni;a++)for(let b=0;b<r.nj;b++)svg+='<circle cx="'+(x+a*S+10)+'" cy="'+(y+b*S+10)+'" r="5" fill="#0002" stroke="#0005"/>';
+          if(r.kind==='plate'&&r.ni*r.nj===3)svg+='<rect x="'+(x+3)+'" y="'+(y+3)+'" width="'+(w-6)+'" height="'+(h-6)+'" fill="none" stroke="#fff" stroke-dasharray="2 2"/>';
+        });
+        (st.e||[]).forEach(e=>{svg+='<rect class="el" x="'+e[0]*2.5+'" y="'+e[1]*2.5+'" width="'+e[2]*2.5+'" height="'+e[3]*2.5+'" rx="2"/>';
+          if(e[4])svg+='<text x="'+(e[0]+e[2]/2)*2.5+'" y="'+((e[1]+e[3]/2)*2.5+3)+'" text-anchor="middle">'+e[4]+'</text>';});
+        (st.c||[]).forEach(c=>{svg+='<circle cx="'+c[0]*2.5+'" cy="'+c[1]*2.5+'" r="5" fill="#111" stroke="#fff"/>';});
+        (st.x||[]).forEach(t=>{svg+='<text x="'+t.x*2.5+'" y="'+t.z*2.5+'">'+t.t+'</text>';});
+        svg+='<text class="cap" x="'+PW/2+'" y="182" text-anchor="middle">vorne</text><text class="cap" x="'+PW/2+'" y="-6" text-anchor="middle">hinten</text></svg></div>';
+      }
+      html+='<div class="step">'+(svg||'<div></div>')+'<div><h3><span>'+st.n+'</span>'+st.t+'</h3><p>'+st.h+'</p>'+(list?'<ul>'+list+'</ul>':'')+'</div></div>';
+    });
+    box.innerHTML=html;
+  }
+  renderSteps();
+
+  // ---------- 3D ----------
+  const stage=document.getElementById('stage');
+  const cbtn=k=>document.getElementById('c-'+k);
+  function markPreset(){[0,1,2].forEach(k=>cbtn(k).setAttribute('aria-pressed',String(k===preset)));}
+  if(!window.THREE||!THREE.OrbitControls){
+    document.getElementById('fallback').hidden=false;
+    [0,1,2].forEach(k=>cbtn(k).addEventListener('click',()=>{preset=k;markPreset();renderSteps();}));
+    return;
+  }
+  const W=NX*P,reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.outputEncoding=THREE.sRGBEncoding;
+  stage.appendChild(renderer.domElement);
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(32,1.6,1,2500);
+  camera.position.set(185,120,230);
+  const controls=new THREE.OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=true;controls.enablePan=false;controls.minDistance=140;controls.maxDistance=600;
+  controls.target.set(0,8,0);
+  scene.add(new THREE.HemisphereLight(0xffffff,0x8a93a6,0.5));
+  const sun=new THREE.DirectionalLight(0xffffff,0.6);sun.position.set(120,220,160);scene.add(sun);
+  const fill=new THREE.DirectionalLight(0xffffff,0.25);fill.position.set(-160,60,-120);scene.add(fill);
+
+  const root=new THREE.Group();root.position.set(-W/2,-32,-32);scene.add(root);
+  const G3={shell:new THREE.Group(),front:new THREE.Group(),roof:new THREE.Group(),in:new THREE.Group()};
+  root.add(G3.shell,G3.front,G3.roof,G3.in);
+  const gShell=G3.shell,gFront=G3.front,gRoof=G3.roof,gIn=G3.in;
+
+  const shellMats=[];
+  const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.4,metalness:0},o||{}));
+  const SM=c=>{const m=M(c);shellMats.push(m);return m;};
+  const transR=M(0xff2a2a,{transparent:true,opacity:.8,emissive:0xff0000,emissiveIntensity:0,roughness:.15});
+  const transB=M(0x2a6bff,{transparent:true,opacity:.8,emissive:0x0044ff,emissiveIntensity:0,roughness:.15});
+  recs.forEach(r=>{r.m=r.mat==='transR'?transR:r.mat==='transB'?transB:(r.grp==='in'||r.kind==='round')?M(0xffffff):SM(0xffffff);});
+  function paint(i){preset=i;recs.forEach(r=>{if(r.m!==transR&&r.m!==transB)r.m.color.set(css(r)).convertSRGBToLinear();});markPreset();renderSteps();}
+  [0,1,2].forEach(k=>cbtn(k).addEventListener('click',()=>paint(k)));
+
+  const edgeMat=new THREE.LineBasicMaterial({color:0x000000,transparent:true,opacity:.3});
+  const studGeo=new THREE.CylinderGeometry(2.4,2.4,1.7,20);
+  function withEdges(g,me,geo){const l=new THREE.LineSegments(new THREE.EdgesGeometry(geo),edgeMat);l.position.copy(me.position);l.rotation.copy(me.rotation);g.add(l);me.userData.edge=l;}
+  function box(g,x,y,z,w,h,d,m,edges){
+    const geo=new THREE.BoxGeometry(w,h,d);const me=new THREE.Mesh(geo,m);
+    me.position.set(x+w/2,y+h/2,z+d/2);g.add(me);if(edges!==false)withEdges(g,me,geo);return me;
+  }
+  function stud(g,x,y,z,m){const s=new THREE.Mesh(studGeo,m);s.position.set(x,y+.85,z);g.add(s);}
+  function cyl(g,x,y,z,r,h,m,axis){
+    const c=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,28),m);
+    if(axis==='z')c.rotation.x=Math.PI/2;
+    c.position.set(x,y,z);g.add(c);return c;
+  }
+  recs.forEach(r=>{
+    const g=G3[r.grp],m=r.m,x=r.i*P,z=r.j*P,w=r.ni*P,d=r.nj*P;
+    if(r.kind==='round'){cyl(root,x+w/2,r.y+PL/2,z+d/2,7.6,PL,m);return;}
+    if(r.kind==='slopeL'||r.kind==='slopeR'){
+      const sh=new THREE.Shape();
+      if(r.kind==='slopeL'){sh.moveTo(0,0);sh.lineTo(16,0);sh.lineTo(16,H);sh.lineTo(8,H);sh.lineTo(0,1.6);}
+      else{sh.moveTo(0,0);sh.lineTo(16,0);sh.lineTo(16,1.6);sh.lineTo(8,H);sh.lineTo(0,H);}
+      const geo=new THREE.ExtrudeGeometry(sh,{depth:d,bevelEnabled:false});const me=new THREE.Mesh(geo,m);
+      me.position.set(x,r.y,z);g.add(me);withEdges(g,me,geo);return;
+    }
+    const h=r.kind==='plate'?PL:H;
+    box(g,x,r.y,z,w,h,d,m);
+    const studs=r.kind==='trans'||r.mat==='top'||r.y===yR(ROWS-1)||(r.kind==='plate'&&r.ni*r.nj===3);
+    if(studs)for(let a=0;a<r.ni;a++)for(let b=0;b<r.nj;b++)stud(g,x+4+a*P,r.y+h,z+4+b*P,m);
+  });
+
+  // Deckel: Platine mit ESP32 unten und Tastern oben, LED-Streifen, Antenne
+  const metal=M(0xc9ced6,{metalness:.6,roughness:.3}),blk=M(0x22262c);
+  const TOP=yT+PL,pb=yT-5.2;
+  box(gRoof,24,pb,26,56,1.6,28,M(0x7a5a2b),false);
+  box(gRoof,26,pb-10.2,26,52,1.6,28,M(0x16181c));box(gRoof,28,pb-13.4,32,18,3.2,16,metal);box(gRoof,71,pb-12.8,36,7,2.6,8,metal,false);
+  for(let i=0;i<15;i++){box(gRoof,30+i*2.54,pb-8.6,27,.7,8.6,.7,M(0xd8b24a),false);box(gRoof,30+i*2.54,pb-8.6,52.3,.7,8.6,.7,M(0xd8b24a),false);}
+  [36,52,68].forEach(x=>{box(gRoof,x-3,pb+1.6,33,6,3.6,6,blk,false);cyl(gRoof,x,TOP-1.2,36,1.7,7,M(0x111317));});
+  box(gRoof,27,yL+PL+.6,54.6,50,8.4,1.2,M(0xf1ece0),false);box(gRoof,27,yL+PL+.6,8.2,50,8.4,1.2,M(0xf1ece0),false);
+  cyl(gRoof,12,TOP+2.5,12,2.4,5,blk);cyl(gRoof,12,TOP+26,12,1.1,44,metal);
+  const ball=new THREE.Mesh(new THREE.SphereGeometry(2.2,16,12),metal);ball.position.set(12,TOP+49,12);gRoof.add(ball);
+
+  // Innenleben
+  box(gIn,10,PL,8,84,48,16,blk);
+  box(gIn,52,24.5,3.5,8,5,4.5,M(0xe9e9e4),false);
+  box(gIn,10,PL,32,40,40,24,M(0x2d3138));
+  cyl(gIn,30,PL+20,56.3,14,.8,M(0x111317),'z');cyl(gIn,30,PL+20,56.7,5.5,.8,M(0x3a3f47),'z');
+  box(gIn,82,27.3,33,20,1.6,20,M(0x1d4e89));
+  box(gIn,88,28.9,36,14,1.9,14,metal);
+  box(gIn,83,28.9,39,4.5,1.2,8,blk,false);
+  const card=box(gIn,90.5,29.3,37.5,14,1,11,M(0xff7a1a));const cardX=card.position.x;
+
+  const sh=new THREE.Mesh(new THREE.CircleGeometry(100,48),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.07}));
+  sh.rotation.x=-Math.PI/2;sh.position.set(W/2,-3.6,32);root.add(sh);
+
+  const tags=[];
+  function tag(group,x,y,z,text,inside,below,back){
+    const o=new THREE.Object3D();o.position.set(x,y,z);group.add(o);
+    const el=document.createElement('div');el.className='tag'+(below?' below':'');el.textContent=text;stage.appendChild(el);
+    tags.push({o,el,inside,back});
+  }
+  tag(gShell,W+3,34,44,'Schlitz für die microSD');
+  tag(gRoof,52,TOP+8,36,'Zurück · Weiter · Sirene');
+  tag(gRoof,52,yL+PL,64,'Leuchtleiste rot, hinten blau',false,true);
+  tag(gFront,28,PL,64,'Lautsprechergitter',false,true);
+  tag(gShell,56,27,0,'Lücke für den Schalter',false,true,true);
+  tag(gIn,90,22,44,'DFPlayer Mini',true,true);
+  tag(gIn,30,34,50,'Lautsprecher',true);
+  tag(gIn,60,46,16,'Batteriefach 3 × AA',true);
+  tag(gRoof,52,pb-14,40,'ESP32 unter dem Deckel',true,true);
+
+  const state={mode:'closed',sd:false,siren:false,music:false},cur={roof:0,front:0,op:1,sd:0};
+  const goal={closed:{roof:0,front:0,op:1},see:{roof:0,front:0,op:.13},explode:{roof:56,front:54,op:1}};
+  const ease=t=>t*t*(3-2*t);
+  function setMode(m){state.mode=m;['closed','see','explode'].forEach(k=>document.getElementById('m-'+k).setAttribute('aria-pressed',String(k===m)));}
+  ['closed','see','explode'].forEach(k=>document.getElementById('m-'+k).addEventListener('click',()=>setMode(k)));
+  const sdBtn=document.getElementById('sd');
+  sdBtn.addEventListener('click',()=>{state.sd=!state.sd;sdBtn.textContent=state.sd?'SD-Karte einschieben':'SD-Karte herausziehen';});
+  const sirBtn=document.getElementById('siren');
+  sirBtn.addEventListener('click',()=>{state.siren=!state.siren;sirBtn.setAttribute('aria-pressed',String(state.siren));
+    sirBtn.textContent=state.siren?'Sirene aus':'Sirene an';});
+
+  // Beispielrhythmus: die Leuchtleisten folgen dem echten Ton
+  let actx=null,an=null,fd=null,timer=null,nextT=0,beat=0,noise=null,master=null;
+  const mel=[262,330,392,330,294,349,440,349];
+  function sched(t,b){
+    if(b%4===0){const o=actx.createOscillator(),g=actx.createGain();o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);
+      g.gain.setValueAtTime(1,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g);g.connect(master);o.start(t);o.stop(t+.26);}
+    if(b%2===1||b%4===2){const n=actx.createBufferSource(),f=actx.createBiquadFilter(),g=actx.createGain();n.buffer=noise;f.type='highpass';f.frequency.value=7000;
+      g.gain.setValueAtTime(.35,t);g.gain.exponentialRampToValueAtTime(.001,t+.06);n.connect(f);f.connect(g);g.connect(master);n.start(t);n.stop(t+.07);}
+    if(b%2===0){const o=actx.createOscillator(),g=actx.createGain();o.type='triangle';o.frequency.value=mel[(b/2)%8];
+      g.gain.setValueAtTime(.14,t);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.connect(g);g.connect(master);o.start(t);o.stop(t+.23);}
+  }
+  function musicOn(){
+    try{
+      if(!actx){const AC=window.AudioContext||window.webkitAudioContext;actx=new AC();master=actx.createGain();master.gain.value=.3;
+        an=actx.createAnalyser();an.fftSize=256;an.smoothingTimeConstant=.35;fd=new Uint8Array(an.frequencyBinCount);
+        master.connect(an);an.connect(actx.destination);
+        noise=actx.createBuffer(1,actx.sampleRate*.1,actx.sampleRate);const d=noise.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}
+      actx.resume();nextT=actx.currentTime+.05;beat=0;
+      timer=setInterval(()=>{while(nextT<actx.currentTime+.2){sched(nextT,beat);nextT+=.125;beat=(beat+1)%16;}},50);
+    }catch(e){actx=null;}
+  }
+  function musicOff(){clearInterval(timer);if(actx)actx.suspend();}
+  const musBtn=document.getElementById('music');
+  musBtn.addEventListener('click',()=>{state.music=!state.music;musBtn.setAttribute('aria-pressed',String(state.music));
+    musBtn.textContent=state.music?'Musik aus':'Musik an';if(state.music)musicOn();else musicOff();});
+
+  paint(0);
+  function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;
+    camera.fov=w<520?42:32;camera.updateProjectionMatrix();}
+  new ResizeObserver(resize).observe(stage);resize();
+
+  const v=new THREE.Vector3();
+  function frame(){
+    const g=goal[state.mode],k=reduce?1:.12;
+    cur.roof+=(g.roof-cur.roof)*k;cur.front+=(g.front-cur.front)*k;cur.op+=(g.op-cur.op)*k;
+    cur.sd+=((state.sd?1:0)-cur.sd)*(reduce?1:.08);
+    gRoof.position.y=cur.roof;gFront.position.z=cur.front;
+    const tr=cur.op<.985;
+    shellMats.forEach(m=>{if(m.transparent!==tr){m.transparent=tr;m.depthWrite=!tr;m.needsUpdate=true;}m.opacity=tr?cur.op:1;});
+    const out=ease(cur.sd)*14;
+    card.position.x=cardX+out;card.userData.edge.position.x=cardX+out;
+    let r=0,b=0;
+    if(state.siren){
+      if(reduce){r=1;b=1;}
+      else{const p=performance.now()%600,fl=Math.floor(p/75)%2===0;r=p<300&&fl?1:0;b=p>=300&&fl?1:0;}
+    } else if(state.music){
+      if(an&&!reduce){an.getByteFrequencyData(fd);let h=0;for(let i=40;i<80;i++)h+=fd[i];h/=40;
+        r=Math.min(1,Math.max(0,(fd[0]-150)/80));b=Math.min(1,Math.max(0,(h-40)/70));}
+      else if(reduce){r=.6;b=.6;}
+      else{const p=performance.now()%500;r=p<90?1:0;b=p>250&&p<320?1:0;}
+    }
+    transR.emissiveIntensity=r*1.6;transB.emissiveIntensity=b*1.8;
+    controls.update();renderer.render(scene,camera);
+    const w=stage.clientWidth,h=stage.clientHeight;
+    tags.forEach(t=>{
+      const show=(!t.inside||state.mode!=='closed')&&(!t.back||camera.position.z<-40);
+      t.o.getWorldPosition(v);v.project(camera);
+      if(!show||v.z>1){t.el.hidden=true;return;}
+      t.el.hidden=false;
+      t.el.style.left=((v.x*.5+.5)*w).toFixed(1)+'px';t.el.style.top=((-v.y*.5+.5)*h).toFixed(1)+'px';
+    });
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+</script>
+
+</body>
+</html>
